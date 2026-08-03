@@ -1,16 +1,25 @@
 # Lofi Social Radar
 
-Fondation du **Lofi Social & Community Intelligence OS**. Cette première tranche relie une tendance sourcée à une idée, un score explicable figé, une décision humaine et un brief créatif.
+Première base fonctionnelle du **Social & Community Intelligence OS** de Lofi Girl : le radar collecte les publications visibles sur les comptes officiels Instagram, X, TikTok et YouTube, conserve leurs relevés et met en avant les contenus qui surperforment.
 
 ## Opérationnel
 
-- Radar de tendances avec filtre, recherche et import manuel sourcé.
-- Transformation d’une tendance en idée éditable.
-- Score éditorial V1 explicable, versionné et conservé avant décision.
-- Validation, refus motivé et restauration avec journal append-only.
-- Brief créatif généré après validation, sans ajout automatique à la Roadmap.
-- Persistance Cloudflare D1 et séparation visible des données de démonstration.
-- Interface responsive calée sur le design des Radars YouTube et Spotify.
+- Comptes officiels `@lofigirl` préconfigurés, dont la chaîne YouTube stable `UCSJ4gkVC6NrvII8umztf0Ow`.
+- Collecte publique réelle : flux YouTube, intégrations publiques Instagram et TikTok, page publique X.
+- Historique D1 des posts, métriques, scans et erreurs par source.
+- Upsert idempotent : rescanner met à jour le post et ajoute un nouveau relevé sans le dupliquer.
+- Classement normalisé à l’intérieur de chaque plateforme, ajusté à l’âge du contenu quand la date est publique.
+- Analyse descriptive des meilleurs formats et détection des mêmes créatifs sur plusieurs réseaux.
+- Interface responsive alignée sur le design des Radars YouTube et Spotify.
+
+## Couverture V1
+
+- **YouTube** : publications récentes, dates, miniatures et vues exposées par le flux public ; les likes ne sont pas relabellisés depuis l’ancien champ de notation.
+- **Instagram** : jusqu’à six publications, dates, likes et commentaires quand Meta expose le bloc riche de l’intégration ; sinon la source reste explicitement limitée, sans métrique inventée.
+- **X** : cinq publications publiques récentes, vues, likes, réponses, reposts, citations et favoris lorsque visibles.
+- **TikTok** : sélection de vidéos exposée par l’intégration publique, avec vues ; la chronologie et les interactions complètes nécessitent ensuite la connexion officielle du compte.
+
+Chaque source affiche sa couverture et ses limites. Une métrique absente reste `null` et n’est jamais remplacée par zéro.
 
 ## Commandes
 
@@ -22,11 +31,6 @@ pnpm test
 pnpm db:generate
 ```
 
-## Garde-fous
+## Étape suivante
 
-- Aucun post, commentaire ou message officiel n’est publié automatiquement.
-- Une donnée absente reste absente ; aucun chiffre n’est inventé pour remplir l’interface.
-- Le score est une priorité éditoriale, pas une promesse de performance.
-- Les exemples portent l’origine `demo` et restent identifiables dans toute l’interface.
-
-La suite fonctionnelle et le modèle cible sont documentés dans `docs/ARCHITECTURE.md`. Les limites des connecteurs V1 figurent dans `docs/CONNECTORS.md`.
+Brancher les accès propriétaires Meta, TikTok, X et YouTube Analytics afin d’ajouter portée, watch time, rétention, partages et sauvegardes, puis automatiser les relevés rapprochés à 1 h, 6 h, 24 h, 72 h et 7 jours.

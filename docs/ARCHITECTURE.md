@@ -1,63 +1,47 @@
 # Architecture fonctionnelle
 
-## Existant inspecté
-
-Le dossier était un starter Next.js / TypeScript / vinext sans logique métier, schéma de données ni interface produit. Le dossier voisin concerne un autre produit et ne contient rien de réutilisable pour Social Intelligence. Le design de référence provient donc du Radar YouTube / Spotify live : fond nocturne `#07080d`, sidebar de 238 px, panneaux navy, cartes de 16 px, titres Sora, corps Inter et navigation par emojis.
-
 ## Tranche V1 livrée
 
 ```text
-🔥 Tendance sourcée
-  → ✨ Idée éditable
-  → 🔒 score initial + explication + version figés
-  → ⏳ décision humaine
-       → ✅ validation → 📝 brief
-       → ❌ refus motivé → ↩ restauration possible
-  → 📈 résultat réel (prochaine tranche)
+4 comptes officiels Lofi Girl
+  → collecte publique par plateforme
+  → normalisation des posts et métriques
+  → upsert du contenu + nouveau snapshot horodaté
+  → score relatif dans la plateforme
+  → top posts + rapprochement cross-platform
+  → enseignements éditoriaux descriptifs
 ```
 
-Valider ne planifie jamais automatiquement une idée. Le passage en Roadmap restera une action distincte.
+Le premier écran ne part plus de tendances fictives. Il interroge Instagram, X, TikTok et YouTube, puis affiche les publications réellement exposées par chaque source publique et les limites de couverture éventuelles.
 
-## Architecture cible
+## Données persistées
 
-```text
-Interface Radar
-  → routes API authentifiées
-  → services métier
-     TrendService · IdeaService · DecisionService · TrackingService
-     ScoringEngine · BriefService
-  → repository D1 aujourd’hui, PostgreSQL demain
-  → journal d’audit · connecteurs · tâches asynchrones
-```
+- `social_accounts` : compte officiel, URL, couverture, statut, abonnés visibles et fraîcheur.
+- `social_posts` : contenu normalisé, format, date, miniature, dernières métriques, score et explication.
+- `post_metric_snapshots` : relevés successifs immuables des vues et interactions.
+- `scan_runs` : tentative par source, durée, résultat, compteurs et erreur éventuelle.
 
-La V1 utilise D1 derrière des routes structurées. Les mutations combinées utilisent des transactions `batch`, une version de ligne protège les décisions concurrentes et le journal des décisions est append-only.
+Les anciennes tables `trends`, `ideas`, `briefs` et `decision_events` restent disponibles pour la phase d’idéation, mais aucune donnée de démonstration n’est plus injectée ou affichée.
 
-## Données actuellement persistées
+## Score de performance
 
-- `trends` : source, date de détection, vélocité, maturité, saturation, fit/risque marque, recommandation et explication.
-- `ideas` : concept, objectif, plateforme, format, personnage, hook, effort, statut et scores.
-- `briefs` : objectif, message, variantes de hook, storyboard, assets et critère de succès.
-- `decision_events` : action, état avant/après, acteur, motif et snapshot immuable.
+Le score ne compare jamais les volumes bruts de deux plateformes différentes. Il classe un post dans sa cohorte de plateforme à partir des dimensions réellement présentes :
 
-La prochaine évolution ajoutera les observations temporelles, versions d’idées, suivi de production, publications et snapshots de performance.
+- niveau de vues ajusté à l’âge du post quand sa date est publique ;
+- interactions rapportées aux vues lorsqu’elles coexistent ;
+- interactions ajustées à l’âge quand les vues manquent mais que la date existe ;
+- conversation et partages lorsque disponibles.
 
-## Scoring V1
+Une métrique absente est retirée du calcul et les poids restants sont renormalisés. Elle ne vaut jamais zéro. L’explication conserve la taille de l’échantillon, les métriques disponibles et leurs percentiles.
 
-Le score est volontairement explicable :
+## Analyse éditoriale
 
-- 30 % cohérence de marque ;
-- 25 % timing ;
-- 20 % qualité des preuves ;
-- 15 % adéquation stratégique ;
-- 10 % faisabilité ;
-- pénalités de risque de marque et de saturation.
+Le moteur rapproche les accroches normalisées afin de repérer le même créatif sur plusieurs plateformes. Les enseignements restent descriptifs : type de contenu dominant dans le top, réseau porteur, écart entre déclinaisons et taille de l’échantillon. Aucune causalité n’est inventée.
 
-Sans historique suffisant, l’interface affiche « Données insuffisantes ». Le score ne doit jamais être présenté comme une causalité ou une garantie de performance.
+## Suite
 
-## Phases suivantes
-
-1. YouTube historique : import et OAuth propriétaire, bibliothèque de contenus et cohortes par âge.
-2. Community Inbox : imports de commentaires, priorisation, réponses suggérées et validation humaine.
-3. Calendrier et expérimentation : Roadmap explicite, variantes, seuils de décision et mesure.
-4. Learning Engine : résultats réels, calibration des scores, comparaison IA / humain / résultat.
-5. Connecteurs supplémentaires uniquement après validation des droits et permissions.
+1. Accès propriétaires Instagram et TikTok pour la portée, les partages, les sauvegardes et le watch time.
+2. YouTube Analytics pour rétention, durée moyenne, sources de trafic et abonnés gagnés.
+3. X API avec plafond de dépense explicite pour une chronologie plus profonde.
+4. Relevés rapprochés à 1 h, 6 h, 24 h, 72 h et 7 jours.
+5. Transformation manuelle d’un enseignement validé en idée puis en brief.

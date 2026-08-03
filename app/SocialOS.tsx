@@ -1,236 +1,149 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+/* eslint-disable @next/next/no-img-element -- thumbnails come from live social sources with dynamic hosts. */
 
-type View =
-  | "overview"
-  | "trends"
-  | "ideas"
-  | "review"
-  | "approved"
-  | "briefs"
-  | "connectors";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-type Trend = {
+type Platform = "youtube" | "instagram" | "tiktok" | "x";
+type View = "overview" | "top" | "all" | "sources";
+
+type SocialAccount = {
   id: string;
+  platform: Platform;
+  handle: string;
+  display_name: string;
+  profile_url: string;
+  external_account_id: string | null;
+  source_kind: string;
+  coverage_label: string;
+  status: "ready" | "limited" | "error" | "idle";
+  follower_count: number | null;
+  last_scan_at: string | null;
+  last_success_at: string | null;
+  last_error: string | null;
+  post_count: number;
+};
+
+type SocialPost = {
+  id: string;
+  account_id: string;
+  platform: Platform;
+  external_post_id: string;
+  url: string;
+  title: string;
+  text: string;
+  format: string;
+  thumbnail_url: string | null;
+  published_at: string | null;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  saves: number | null;
+  performance_score: number | null;
+  score_confidence: "high" | "medium" | "low" | "insufficient";
+  score_explanation: string;
+  analysis_label: string | null;
+  source_kind: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  last_metric_at: string;
+};
+
+type ScanRun = {
+  id: string;
+  account_id: string;
+  status: "running" | "succeeded" | "partial" | "failed";
+  found_count: number;
+  inserted_count: number;
+  updated_count: number;
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+};
+
+type Insight = {
+  emoji: string;
   title: string;
   summary: string;
-  platform: string;
-  source_label: string;
-  source_url: string | null;
-  first_detected_at: string;
-  velocity_score: number;
-  maturity: string;
-  saturation_risk: number;
-  brand_fit: number;
-  brand_risk: number;
-  recommendation: "Utiliser" | "Surveiller" | "Ignorer";
-  explanation: string;
-  origin: "demo" | "manual" | "connector";
-};
-
-type IdeaStatus = "review" | "approved" | "rejected";
-
-type Idea = {
-  id: string;
-  trend_id: string | null;
-  title: string;
-  concept: string;
-  objective: string;
-  platform: string;
-  format: string;
-  character: string;
-  hook: string;
-  cta: string;
-  brand_score: number;
-  timing_score: number;
-  evidence_score: number;
-  feasibility_score: number;
-  priority_score: number;
-  confidence_label: string;
-  score_explanation: string;
-  prediction_version: string;
-  prediction_snapshot: string;
-  production_effort: string;
-  status: IdeaStatus;
-  decision_note: string | null;
-  ideal_publish_at: string | null;
-  origin: "demo" | "manual" | "connector";
-  row_version: number;
-  created_at: string;
-  updated_at: string;
-};
-
-type Brief = {
-  id: string;
-  idea_id: string;
-  objective: string;
-  message: string;
-  hook_variants: string;
-  storyboard: string;
-  asset_requirements: string;
-  success_criteria: string;
-  owner: string | null;
-  deadline: string | null;
-  created_at: string;
-};
-
-type DecisionEvent = {
-  id: number;
-  entity_type: string;
-  entity_id: string;
-  action: string;
-  from_status: string | null;
-  to_status: string | null;
-  actor_label: string;
-  rationale: string | null;
-  created_at: string;
+  evidence?: string;
 };
 
 type WorkspacePayload = {
-  mode: "demo" | "real";
+  mode: "live";
   notice: string;
-  trends: Trend[];
-  ideas: Idea[];
-  briefs: Brief[];
-  events: DecisionEvent[];
+  generatedAt: string;
+  accounts: SocialAccount[];
+  posts: SocialPost[];
+  scans: ScanRun[];
+  analysis?: {
+    insights?: Array<
+      Partial<Insight> & {
+        title: string;
+        detail?: string;
+        platform?: Platform | "all";
+      }
+    >;
+    crossPlatform?: Array<{
+      label: string;
+      platforms: Platform[];
+      averageScore: number;
+      postIds: string[];
+    }>;
+  } | null;
 };
 
-type IdeaDraft = {
-  trendId: string;
-  title: string;
-  concept: string;
-  objective: string;
-  platform: string;
-  format: string;
-  character: string;
-  hook: string;
-  cta: string;
-  productionEffort: string;
-};
-
-type TrendDraft = {
-  title: string;
-  summary: string;
-  platform: string;
-  sourceLabel: string;
-  sourceUrl: string;
-  brandFit: number;
-  velocityScore: number;
+const PLATFORM_META: Record<
+  Platform,
+  { emoji: string; label: string; short: string; tone: string }
+> = {
+  youtube: { emoji: "▶️", label: "YouTube", short: "YT", tone: "red" },
+  instagram: { emoji: "📸", label: "Instagram", short: "IG", tone: "pink" },
+  tiktok: { emoji: "🎵", label: "TikTok", short: "TT", tone: "cyan" },
+  x: { emoji: "𝕏", label: "X", short: "X", tone: "blue" },
 };
 
 const NAV: Array<{
   id: View;
   emoji: string;
   label: string;
-  group: "Pilotage" | "Production" | "Système";
+  group: "Pilotage" | "Données";
 }> = [
-  { id: "overview", emoji: "📊", label: "Vue d’ensemble", group: "Pilotage" },
-  { id: "trends", emoji: "🔥", label: "Tendances", group: "Pilotage" },
-  { id: "ideas", emoji: "✨", label: "Idées", group: "Production" },
-  { id: "review", emoji: "⏳", label: "À valider", group: "Production" },
-  { id: "approved", emoji: "✅", label: "Validées", group: "Production" },
-  { id: "briefs", emoji: "📝", label: "Briefs", group: "Production" },
-  { id: "connectors", emoji: "🔌", label: "Connecteurs", group: "Système" },
+  { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
+  { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
+  { id: "all", emoji: "🔎", label: "Tous les contenus", group: "Données" },
+  { id: "sources", emoji: "🔌", label: "Sources", group: "Données" },
 ];
 
 const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
   overview: {
-    title: "Vue d’ensemble",
-    subtitle: "Les décisions utiles maintenant, pas 200 métriques sans conclusion.",
+    title: "Command Center",
+    subtitle: "Ce qui fonctionne vraiment sur les comptes Lofi Girl.",
   },
-  trends: {
-    title: "Radar tendances",
-    subtitle: "Signaux précoces, compatibilité de marque et preuves visibles.",
+  top: {
+    title: "Meilleurs posts",
+    subtitle: "Classement normalisé par plateforme, métriques et âge du contenu.",
   },
-  ideas: {
-    title: "Content Brain",
-    subtitle: "Idées reliées à leurs tendances et score éditorial explicable.",
+  all: {
+    title: "Tous les contenus",
+    subtitle: "Les publications réellement détectées, sans donnée de démonstration.",
   },
-  review: {
-    title: "À valider",
-    subtitle: "Décider, motiver et conserver la prédiction initiale.",
-  },
-  approved: {
-    title: "Idées validées",
-    subtitle: "Validation éditoriale distincte de la mise en Roadmap.",
-  },
-  briefs: {
-    title: "Briefs créatifs",
-    subtitle: "Concepts validés transformés en livrables exploitables.",
-  },
-  connectors: {
-    title: "Connecteurs & imports",
-    subtitle: "API officielles uniquement, avec repli manuel explicite.",
+  sources: {
+    title: "Sources officielles",
+    subtitle: "Couverture, fraîcheur et limites visibles pour chaque réseau.",
   },
 };
 
-const CONNECTORS = [
-  {
-    emoji: "▶️",
-    name: "YouTube",
-    status: "OAuth requis",
-    detail: "Analytics propriétaire après autorisation de la chaîne.",
-    tone: "red",
-  },
-  {
-    emoji: "📸",
-    name: "Instagram",
-    status: "Non connecté",
-    detail: "Compte professionnel, permissions Meta et App Review.",
-    tone: "pink",
-  },
-  {
-    emoji: "🎵",
-    name: "TikTok",
-    status: "Import manuel",
-    detail: "Pas de radar commercial global via Research API.",
-    tone: "cyan",
-  },
-  {
-    emoji: "🟠",
-    name: "Reddit",
-    status: "Accord requis",
-    detail: "Usage commercial à encadrer, aucun contournement par scraping.",
-    tone: "amber",
-  },
-  {
-    emoji: "💬",
-    name: "Discord",
-    status: "Bot à installer",
-    detail: "Uniquement les serveurs autorisés et intents approuvés.",
-    tone: "indigo",
-  },
-  {
-    emoji: "📈",
-    name: "Google Trends",
-    status: "Alpha limitée",
-    detail: "Import manuel jusqu’à obtention d’un accès API officiel.",
-    tone: "green",
-  },
-];
-
-const rejectionReasons = [
-  "Hors marque",
-  "Trop tard",
-  "Signal trop faible",
-  "Production trop lourde",
-  "Doublon",
-  "Autre",
-];
-
-const emptyTrendDraft: TrendDraft = {
-  title: "",
-  summary: "",
-  platform: "Instagram",
-  sourceLabel: "Import manuel",
-  sourceUrl: "",
-  brandFit: 75,
-  velocityScore: 50,
-};
+function formatNumber(value: number | null | undefined) {
+  if (value === null || value === undefined) return "—";
+  return new Intl.NumberFormat("fr-FR", {
+    notation: value >= 10_000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
 
 function formatDate(value: string | null, withTime = false) {
-  if (!value) return "Non défini";
+  if (!value) return "Jamais";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("fr-FR", {
@@ -240,54 +153,133 @@ function formatDate(value: string | null, withTime = false) {
   }).format(date);
 }
 
-function readJsonList(value: string): string[] {
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return [];
-  }
+function relativeAge(value: string | null) {
+  if (!value) return "date publique absente";
+  const ms = Date.now() - new Date(value).getTime();
+  if (!Number.isFinite(ms)) return "date inconnue";
+  const hours = Math.max(0, Math.floor(ms / 3_600_000));
+  if (hours < 1) return "moins d’1 h";
+  if (hours < 24) return `${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days < 31) return `${days} j`;
+  const months = Math.floor(days / 30);
+  return `${months} mois`;
 }
 
-function recommendationTone(recommendation: Trend["recommendation"]) {
-  if (recommendation === "Utiliser") return "green";
-  if (recommendation === "Surveiller") return "amber";
-  return "red";
+function confidenceLabel(value: SocialPost["score_confidence"]) {
+  if (value === "high") return "Confiance forte";
+  if (value === "medium") return "Confiance moyenne";
+  if (value === "low") return "Échantillon limité";
+  return "Non classé";
 }
 
-function statusCopy(status: IdeaStatus) {
-  if (status === "approved") return { emoji: "✅", label: "Validée", tone: "green" };
-  if (status === "rejected") return { emoji: "❌", label: "Refusée", tone: "red" };
-  return { emoji: "⏳", label: "À valider", tone: "indigo" };
-}
-
-function scoreTone(score: number) {
+function scoreTone(score: number | null) {
+  if (score === null) return "muted";
   if (score >= 80) return "green";
   if (score >= 60) return "amber";
-  return "red";
+  return "muted";
+}
+
+function postLabel(post: SocialPost) {
+  if (post.analysis_label) return post.analysis_label;
+  const value = `${post.title} ${post.text}`.toLowerCase();
+  if (/radio|beats|music|mix|sleep|study|lofi/.test(value)) return "Musique & usage";
+  if (/fortnite|game|album|release|merch|listen/.test(value)) return "Activation";
+  if (/pocky|maya|girl|character|lore/.test(value)) return "Personnage & lore";
+  if (/tell me|comment|you|your|\?/.test(value)) return "Conversation";
+  return "Relatable & humour";
+}
+
+function normalizeCreative(post: SocialPost) {
+  return `${post.title || post.text}`
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/@[\w.]+/g, "")
+    .replace(/#[\w-]+/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .slice(0, 9)
+    .join(" ");
+}
+
+function localInsights(posts: SocialPost[]): Insight[] {
+  if (!posts.length) return [];
+  const ranked = [...posts].sort(
+    (a, b) => (b.performance_score ?? -1) - (a.performance_score ?? -1),
+  );
+  const groups = new Map<string, SocialPost[]>();
+  for (const post of posts) {
+    const key = normalizeCreative(post);
+    if (key.split(" ").length < 3) continue;
+    groups.set(key, [...(groups.get(key) ?? []), post]);
+  }
+  const cross = [...groups.values()]
+    .filter((group) => new Set(group.map((post) => post.platform)).size >= 2)
+    .sort((a, b) => {
+      const average = (items: SocialPost[]) =>
+        items.reduce((sum, item) => sum + (item.performance_score ?? 0), 0) / items.length;
+      return average(b) - average(a);
+    })[0];
+  const topFive = ranked.slice(0, Math.min(5, ranked.length));
+  const labels = new Map<string, number>();
+  for (const post of topFive) {
+    const label = postLabel(post);
+    labels.set(label, (labels.get(label) ?? 0) + 1);
+  }
+  const dominant = [...labels.entries()].sort((a, b) => b[1] - a[1])[0];
+  const top = ranked[0];
+  const insights: Insight[] = [];
+
+  if (cross) {
+    const platforms = [...new Set(cross.map((post) => PLATFORM_META[post.platform].label))];
+    insights.push({
+      emoji: "🌍",
+      title: "Créatif cross-platform détecté",
+      summary: `« ${cross[0].title || cross[0].text} » ressort sur ${platforms.join(", ")}.`,
+      evidence: `${cross.length} publications reliées par leur accroche.`,
+    });
+  }
+  insights.push({
+    emoji: "🚀",
+    title: `${PLATFORM_META[top.platform].label} porte le signal n°1`,
+    summary: `« ${top.title || top.text} » est actuellement le post le mieux classé.`,
+    evidence: `${top.performance_score ?? "—"}/100 · ${top.score_explanation}`,
+  });
+  if (dominant) {
+    insights.push({
+      emoji: "🧠",
+      title: `Pattern dominant : ${dominant[0]}`,
+      summary: `${dominant[1]} des ${topFive.length} meilleurs posts utilisent ce ressort éditorial.`,
+      evidence: "Lecture descriptive de l’échantillon visible, pas une causalité.",
+    });
+  }
+  return insights.slice(0, 3);
+}
+
+function metrics(post: SocialPost) {
+  return [
+    post.views !== null ? { icon: "👁", label: "vues", value: post.views } : null,
+    post.likes !== null ? { icon: "♥", label: "likes", value: post.likes } : null,
+    post.comments !== null
+      ? { icon: "💬", label: "commentaires", value: post.comments }
+      : null,
+    post.shares !== null ? { icon: "↗", label: "partages", value: post.shares } : null,
+    post.saves !== null ? { icon: "🔖", label: "sauvegardes", value: post.saves } : null,
+  ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
 }
 
 export function SocialOS() {
   const [workspace, setWorkspace] = useState<WorkspacePayload | null>(null);
   const [view, setView] = useState<View>("overview");
+  const [platform, setPlatform] = useState<"all" | Platform>("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [trendFilter, setTrendFilter] = useState("Toutes");
-  const [trendModal, setTrendModal] = useState(false);
-  const [ideaModal, setIdeaModal] = useState(false);
-  const [decisionModal, setDecisionModal] = useState<"approved" | "rejected" | "review" | null>(null);
-  const [briefModal, setBriefModal] = useState(false);
-  const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null);
-  const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
-  const [selectedBrief, setSelectedBrief] = useState<Brief | null>(null);
-  const [trendDraft, setTrendDraft] = useState<TrendDraft>(emptyTrendDraft);
-  const [ideaDraft, setIdeaDraft] = useState<IdeaDraft | null>(null);
-  const [decisionReason, setDecisionReason] = useState("");
-  const [publishDate, setPublishDate] = useState("");
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -295,237 +287,115 @@ export function SocialOS() {
     try {
       const response = await fetch("/api/workspace", { cache: "no-store" });
       const payload = (await response.json()) as WorkspacePayload & { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Chargement impossible.");
+      if (!response.ok) throw new Error(payload.error || "Le radar ne répond pas.");
       setWorkspace(payload);
     } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Impossible de charger l’espace de travail.",
-      );
+      setError(loadError instanceof Error ? loadError.message : "Chargement impossible.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timeout = window.setTimeout(() => {
       void loadWorkspace();
     }, 0);
-    return () => window.clearTimeout(timer);
+    return () => window.clearTimeout(timeout);
   }, [loadWorkspace]);
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(""), 3200);
-    return () => window.clearTimeout(timer);
+    const timeout = window.setTimeout(() => setToast(""), 3600);
+    return () => window.clearTimeout(timeout);
   }, [toast]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setTrendModal(false);
-      setIdeaModal(false);
-      setDecisionModal(null);
-      setBriefModal(false);
-      setMobileOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  const runScan = useCallback(
+    async (target?: Platform) => {
+      setScanning(true);
+      setError("");
+      try {
+        const response = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(target ? { platform: target } : {}),
+        });
+        const result = (await response.json()) as { error?: string };
+        if (!response.ok) throw new Error(result.error || "Le scan a échoué.");
+        await loadWorkspace();
+        setToast(target ? `${PLATFORM_META[target].label} actualisé` : "Les 4 réseaux ont été rescannés");
+      } catch (scanError) {
+        setError(scanError instanceof Error ? scanError.message : "Le scan a échoué.");
+      } finally {
+        setScanning(false);
+      }
+    },
+    [loadWorkspace],
+  );
 
-  const trends = useMemo(() => workspace?.trends ?? [], [workspace]);
-  const ideas = useMemo(() => workspace?.ideas ?? [], [workspace]);
-  const briefs = useMemo(() => workspace?.briefs ?? [], [workspace]);
-  const reviewIdeas = ideas.filter((idea) => idea.status === "review");
-  const approvedIdeas = ideas.filter((idea) => idea.status === "approved");
+  const posts = useMemo(() => workspace?.posts ?? [], [workspace?.posts]);
+  const accounts = workspace?.accounts ?? [];
+  const topPosts = useMemo(
+    () => [...posts].sort((a, b) => (b.performance_score ?? -1) - (a.performance_score ?? -1)),
+    [posts],
+  );
+  const filteredPosts = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return topPosts.filter((post) => {
+      if (platform !== "all" && post.platform !== platform) return false;
+      if (!needle) return true;
+      return `${post.title} ${post.text} ${post.format}`.toLowerCase().includes(needle);
+    });
+  }, [platform, search, topPosts]);
+  const insights = useMemo(() => {
+    const serverInsights = workspace?.analysis?.insights;
+    return serverInsights?.length
+      ? serverInsights.slice(0, 3).map((insight) => ({
+          emoji:
+            insight.emoji ??
+            (insight.platform && insight.platform !== "all"
+              ? PLATFORM_META[insight.platform].emoji
+              : "🧠"),
+          title: insight.title,
+          summary: insight.summary ?? insight.detail ?? "Analyse descriptive disponible.",
+          evidence: insight.evidence,
+        }))
+      : localInsights(posts);
+  }, [posts, workspace?.analysis?.insights]);
+  const activeSources = accounts.filter((account) => account.post_count > 0).length;
+  const lastSuccess = accounts
+    .map((account) => account.last_success_at)
+    .filter(Boolean)
+    .sort()
+    .at(-1) as string | undefined;
 
-  const navCounts: Partial<Record<View, number>> = {
-    trends: trends.length,
-    ideas: ideas.length,
-    review: reviewIdeas.length,
-    approved: approvedIdeas.length,
-    briefs: briefs.length,
+  const navCount = (id: View) => {
+    if (id === "top") return Math.min(10, posts.length);
+    if (id === "all") return posts.length;
+    if (id === "sources") return accounts.length;
+    return undefined;
   };
-
-  const filteredTrends = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("fr");
-    return trends.filter((trend) => {
-      const matchesSearch =
-        !query ||
-        [trend.title, trend.summary, trend.platform, trend.source_label]
-          .join(" ")
-          .toLocaleLowerCase("fr")
-          .includes(query);
-      const matchesFilter =
-        trendFilter === "Toutes" || trend.recommendation === trendFilter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [search, trendFilter, trends]);
-
-  function switchView(nextView: View) {
-    setView(nextView);
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function openIdeaBuilder(trend: Trend) {
-    setSelectedTrend(trend);
-    setIdeaDraft({
-      trendId: trend.id,
-      title: `${trend.title} · version Lofi Girl`,
-      concept: `${trend.summary} Le concept est réinterprété avec un rythme calme, une narration visuelle originale et les codes de Lofi Girl.`,
-      objective: "Renforcer les sauvegardes et la proximité avec la communauté",
-      platform: trend.platform.split(" · ")[0],
-      format: "Vidéo courte · 12 s",
-      character: "Lofi Girl",
-      hook: "Le petit rituel qui remet la journée sur les rails.",
-      cta: "Et toi, quel est ton rituel pour repartir ?",
-      productionEffort: "Moyen",
-    });
-    setIdeaModal(true);
-  }
-
-  function openDecision(idea: Idea, nextStatus: "approved" | "rejected" | "review") {
-    setSelectedIdea(idea);
-    setDecisionReason("");
-    setPublishDate(idea.ideal_publish_at?.slice(0, 10) ?? "");
-    setDecisionModal(nextStatus);
-  }
-
-  function openBrief(brief: Brief) {
-    setSelectedBrief(brief);
-    setBriefModal(true);
-  }
-
-  async function submitTrend(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    setError("");
-    try {
-      const response = await fetch("/api/trends", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(trendDraft),
-      });
-      const payload = (await response.json()) as { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Import impossible.");
-      setTrendModal(false);
-      setTrendDraft(emptyTrendDraft);
-      setToast("🔥 Tendance ajoutée avec sa provenance");
-      await loadWorkspace();
-      setView("trends");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Import impossible.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function submitIdea(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!ideaDraft) return;
-    setSaving(true);
-    setError("");
-    try {
-      const response = await fetch("/api/ideas", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(ideaDraft),
-      });
-      const payload = (await response.json()) as {
-        error?: string;
-        priority?: number;
-      };
-      if (!response.ok) throw new Error(payload.error || "Création impossible.");
-      setIdeaModal(false);
-      setIdeaDraft(null);
-      setToast(`✨ Idée créée · priorité ${payload.priority ?? "calculée"}/100`);
-      await loadWorkspace();
-      setView("review");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Création impossible.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function submitDecision(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selectedIdea || !decisionModal) return;
-    setSaving(true);
-    setError("");
-    try {
-      const response = await fetch(`/api/ideas/${selectedIdea.id}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          status: decisionModal,
-          rationale: decisionReason,
-          idealPublishAt: publishDate || null,
-          expectedVersion: selectedIdea.row_version,
-        }),
-      });
-      const payload = (await response.json()) as { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Décision impossible.");
-      const statusLabel = statusCopy(decisionModal).label;
-      setDecisionModal(null);
-      setSelectedIdea(null);
-      setToast(`${statusCopy(decisionModal).emoji} Idée ${statusLabel.toLowerCase()}`);
-      await loadWorkspace();
-      setView(decisionModal === "approved" ? "approved" : decisionModal === "rejected" ? "ideas" : "review");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Décision impossible.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function copyBrief(brief: Brief) {
-    const idea = ideas.find((item) => item.id === brief.idea_id);
-    const text = [
-      `📝 ${idea?.title ?? "Brief créatif"}`,
-      `Objectif : ${brief.objective}`,
-      `Message : ${brief.message}`,
-      "Hooks :",
-      ...readJsonList(brief.hook_variants).map((item) => `- ${item}`),
-      "Storyboard :",
-      ...readJsonList(brief.storyboard).map((item) => `- ${item}`),
-      "Assets :",
-      ...readJsonList(brief.asset_requirements).map((item) => `- ${item}`),
-      `Critère de succès : ${brief.success_criteria}`,
-    ].join("\n");
-    try {
-      await navigator.clipboard.writeText(text);
-      setToast("📋 Brief copié");
-    } catch {
-      setToast("Copie indisponible · sélectionne le texte du brief");
-    }
-  }
 
   return (
     <div className="app-shell">
       <button
         className="burger"
         type="button"
-        onClick={() => setMobileOpen((value) => !value)}
-        aria-label="Ouvrir la navigation"
-        aria-expanded={mobileOpen}
+        aria-label="Ouvrir le menu"
+        onClick={() => setMobileOpen(true)}
       >
         ☰
       </button>
       <button
-        type="button"
-        aria-label="Fermer la navigation"
         className={`side-veil ${mobileOpen ? "show" : ""}`}
+        type="button"
+        aria-label="Fermer le menu"
         onClick={() => setMobileOpen(false)}
       />
 
       <aside className={`sidebar ${mobileOpen ? "open" : ""}`}>
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">
-            ◉
-            <span />
+            ◉<span />
           </div>
           <div className="brand-copy">
             <h1>
@@ -538,27 +408,28 @@ export function SocialOS() {
         <div className="radar-switch" aria-label="Produit actif">
           <span>▶ YouTube</span>
           <span>♫ Spotify</span>
-          <span className="on">◎ Social</span>
+          <span className="on">● Social</span>
         </div>
 
         <nav className="nav" aria-label="Navigation principale">
-          {(["Pilotage", "Production", "Système"] as const).map((group) => (
+          {(["Pilotage", "Données"] as const).map((group) => (
             <div className="nav-group" key={group}>
               <div className="nav-label">{group}</div>
               {NAV.filter((item) => item.group === group).map((item) => (
                 <button
-                  type="button"
                   key={item.id}
                   className={view === item.id ? "active" : ""}
-                  onClick={() => switchView(item.id)}
+                  type="button"
+                  onClick={() => {
+                    setView(item.id);
+                    setMobileOpen(false);
+                  }}
                 >
-                  <span className="nav-emoji" aria-hidden="true">
-                    {item.emoji}
-                  </span>
+                  <span className="nav-emoji">{item.emoji}</span>
                   <span className="nav-text">{item.label}</span>
-                  {navCounts[item.id] !== undefined && (
-                    <span className="nav-count">{navCounts[item.id]}</span>
-                  )}
+                  {navCount(item.id) !== undefined ? (
+                    <span className="nav-count">{navCount(item.id)}</span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -567,14 +438,14 @@ export function SocialOS() {
 
         <div className="sidebar-foot">
           <div className="sync-row">
-            <span className={`sync-dot ${error ? "error" : loading ? "loading" : ""}`} />
+            <span className={`sync-dot ${scanning ? "loading" : error ? "error" : ""}`} />
             <div>
-              <b>{error ? "Connexion interrompue" : loading ? "Chargement…" : "Base partagée active"}</b>
-              <span>{workspace?.mode === "demo" ? "🧪 Données démo" : "Données réelles"}</span>
+              <b>{scanning ? "Scan en cours" : `${activeSources}/4 sources actives`}</b>
+              <span>{lastSuccess ? `Dernier relevé ${formatDate(lastSuccess, true)}` : "Premier scan à lancer"}</span>
             </div>
           </div>
-          <button className="refresh-button" type="button" onClick={() => void loadWorkspace()} disabled={loading}>
-            ↻ <span>{loading ? "Actualisation…" : "Actualiser"}</span>
+          <button className="refresh-button" type="button" disabled={scanning} onClick={() => void runScan()}>
+            {scanning ? "⏳ Collecte…" : "↻ Scanner les réseaux"}
           </button>
         </div>
       </aside>
@@ -582,302 +453,275 @@ export function SocialOS() {
       <main className="main">
         <header className="topbar">
           <div>
-            <div className="eyebrow">SOCIAL & COMMUNITY INTELLIGENCE OS</div>
+            <span className="eyebrow">Social & Community Intelligence OS</span>
             <h2>
               {NAV.find((item) => item.id === view)?.emoji} {VIEW_COPY[view].title}
-              {view === "overview" && <span className="top-pill">Fondation V1</span>}
+              <span className="top-pill">Live V1</span>
             </h2>
             <p>{VIEW_COPY[view].subtitle}</p>
           </div>
           <div className="top-actions">
-            <span className="demo-pill">🧪 Démo · sources non connectées</span>
-            <button className="button secondary" type="button" onClick={() => setTrendModal(true)}>
-              ＋ Importer un signal
+            <span className="demo-pill live-pill">● Données publiques réelles</span>
+            <button className="button primary" type="button" disabled={scanning} onClick={() => void runScan()}>
+              {scanning ? "⏳ Scan en cours" : "🔄 Scanner maintenant"}
             </button>
           </div>
         </header>
 
-        {error && (
+        {error ? (
           <div className="error-banner" role="alert">
             <span>⚠️</span>
             <div>
-              <b>Action interrompue</b>
+              <b>Le radar a rencontré un problème</b>
               <p>{error}</p>
             </div>
-            <button type="button" onClick={() => setError("")} aria-label="Fermer l’alerte">
-              ×
-            </button>
+            <button type="button" aria-label="Fermer" onClick={() => setError("")}>×</button>
           </div>
-        )}
+        ) : null}
 
         {loading && !workspace ? (
-          <LoadingState />
-        ) : view === "overview" ? (
-          <Overview
-            trends={trends}
-            ideas={ideas}
-            events={workspace?.events ?? []}
-            reviewIdeas={reviewIdeas}
-            approvedIdeas={approvedIdeas}
-            onView={switchView}
-            onBuildIdea={openIdeaBuilder}
-            onDecision={openDecision}
-          />
-        ) : view === "trends" ? (
-          <TrendView
-            trends={filteredTrends}
-            search={search}
-            onSearch={setSearch}
-            filter={trendFilter}
-            onFilter={setTrendFilter}
-            onBuildIdea={openIdeaBuilder}
-            onImport={() => setTrendModal(true)}
-          />
-        ) : view === "ideas" ? (
-          <IdeaView
-            ideas={ideas}
-            trends={trends}
-            title="Toutes les idées"
-            empty="Aucune idée pour l’instant. Transforme un signal du Radar en concept éditorial."
-            onDecision={openDecision}
-            onViewTrends={() => switchView("trends")}
-          />
-        ) : view === "review" ? (
-          <IdeaView
-            ideas={reviewIdeas}
-            trends={trends}
-            title="File de décision"
-            empty="Tout est décidé. Les nouvelles idées apparaîtront ici."
-            onDecision={openDecision}
-            onViewTrends={() => switchView("trends")}
-          />
-        ) : view === "approved" ? (
-          <ApprovedView
-            ideas={approvedIdeas}
-            briefs={briefs}
-            onOpenBrief={openBrief}
-            onViewReview={() => switchView("review")}
-          />
-        ) : view === "briefs" ? (
-          <BriefView
-            briefs={briefs}
-            ideas={ideas}
-            onOpen={openBrief}
-            onCopy={copyBrief}
-            onViewApproved={() => switchView("approved")}
-          />
-        ) : (
-          <ConnectorView onImport={() => setTrendModal(true)} />
-        )}
+          <div className="scanner-loading">
+            <div className="radar-loader">◉</div>
+            <h3>Scan des comptes officiels Lofi Girl</h3>
+            <p>Instagram, X, TikTok et YouTube sont interrogés et normalisés.</p>
+            <div className="scan-platforms">📸 &nbsp; 𝕏 &nbsp; 🎵 &nbsp; ▶️</div>
+          </div>
+        ) : null}
+
+        {workspace && view === "overview" ? (
+          <div className="view-stack">
+            <section>
+              <div className="section-heading">
+                <div>
+                  <span className="section-kicker">Couverture maintenant</span>
+                  <h3>{activeSources} réseaux avec des posts exploitables</h3>
+                </div>
+                <span className="freshness">{posts.length} contenus · relevé {formatDate(lastSuccess ?? null, true)}</span>
+              </div>
+              <div className="source-status-grid">
+                {(Object.keys(PLATFORM_META) as Platform[]).map((key) => {
+                  const account = accounts.find((item) => item.platform === key);
+                  const meta = PLATFORM_META[key];
+                  return (
+                    <button
+                      type="button"
+                      className={`source-status-card tone-${meta.tone}`}
+                      key={key}
+                      onClick={() => {
+                        setPlatform(key);
+                        setView("top");
+                      }}
+                    >
+                      <span className="source-logo">{meta.emoji}</span>
+                      <span className="source-card-copy">
+                        <b>{meta.label}</b>
+                        <small>{account?.coverage_label ?? "Source en attente"}</small>
+                      </span>
+                      <span className="source-count">
+                        <b>{account?.post_count ?? 0}</b>
+                        <small>posts</small>
+                      </span>
+                      <span className={`source-state ${account?.status ?? "idle"}`}>
+                        {account?.status === "error" ? "Erreur" : account?.status === "limited" ? "Limité" : "Actif"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <div className="section-heading">
+                <div>
+                  <span className="section-kicker">Analyse éditoriale</span>
+                  <h3>Ce qui mérite l’attention de l’équipe</h3>
+                </div>
+                <span className="freshness">Calculé sur {posts.length} posts réels</span>
+              </div>
+              <div className="insight-grid">
+                {insights.map((insight, index) => (
+                  <article className={`insight-card insight-${index + 1}`} key={`${insight.title}-${index}`}>
+                    <span className="insight-emoji">{insight.emoji}</span>
+                    <span className="section-kicker">{index === 0 ? "Signal prioritaire" : "Lecture du radar"}</span>
+                    <h3>{insight.title}</h3>
+                    <p>{insight.summary}</p>
+                    {insight.evidence ? <small>{insight.evidence}</small> : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="overview-columns social-overview-columns">
+              <div className="panel">
+                <div className="panel-head">
+                  <div>
+                    <span className="section-kicker">Top performance</span>
+                    <h3>Les posts qui fonctionnent le mieux</h3>
+                  </div>
+                  <button className="text-button" type="button" onClick={() => setView("top")}>Voir tout →</button>
+                </div>
+                <div className="top-post-list">
+                  {topPosts.slice(0, 5).map((post, index) => (
+                    <PostRow post={post} rank={index + 1} key={post.id} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel methodology-panel">
+                <div className="panel-head">
+                  <div>
+                    <span className="section-kicker">Score explicable</span>
+                    <h3>Comparaisons honnêtes</h3>
+                  </div>
+                  <span className="audit-lock">🔒</span>
+                </div>
+                <div className="method-list">
+                  <div><span>01</span><p><b>Chaque réseau est comparé à lui-même.</b> Les vues TikTok ne sont jamais comparées brutes aux likes Instagram.</p></div>
+                  <div><span>02</span><p><b>L’âge du post est intégré quand sa date est publique.</b> Sans date, le radar signale qu’il compare seulement les volumes visibles.</p></div>
+                  <div><span>03</span><p><b>Les métriques absentes sont retirées.</b> Elles ne sont jamais remplacées artificiellement par zéro.</p></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        ) : null}
+
+        {workspace && (view === "top" || view === "all") ? (
+          <div className="view-stack">
+            <div className="toolbar social-toolbar">
+              <div className="filter-tabs" aria-label="Filtrer par plateforme">
+                <button className={platform === "all" ? "active" : ""} type="button" onClick={() => setPlatform("all")}>Tous</button>
+                {(Object.keys(PLATFORM_META) as Platform[]).map((key) => (
+                  <button className={platform === key ? "active" : ""} type="button" key={key} onClick={() => setPlatform(key)}>
+                    {PLATFORM_META[key].emoji} {PLATFORM_META[key].label}
+                  </button>
+                ))}
+              </div>
+              <label className="search-box">
+                <span aria-hidden="true">⌕</span>
+                <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Chercher une accroche, un format…" />
+              </label>
+              <span className="result-count"><b>{filteredPosts.length}</b> contenus</span>
+            </div>
+
+            <div className={view === "top" ? "post-grid" : "post-list-grid"}>
+              {(view === "top" ? filteredPosts.slice(0, 20) : filteredPosts).map((post, index) => (
+                <PostCard post={post} rank={index + 1} compact={view === "all"} key={post.id} />
+              ))}
+            </div>
+            {!filteredPosts.length ? (
+              <div className="empty-state">
+                <span>🔎</span>
+                <h3>Aucun contenu pour ce filtre</h3>
+                <p>Relance un scan ou choisis une autre plateforme.</p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {workspace && view === "sources" ? (
+          <div className="view-stack">
+            <div className="source-notice">
+              <span>🛰️</span>
+              <div>
+                <b>Première base : signaux publics réellement visibles</b>
+                <p>Le radar collecte ce que chaque réseau rend public. Les connexions propriétaires ajouteront ensuite portée, watch time, sauvegardes et rétention.</p>
+              </div>
+            </div>
+            <div className="sources-detail-grid">
+              {accounts.map((account) => {
+                const meta = PLATFORM_META[account.platform];
+                return (
+                  <article className={`source-detail-card tone-${meta.tone}`} key={account.id}>
+                    <div className="source-detail-head">
+                      <span className="source-logo large">{meta.emoji}</span>
+                      <div>
+                        <span className="section-kicker">Compte officiel vérifié</span>
+                        <h3>{meta.label} · @{account.handle}</h3>
+                      </div>
+                      <span className={`source-state ${account.status}`}>{account.status === "error" ? "Erreur" : account.status === "limited" ? "Couverture limitée" : "Actif"}</span>
+                    </div>
+                    <div className="source-kpis">
+                      <div><b>{formatNumber(account.follower_count)}</b><span>abonnés visibles</span></div>
+                      <div><b>{account.post_count}</b><span>posts collectés</span></div>
+                      <div><b>{formatDate(account.last_success_at, true)}</b><span>dernier succès</span></div>
+                    </div>
+                    <div className="coverage-box">
+                      <span>Couverture</span>
+                      <p>{account.coverage_label}</p>
+                      {account.last_error ? <small>Dernière limite : {account.last_error}</small> : null}
+                    </div>
+                    <div className="source-actions">
+                      <a className="button ghost compact" href={account.profile_url} target="_blank" rel="noreferrer">Voir le profil ↗</a>
+                      <button className="button primary compact" type="button" disabled={scanning} onClick={() => void runScan(account.platform)}>↻ Scanner {meta.label}</button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </main>
 
-      {toast && <div className="toast" role="status">{toast}</div>}
-
-      {trendModal && (
-        <Modal title="🔥 Importer une tendance" subtitle="Ajout manuel avec provenance visible" onClose={() => setTrendModal(false)}>
-          <form className="form" onSubmit={submitTrend}>
-            <div className="form-note">🔎 Les chiffres saisis restent des observations manuelles, jamais des données API.</div>
-            <label>
-              <span>Titre du signal</span>
-              <input required value={trendDraft.title} onChange={(event) => setTrendDraft({ ...trendDraft, title: event.target.value })} placeholder="Ex. Un rituel visuel émergent" />
-            </label>
-            <label>
-              <span>Résumé et mécanisme observé</span>
-              <textarea required rows={4} value={trendDraft.summary} onChange={(event) => setTrendDraft({ ...trendDraft, summary: event.target.value })} placeholder="Décris le mécanisme, sans proposer de copie…" />
-            </label>
-            <div className="form-grid">
-              <label>
-                <span>Plateforme</span>
-                <select value={trendDraft.platform} onChange={(event) => setTrendDraft({ ...trendDraft, platform: event.target.value })}>
-                  <option>YouTube</option><option>Instagram</option><option>TikTok</option><option>Reddit</option><option>Discord</option><option>Pinterest</option><option>Multi-plateforme</option>
-                </select>
-              </label>
-              <label>
-                <span>Source</span>
-                <input required value={trendDraft.sourceLabel} onChange={(event) => setTrendDraft({ ...trendDraft, sourceLabel: event.target.value })} />
-              </label>
-            </div>
-            <label>
-              <span>URL source · facultative</span>
-              <input type="url" value={trendDraft.sourceUrl} onChange={(event) => setTrendDraft({ ...trendDraft, sourceUrl: event.target.value })} placeholder="https://…" />
-            </label>
-            <div className="form-grid">
-              <RangeField label="Compatibilité Lofi Girl" value={trendDraft.brandFit} onChange={(value) => setTrendDraft({ ...trendDraft, brandFit: value })} />
-              <RangeField label="Vitesse observée" value={trendDraft.velocityScore} onChange={(value) => setTrendDraft({ ...trendDraft, velocityScore: value })} />
-            </div>
-            <div className="modal-actions"><button className="button ghost" type="button" onClick={() => setTrendModal(false)}>Annuler</button><button className="button primary" type="submit" disabled={saving}>{saving ? "Ajout…" : "🔥 Ajouter au Radar"}</button></div>
-          </form>
-        </Modal>
-      )}
-
-      {ideaModal && ideaDraft && selectedTrend && (
-        <Modal title="✨ Transformer en idée" subtitle={`Signal source · ${selectedTrend.title}`} onClose={() => setIdeaModal(false)} wide>
-          <form className="form" onSubmit={submitIdea}>
-            <div className="source-context"><span>🔥</span><div><b>{selectedTrend.recommendation} · fit {selectedTrend.brand_fit}/100</b><p>{selectedTrend.explanation}</p></div></div>
-            <label><span>Titre interne</span><input required value={ideaDraft.title} onChange={(event) => setIdeaDraft({ ...ideaDraft, title: event.target.value })} /></label>
-            <label><span>Concept original</span><textarea required rows={4} value={ideaDraft.concept} onChange={(event) => setIdeaDraft({ ...ideaDraft, concept: event.target.value })} /></label>
-            <div className="form-grid">
-              <label><span>Objectif</span><input required value={ideaDraft.objective} onChange={(event) => setIdeaDraft({ ...ideaDraft, objective: event.target.value })} /></label>
-              <label><span>Personnage</span><select value={ideaDraft.character} onChange={(event) => setIdeaDraft({ ...ideaDraft, character: event.target.value })}><option>Lofi Girl</option><option>Synthwave Boy</option><option>Mochi</option><option>Ensemble de personnages</option><option>Sans personnage</option></select></label>
-            </div>
-            <div className="form-grid thirds">
-              <label><span>Plateforme</span><select value={ideaDraft.platform} onChange={(event) => setIdeaDraft({ ...ideaDraft, platform: event.target.value })}><option>YouTube Shorts</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Pinterest</option></select></label>
-              <label><span>Format</span><select value={ideaDraft.format} onChange={(event) => setIdeaDraft({ ...ideaDraft, format: event.target.value })}><option>Vidéo courte · 12 s</option><option>Carousel · 5 cartes</option><option>Image éditoriale</option><option>Vidéo · 30 s</option><option>Story interactive</option></select></label>
-              <label><span>Effort</span><select value={ideaDraft.productionEffort} onChange={(event) => setIdeaDraft({ ...ideaDraft, productionEffort: event.target.value })}><option>Faible</option><option>Moyen</option><option>Élevé</option></select></label>
-            </div>
-            <label><span>Hook</span><input required value={ideaDraft.hook} onChange={(event) => setIdeaDraft({ ...ideaDraft, hook: event.target.value })} /></label>
-            <label><span>CTA · facultatif</span><input value={ideaDraft.cta} onChange={(event) => setIdeaDraft({ ...ideaDraft, cta: event.target.value })} /></label>
-            <div className="immutable-note"><span>🔒</span><div><b>Prévision initiale figée à la création</b><p>Le moteur stockera le score, son explication et sa version avant toute décision humaine.</p></div></div>
-            <div className="modal-actions"><button className="button ghost" type="button" onClick={() => setIdeaModal(false)}>Annuler</button><button className="button primary" type="submit" disabled={saving}>{saving ? "Calcul…" : "✨ Créer et envoyer à validation"}</button></div>
-          </form>
-        </Modal>
-      )}
-
-      {decisionModal && selectedIdea && (
-        <Modal title={`${statusCopy(decisionModal).emoji} ${statusCopy(decisionModal).label}`} subtitle={selectedIdea.title} onClose={() => setDecisionModal(null)}>
-          <form className="form" onSubmit={submitDecision}>
-            <div className="decision-score"><ScoreRing score={selectedIdea.priority_score} small /><div><b>Priorité éditoriale · {selectedIdea.priority_score}/100</b><p>{selectedIdea.confidence_label}. La prévision initiale reste immuable.</p></div></div>
-            {decisionModal === "rejected" ? (
-              <label><span>Motif du refus · obligatoire</span><select required value={decisionReason} onChange={(event) => setDecisionReason(event.target.value)}><option value="">Choisir un motif…</option>{rejectionReasons.map((reason) => <option key={reason}>{reason}</option>)}</select></label>
-            ) : (
-              <label><span>{decisionModal === "approved" ? "Note de validation" : "Motif de restauration"} · facultatif</span><textarea rows={3} value={decisionReason} onChange={(event) => setDecisionReason(event.target.value)} placeholder="Contexte utile pour l’équipe…" /></label>
-            )}
-            {decisionModal === "approved" && (
-              <><label><span>Date idéale · facultative</span><input type="date" value={publishDate} onChange={(event) => setPublishDate(event.target.value)} /></label><div className="form-note">📍 Valider génère le brief mais n’ajoute pas automatiquement l’idée à la Roadmap.</div></>
-            )}
-            <div className="modal-actions"><button className="button ghost" type="button" onClick={() => setDecisionModal(null)}>Annuler</button><button className={`button ${decisionModal === "rejected" ? "danger" : "success"}`} type="submit" disabled={saving}>{saving ? "Enregistrement…" : `${statusCopy(decisionModal).emoji} Confirmer`}</button></div>
-          </form>
-        </Modal>
-      )}
-
-      {briefModal && selectedBrief && (
-        <Modal title="📝 Brief créatif" subtitle={ideas.find((idea) => idea.id === selectedBrief.idea_id)?.title ?? "Idée validée"} onClose={() => setBriefModal(false)} wide>
-          <BriefDetail brief={selectedBrief} onCopy={() => void copyBrief(selectedBrief)} />
-        </Modal>
-      )}
+      {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
 }
 
-function Overview({ trends, ideas, events, reviewIdeas, approvedIdeas, onView, onBuildIdea, onDecision }: {
-  trends: Trend[]; ideas: Idea[]; events: DecisionEvent[]; reviewIdeas: Idea[]; approvedIdeas: Idea[]; onView: (view: View) => void; onBuildIdea: (trend: Trend) => void; onDecision: (idea: Idea, status: "approved" | "rejected" | "review") => void;
-}) {
-  const useTrends = trends.filter((trend) => trend.recommendation === "Utiliser");
-  const topTrend = useTrends[0];
-  const nextIdea = reviewIdeas[0];
+function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
+  const meta = PLATFORM_META[post.platform];
   return (
-    <div className="view-stack">
-      <section className="action-strip">
-        <div className="section-heading"><div><span className="section-kicker">À FAIRE MAINTENANT</span><h3>3 décisions qui font avancer l’équipe</h3></div><span className="freshness">Mis à jour à l’ouverture</span></div>
-        <div className="action-grid">
-          <ActionCard tone="purple" emoji="🔥" label="SIGNAL PRIORITAIRE" title={topTrend?.title ?? "Importer le premier signal"} description={topTrend?.explanation ?? "Aucune tendance exploitable n’est encore disponible."} action={topTrend ? "Transformer en idée" : "Ouvrir le Radar"} onClick={() => topTrend ? onBuildIdea(topTrend) : onView("trends")} />
-          <ActionCard tone="green" emoji="⏳" label="DÉCISION ATTENDUE" title={nextIdea?.title ?? "File de validation vide"} description={nextIdea ? `Priorité ${nextIdea.priority_score}/100 · ${nextIdea.confidence_label}` : "Les nouvelles idées soumises apparaîtront ici."} action={nextIdea ? "Décider maintenant" : "Voir les idées"} onClick={() => nextIdea ? onDecision(nextIdea, "approved") : onView("ideas")} />
-          <ActionCard tone="blue" emoji="🔌" label="COUVERTURE DATA" title="Aucun connecteur actif" description="Les exemples sont isolés. Branche une API officielle ou importe un signal avec sa provenance." action="Voir les limites" onClick={() => onView("connectors")} />
-        </div>
-      </section>
+    <a className="social-post-row" href={post.url} target="_blank" rel="noreferrer">
+      <span className="rank">{String(rank).padStart(2, "0")}</span>
+      <span className="post-platform-icon">{meta.emoji}</span>
+      <span className="post-row-copy">
+        <b>{post.title || post.text || "Publication sans légende"}</b>
+        <small>{meta.label} · {post.format} · {post.published_at ? `il y a ${relativeAge(post.published_at)}` : "date publique absente"}</small>
+      </span>
+      <span className="row-metrics">
+        {metrics(post).slice(0, 2).map((metric) => (
+          <span key={metric.label}>{metric.icon} {formatNumber(metric.value)}</span>
+        ))}
+      </span>
+      <span className={`mini-score score-${scoreTone(post.performance_score)}`}>{post.performance_score ?? "—"}</span>
+    </a>
+  );
+}
 
-      <section>
-        <div className="section-heading"><div><span className="section-kicker">BOUCLE ÉDITORIALE</span><h3>De la détection à l’apprentissage</h3></div><button className="text-button" type="button" onClick={() => onView("trends")}>Ouvrir le Radar →</button></div>
-        <div className="pipeline">
-          <PipelineStep emoji="🔥" label="Tendances" value={trends.length} hint={`${useTrends.length} à utiliser`} active />
-          <span className="pipeline-arrow">›</span>
-          <PipelineStep emoji="✨" label="Idées" value={ideas.length} hint="score figé" />
-          <span className="pipeline-arrow">›</span>
-          <PipelineStep emoji="⏳" label="À valider" value={reviewIdeas.length} hint="décision humaine" />
-          <span className="pipeline-arrow">›</span>
-          <PipelineStep emoji="✅" label="Validées" value={approvedIdeas.length} hint="brief généré" />
-          <span className="pipeline-arrow">›</span>
-          <PipelineStep emoji="📈" label="Résultats" value={0} hint="à connecter" locked />
-        </div>
-      </section>
-
-      <section className="overview-columns">
-        <div className="panel">
-          <div className="panel-head"><div><span className="section-kicker">TENDANCES COMPATIBLES</span><h3>À exploiter tôt</h3></div><button className="icon-button" type="button" onClick={() => onView("trends")} aria-label="Voir toutes les tendances">→</button></div>
-          <div className="compact-list">
-            {useTrends.slice(0, 3).map((trend, index) => <button type="button" className="compact-row" key={trend.id} onClick={() => onBuildIdea(trend)}><span className="rank">0{index + 1}</span><div><b>{trend.title}</b><span>{trend.platform} · {trend.maturity}</span></div><span className="mini-score">{trend.brand_fit}</span></button>)}
-            {!useTrends.length && <EmptyInline text="Aucune tendance à utiliser." />}
+function PostCard({ post, rank, compact }: { post: SocialPost; rank: number; compact: boolean }) {
+  const meta = PLATFORM_META[post.platform];
+  return (
+    <article className={`social-post-card ${compact ? "compact" : ""}`}>
+      <a className="post-visual" href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
+        {post.thumbnail_url ? <img src={post.thumbnail_url} alt="" loading="lazy" /> : <span>{meta.emoji}</span>}
+        <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
+        <span className="post-rank">#{rank}</span>
+      </a>
+      <div className="post-card-body">
+        <div className="post-card-title">
+          <div>
+            <span className="section-kicker">{postLabel(post)} · {post.format}</span>
+            <h3>{post.title || post.text || "Publication sans légende"}</h3>
           </div>
+          <span className={`score-badge score-${scoreTone(post.performance_score)}`}>
+            <b>{post.performance_score ?? "—"}</b><small>/100</small>
+          </span>
         </div>
-        <div className="panel">
-          <div className="panel-head"><div><span className="section-kicker">JOURNAL IMMUABLE</span><h3>Dernières décisions</h3></div><span className="audit-lock">🔒</span></div>
-          <div className="activity-list">
-            {events.slice(0, 4).map((event) => <div className="activity-row" key={event.id}><span className={`activity-dot ${event.action}`} /><div><b>{event.action === "approved" ? "Idée validée" : event.action === "rejected" ? "Idée refusée" : event.action === "restored" ? "Idée restaurée" : event.entity_type === "trend" ? "Tendance ajoutée" : "Idée créée"}</b><span>{event.actor_label} · {formatDate(event.created_at, true)}</span></div></div>)}
-            {!events.length && <EmptyInline text="Le journal se remplira à la première action." />}
+        <div className="metric-row">
+          {metrics(post).map((metric) => (
+            <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
+          ))}
+        </div>
+        {!compact ? (
+          <div className="why-box">
+            <span>Pourquoi ça ressort</span>
+            <p>{post.score_explanation}</p>
           </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function TrendView({ trends, search, onSearch, filter, onFilter, onBuildIdea, onImport }: { trends: Trend[]; search: string; onSearch: (value: string) => void; filter: string; onFilter: (value: string) => void; onBuildIdea: (trend: Trend) => void; onImport: () => void }) {
-  return (
-    <div className="view-stack">
-      <div className="toolbar"><label className="search-box"><span>🔍</span><input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Rechercher un signal, une plateforme…" /><kbd>⌘ K</kbd></label><div className="filter-tabs">{["Toutes", "Utiliser", "Surveiller", "Ignorer"].map((item) => <button type="button" key={item} className={filter === item ? "active" : ""} onClick={() => onFilter(item)}>{item === "Utiliser" ? "🟢" : item === "Surveiller" ? "🟡" : item === "Ignorer" ? "🔴" : "◎"} {item}</button>)}</div><span className="result-count"><b>{trends.length}</b> signaux</span></div>
-      {trends.length ? <div className="trend-grid">{trends.map((trend) => <TrendCard trend={trend} key={trend.id} onBuildIdea={() => onBuildIdea(trend)} />)}</div> : <EmptyState emoji="🔥" title="Aucun signal ne correspond" description="Change les filtres ou importe une tendance avec sa source." action="Importer un signal" onAction={onImport} />}
-    </div>
-  );
-}
-
-function TrendCard({ trend, onBuildIdea }: { trend: Trend; onBuildIdea: () => void }) {
-  const tone = recommendationTone(trend.recommendation);
-  return (
-    <article className={`trend-card tone-${tone}`}>
-      <div className="trend-card-top"><div className="source-chip"><span>{trend.platform.includes("YouTube") ? "▶️" : trend.platform.includes("TikTok") ? "🎵" : trend.platform.includes("Pinterest") ? "📌" : "📸"}</span>{trend.platform}</div><span className={`recommendation tone-${tone}`}>{tone === "green" ? "🟢" : tone === "amber" ? "🟡" : "🔴"} {trend.recommendation}</span></div>
-      <div><div className="origin-line"><span>{trend.origin === "demo" ? "🧪 EXEMPLE" : trend.origin === "manual" ? "✍️ MANUEL" : "🔌 API"}</span><span>Détectée {formatDate(trend.first_detected_at)}</span></div><h3>{trend.title}</h3><p className="trend-summary">{trend.summary}</p></div>
-      <div className="trend-metrics"><Metric label="Vitesse" value={trend.velocity_score} suffix="/100" tone={scoreTone(trend.velocity_score)} /><Metric label="Fit marque" value={trend.brand_fit} suffix="/100" tone={scoreTone(trend.brand_fit)} /><Metric label="Saturation" value={trend.saturation_risk} suffix="%" tone={trend.saturation_risk >= 70 ? "red" : trend.saturation_risk >= 40 ? "amber" : "green"} /></div>
-      <div className="trend-tags"><span>📍 {trend.maturity}</span><span>🛡️ Risque {trend.brand_risk}/100</span></div>
-      <div className="why-box"><span>💡</span><p>{trend.explanation}</p></div>
-      <div className="trend-footer"><span className="source-label">Source · {trend.source_label}</span><button className="button primary compact" type="button" onClick={onBuildIdea} disabled={trend.recommendation === "Ignorer"}>{trend.recommendation === "Ignorer" ? "Signal écarté" : "✨ Transformer en idée"}</button></div>
+        ) : null}
+        <footer>
+          <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
+          <span className={`confidence confidence-${post.score_confidence}`}>{confidenceLabel(post.score_confidence)}</span>
+        </footer>
+      </div>
     </article>
   );
 }
-
-function IdeaView({ ideas, trends, title, empty, onDecision, onViewTrends }: { ideas: Idea[]; trends: Trend[]; title: string; empty: string; onDecision: (idea: Idea, status: "approved" | "rejected" | "review") => void; onViewTrends: () => void }) {
-  return (
-    <div className="view-stack"><div className="section-heading"><div><span className="section-kicker">CONTENT BRAIN</span><h3>{title}</h3></div><span className="result-count"><b>{ideas.length}</b> idées</span></div>{ideas.length ? <div className="idea-list">{ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} trend={trends.find((trend) => trend.id === idea.trend_id)} onDecision={onDecision} />)}</div> : <EmptyState emoji="✨" title="Rien dans cette vue" description={empty} action="Voir les tendances" onAction={onViewTrends} />}</div>
-  );
-}
-
-function IdeaCard({ idea, trend, onDecision }: { idea: Idea; trend?: Trend; onDecision: (idea: Idea, status: "approved" | "rejected" | "review") => void }) {
-  const status = statusCopy(idea.status);
-  return (
-    <article className="idea-card">
-      <div className="idea-main"><div className="idea-meta"><span className={`status-badge tone-${status.tone}`}>{status.emoji} {status.label}</span><span>{idea.platform}</span><span>{idea.format}</span><span>{idea.character}</span></div><h3>{idea.title}</h3><p>{idea.concept}</p><div className="hook-line"><span>HOOK</span><b>“{idea.hook}”</b></div><div className="idea-source">🔥 Source · {trend?.title ?? "Tendance archivée"} <span>·</span> 🔒 score initial {idea.prediction_version}</div></div>
-      <div className="idea-score"><ScoreRing score={idea.priority_score} /><span>Priorité éditoriale</span><small>{idea.confidence_label}</small></div>
-      <div className="idea-breakdown"><ScoreBar label="Marque" value={idea.brand_score} /><ScoreBar label="Timing" value={idea.timing_score} /><ScoreBar label="Preuves" value={idea.evidence_score} /><ScoreBar label="Faisabilité" value={idea.feasibility_score} /><button className="explain-link" type="button" title={idea.score_explanation}>ⓘ Pourquoi ce score ?</button></div>
-      <div className="idea-actions">{idea.status === "review" ? <><button className="round-action reject" type="button" onClick={() => onDecision(idea, "rejected")}><span>✕</span> Refuser</button><button className="round-action approve" type="button" onClick={() => onDecision(idea, "approved")}><span>✓</span> Valider</button></> : idea.status === "rejected" ? <button className="round-action restore" type="button" onClick={() => onDecision(idea, "review")}><span>↩</span> Restaurer</button> : <div className="approved-note"><span>✅</span><div><b>Brief disponible</b><small>Pas encore dans la Roadmap</small></div></div>}</div>
-    </article>
-  );
-}
-
-function ApprovedView({ ideas, briefs, onOpenBrief, onViewReview }: { ideas: Idea[]; briefs: Brief[]; onOpenBrief: (brief: Brief) => void; onViewReview: () => void }) {
-  return <div className="view-stack">{ideas.length ? <div className="approved-grid">{ideas.map((idea) => { const brief = briefs.find((item) => item.idea_id === idea.id); return <article className="approved-card" key={idea.id}><div className="approved-icon">✅</div><div className="idea-meta"><span>{idea.platform}</span><span>{idea.format}</span></div><h3>{idea.title}</h3><p>{idea.objective}</p><div className="approved-kpis"><span><b>{idea.priority_score}</b> priorité</span><span><b>{idea.brand_score}</b> marque</span><span><b>{idea.production_effort}</b> effort</span></div><div className="approved-footer"><span>{idea.ideal_publish_at ? `🗓️ ${formatDate(idea.ideal_publish_at)}` : "🗓️ Date à définir"}</span>{brief ? <button className="button primary compact" type="button" onClick={() => onOpenBrief(brief)}>📝 Ouvrir le brief</button> : <span className="status-badge tone-amber">Brief en préparation</span>}</div></article>; })}</div> : <EmptyState emoji="✅" title="Aucune idée validée" description="La validation reste humaine. Une fois confirmée, l’idée et son brief apparaîtront ici." action="Ouvrir la file de décision" onAction={onViewReview} />}</div>;
-}
-
-function BriefView({ briefs, ideas, onOpen, onCopy, onViewApproved }: { briefs: Brief[]; ideas: Idea[]; onOpen: (brief: Brief) => void; onCopy: (brief: Brief) => void; onViewApproved: () => void }) {
-  return <div className="view-stack">{briefs.length ? <div className="brief-list">{briefs.map((brief) => { const idea = ideas.find((item) => item.id === brief.idea_id); return <article className="brief-row" key={brief.id}><div className="brief-icon">📝</div><div className="brief-copy"><div className="idea-meta"><span>{idea?.platform ?? "Plateforme"}</span><span>{idea?.character ?? "Personnage"}</span><span>{formatDate(brief.created_at)}</span></div><h3>{idea?.title ?? "Brief créatif"}</h3><p>{brief.objective}</p></div><div className="brief-status"><span className="status-badge tone-green">Prêt pour production</span><small>{brief.deadline ? `Cible · ${formatDate(brief.deadline)}` : "Date à définir"}</small></div><div className="brief-actions"><button className="button ghost compact" type="button" onClick={() => onCopy(brief)}>📋 Copier</button><button className="button primary compact" type="button" onClick={() => onOpen(brief)}>Ouvrir →</button></div></article>; })}</div> : <EmptyState emoji="📝" title="Aucun brief" description="Valide d’abord une idée. Son brief créatif sera généré sans la planifier automatiquement." action="Voir les idées validées" onAction={onViewApproved} />}</div>;
-}
-
-function ConnectorView({ onImport }: { onImport: () => void }) {
-  return <div className="view-stack"><div className="connector-banner"><div className="connector-banner-icon">🛡️</div><div><b>Garde-fou V1 · aucune publication automatique</b><p>Les connecteurs collectent ou importent des données. Tout post, commentaire ou réponse officielle exige une validation humaine.</p></div></div><div className="connector-grid">{CONNECTORS.map((connector) => <article className={`connector-card tone-${connector.tone}`} key={connector.name}><div className="connector-icon">{connector.emoji}</div><div><div className="connector-title"><h3>{connector.name}</h3><span>{connector.status}</span></div><p>{connector.detail}</p></div><button className="button ghost compact" type="button" onClick={onImport}>↥ Import manuel</button></article>)}</div><div className="panel connector-next"><div><span className="section-kicker">PROCHAINE ÉTAPE</span><h3>Brancher YouTube en premier</h3><p>Le connecteur apportera les performances historiques propriétaires. Les autres sources resteront manuelles tant que leurs permissions officielles ne sont pas obtenues.</p></div><div className="connector-checks"><span>✓ OAuth chaîne</span><span>✓ quotas suivis</span><span>✓ audit des imports</span><span>× aucune publication automatique</span></div></div></div>;
-}
-
-function BriefDetail({ brief, onCopy }: { brief: Brief; onCopy: () => void }) {
-  return <div className="brief-detail"><section><span className="section-kicker">OBJECTIF</span><p>{brief.objective}</p></section><section><span className="section-kicker">MESSAGE</span><p>{brief.message}</p></section><section><span className="section-kicker">VARIANTES DE HOOK</span><ol>{readJsonList(brief.hook_variants).map((item) => <li key={item}>{item}</li>)}</ol></section><section><span className="section-kicker">STORYBOARD</span><ol>{readJsonList(brief.storyboard).map((item) => <li key={item}>{item}</li>)}</ol></section><section><span className="section-kicker">ASSETS REQUIS</span><ul>{readJsonList(brief.asset_requirements).map((item) => <li key={item}>{item}</li>)}</ul></section><section className="success-box"><span>📈</span><div><b>Critère de succès</b><p>{brief.success_criteria}</p></div></section><div className="modal-actions"><button className="button primary" type="button" onClick={onCopy}>📋 Copier le brief</button></div></div>;
-}
-
-function Modal({ title, subtitle, onClose, children, wide = false }: { title: string; subtitle: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className={`modal ${wide ? "wide" : ""}`} role="dialog" aria-modal="true" aria-labelledby="modal-title"><header><div><h2 id="modal-title">{title}</h2><p>{subtitle}</p></div><button type="button" onClick={onClose} aria-label="Fermer">×</button></header><div className="modal-body">{children}</div></section></div>;
-}
-
-function ActionCard({ tone, emoji, label, title, description, action, onClick }: { tone: string; emoji: string; label: string; title: string; description: string; action: string; onClick: () => void }) { return <article className={`action-card tone-${tone}`}><div className="action-icon">{emoji}</div><div><span className="section-kicker">{label}</span><h3>{title}</h3><p>{description}</p><button className="text-button" type="button" onClick={onClick}>{action} →</button></div></article>; }
-function PipelineStep({ emoji, label, value, hint, active = false, locked = false }: { emoji: string; label: string; value: number; hint: string; active?: boolean; locked?: boolean }) { return <div className={`pipeline-step ${active ? "active" : ""} ${locked ? "locked" : ""}`}><span className="pipeline-emoji">{emoji}</span><div><span>{label}</span><b>{value}</b><small>{hint}</small></div></div>; }
-function Metric({ label, value, suffix, tone }: { label: string; value: number; suffix: string; tone: string }) { return <div className="metric"><span>{label}</span><b className={`text-${tone}`}>{value}<small>{suffix}</small></b><div className="metric-track"><span className={`bg-${tone}`} style={{ width: `${Math.max(4, value)}%` }} /></div></div>; }
-function ScoreRing({ score, small = false }: { score: number; small?: boolean }) { return <div className={`score-ring ${small ? "small" : ""}`} style={{ "--score": `${score * 3.6}deg` } as React.CSSProperties}><div><b>{score}</b><span>/100</span></div></div>; }
-function ScoreBar({ label, value }: { label: string; value: number }) { return <div className="score-bar"><span>{label}</span><div><i style={{ width: `${value}%` }} /></div><b>{value}</b></div>; }
-function RangeField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) { return <label className="range-field"><span>{label} <b>{value}/100</b></span><input type="range" min="0" max="100" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>; }
-function EmptyState({ emoji, title, description, action, onAction }: { emoji: string; title: string; description: string; action: string; onAction: () => void }) { return <div className="empty-state"><span>{emoji}</span><h3>{title}</h3><p>{description}</p><button className="button primary" type="button" onClick={onAction}>{action}</button></div>; }
-function EmptyInline({ text }: { text: string }) { return <div className="empty-inline">{text}</div>; }
-function LoadingState() { return <div className="loading-grid" role="status" aria-label="Chargement de l’espace"><div className="loading-card" /><div className="loading-card" /><div className="loading-card" /><div className="loading-panel" /></div>; }

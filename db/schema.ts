@@ -1,5 +1,154 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
+
+export const socialAccounts = sqliteTable(
+  "social_accounts",
+  {
+    id: text("id").primaryKey(),
+    platform: text("platform").notNull(),
+    handle: text("handle").notNull(),
+    displayName: text("display_name").notNull(),
+    profileUrl: text("profile_url").notNull(),
+    externalAccountId: text("external_account_id"),
+    verified: integer("verified").notNull().default(1),
+    followerCount: integer("follower_count"),
+    sourceKind: text("source_kind"),
+    coverage: text("coverage"),
+    scanStatus: text("scan_status").notNull().default("pending"),
+    scanMessage: text("scan_message"),
+    lastScannedAt: text("last_scanned_at"),
+    lastSuccessAt: text("last_success_at"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("idx_social_accounts_platform_handle").on(
+      table.platform,
+      table.handle,
+    ),
+    uniqueIndex("idx_social_accounts_platform_external").on(
+      table.platform,
+      table.externalAccountId,
+    ),
+    index("idx_social_accounts_status_scanned").on(
+      table.scanStatus,
+      table.lastScannedAt,
+    ),
+  ],
+);
+
+export const socialPosts = sqliteTable(
+  "social_posts",
+  {
+    id: text("id").primaryKey(),
+    accountId: text("account_id")
+      .notNull()
+      .references(() => socialAccounts.id),
+    platform: text("platform").notNull(),
+    externalId: text("external_id").notNull(),
+    url: text("url").notNull(),
+    title: text("title"),
+    postText: text("text"),
+    format: text("format"),
+    thumbnailUrl: text("thumbnail_url"),
+    publishedAt: text("published_at"),
+    views: integer("views"),
+    likes: integer("likes"),
+    comments: integer("comments"),
+    shares: integer("shares"),
+    saves: integer("saves"),
+    performanceScore: integer("performance_score"),
+    confidence: text("confidence"),
+    cohortKey: text("cohort_key"),
+    scoreExplanation: text("score_explanation"),
+    metricCoverage: text("metric_coverage"),
+    rank: integer("rank"),
+    platformRank: integer("platform_rank"),
+    rawJson: text("raw_json"),
+    firstSeenAt: text("first_seen_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    lastSeenAt: text("last_seen_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("idx_social_posts_platform_external").on(
+      table.platform,
+      table.externalId,
+    ),
+    index("idx_social_posts_account_published").on(
+      table.accountId,
+      table.publishedAt,
+    ),
+    index("idx_social_posts_platform_score").on(
+      table.platform,
+      table.performanceScore,
+    ),
+  ],
+);
+
+export const scanRuns = sqliteTable(
+  "scan_runs",
+  {
+    id: text("id").primaryKey(),
+    platform: text("platform").notNull(),
+    trigger: text("trigger").notNull(),
+    status: text("status").notNull(),
+    actorLabel: text("actor_label").notNull(),
+    sourceKind: text("source_kind"),
+    coverage: text("coverage"),
+    postCount: integer("post_count").notNull().default(0),
+    newPostCount: integer("new_post_count").notNull().default(0),
+    updatedPostCount: integer("updated_post_count").notNull().default(0),
+    errorMessage: text("error_message"),
+    startedAt: text("started_at").notNull(),
+    completedAt: text("completed_at"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_scan_runs_platform_started").on(
+      table.platform,
+      table.startedAt,
+    ),
+    index("idx_scan_runs_status_started").on(table.status, table.startedAt),
+  ],
+);
+
+export const postMetricSnapshots = sqliteTable(
+  "post_metric_snapshots",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    postId: text("post_id")
+      .notNull()
+      .references(() => socialPosts.id),
+    scanRunId: text("scan_run_id")
+      .notNull()
+      .references(() => scanRuns.id),
+    capturedAt: text("captured_at").notNull(),
+    views: integer("views"),
+    likes: integer("likes"),
+    comments: integer("comments"),
+    shares: integer("shares"),
+    saves: integer("saves"),
+    followerCount: integer("follower_count"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("idx_metric_snapshots_post_run").on(
+      table.postId,
+      table.scanRunId,
+    ),
+    index("idx_metric_snapshots_post_captured").on(
+      table.postId,
+      table.capturedAt,
+    ),
+  ],
+);
 
 export const trends = sqliteTable(
   "trends",

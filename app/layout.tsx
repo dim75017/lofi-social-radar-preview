@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     template: "%s · Lofi Social Radar",
   },
   description:
-    "Plateforme interne de Social & Community Intelligence pour Lofi Girl.",
+    "Radar interne des performances Instagram, X, TikTok et YouTube de Lofi Girl.",
 };
 
 export const viewport: Viewport = {

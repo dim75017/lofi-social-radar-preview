@@ -20,50 +20,45 @@ async function render() {
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the Lofi Social Radar product shell", async () => {
+test("server-renders the live Social Radar shell", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<title>Lofi Social Radar<\/title>/i);
-  assert.match(html, /Social Radar/);
-  assert.match(html, /Vue d’ensemble/);
-  assert.match(html, /Community Intelligence/);
-  assert.match(html, /🧪 Démo/);
-  assert.match(html, /🔥/);
-  assert.match(html, /✨/);
-  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
+  assert.match(html, /Command Center/);
+  assert.match(html, /Meilleurs posts/);
+  assert.match(html, /Données publiques réelles/);
+  assert.match(html, /Instagram, X, TikTok et YouTube/);
+  assert.doesNotMatch(html, /🧪 Démo|Données de démonstration|codex-preview|react-loading-skeleton/i);
 });
 
-test("keeps persistence and guardrails explicit", async () => {
-  const [hosting, schema, component, packageJson] = await Promise.all([
+test("keeps real social collection and persistence explicit", async () => {
+  const [hosting, schema, component, scanner, packageJson] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-scanner.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
-  assert.match(schema, /predictionSnapshot/);
-  assert.match(schema, /decisionEvents/);
-  assert.match(component, /aucune publication automatique/i);
-  assert.match(component, /n’ajoute pas automatiquement l’idée à la Roadmap/i);
-  assert.match(component, /Données de démonstration|Données démo|🧪/);
+  assert.match(schema, /socialAccounts/);
+  assert.match(schema, /socialPosts/);
+  assert.match(schema, /postMetricSnapshots/);
+  assert.match(schema, /scanRuns/);
+  assert.match(scanner, /youtube\.com\/feeds\/videos\.xml/);
+  assert.match(scanner, /instagram\.com/);
+  assert.match(scanner, /tiktok\.com/);
+  assert.match(scanner, /x\.com/);
+  assert.match(component, /Chaque réseau est comparé à lui-même/);
+  assert.match(component, /métriques absentes sont retirées/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
