@@ -3552,14 +3552,14 @@ a {
 }
 
 .post-text-content {
-  margin: 12px 0 4px;
+  position: relative;
+  margin: 12px 0 0;
   color: var(--text);
   font-family: Sora, Inter, sans-serif;
   font-size: clamp(17px, 1.3vw, 21px);
   font-weight: 680;
   line-height: 1.52;
   overflow-wrap: anywhere;
-  white-space: pre-wrap;
 }
 
 .poll-choice-list {
@@ -3585,13 +3585,54 @@ a {
 }
 
 .post-text-content a {
+  display: -webkit-box;
+  overflow: hidden;
   color: inherit;
   text-decoration: none;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .post-text-content a:hover,
 .post-text-content a:focus-visible {
   color: var(--accent-2);
+}
+
+.post-text-content.is-expanded a {
+  display: block;
+  overflow: visible;
+}
+
+.post-text-expand {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 30px;
+  border: 0;
+  border-radius: 7px;
+  background: linear-gradient(90deg, rgba(14, 17, 28, 0.1), rgba(14, 17, 28, 0.98) 38%);
+  padding: 1px 0 1px 10px;
+  color: var(--accent-2);
+  font-family: Sora, Inter, sans-serif;
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.post-text-expand:hover,
+.post-text-expand:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.post-text-content.is-expanded .post-text-expand {
+  position: static;
+  margin-top: 7px;
+  border: 1px solid rgba(154, 168, 255, 0.2);
+  background: rgba(154, 168, 255, 0.08);
+  padding: 4px 8px;
+  font-size: 11px;
 }
 
 .social-post-card.text-only .metric-row {

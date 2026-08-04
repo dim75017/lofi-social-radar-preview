@@ -310,10 +310,19 @@ function localInsights(posts: SocialPost[]): Insight[] {
     }));
 }
 
+function metricEmoji(metric: MetricKey, platform?: Platform) {
+  if (metric === "views") return "👀";
+  if (metric === "likes") return platform === "youtube" ? "👍" : "❤️";
+  if (metric === "comments") return "💬";
+  if (metric === "shares") return "↗️";
+  if (metric === "saves") return "🔖";
+  return "🗳️";
+}
+
 function metrics(post: SocialPost) {
   return [
-    post.views !== null ? { icon: "👁", label: "vues", value: post.views } : null,
-    post.likes !== null ? { icon: "♥", label: "likes", value: post.likes } : null,
+    post.views !== null ? { icon: metricEmoji("views", post.platform), label: "vues", value: post.views } : null,
+    post.likes !== null ? { icon: metricEmoji("likes", post.platform), label: "likes", value: post.likes } : null,
     post.comments !== null
       ? { icon: "💬", label: "commentaires", value: post.comments }
       : null,
@@ -332,8 +341,8 @@ function metrics(post: SocialPost) {
 type MetricKey = "views" | "likes" | "comments" | "shares" | "saves" | "poll_votes";
 
 const METRIC_META: Record<MetricKey, { icon: string; label: string }> = {
-  views: { icon: "👁", label: "vues" },
-  likes: { icon: "♥", label: "likes" },
+  views: { icon: "👀", label: "vues" },
+  likes: { icon: "❤️", label: "likes" },
   comments: { icon: "💬", label: "commentaires" },
   shares: { icon: "↗", label: "partages" },
   saves: { icon: "🔖", label: "sauvegardes" },
@@ -1594,10 +1603,25 @@ function PostCard({
   const postCopy = post.text || post.title || "Publication sans légende";
   const choices = post.format === "community_poll" ? pollChoices(post) : [];
   const publishedDate = formatCardPublishedDate(post.published_at);
+  const textLinkRef = useRef<HTMLAnchorElement>(null);
+  const [isTextExpanded, setIsTextExpanded] = useState(false);
+  const [isTextOverflowing, setIsTextOverflowing] = useState(false);
   const footerMetrics = [
-    post.views !== null ? { icon: "👁", label: "vues", value: post.views } : null,
-    post.likes !== null ? { icon: "♥", label: "likes", value: post.likes } : null,
+    post.views !== null ? { icon: metricEmoji("views", post.platform), label: "vues", value: post.views } : null,
+    post.likes !== null ? { icon: metricEmoji("likes", post.platform), label: "likes", value: post.likes } : null,
   ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
+
+  useEffect(() => {
+    if (hasMediaPreview || isTextExpanded) return;
+    const element = textLinkRef.current;
+    if (!element) return;
+    const updateOverflow = () => setIsTextOverflowing(element.scrollHeight > element.clientHeight + 1);
+    updateOverflow();
+    const observer = new ResizeObserver(updateOverflow);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasMediaPreview, isTextExpanded, postCopy]);
+
   return (
     <article
       className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
@@ -1626,11 +1650,21 @@ function PostCard({
                 </a>
               </h3>
             ) : (
-              <p className="post-text-content">
-                <a href={post.url} target="_blank" rel="noreferrer">
+              <div className={`post-text-content ${isTextExpanded ? "is-expanded" : ""}`}>
+                <a ref={textLinkRef} href={post.url} target="_blank" rel="noreferrer">
                   {postCopy}
                 </a>
-              </p>
+                {isTextOverflowing ? (
+                  <button
+                    className="post-text-expand"
+                    type="button"
+                    aria-expanded={isTextExpanded}
+                    onClick={() => setIsTextExpanded((value) => !value)}
+                  >
+                    {isTextExpanded ? "Réduire" : "…"}
+                  </button>
+                ) : null}
+              </div>
             )}
           </div>
         </div>
