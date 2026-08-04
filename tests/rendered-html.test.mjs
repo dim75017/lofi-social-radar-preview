@@ -66,8 +66,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(scanner, /x\.com/);
   assert.match(component, /Chaque réseau est comparé à lui-même/);
   assert.match(component, /métriques absentes sont retirées/i);
-  assert.match(component, /top-platform-picker/);
-  assert.match(component, /Toutes les plateformes/);
+  assert.match(component, /top-platform-subnav/);
+  assert.match(component, /Plateformes des meilleurs posts/);
+  assert.match(component, /aria-expanded=\{isTopItem \? isTopSection : undefined\}/);
+  assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
+  assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
   assert.match(component, /Meilleure performance d’abord/);
   assert.match(component, /tous affichés/);

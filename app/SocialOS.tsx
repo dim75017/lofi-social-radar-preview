@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- thumbnails come from live social sources with dynamic hosts. */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   generateSocialIdeas,
@@ -347,7 +347,6 @@ export function SocialOS({
   const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
-  const topPlatformDetailsRef = useRef<HTMLDetailsElement>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
@@ -566,12 +565,13 @@ export function SocialOS({
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
   const visiblePosts = filteredPosts.slice(0, visiblePostCount);
 
-  const chooseTopPlatform = (target: "all" | Platform) => {
+  const chooseTopPlatform = (target: Platform) => {
+    setView("top");
     setTopPlatform(target);
     setTopFormatFilter("all");
-    if (topPlatformDetailsRef.current) {
-      topPlatformDetailsRef.current.open = false;
-    }
+    setTopDuration("all");
+    setSearch("");
+    setMobileOpen(false);
   };
 
   const setIdeaDecision = useCallback((ideaId: string, decision: IdeaDecision) => {
@@ -651,33 +651,89 @@ export function SocialOS({
           {(["Pilotage", "Données"] as const).map((group) => (
             <div className="nav-group" key={group}>
               <div className="nav-label">{group}</div>
-              {NAV.filter((item) => item.group === group).map((item) => (
-                <button
-                  key={item.id}
-                  className={view === item.id ? "active" : ""}
-                  type="button"
-                  onClick={() => {
-                    setView(item.id);
-                    if (item.id === "top") {
-                      setTopPlatform("all");
-                      setTopFormatFilter("all");
-                      setTopDuration("all");
-                      setSearch("");
-                    }
-                    if (item.id === "all") {
-                      setPlatform("all");
-                      setFormatFilter("all");
-                    }
-                    setMobileOpen(false);
-                  }}
-                >
-                  <span className="nav-emoji">{item.emoji}</span>
-                  <span className="nav-text">{item.label}</span>
-                  {navCount(item.id) !== undefined ? (
-                    <span className="nav-count">{navCount(item.id)}</span>
-                  ) : null}
-                </button>
-              ))}
+              {NAV.filter((item) => item.group === group).map((item) => {
+                const isTopItem = item.id === "top";
+                const isTopSection = isTopItem && view === "top";
+                const isActive =
+                  view === item.id && (!isTopItem || topPlatform === "all");
+                const isSectionActive = isTopSection && topPlatform !== "all";
+
+                return (
+                  <div
+                    className={`nav-entry ${isTopItem ? "has-children" : ""}`}
+                    key={item.id}
+                  >
+                    <button
+                      className={isActive ? "active" : isSectionActive ? "section-active" : ""}
+                      type="button"
+                      aria-current={isActive ? "page" : undefined}
+                      aria-expanded={isTopItem ? isTopSection : undefined}
+                      aria-controls={isTopItem ? "top-platform-subnav" : undefined}
+                      onClick={() => {
+                        setView(item.id);
+                        if (item.id === "top") {
+                          setTopPlatform("all");
+                          setTopFormatFilter("all");
+                          setTopDuration("all");
+                          setSearch("");
+                        }
+                        if (item.id === "all") {
+                          setPlatform("all");
+                          setFormatFilter("all");
+                        }
+                        if (item.id !== "top") setMobileOpen(false);
+                      }}
+                    >
+                      <span className="nav-emoji">{item.emoji}</span>
+                      <span className="nav-text">{item.label}</span>
+                      {isTopItem ? (
+                        <span className="nav-meta">
+                          <span className="nav-count">{navCount(item.id)}</span>
+                          <span
+                            className={`nav-disclosure ${isTopSection ? "open" : ""}`}
+                            aria-hidden="true"
+                          >
+                            ⌄
+                          </span>
+                        </span>
+                      ) : navCount(item.id) !== undefined ? (
+                        <span className="nav-count">{navCount(item.id)}</span>
+                      ) : null}
+                    </button>
+
+                    {isTopSection ? (
+                      <div
+                        className="nav-submenu"
+                        id="top-platform-subnav"
+                        role="group"
+                        aria-label="Plateformes des meilleurs posts"
+                      >
+                        {PLATFORM_ORDER.map((key) => {
+                          const meta = PLATFORM_META[key];
+                          const count = posts.filter(
+                            (post) => post.platform === key,
+                          ).length;
+                          return (
+                            <button
+                              className={topPlatform === key ? "active" : ""}
+                              type="button"
+                              aria-current={topPlatform === key ? "page" : undefined}
+                              aria-label={`${meta.label}, ${count} posts`}
+                              title={`${meta.label} · ${count} posts`}
+                              onClick={() => chooseTopPlatform(key)}
+                              key={key}
+                            >
+                              <span className="nav-emoji">{meta.emoji}</span>
+                              <span className="nav-text">{meta.label}</span>
+                              <span className="nav-count">{count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </nav>
@@ -952,53 +1008,6 @@ export function SocialOS({
               </div>
 
               <div className="top-ranking-control-row">
-                <details className="top-platform-picker" ref={topPlatformDetailsRef}>
-                  <summary>
-                    <span className="top-platform-current">
-                      <small>Plateforme</small>
-                      <b>
-                        {topPlatform === "all"
-                          ? "🌐 Toutes les plateformes"
-                          : `${PLATFORM_META[topPlatform].emoji} ${PLATFORM_META[topPlatform].label}`}
-                      </b>
-                    </span>
-                    <span className="top-platform-total">
-                      <b>{topPlatformPosts.length}</b>
-                      <small>posts</small>
-                    </span>
-                    <span className="top-platform-chevron" aria-hidden="true">⌄</span>
-                  </summary>
-                  <div className="top-platform-menu" aria-label="Choisir une plateforme">
-                    <button
-                      className={topPlatform === "all" ? "active" : ""}
-                      type="button"
-                      aria-pressed={topPlatform === "all"}
-                      onClick={() => chooseTopPlatform("all")}
-                    >
-                      <span>🌐 Toutes les plateformes</span>
-                      <b>{durationTopPosts.length}</b>
-                    </button>
-                    {PLATFORM_ORDER.map((key) => {
-                      const meta = PLATFORM_META[key];
-                      const count = durationTopPosts.filter(
-                        (post) => post.platform === key,
-                      ).length;
-                      return (
-                        <button
-                          className={topPlatform === key ? "active" : ""}
-                          type="button"
-                          aria-pressed={topPlatform === key}
-                          onClick={() => chooseTopPlatform(key)}
-                          key={key}
-                        >
-                          <span>{meta.emoji} {meta.label}</span>
-                          <b>{count}</b>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </details>
-
                 <label className="search-box top-ranking-search">
                   <span aria-hidden="true">⌕</span>
                   <input
@@ -1043,7 +1052,7 @@ export function SocialOS({
                 </div>
               ) : (
                 <p className="top-ranking-note">
-                  Classement continu, de la meilleure performance à la plus faible. Choisis une plateforme pour afficher ses formats natifs.
+                  Classement continu, de la meilleure performance à la plus faible. Les plateformes se choisissent sous « Meilleurs posts » dans le menu de gauche.
                 </p>
               )}
 
