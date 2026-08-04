@@ -347,6 +347,7 @@ export function SocialOS({
   const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
+  const [topNavExpanded, setTopNavExpanded] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
@@ -428,6 +429,7 @@ export function SocialOS({
           setTopDuration("all");
           setSearch("");
           setView("top");
+          setTopNavExpanded(true);
           setToast(
             `${PLATFORM_META[target].label} · ${workspace?.accounts.find((account) => account.platform === target)?.post_count ?? 0} contenus du snapshot`,
           );
@@ -569,8 +571,7 @@ export function SocialOS({
     setView("top");
     setTopPlatform(target);
     setTopFormatFilter("all");
-    setTopDuration("all");
-    setSearch("");
+    setTopNavExpanded(true);
     setMobileOpen(false);
   };
 
@@ -667,21 +668,31 @@ export function SocialOS({
                       className={isActive ? "active" : isSectionActive ? "section-active" : ""}
                       type="button"
                       aria-current={isActive ? "page" : undefined}
-                      aria-expanded={isTopItem ? isTopSection : undefined}
+                      aria-expanded={isTopItem ? topNavExpanded : undefined}
                       aria-controls={isTopItem ? "top-platform-subnav" : undefined}
                       onClick={() => {
-                        setView(item.id);
                         if (item.id === "top") {
-                          setTopPlatform("all");
-                          setTopFormatFilter("all");
-                          setTopDuration("all");
-                          setSearch("");
+                          const isCurrentAll = view === "top" && topPlatform === "all";
+                          if (isCurrentAll) {
+                            setTopNavExpanded((expanded) => !expanded);
+                          } else {
+                            setView("top");
+                            setTopPlatform("all");
+                            setTopFormatFilter("all");
+                            setTopDuration("all");
+                            setSearch("");
+                            setTopNavExpanded(true);
+                          }
+                          return;
                         }
+
+                        setView(item.id);
+                        setTopNavExpanded(false);
                         if (item.id === "all") {
                           setPlatform("all");
                           setFormatFilter("all");
                         }
-                        if (item.id !== "top") setMobileOpen(false);
+                        setMobileOpen(false);
                       }}
                     >
                       <span className="nav-emoji">{item.emoji}</span>
@@ -690,7 +701,7 @@ export function SocialOS({
                         <span className="nav-meta">
                           <span className="nav-count">{navCount(item.id)}</span>
                           <span
-                            className={`nav-disclosure ${isTopSection ? "open" : ""}`}
+                            className={`nav-disclosure ${topNavExpanded ? "open" : ""}`}
                             aria-hidden="true"
                           >
                             ⌄
@@ -701,7 +712,7 @@ export function SocialOS({
                       ) : null}
                     </button>
 
-                    {isTopSection ? (
+                    {isTopSection && topNavExpanded ? (
                       <div
                         className="nav-submenu"
                         id="top-platform-subnav"
@@ -825,6 +836,7 @@ export function SocialOS({
                         setTopDuration("all");
                         setSearch("");
                         setView("top");
+                        setTopNavExpanded(true);
                       }}
                     >
                       <span className="source-logo">{meta.emoji}</span>
@@ -900,6 +912,7 @@ export function SocialOS({
                       setTopDuration("all");
                       setSearch("");
                       setView("top");
+                      setTopNavExpanded(true);
                     }}
                   >
                     Voir tout →

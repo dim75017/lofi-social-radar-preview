@@ -68,7 +68,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /métriques absentes sont retirées/i);
   assert.match(component, /top-platform-subnav/);
   assert.match(component, /Plateformes des meilleurs posts/);
-  assert.match(component, /aria-expanded=\{isTopItem \? isTopSection : undefined\}/);
+  assert.match(component, /aria-expanded=\{isTopItem \? topNavExpanded : undefined\}/);
+  assert.match(component, /setTopNavExpanded\(\(expanded\) => !expanded\)/);
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
   assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
