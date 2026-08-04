@@ -24,7 +24,7 @@ export const SOCIAL_FORMAT_FILTERS = {
   youtube: [
     { key: "all", label: "Tous", emoji: "✨" },
     { key: "short", label: "Shorts", emoji: "🎬" },
-    { key: "community", label: "Communauté", emoji: "💬" },
+    { key: "community", label: "Communauté · image", emoji: "🖼️" },
     { key: "poll", label: "Sondages", emoji: "🗳️" },
     { key: "text", label: "Texte", emoji: "✍️" },
     { key: "comment", label: "Commentaires", emoji: "💭" },
@@ -84,7 +84,7 @@ const SOCIAL_FORMAT_CATEGORY_PRESENTATION: Record<
 > = {
   youtube: {
     short: { label: "Short", emoji: "🎬" },
-    community: { label: "Post communauté", emoji: "💬" },
+    community: { label: "Post communauté avec image", emoji: "🖼️" },
     poll: { label: "Sondage", emoji: "🗳️" },
     text: { label: "Post texte", emoji: "✍️" },
     comment: { label: "Commentaire", emoji: "💭" },
@@ -137,10 +137,8 @@ const YOUTUBE_TEXT_ALIASES = new Set([
   "youtube-text",
 ]);
 const YOUTUBE_COMMUNITY_ALIASES = new Set([
-  "community",
-  "community-post",
-  "youtube-community",
-  "post",
+  "community-image",
+  "youtube-community-image",
   "image",
   "photo",
   "carousel",
@@ -274,11 +272,7 @@ export function classifySocialFormat<P extends SocialPlatform>(
       if (hasAlias(descriptor, YOUTUBE_TEXT_ALIASES)) {
         return "text" as SocialFormatCategory<P>;
       }
-      if (
-        isYouTubeCommunityUrl(url) ||
-        hasAlias(descriptor, YOUTUBE_COMMUNITY_ALIASES) ||
-        rawFlag(post.raw, "isCommunityPost")
-      ) {
+      if (hasAlias(descriptor, YOUTUBE_COMMUNITY_ALIASES)) {
         return "community" as SocialFormatCategory<P>;
       }
       return null;
@@ -332,16 +326,6 @@ export function matchesSocialFormatFilter<P extends SocialPlatform>(
   const category = classifySocialFormat(post);
   if (category === null || category === "out-of-scope") return false;
   if (filter === "all") return true;
-
-  // Communauté is the YouTube umbrella: polls and text posts are its
-  // sub-formats, while comments remain a separate editorial action.
-  if (
-    post.platform === "youtube" &&
-    filter === "community" &&
-    (category === "community" || category === "poll" || category === "text")
-  ) {
-    return true;
-  }
 
   return category === filter;
 }
@@ -478,13 +462,6 @@ function findRawFlag(value: unknown, wanted: string, depth = 0): boolean {
     if (findRawFlag(entry, wanted, depth + 1)) return true;
   }
   return false;
-}
-
-function isYouTubeCommunityUrl(url: string): boolean {
-  return (
-    url.includes("youtube.com/post/") ||
-    url.includes("youtube.com/channel/") && url.includes("/community")
-  );
 }
 
 function isYouTubeVideoUrl(url: string): boolean {

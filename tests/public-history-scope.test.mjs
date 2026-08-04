@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { mergeWorkspaceWithPublicHistory } from "../lib/public-history.ts";
+import { matchesSocialFormatFilter } from "../lib/social-formats.ts";
 
 async function snapshot() {
   return JSON.parse(
@@ -69,4 +70,25 @@ test("poll vote totals are exposed as a first-class UI metric", async () => {
 
   assert.ok(polls.length > 0);
   assert.ok(polls.some((post) => Number.isFinite(post.poll_votes)));
+});
+
+test("the YouTube Community filter contains image posts only", async () => {
+  const history = await snapshot();
+  const youtube = history.posts.filter((post) => post.platform === "youtube");
+  const communityImages = youtube.filter((post) =>
+    matchesSocialFormatFilter(post, "community"),
+  );
+
+  assert.equal(communityImages.length, 94);
+  assert.ok(communityImages.every((post) => post.format === "community_image"));
+  assert.ok(
+    youtube
+      .filter((post) => post.format === "community_text")
+      .every((post) => !matchesSocialFormatFilter(post, "community")),
+  );
+  assert.ok(
+    youtube
+      .filter((post) => post.format === "community_poll")
+      .every((post) => !matchesSocialFormatFilter(post, "community")),
+  );
 });

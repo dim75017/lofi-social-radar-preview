@@ -14,6 +14,12 @@ import {
   matchesSocialFormatFilter,
   type SocialFormatFilter,
 } from "../lib/social-formats";
+import {
+  SOCIAL_DURATION_FILTERS,
+  hasKnownSocialPublishedDate,
+  matchesSocialDuration,
+  type SocialDurationFilter,
+} from "../lib/social-duration";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
@@ -340,6 +346,7 @@ export function SocialOS({
   const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("all");
   const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
+  const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
   const topPlatformDetailsRef = useRef<HTMLDetailsElement>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
@@ -419,6 +426,7 @@ export function SocialOS({
         if (target) {
           setTopPlatform(target);
           setTopFormatFilter("all");
+          setTopDuration("all");
           setSearch("");
           setView("top");
           setToast(
@@ -463,12 +471,20 @@ export function SocialOS({
       `${post.title} ${post.text} ${post.format}`.toLowerCase().includes(needle),
     );
   }, [search, topPosts]);
+  const topDurationReference = workspace?.generatedAt ?? "";
+  const durationTopPosts = useMemo(
+    () =>
+      searchedTopPosts.filter((post) =>
+        matchesSocialDuration(post, topDuration, topDurationReference),
+      ),
+    [searchedTopPosts, topDuration, topDurationReference],
+  );
   const topPlatformPosts = useMemo(
     () =>
       topPlatform === "all"
-        ? searchedTopPosts
-        : searchedTopPosts.filter((post) => post.platform === topPlatform),
-    [searchedTopPosts, topPlatform],
+        ? durationTopPosts
+        : durationTopPosts.filter((post) => post.platform === topPlatform),
+    [durationTopPosts, topPlatform],
   );
   const topFilteredPosts = useMemo(
     () =>
@@ -479,6 +495,26 @@ export function SocialOS({
           ),
     [topFormatFilter, topPlatform, topPlatformPosts],
   );
+  const topUndatedCount = useMemo(
+    () =>
+      topDuration === "all"
+        ? 0
+        : searchedTopPosts.filter((post) => {
+            if (topPlatform !== "all" && post.platform !== topPlatform) return false;
+            if (
+              topPlatform !== "all" &&
+              topFormatFilter !== "all" &&
+              !matchesSocialFormatFilter(post, topFormatFilter)
+            ) {
+              return false;
+            }
+            return !hasKnownSocialPublishedDate(post);
+          }).length,
+    [searchedTopPosts, topDuration, topFormatFilter, topPlatform],
+  );
+  const activeTopDuration =
+    SOCIAL_DURATION_FILTERS.find((option) => option.key === topDuration) ??
+    SOCIAL_DURATION_FILTERS[0];
   const filteredPosts = useMemo(() => {
     return searchedTopPosts.filter((post) => {
       if (platform !== "all" && post.platform !== platform) return false;
@@ -612,6 +648,7 @@ export function SocialOS({
                     if (item.id === "top") {
                       setTopPlatform("all");
                       setTopFormatFilter("all");
+                      setTopDuration("all");
                       setSearch("");
                     }
                     if (item.id === "all") {
@@ -716,6 +753,7 @@ export function SocialOS({
                       onClick={() => {
                         setTopPlatform(key);
                         setTopFormatFilter("all");
+                        setTopDuration("all");
                         setSearch("");
                         setView("top");
                       }}
@@ -790,6 +828,7 @@ export function SocialOS({
                     onClick={() => {
                       setTopPlatform("all");
                       setTopFormatFilter("all");
+                      setTopDuration("all");
                       setSearch("");
                       setView("top");
                     }}
@@ -878,6 +917,27 @@ export function SocialOS({
               className={`top-ranking-controls tone-${topPlatform === "all" ? "blue" : PLATFORM_META[topPlatform].tone}`}
               aria-label="Contrôles du classement"
             >
+              <div className="top-duration-control-row">
+                <span className="section-kicker">Durée</span>
+                <div
+                  className="format-filter-tabs top-duration-tabs"
+                  aria-label="Filtrer le classement par durée"
+                >
+                  {SOCIAL_DURATION_FILTERS.map((option) => (
+                    <button
+                      className={topDuration === option.key ? "active" : ""}
+                      type="button"
+                      aria-pressed={topDuration === option.key}
+                      onClick={() => setTopDuration(option.key)}
+                      key={option.key}
+                    >
+                      {option.emoji} {option.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="top-ranking-sort">🏆 Meilleure performance d’abord</span>
+              </div>
+
               <div className="top-ranking-control-row">
                 <details className="top-platform-picker" ref={topPlatformDetailsRef}>
                   <summary>
@@ -903,11 +963,11 @@ export function SocialOS({
                       onClick={() => chooseTopPlatform("all")}
                     >
                       <span>🌐 Toutes les plateformes</span>
-                      <b>{searchedTopPosts.length}</b>
+                      <b>{durationTopPosts.length}</b>
                     </button>
                     {PLATFORM_ORDER.map((key) => {
                       const meta = PLATFORM_META[key];
-                      const count = searchedTopPosts.filter(
+                      const count = durationTopPosts.filter(
                         (post) => post.platform === key,
                       ).length;
                       return (
@@ -937,7 +997,7 @@ export function SocialOS({
 
                 <span className="top-ranking-count">
                   <b>{topFilteredPosts.length}</b>
-                  <small>posts classés · tous affichés</small>
+                  <small>{activeTopDuration.label} · tous affichés</small>
                 </span>
               </div>
 
@@ -970,9 +1030,17 @@ export function SocialOS({
                 </div>
               ) : (
                 <p className="top-ranking-note">
-                  Classement continu des quatre plateformes. Choisis-en une pour afficher ses formats natifs.
+                  Classement continu, de la meilleure performance à la plus faible. Choisis une plateforme pour afficher ses formats natifs.
                 </p>
               )}
+
+              {topUndatedCount > 0 ? (
+                <p className="top-undated-note">
+                  ℹ️ {topUndatedCount} post{topUndatedCount > 1 ? "s" : ""} sans date
+                  publique {topUndatedCount > 1 ? "restent" : "reste"} disponible{topUndatedCount > 1 ? "s" : ""}
+                  uniquement dans All time.
+                </p>
+              ) : null}
             </section>
 
             {topFilteredPosts.length ? (
@@ -990,8 +1058,16 @@ export function SocialOS({
               <div className={`format-empty-state top-ranking-empty tone-${PLATFORM_META[topPlatform].tone}`}>
                 <span>{topFormatFilter === "comment" ? "💭" : "📡"}</span>
                 <div>
-                  <h3>Aucun contenu disponible pour ce format</h3>
-                  <p>{formatEmptyCopy(topPlatform, topFormatFilter)}</p>
+                  <h3>
+                    {topDuration === "all"
+                      ? "Aucun contenu disponible pour ce format"
+                      : "Aucun contenu daté dans cette période"}
+                  </h3>
+                  <p>
+                    {topDuration === "all"
+                      ? formatEmptyCopy(topPlatform, topFormatFilter)
+                      : "Essaie une durée plus large ou reviens à All time."}
+                  </p>
                 </div>
                 <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
                   Voir les limites →
@@ -1001,7 +1077,11 @@ export function SocialOS({
               <div className="empty-state">
                 <span>🔎</span>
                 <h3>Aucun post ne correspond</h3>
-                <p>Essaie une autre recherche.</p>
+                <p>
+                  {topDuration === "all"
+                    ? "Essaie une autre recherche."
+                    : "Essaie une durée plus large ou reviens à All time."}
+                </p>
               </div>
             )}
           </div>

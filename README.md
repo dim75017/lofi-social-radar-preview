@@ -8,7 +8,7 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 - Navigation interactive : Command Center, meilleurs posts, idées à produire, tous les contenus et état des sources.
 - Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
-- « Meilleurs posts » affiche tout le classement dans un flux continu, avec un seul sélecteur dépliant pour Toutes les plateformes, YouTube, Instagram, TikTok ou X, puis les filtres natifs de la plateforme choisie.
+- « Meilleurs posts » affiche par défaut tout l’historique disponible, de la meilleure performance à la plus faible, avec un filtre de durée (7 jours, 30 jours, 3 mois, 6 mois, 1 an ou All time), un sélecteur dépliant par plateforme, puis ses formats natifs.
 - Classement normalisé à l’intérieur de chaque plateforme, sans remplacer les métriques absentes par des zéros.
 - Moteur d’idées explicable : chaque proposition cite les posts sources, le signal observé, le hook, le format et les déclinaisons YouTube, Instagram, TikTok et X.
 - Décisions éditoriales locales : « À produire », « À retravailler » ou « Écarter ».
@@ -17,7 +17,8 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 ## Couverture des données publiques
 
-- **YouTube** : uniquement les Shorts et les posts Communauté publics (image, texte et sondage). Les vidéos longues et les lives sont entièrement exclus. L’onglet public livre actuellement 200 posts Communauté avant d’arrêter sa pagination ; cela ne garantit pas l’absence de posts plus anciens.
+- **YouTube** : uniquement les Shorts et les posts Communauté publics. Dans les filtres, « Communauté · image » contient strictement les 94 posts avec image ; les 17 sondages et 89 posts texte ont leurs propres boutons. Les vidéos longues et les lives sont entièrement exclus. L’onglet public livre actuellement 200 posts Communauté avant d’arrêter sa pagination ; cela ne garantit pas l’absence de posts plus anciens.
+- **Dates YouTube** : les 319 Shorts dont la date publique n’est pas récupérable restent inclus dans All time et sont exclus des durées bornées, sans leur inventer une date à partir de l’import.
 - **TikTok** : catalogue public visible du profil officiel, avec dates et métriques publiques disponibles.
 - **X** : cinq publications actuellement accessibles par le scanner public. Un historique plus profond nécessite l’API X appropriée.
 - **Instagram** : le profil officiel déclare 1 673 publications, mais l’historique complet et ses insights nécessitent l’autorisation Meta du compte propriétaire. Aucun chiffre n’est inventé en attendant.

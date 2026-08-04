@@ -32,7 +32,7 @@ test("exposes the exact platform filter labels with an emoji", () => {
     [
       ["all", "Tous"],
       ["short", "Shorts"],
-      ["community", "Communauté"],
+      ["community", "Communauté · image"],
       ["poll", "Sondages"],
       ["text", "Texte"],
       ["comment", "Commentaires"],
@@ -78,6 +78,9 @@ test("keeps YouTube Shorts and community sub-formats in scope", () => {
   const genericCommunity = post("youtube", "image", {
     url: "https://www.youtube.com/post/Ugkx123",
   });
+  const unknownCommunity = post("youtube", "community_post", {
+    url: "https://www.youtube.com/post/Ugkx456",
+  });
   const comment = post("youtube", "channel-comment");
 
   assert.equal(classifySocialFormat(short), "short");
@@ -85,9 +88,11 @@ test("keeps YouTube Shorts and community sub-formats in scope", () => {
   assert.equal(classifySocialFormat(text), "text");
   assert.equal(classifySocialFormat(genericCommunity), "community");
   assert.equal(classifySocialFormat(comment), "comment");
+  assert.equal(classifySocialFormat(unknownCommunity), null);
   assert.equal(matchesSocialFormatFilter(poll, "poll"), true);
-  assert.equal(matchesSocialFormatFilter(poll, "community"), true);
-  assert.equal(matchesSocialFormatFilter(text, "community"), true);
+  assert.equal(matchesSocialFormatFilter(poll, "community"), false);
+  assert.equal(matchesSocialFormatFilter(text, "community"), false);
+  assert.equal(matchesSocialFormatFilter(genericCommunity, "community"), true);
   assert.equal(matchesSocialFormatFilter(comment, "community"), false);
   assert.equal(matchesSocialFormatFilter(comment, "comment"), true);
   assert.equal(getSocialFormatLabel(short), "🎬 Short");

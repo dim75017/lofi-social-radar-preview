@@ -41,11 +41,12 @@ test("server-renders the live Social Radar shell", async () => {
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, scanner, publicHistory, packageJson] = await Promise.all([
+  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-formats.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-duration.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-scanner.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/public-history.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
@@ -67,10 +68,15 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /métriques absentes sont retirées/i);
   assert.match(component, /top-platform-picker/);
   assert.match(component, /Toutes les plateformes/);
-  assert.match(component, /posts classés · tous affichés/);
+  assert.match(component, /SOCIAL_DURATION_FILTERS/);
+  assert.match(component, /Meilleure performance d’abord/);
+  assert.match(component, /tous affichés/);
+  assert.match(durations, /All time/);
+  assert.match(durations, /180d/);
   assert.match(component, /topFilteredPosts\.map/);
   assert.doesNotMatch(component, /slice\(0,\s*12\)|Top 12 affiché/);
   assert.match(formats, /Commentaires/);
+  assert.match(formats, /Communauté · image/);
   assert.match(component, /commentaires écrits par @LofiGirl/i);
   assert.match(publicHistory, /isInScopeSocialPost/);
   assert.match(publicHistory, /seuls les Shorts et posts Communauté sont inclus/i);
