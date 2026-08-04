@@ -547,6 +547,9 @@ export function SocialOS({
                   type="button"
                   onClick={() => {
                     setView(item.id);
+                    if (item.id === "top" || item.id === "all") {
+                      setPlatform("all");
+                    }
                     setMobileOpen(false);
                   }}
                 >
