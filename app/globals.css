@@ -3797,9 +3797,13 @@ a {
 
 .social-post-card footer {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-areas:
+    "date actions"
+    "metrics metrics";
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
+  row-gap: 8px;
   margin-top: auto;
   border-top: 1px solid var(--border);
   padding-top: 13px;
@@ -3808,6 +3812,8 @@ a {
 }
 
 .post-published-date {
+  grid-area: date;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -3824,6 +3830,8 @@ a {
 }
 
 .post-card-actions {
+  grid-area: actions;
+  justify-self: end;
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -3831,10 +3839,11 @@ a {
 }
 
 .post-card-footer-metrics {
+  grid-area: metrics;
   display: flex;
   min-width: 0;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 5px;
   flex-wrap: wrap;
   row-gap: 5px;
@@ -4190,18 +4199,14 @@ a {
   }
 
   .social-post-card footer {
-    grid-template-columns: max-content minmax(0, 1fr);
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) max-content;
   }
 
   .post-card-actions {
-    grid-column: 2;
     justify-self: end;
   }
 
   .post-card-footer-metrics {
-    grid-column: 1 / -1;
-    grid-row: 2;
     justify-content: flex-start;
   }
 }
