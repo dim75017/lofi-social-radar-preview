@@ -784,7 +784,18 @@ export function SocialOS({
                     <span className="section-kicker">Top performance</span>
                     <h3>Les posts qui fonctionnent le mieux</h3>
                   </div>
-                  <button className="text-button" type="button" onClick={() => setView("top")}>Voir tout →</button>
+                  <button
+                    className="text-button"
+                    type="button"
+                    onClick={() => {
+                      setTopPlatform("all");
+                      setTopFormatFilter("all");
+                      setSearch("");
+                      setView("top");
+                    }}
+                  >
+                    Voir tout →
+                  </button>
                 </div>
                 <div className="top-post-list">
                   {topPosts.slice(0, 5).map((post, index) => (
