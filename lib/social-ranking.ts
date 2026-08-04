@@ -3,6 +3,7 @@ export type PublicRankingMetric = "likes" | "views" | "poll_votes" | null;
 export type PublicMetricPost = {
   external_post_id: string;
   format: string;
+  published_at?: string | null;
   likes: number | null;
   views: number | null;
   comments: number | null;
@@ -66,7 +67,27 @@ function comparePosts(
     if (difference !== 0) return difference;
   }
 
+  const publishedDifference = comparePublishedDescending(
+    left.published_at,
+    right.published_at,
+  );
+  if (publishedDifference !== 0) return publishedDifference;
+
   return left.external_post_id.localeCompare(right.external_post_id);
+}
+
+function comparePublishedDescending(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): number {
+  const leftTime = left ? new Date(left).getTime() : Number.NaN;
+  const rightTime = right ? new Date(right).getTime() : Number.NaN;
+  const leftKnown = Number.isFinite(leftTime);
+  const rightKnown = Number.isFinite(rightTime);
+  if (!leftKnown && !rightKnown) return 0;
+  if (!leftKnown) return 1;
+  if (!rightKnown) return -1;
+  return rightTime - leftTime;
 }
 
 function compareNullableDescending(

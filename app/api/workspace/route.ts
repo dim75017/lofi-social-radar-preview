@@ -6,6 +6,8 @@ import {
   runSocialScan,
   socialDataNeedsScan,
 } from "../../../db/runtime";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import publicHistory from "../../../data/public-history.json";
 import {
   mergeWorkspaceWithPublicHistory,
@@ -14,6 +16,109 @@ import {
 import { attachLiveMetricHistory } from "../../../lib/live-metric-history";
 
 export const dynamic = "force-dynamic";
+
+type AuthorizedYouTubeActivity = {
+  dateLabel?: unknown;
+  time?: unknown;
+  comment?: unknown;
+  action?: unknown;
+  url?: unknown;
+  target?: unknown;
+};
+
+const FRENCH_MONTHS: Record<string, number> = {
+  "janv.": 0,
+  "févr.": 1,
+  mars: 2,
+  "avr.": 3,
+  mai: 4,
+  juin: 5,
+  juillet: 6,
+  "août": 7,
+  "sept.": 8,
+  "oct.": 9,
+  "nov.": 10,
+  "déc.": 11,
+};
+
+function activityDateToIso(dateLabel: unknown, time: unknown) {
+  if (typeof dateLabel !== "string") return null;
+  const [hours = 0, minutes = 0] =
+    typeof time === "string" ? time.split(":").map(Number) : [];
+  const reference = new Date();
+  if (dateLabel === "Aujourd'hui") {
+    return new Date(reference.getFullYear(), reference.getMonth(), reference.getDate(), hours, minutes).toISOString();
+  }
+  if (dateLabel === "Hier") {
+    return new Date(reference.getFullYear(), reference.getMonth(), reference.getDate() - 1, hours, minutes).toISOString();
+  }
+  const match = dateLabel.match(/^(\d{1,2})\s+([^\s]+)(?:\s+(\d{4}))?$/);
+  if (!match || FRENCH_MONTHS[match[2]] === undefined) return null;
+  const year = match[3] ? Number(match[3]) : reference.getFullYear();
+  return new Date(year, FRENCH_MONTHS[match[2]], Number(match[1]), hours, minutes).toISOString();
+}
+
+async function authorizedYouTubeCommentPosts() {
+  let imported: { comments?: unknown };
+  try {
+    const candidates = [
+      join(process.cwd(), "data", "private-youtube-comment-history.json"),
+      join(process.cwd(), "dist", "data", "private-youtube-comment-history.json"),
+    ];
+    let raw: string | null = null;
+    for (const candidate of candidates) {
+      try {
+        raw = await readFile(candidate, "utf8");
+        break;
+      } catch {
+        // The authorized private import is intentionally optional in public builds.
+      }
+    }
+    imported = raw ? (JSON.parse(raw) as { comments?: unknown }) : {};
+  } catch {
+    imported = {};
+  }
+  if (!Array.isArray(imported.comments)) return [];
+  return imported.comments.flatMap((activity) => {
+    const entry = activity as AuthorizedYouTubeActivity;
+    if (typeof entry.url !== "string" || typeof entry.comment !== "string") return [];
+    let commentId: string | null = null;
+    try {
+      commentId = new URL(entry.url).searchParams.get("lc");
+    } catch {
+      return [];
+    }
+    if (!commentId) return [];
+    return [{
+      id: `youtube:${commentId}`,
+      account_id: "lofigirl-youtube",
+      platform: "youtube",
+      external_id: commentId,
+      external_post_id: commentId,
+      url: entry.url,
+      title: typeof entry.target === "string" ? entry.target : "Commentaire Lofi Girl",
+      text: entry.comment,
+      format: "comment",
+      thumbnail_url: null,
+      published_at: activityDateToIso(entry.dateLabel, entry.time),
+      views: null,
+      likes: null,
+      comments: null,
+      shares: null,
+      saves: null,
+      raw_json: JSON.stringify({
+        collector: "authorized-google-my-activity",
+        activityType: entry.action,
+        target: entry.target,
+        likesStatus: "À relever sur la page YouTube du commentaire.",
+      }),
+      source_kind: "authorized-google-my-activity",
+      first_seen_at: new Date().toISOString(),
+      last_seen_at: new Date().toISOString(),
+      last_metric_at: new Date().toISOString(),
+    }];
+  });
+}
 
 export async function GET(request: Request) {
   try {
@@ -104,6 +209,7 @@ export async function GET(request: Request) {
       metricSnapshotResult.results ?? [],
     );
 
+    const privateCommentPosts = await authorizedYouTubeCommentPosts();
     const workspace = mergeWorkspaceWithPublicHistory(
       {
         mode: "live",
@@ -111,7 +217,7 @@ export async function GET(request: Request) {
           "Données publiques des comptes officiels Lofi Girl. Les couvertures limitées sont signalées explicitement et aucune métrique manquante n’est inventée.",
         generatedAt: new Date().toISOString(),
         accounts: accountResult.results ?? [],
-        posts: livePosts,
+        posts: [...livePosts, ...privateCommentPosts],
         scans: scanResult.results ?? [],
       },
       publicHistory as PublicHistorySnapshot,

@@ -43,3 +43,6 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Authorized account-history imports remain local to the private dashboard.
+/data/private-youtube-comment-history.json
