@@ -3692,6 +3692,15 @@ a {
     white-space: normal;
   }
 
+  .top-duration-tabs {
+    width: 100%;
+  }
+
+  .top-duration-tabs button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
   .format-empty-state {
     grid-template-columns: auto minmax(0, 1fr);
   }

@@ -495,6 +495,19 @@ export function SocialOS({
           ),
     [topFormatFilter, topPlatform, topPlatformPosts],
   );
+  const topLifetimeFilteredPosts = useMemo(() => {
+    const platformPosts =
+      topPlatform === "all"
+        ? searchedTopPosts
+        : searchedTopPosts.filter((post) => post.platform === topPlatform);
+    return topPlatform === "all" || topFormatFilter === "all"
+      ? platformPosts
+      : platformPosts.filter((post) =>
+          matchesSocialFormatFilter(post, topFormatFilter),
+        );
+  }, [searchedTopPosts, topFormatFilter, topPlatform]);
+  const topEmptyIsDuration =
+    topDuration !== "all" && topLifetimeFilteredPosts.length > 0;
   const topUndatedCount = useMemo(
     () =>
       topDuration === "all"
@@ -1059,14 +1072,18 @@ export function SocialOS({
                 <span>{topFormatFilter === "comment" ? "💭" : "📡"}</span>
                 <div>
                   <h3>
-                    {topDuration === "all"
-                      ? "Aucun contenu disponible pour ce format"
-                      : "Aucun contenu daté dans cette période"}
+                    {topEmptyIsDuration
+                      ? "Aucun contenu daté dans cette période"
+                      : search.trim()
+                        ? "Aucun résultat pour cette recherche"
+                        : "Aucun contenu disponible pour ce format"}
                   </h3>
                   <p>
-                    {topDuration === "all"
-                      ? formatEmptyCopy(topPlatform, topFormatFilter)
-                      : "Essaie une durée plus large ou reviens à All time."}
+                    {topEmptyIsDuration
+                      ? "Essaie une durée plus large ou reviens à All time."
+                      : search.trim()
+                        ? "Essaie une autre accroche ou efface la recherche."
+                        : formatEmptyCopy(topPlatform, topFormatFilter)}
                   </p>
                 </div>
                 <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
@@ -1076,11 +1093,15 @@ export function SocialOS({
             ) : (
               <div className="empty-state">
                 <span>🔎</span>
-                <h3>Aucun post ne correspond</h3>
+                <h3>
+                  {topEmptyIsDuration
+                    ? "Aucun contenu daté dans cette période"
+                    : "Aucun post ne correspond"}
+                </h3>
                 <p>
-                  {topDuration === "all"
-                    ? "Essaie une autre recherche."
-                    : "Essaie une durée plus large ou reviens à All time."}
+                  {topEmptyIsDuration
+                    ? "Essaie une durée plus large ou reviens à All time."
+                    : "Essaie une autre recherche."}
                 </p>
               </div>
             )}
