@@ -317,8 +317,12 @@ function metrics(post: SocialPost) {
     post.comments !== null
       ? { icon: "💬", label: "commentaires", value: post.comments }
       : null,
-    post.shares !== null ? { icon: "↗", label: "partages", value: post.shares } : null,
-    post.saves !== null ? { icon: "🔖", label: "sauvegardes", value: post.saves } : null,
+    post.platform !== "tiktok" && post.shares !== null
+      ? { icon: "↗", label: "partages", value: post.shares }
+      : null,
+    post.platform !== "tiktok" && post.saves !== null
+      ? { icon: "🔖", label: "sauvegardes", value: post.saves }
+      : null,
     post.poll_votes !== null
       ? { icon: "🗳️", label: "votes", value: post.poll_votes }
       : null,
@@ -434,6 +438,24 @@ function parsePostRaw(value: string | null | undefined): Record<string, unknown>
   } catch {
     return {};
   }
+}
+
+function pollChoices(post: SocialPost): string[] {
+  const choices = parsePostRaw(post.raw_json).pollChoices;
+  return Array.isArray(choices)
+    ? choices.filter((choice): choice is string => typeof choice === "string" && choice.trim().length > 0)
+    : [];
+}
+
+function formatCardPublishedDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
 export function SocialOS({
@@ -1601,8 +1623,11 @@ function PostCard({
   onOpenDetails: (post: SocialPost) => void;
 }) {
   const meta = PLATFORM_META[post.platform];
-  const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url);
+  const isCommunityImage = post.platform === "youtube" && post.format === "community_image";
+  const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url || isCommunityImage);
   const postCopy = post.text || post.title || "Publication sans légende";
+  const choices = post.format === "community_poll" ? pollChoices(post) : [];
+  const publishedDate = formatCardPublishedDate(post.published_at);
   return (
     <article
       className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
@@ -1619,15 +1644,11 @@ function PostCard({
       <div className="post-card-body">
         {!hasMediaPreview ? (
           <div className="post-card-meta-row">
-            <span className={`inline-platform-badge tone-${meta.tone}`}>
-              {meta.emoji} {meta.label}
-            </span>
             <span className="inline-post-rank">#{rank}</span>
           </div>
         ) : null}
         <div className="post-card-title">
           <div>
-            <span className="section-kicker">{postLabel(post)} · {getSocialFormatLabel(post)}</span>
             {hasMediaPreview ? (
               <h3>
                 <a href={post.url} target="_blank" rel="noreferrer">
@@ -1643,13 +1664,18 @@ function PostCard({
             )}
           </div>
         </div>
+        {choices.length ? (
+          <ul className="poll-choice-list" aria-label="Options du sondage">
+            {choices.map((choice) => <li key={choice}>{choice}</li>)}
+          </ul>
+        ) : null}
         <div className="metric-row">
           {metrics(post).map((metric) => (
             <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
           ))}
         </div>
         <footer>
-          <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
+          {publishedDate ? <span>Publié le {publishedDate}</span> : <span />}
           <span className="post-card-actions">
             <button type="button" onClick={() => onOpenDetails(post)}>
               Plus d’informations
@@ -1790,12 +1816,7 @@ function PostMediaPreview({
           {video ? <span className="media-play-mark" aria-hidden="true">▶</span> : null}
         </button>
       )}
-      {!isPlaying ? (
-        <>
-          <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
-          <span className="post-rank">#{rank}</span>
-        </>
-      ) : null}
+      {!isPlaying ? <span className="post-rank">#{rank}</span> : null}
     </div>
   );
 }
@@ -1865,6 +1886,7 @@ function PostDetailsModal({
   const totalDelta = firstValue !== null && lastValue !== null ? lastValue - firstValue : null;
   const nearLaunch = isNearLaunchObservation(post, firstPoint?.captured_at);
   const editorialAnalysis = post.editorial_analysis;
+  const detailTheme = postLabel(post);
   const editorialAnalysisId = `details-editorial-${post.platform}-${post.external_post_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   const precisionLabel = post.published_at_precision === "exact"
     ? "Date exacte"
@@ -1890,6 +1912,7 @@ function PostDetailsModal({
           <div>
             <span>{meta.emoji} Fiche détaillée · {getSocialFormatLabel(post)}</span>
             <h2 id="post-details-title">{title}</h2>
+            <small className="details-theme-label">{detailTheme}</small>
           </div>
           <button
             className="post-details-close"
@@ -1909,6 +1932,11 @@ function PostDetailsModal({
           <div>
             <span className="section-kicker">Publication</span>
             <p>{post.text || post.title || "Aucun texte public associé."}</p>
+            {post.format === "community_poll" && pollChoices(post).length ? (
+              <ul className="poll-choice-list details-poll-choice-list" aria-label="Options du sondage">
+                {pollChoices(post).map((choice) => <li key={choice}>{choice}</li>)}
+              </ul>
+            ) : null}
             <div className="metric-row details-current-metrics">
               {metrics(post).map((metric) => (
                 <span key={metric.label} title={metric.label}>

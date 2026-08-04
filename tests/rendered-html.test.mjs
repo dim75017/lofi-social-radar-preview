@@ -126,7 +126,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.inline-video-frame/);
   assert.match(styles, /\.post-details-modal/);
-  assert.match(styles, /platform-youtube[\s\S]*?scale\(1\.18\)/);
+  assert.match(styles, /platform-youtube[\s\S]*?scale\(1\.8\)/);
   const explicitFontSizes = [...styles.matchAll(/font-size:\s*([0-9.]+)px/g)].map(
     (match) => Number(match[1]),
   );

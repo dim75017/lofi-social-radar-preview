@@ -3384,8 +3384,8 @@ a {
 }
 
 .post-visual.platform-youtube.is-playable:not(.is-playing) .post-visual-trigger img {
-  object-position: center 38%;
-  transform: scale(1.18);
+  object-position: center 48%;
+  transform: scale(1.8);
 }
 
 .post-preview-placeholder {
@@ -3441,7 +3441,7 @@ a {
 }
 
 .social-post-card:hover .post-visual.platform-youtube.is-playable:not(.is-playing) .post-visual-trigger img {
-  transform: scale(1.22);
+  transform: scale(1.88);
 }
 
 .inline-video-frame {
@@ -3520,7 +3520,7 @@ a {
 .post-card-meta-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -3554,7 +3554,7 @@ a {
 
 .post-card-title h3 {
   display: -webkit-box;
-  margin: 5px 0 0;
+  margin: 0;
   overflow: hidden;
   font-family: Sora, Inter, sans-serif;
   font-size: var(--fs-card-title);
@@ -3582,6 +3582,28 @@ a {
   line-height: 1.52;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.poll-choice-list {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poll-choice-list li {
+  overflow: hidden;
+  border: 1px solid rgba(154, 168, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(7, 8, 13, 0.34);
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: var(--fs-caption);
+  font-weight: 680;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-text-content a {
@@ -4358,6 +4380,14 @@ a {
   text-transform: uppercase;
 }
 
+.details-theme-label {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  font-weight: 750;
+}
+
 .post-details-modal h2 {
   display: -webkit-box;
   margin: 5px 0 0;
@@ -4424,6 +4454,10 @@ a {
 }
 
 .details-current-metrics {
+  margin-top: 12px;
+}
+
+.details-poll-choice-list {
   margin-top: 12px;
 }
 

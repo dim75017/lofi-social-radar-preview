@@ -1,10 +1,9 @@
 export const SOCIAL_DURATION_FILTERS = [
-  { key: "all", label: "All time", emoji: "♾️", days: null },
-  { key: "7d", label: "7 jours", emoji: "⚡", days: 7 },
   { key: "30d", label: "30 jours", emoji: "📅", days: 30 },
   { key: "90d", label: "3 mois", emoji: "🗓️", days: 90 },
   { key: "180d", label: "6 mois", emoji: "🌗", days: 180 },
   { key: "365d", label: "1 an", emoji: "📆", days: 365 },
+  { key: "all", label: "All time", emoji: "♾️", days: null },
 ] as const;
 
 export type SocialDurationFilter =
