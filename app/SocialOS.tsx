@@ -654,28 +654,6 @@ export function SocialOS({
   const activeLibraryFormat =
     categoryFilters(platform).find((filter) => filter.key === formatFilter) ??
     categoryFilters(platform)[0];
-  const youtubeCommunityCounts = useMemo(
-    () => ({
-      image: posts.filter(
-        (post) =>
-          post.platform === "youtube" &&
-          matchesSocialFormatFilter(post, "community"),
-      ).length,
-      poll: posts.filter(
-        (post) =>
-          post.platform === "youtube" && matchesSocialFormatFilter(post, "poll"),
-      ).length,
-      text: posts.filter(
-        (post) =>
-          post.platform === "youtube" && matchesSocialFormatFilter(post, "text"),
-      ).length,
-      shorts: posts.filter(
-        (post) =>
-          post.platform === "youtube" && matchesSocialFormatFilter(post, "short"),
-      ).length,
-    }),
-    [posts],
-  );
   const insights = useMemo(() => {
     return localInsights(posts);
   }, [posts]);
@@ -1144,17 +1122,6 @@ export function SocialOS({
                   })}
                 </div>
               </div>
-
-              {topPlatform === "youtube" ? (
-                <div className="history-gap-notice">
-                  <span>🗂️</span>
-                  <p>
-                    <b>Historique visible chargé jusqu’au dernier lot.</b>{" "}
-                    {youtubeCommunityCounts.shorts} Shorts et {youtubeCommunityCounts.image + youtubeCommunityCounts.poll + youtubeCommunityCounts.text} posts Communauté sont conservés, dont {youtubeCommunityCounts.image} images, {youtubeCommunityCounts.poll} sondages et {youtubeCommunityCounts.text} textes. Les contenus supprimés, privés ou réservés aux membres restent naturellement hors de portée.
-                  </p>
-                  <button className="button ghost compact" type="button" onClick={() => setView("sources")}>Voir la couverture →</button>
-                </div>
-              ) : null}
 
               {topUndatedCount > 0 ? (
                 <p className="top-undated-note">
@@ -1674,7 +1641,11 @@ function PostCard({
           ))}
         </div>
         <footer>
-          {publishedDate ? <span>Publié le {publishedDate}</span> : <span />}
+          {publishedDate ? (
+            <time className="post-published-date" dateTime={post.published_at ?? undefined}>
+              {publishedDate}
+            </time>
+          ) : <span />}
           <span className="post-card-actions">
             <button type="button" onClick={() => onOpenDetails(post)}>
               Plus d’informations
