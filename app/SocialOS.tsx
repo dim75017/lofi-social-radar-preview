@@ -936,16 +936,34 @@ export function SocialOS({
                         </div>
 
                         {matchingPosts.length ? (
-                          <div className="post-grid platform-post-grid">
-                            {matchingPosts.slice(0, 12).map((post, index) => (
-                              <PostCard
-                                post={post}
-                                rank={index + 1}
-                                compact={false}
-                                key={post.id}
-                              />
-                            ))}
-                          </div>
+                          <>
+                            <div className="post-grid platform-post-grid">
+                              {matchingPosts.slice(0, 12).map((post, index) => (
+                                <PostCard
+                                  post={post}
+                                  rank={index + 1}
+                                  compact={false}
+                                  key={post.id}
+                                />
+                              ))}
+                            </div>
+                            {matchingPosts.length > 12 ? (
+                              <div className="platform-post-more">
+                                <span>Top 12 affiché sur {matchingPosts.length} contenus classés</span>
+                                <button
+                                  className="button ghost compact"
+                                  type="button"
+                                  onClick={() => {
+                                    setPlatform(key);
+                                    setFormatFilter(selectedFilter);
+                                    setView("all");
+                                  }}
+                                >
+                                  Voir tous les contenus {meta.label} →
+                                </button>
+                              </div>
+                            ) : null}
+                          </>
                         ) : (
                           <div className="format-empty-state">
                             <span>{selectedFilter === "comment" ? "💭" : "📡"}</span>

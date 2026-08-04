@@ -442,20 +442,11 @@ function youtubeCommunityPosts(source: string): NormalizedPost[] {
 
     const text = rendererText(renderer.contentText);
     const attachment = asRecord(renderer.backstageAttachment);
-    const attachmentJson = attachment ? JSON.stringify(attachment) : "";
-    const isPoll = /"(?:pollRenderer|backstagePollRenderer|pollChoiceRenderer)"/.test(
-      attachmentJson,
-    );
-    const hasImage = /"(?:backstageImageRenderer|imageRenderer)"/.test(
-      attachmentJson,
-    );
-    const format = isPoll
-      ? "community_poll"
-      : hasImage
-        ? "community_image"
-        : attachment
-          ? "community_post"
-          : "community_text";
+    const format = youtubeCommunityAttachmentFormat(attachment);
+    // Community shares that embed a long video, a live, a playlist or another
+    // unsupported attachment are outside this Radar's editorial-post scope.
+    if (!format) continue;
+    const isPoll = format === "community_poll";
     const pollVotes = isPoll ? firstCountForKeys(attachment, ["totalVotes", "totalVotesText"]) : null;
 
     posts.push({
@@ -488,6 +479,24 @@ function youtubeCommunityPosts(source: string): NormalizedPost[] {
   }
 
   return posts;
+}
+
+export function youtubeCommunityAttachmentFormat(
+  value: unknown,
+): "community_poll" | "community_image" | "community_text" | null {
+  const attachment = asRecord(value);
+  if (!attachment || Object.keys(attachment).length === 0) {
+    return "community_text";
+  }
+
+  const attachmentJson = JSON.stringify(attachment);
+  if (/"(?:pollRenderer|backstagePollRenderer)"/.test(attachmentJson)) {
+    return "community_poll";
+  }
+  if (/"(?:backstageImageRenderer|postMultiImageRenderer)"/.test(attachmentJson)) {
+    return "community_image";
+  }
+  return null;
 }
 
 function youtubeInitialData(source: string): unknown | null {

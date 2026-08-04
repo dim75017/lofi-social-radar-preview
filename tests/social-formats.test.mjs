@@ -12,6 +12,7 @@ import {
   isYouTubeOutOfScope,
   matchesSocialFormatFilter,
 } from "../lib/social-formats.ts";
+import { youtubeCommunityAttachmentFormat } from "../lib/social-scanner.ts";
 
 function post(platform, format, overrides = {}) {
   return {
@@ -108,6 +109,33 @@ test("explicitly excludes YouTube long videos, livestreams and premieres", () =>
     assert.equal(isInScopeSocialPost(candidate), false);
     assert.equal(isYouTubeOutOfScope(candidate), true);
   }
+
+  const contradictoryShort = post("youtube", "short", {
+    url: "https://www.youtube.com/watch?v=legacy-short-label",
+    raw: { isShort: true },
+  });
+  assert.equal(classifySocialFormat(contradictoryShort), "out-of-scope");
+  assert.equal(isInScopeSocialPost(contradictoryShort), false);
+});
+
+test("keeps only native Community text, image and poll attachments", () => {
+  assert.equal(youtubeCommunityAttachmentFormat(null), "community_text");
+  assert.equal(
+    youtubeCommunityAttachmentFormat({ backstageImageRenderer: { image: {} } }),
+    "community_image",
+  );
+  assert.equal(
+    youtubeCommunityAttachmentFormat({ pollRenderer: { choices: [] } }),
+    "community_poll",
+  );
+  assert.equal(
+    youtubeCommunityAttachmentFormat({ videoRenderer: { videoId: "long" } }),
+    null,
+  );
+  assert.equal(
+    youtubeCommunityAttachmentFormat({ playlistRenderer: { playlistId: "mix" } }),
+    null,
+  );
 });
 
 test("normalizes current and future Instagram, TikTok and X format aliases", () => {

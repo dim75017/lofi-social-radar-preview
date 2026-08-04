@@ -3111,6 +3111,15 @@ a {
   margin-top: 13px;
 }
 
+.platform-post-more {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 0.84rem;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
 .format-empty-state {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -3606,6 +3615,16 @@ a {
 
   .format-empty-state .button {
     grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .platform-post-more {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .platform-post-more .button {
     width: 100%;
   }
 

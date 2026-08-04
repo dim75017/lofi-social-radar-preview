@@ -247,6 +247,16 @@ export function classifySocialFormat<P extends SocialPlatform>(
 
   switch (post.platform) {
     case "youtube":
+      // A canonical long-form/live URL or flag always wins over a stale format
+      // label. This prevents contradictory legacy rows from re-entering scope.
+      if (
+        isYouTubeVideoUrl(url) ||
+        hasAlias(descriptor, YOUTUBE_LONG_VIDEO_ALIASES) ||
+        hasAlias(descriptor, YOUTUBE_LIVE_ALIASES) ||
+        rawFlag(post.raw, "isLive")
+      ) {
+        return "out-of-scope" as SocialFormatCategory<P>;
+      }
       if (
         url.includes("youtube.com/shorts/") ||
         url.includes("youtu.be/shorts/") ||
@@ -270,14 +280,6 @@ export function classifySocialFormat<P extends SocialPlatform>(
         rawFlag(post.raw, "isCommunityPost")
       ) {
         return "community" as SocialFormatCategory<P>;
-      }
-      if (
-        isYouTubeVideoUrl(url) ||
-        hasAlias(descriptor, YOUTUBE_LONG_VIDEO_ALIASES) ||
-        hasAlias(descriptor, YOUTUBE_LIVE_ALIASES) ||
-        rawFlag(post.raw, "isLive")
-      ) {
-        return "out-of-scope" as SocialFormatCategory<P>;
       }
       return null;
 
