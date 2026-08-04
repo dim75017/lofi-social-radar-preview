@@ -1,5 +1,14 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner.ts";
 import {
+  buildEditorialAnalysisMap,
+  editorialPostKey,
+  type EditorialWhy,
+} from "./social-editorial-analysis.ts";
+import {
+  rankPostsByPublicMetric,
+  type PublicRankingMetric,
+} from "./social-ranking.ts";
+import {
   rankPosts,
   type RankedPost,
   type ScoreConfidence,
@@ -64,11 +73,22 @@ export type GenerateSocialIdeasOptions = {
   winnersPerPlatform?: number;
 };
 
+type IdeaRankedPost = RankedPost & {
+  publicCohortKey: string;
+  publicCohortRank: number;
+  publicRankingMetric: Exclude<PublicRankingMetric, null>;
+};
+
 type Candidate = {
   key: string;
   pattern: EditorialPattern;
-  posts: RankedPost[];
+  posts: IdeaRankedPost[];
   repeatedCreative: boolean;
+};
+
+type PublicWinnerSelection = {
+  eligible: IdeaRankedPost[];
+  winners: IdeaRankedPost[];
 };
 
 type IdeaTemplate = {
@@ -114,30 +134,26 @@ export function generateSocialIdeas(
   options: GenerateSocialIdeasOptions = {},
 ): SocialIdeaPlan {
   const referenceTime = ideaReferenceTime(posts, options.now);
-  const winnersPerPlatform = boundedInteger(options.winnersPerPlatform, 3, 1, 10);
+  const winnersPerCohort = boundedInteger(options.winnersPerPlatform, 3, 1, 10);
   const maxIdeas = boundedInteger(options.maxIdeas, 4, 1, 10);
   const ranked = rankPosts(posts, referenceTime);
-  const eligible = ranked.filter(
-    (post): post is RankedPost & { performanceScore: number } =>
-      post.performanceScore !== null && post.confidence !== "insufficient",
+  const selection = selectPublicWinners(ranked, winnersPerCohort);
+  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
+  const candidates = buildCandidates(selection.winners, editorialAnalyses).sort(
+    (left, right) => compareCandidates(left, right, editorialAnalyses),
   );
-  const winners = eligible.filter(
-    (post) =>
-      post.platformRank !== null && post.platformRank <= winnersPerPlatform,
-  );
-  const candidates = buildCandidates(winners).sort(compareCandidates);
   const ideas = candidates
     .slice(0, maxIdeas)
-    .map((candidate) => materializeIdea(candidate));
+    .map((candidate) => materializeIdea(candidate, editorialAnalyses));
 
   return {
     generatedAt: referenceTime.toISOString(),
-    eligiblePostCount: eligible.length,
-    winnerCount: winners.length,
+    eligiblePostCount: selection.eligible.length,
+    winnerCount: selection.winners.length,
     ideas,
     caveats: [
       "Les idées sont des hypothèses éditoriales issues de signaux descriptifs ; elles ne prédisent pas la performance et ne démontrent aucune causalité.",
-      "Les scores restent normalisés à l’intérieur de chaque plateforme : les volumes bruts ne sont pas comparés entre réseaux.",
+      "Les références sont choisies séparément dans chaque combinaison plateforme-format à partir de la métrique publique disponible ; les volumes ne sont jamais comparés entre réseaux.",
       "Aucun visuel généré par IA : utiliser uniquement les assets officiels Lofi Girl et les créations validées par l’équipe.",
     ],
   };
@@ -145,7 +161,111 @@ export function generateSocialIdeas(
 
 export const generateEditorialIdeas = generateSocialIdeas;
 
-function buildCandidates(winners: readonly RankedPost[]): Candidate[] {
+function selectPublicWinners(
+  posts: readonly RankedPost[],
+  winnersPerCohort: number,
+): PublicWinnerSelection {
+  const cohorts = groupBy(posts, publicCohortKey);
+  const eligible: IdeaRankedPost[] = [];
+  const winners: IdeaRankedPost[] = [];
+
+  for (const cohortKey of [...cohorts.keys()].sort()) {
+    const cohort = cohorts.get(cohortKey) ?? [];
+    const ranking = rankPostsByPublicMetric(
+      cohort.map((post) => ({
+        post,
+        external_post_id: post.externalId,
+        format: post.format ?? "unknown",
+        likes: publicMetric(post.likes),
+        views: publicMetric(post.views),
+        comments: publicMetric(post.comments),
+        shares: publicMetric(post.shares),
+        saves: publicMetric(post.saves),
+        poll_votes: pollVotes(post),
+      })),
+    );
+    if (ranking.metric === null) continue;
+
+    const rankable = ranking.posts.filter(
+      (entry) => entry[ranking.metric!] !== null,
+    );
+    const cohortPosts = rankable.map(
+      (entry, index): IdeaRankedPost => ({
+        ...entry.post,
+        publicCohortKey: cohortKey,
+        publicCohortRank: index + 1,
+        publicRankingMetric: ranking.metric!,
+      }),
+    );
+    eligible.push(...cohortPosts);
+    winners.push(...cohortPosts.slice(0, winnersPerCohort));
+  }
+
+  return {
+    eligible: eligible.sort(compareSeedPosts),
+    winners: winners.sort(compareSeedPosts),
+  };
+}
+
+function summarizeObservedSignal(
+  candidate: Candidate,
+  seeds: readonly IdeaRankedPost[],
+  analyses: readonly EditorialWhy[],
+): string {
+  const cohortLabels = uniqueStrings(seeds.map(cohortDisplayLabel));
+  const readings = uniqueStrings(
+    analyses
+      .filter((analysis) => analysis.primarySignal !== "insufficient")
+      .map((analysis) => analysis.headline),
+  );
+  const editorialReading = readings.length
+    ? `La lecture commune est : ${joinFrench(
+        readings.slice(0, 2).map((reading) => `« ${reading} »`),
+      )}.`
+    : "Le texte public reste trop pauvre pour préciser davantage le mécanisme sans inventer.";
+
+  if (candidate.repeatedCreative) {
+    return `Une accroche quasi identique réapparaît dans ${joinFrench(
+      cohortLabels,
+    )}. ${editorialReading}`;
+  }
+  return `${seeds.length} publication${seeds.length > 1 ? "s" : ""} de ${joinFrench(
+    cohortLabels,
+  )} partage${seeds.length > 1 ? "nt" : ""} le ressort « ${
+    PATTERN_LABELS[candidate.pattern]
+  } ». ${editorialReading}`;
+}
+
+function confidenceRationale(
+  seeds: readonly IdeaRankedPost[],
+  analyses: readonly EditorialWhy[],
+  repeatedCreative: boolean,
+): string {
+  const platformCount = new Set(seeds.map((post) => post.platform)).size;
+  const cohortCount = new Set(seeds.map((post) => post.publicCohortKey)).size;
+  const comparativeCount = analyses.filter(
+    (analysis) => analysis.status === "comparative",
+  ).length;
+  const comparisonCopy = comparativeCount
+    ? `${comparativeCount} lecture${comparativeCount > 1 ? "s" : ""} dispose${
+        comparativeCount > 1 ? "nt" : ""
+      } d’un contre-exemple éditorial dans la même catégorie.`
+    : "Les lectures reposent surtout sur le contenu lui-même, faute de contre-exemple assez proche.";
+  const echoCopy = repeatedCreative
+    ? "La répétition de l’accroche sur plusieurs réseaux renforce la piste, sans prouver sa causalité."
+    : "Le signal doit encore être validé par une variation éditoriale contrôlée.";
+
+  return `${seeds.length} exemple${seeds.length > 1 ? "s" : ""} issu${
+    seeds.length > 1 ? "s" : ""
+  } de ${cohortCount} catégorie${cohortCount > 1 ? "s" : ""} exacte${
+    cohortCount > 1 ? "s" : ""
+  } sur ${platformCount} plateforme${platformCount > 1 ? "s" : ""}. ${comparisonCopy} ${echoCopy} Ce niveau sert uniquement à prioriser un test.`;
+}
+
+function buildCandidates(
+  winners: readonly IdeaRankedPost[],
+  analyses: ReadonlyMap<string, EditorialWhy>,
+): Candidate[] {
   const candidates: Candidate[] = [];
   const creativeGroups = groupBy(winners, creativeKey);
 
@@ -160,7 +280,9 @@ function buildCandidates(winners: readonly RankedPost[]): Candidate[] {
     });
   }
 
-  const patternGroups = groupBy(winners, detectPattern);
+  const patternGroups = groupBy(winners, (post) =>
+    patternForAnalysis(post, analyses.get(editorialPostKey(post))),
+  );
   for (const [pattern, group] of patternGroups) {
     candidates.push({
       key: `pattern:${pattern}`,
@@ -173,30 +295,34 @@ function buildCandidates(winners: readonly RankedPost[]): Candidate[] {
   return candidates;
 }
 
-function materializeIdea(candidate: Candidate): SocialIdea {
+function materializeIdea(
+  candidate: Candidate,
+  analyses: ReadonlyMap<string, EditorialWhy>,
+): SocialIdea {
   const seeds = selectSeeds(candidate.posts, 5);
   const platforms = orderedPlatforms(seeds.map((post) => post.platform));
-  const scores = seeds.map((post) => post.performanceScore ?? 0);
-  const averageScore = Math.round(average(scores));
+  const seedAnalyses = seeds
+    .map((post) => analyses.get(editorialPostKey(post)))
+    .filter((analysis): analysis is EditorialWhy => analysis !== undefined);
   const confidenceScore = ideaConfidenceScore(
     seeds,
-    platforms.length,
+    seedAnalyses,
     candidate.repeatedCreative,
   );
-  const template = ideaTemplate(candidate.pattern, dominantPattern(seeds));
-  const evidence = seeds.map(
-    (post) =>
-      `${platformLabel(post.platform)} · ${post.performanceScore}/100 · « ${postLabel(post, 80)} » · ${post.url}`,
+  const template = ideaTemplate(
+    candidate.pattern,
+    dominantPattern(seeds, analyses),
   );
-  const observedSignal = candidate.repeatedCreative
-    ? `Une accroche quasi identique apparaît parmi les gagnants de ${joinFrench(
-        platforms.map(platformLabel),
-      )}, avec un score normalisé moyen de ${averageScore}/100.`
-    : `${seeds.length} post${seeds.length > 1 ? "s" : ""} gagnant${
-        seeds.length > 1 ? "s" : ""
-      } relève${seeds.length > 1 ? "nt" : ""} du signal « ${
-        PATTERN_LABELS[candidate.pattern]
-      } » sur ${joinFrench(platforms.map(platformLabel))}, avec un score normalisé moyen de ${averageScore}/100.`;
+  const evidence = seeds.map((post) => {
+    const analysis = analyses.get(editorialPostKey(post));
+    const reading = analysis?.headline ?? "Lecture éditoriale à compléter";
+    return `${cohortDisplayLabel(post)} · « ${postLabel(post, 80)} » · ${reading} · ${post.url}`;
+  });
+  const observedSignal = summarizeObservedSignal(
+    candidate,
+    seeds,
+    seedAnalyses,
+  );
 
   return {
     id: `idea-${candidate.pattern}-${stableHash(
@@ -222,12 +348,17 @@ function materializeIdea(candidate: Candidate): SocialIdea {
     platformAdaptations: adaptationsFor(candidate.pattern),
     confidence: confidenceLevel(confidenceScore),
     confidenceScore,
-    confidenceRationale: `${seeds.length} seed${seeds.length > 1 ? "s" : ""} sur ${
-      platforms.length
-    } plateforme${platforms.length > 1 ? "s" : ""}, score moyen ${averageScore}/100 et qualité de cohorte ${seedConfidenceSummary(
+    confidenceRationale: confidenceRationale(
       seeds,
-    )}. Ce niveau sert uniquement à prioriser un test.`,
-    limits: buildLimits(seeds, platforms, candidate.repeatedCreative),
+      seedAnalyses,
+      candidate.repeatedCreative,
+    ),
+    limits: buildLimits(
+      seeds,
+      platforms,
+      seedAnalyses,
+      candidate.repeatedCreative,
+    ),
     assetPolicy: "official-assets-only",
   };
 }
@@ -324,8 +455,9 @@ function adaptationsFor(
 }
 
 function buildLimits(
-  seeds: readonly RankedPost[],
+  seeds: readonly IdeaRankedPost[],
   platforms: readonly SocialPlatform[],
+  analyses: readonly EditorialWhy[],
   repeatedCreative: boolean,
 ): string[] {
   const limits = [
@@ -337,15 +469,15 @@ function buildLimits(
       `Signal observé uniquement sur ${platformLabel(platforms[0])} ; valider l’idée séparément avant toute généralisation cross-platform.`,
     );
   }
-  if (seeds.some((post) => post.confidence === "low")) {
+  if (analyses.some((analysis) => analysis.confidence === "low")) {
     limits.push(
-      "Au moins une seed repose sur une petite cohorte ou peu de métriques ; interpréter la priorité avec prudence.",
+      "Au moins une lecture repose sur une petite cohorte ou sur une matière éditoriale limitée ; interpréter la priorité avec prudence.",
     );
   }
-  if (seeds.some((post) => post.metricCoverage.length < 3)) {
-    limits.push(
-      "Certaines métriques publiques sont absentes ; elles n’ont été ni estimées ni remplacées par zéro.",
-    );
+  for (const limitation of uniqueStrings(
+    analyses.flatMap((analysis) => analysis.limitations),
+  ).slice(0, 2)) {
+    limits.push(limitation);
   }
   if (repeatedCreative) {
     limits.push(
@@ -356,21 +488,20 @@ function buildLimits(
 }
 
 function ideaConfidenceScore(
-  seeds: readonly RankedPost[],
-  platformCount: number,
+  seeds: readonly IdeaRankedPost[],
+  analyses: readonly EditorialWhy[],
   repeatedCreative: boolean,
 ): number {
-  const meanPerformance = average(
-    seeds.map((post) => post.performanceScore ?? 0),
-  );
-  const evidenceQuality = average(
-    seeds.map((post) => confidenceWeight(post.confidence)),
-  );
+  const platformCount = new Set(seeds.map((post) => post.platform)).size;
+  const cohortCount = new Set(seeds.map((post) => post.publicCohortKey)).size;
+  const evidenceQuality = average(analyses.map(editorialConfidenceWeight));
+  const comparisonQuality = average(analyses.map(editorialStatusWeight));
   const score =
-    5 +
-    meanPerformance * 0.22 +
-    evidenceQuality * 28 +
-    Math.min(3, platformCount) * 7 +
+    10 +
+    evidenceQuality * 25 +
+    comparisonQuality * 20 +
+    Math.min(3, cohortCount) * 6 +
+    Math.min(3, platformCount) * 5 +
     Math.min(4, seeds.length) * 3 +
     (repeatedCreative ? 12 : 0);
   return clamp(Math.round(score), 1, 95);
@@ -382,55 +513,54 @@ function confidenceLevel(score: number): IdeaConfidence {
   return "low";
 }
 
-function confidenceWeight(confidence: ScoreConfidence): number {
-  if (confidence === "high") return 0.95;
-  if (confidence === "medium") return 0.7;
-  if (confidence === "low") return 0.4;
-  return 0;
+function editorialConfidenceWeight(analysis: EditorialWhy): number {
+  return analysis.confidence === "medium" ? 0.8 : 0.4;
 }
 
-function seedConfidenceSummary(seeds: readonly RankedPost[]): string {
-  const counts = new Map<ScoreConfidence, number>();
-  for (const seed of seeds) {
-    counts.set(seed.confidence, (counts.get(seed.confidence) ?? 0) + 1);
-  }
-  return (["high", "medium", "low"] as ScoreConfidence[])
-    .filter((level) => counts.has(level))
-    .map((level) => `${counts.get(level)} ${confidenceLabel(level)}`)
-    .join(", ");
+function editorialStatusWeight(analysis: EditorialWhy): number {
+  if (analysis.status === "comparative") return 1;
+  if (analysis.status === "content-only") return 0.65;
+  return 0.35;
 }
 
-function confidenceLabel(confidence: ScoreConfidence): string {
-  if (confidence === "high") return "forte";
-  if (confidence === "medium") return "moyenne";
-  if (confidence === "low") return "limitée";
-  return "insuffisante";
+function analysisWeight(analysis: EditorialWhy | undefined): number {
+  if (!analysis) return 0;
+  return editorialConfidenceWeight(analysis) + editorialStatusWeight(analysis);
 }
 
-function detectPattern(post: RankedPost): EditorialPattern {
-  const value = `${post.title ?? ""} ${post.text ?? ""}`.toLowerCase();
-  if (/be ready|coming|soon|tomorrow|wait for|secret|reveal|surprise|👀/.test(value)) {
-    return "suspense_reveal";
-  }
-  if (/maya|lofi girl|lofi boy|character|lore|story|room|cat|pocky/.test(value)) {
-    return "character_and_lore";
-  }
-  if (/release|out now|album|merch|drop|launch|listen now|collab|concert|event|game|fortnite/.test(value)) {
-    return "activation";
-  }
-  if (/tell me|comment|what do you|which|choose|pick|your favourite|your favorite|\?/.test(value)) {
+function patternForAnalysis(
+  post: IdeaRankedPost,
+  analysis: EditorialWhy | undefined,
+): EditorialPattern {
+  const signal = analysis?.primarySignal ?? "insufficient";
+  if (
+    signal === "absurd_poll" ||
+    signal === "co_creation" ||
+    signal === "identity_choice"
+  ) {
     return "community_conversation";
   }
-  if (/radio|beats|music|mix|sleep|study|focus|relax|playlist|lofi/.test(value)) {
-    return "music_and_usage";
+  if (signal === "immersive_activation") return "activation";
+  if (signal === "fourth_wall" || signal === "narrative_open_loop") {
+    return "suspense_reveal";
+  }
+  if (signal === "cultural_bridge") return "character_and_lore";
+  if (signal === "commercial_copy") {
+    return hasExplicitMusicOffer(post) ? "music_and_usage" : "activation";
   }
   return "relatable_humour";
 }
 
-function dominantPattern(posts: readonly RankedPost[]): EditorialPattern {
+function dominantPattern(
+  posts: readonly IdeaRankedPost[],
+  analyses: ReadonlyMap<string, EditorialWhy>,
+): EditorialPattern {
   const counts = new Map<EditorialPattern, number>();
   for (const post of posts) {
-    const pattern = detectPattern(post);
+    const pattern = patternForAnalysis(
+      post,
+      analyses.get(editorialPostKey(post)),
+    );
     counts.set(pattern, (counts.get(pattern) ?? 0) + 1);
   }
   return [...counts.entries()].sort((left, right) => {
@@ -439,8 +569,19 @@ function dominantPattern(posts: readonly RankedPost[]): EditorialPattern {
   })[0]?.[0] ?? "relatable_humour";
 }
 
-function creativeKey(post: RankedPost): string {
-  return `${post.title ?? ""} ${post.text ?? ""}`
+function hasExplicitMusicOffer(post: IdeaRankedPost): boolean {
+  const copy = `${post.title ?? ""} ${post.text ?? ""}`
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/@[\w.]+/g, " ")
+    .replace(/#[\w-]+/g, " ")
+    .toLowerCase();
+  return /\b(?:radio|beats?|music|mix|playlist|soundtrack|album|ep|tracks?|listen|streaming)\b/.test(
+    copy,
+  );
+}
+
+function creativeKey(post: IdeaRankedPost): string {
+  return (post.text?.trim() || post.title?.trim() || "")
     .toLowerCase()
     .replace(/https?:\/\/\S+/g, "")
     .replace(/@[\w.]+/g, "")
@@ -453,7 +594,11 @@ function creativeKey(post: RankedPost): string {
     .join(" ");
 }
 
-function compareCandidates(left: Candidate, right: Candidate): number {
+function compareCandidates(
+  left: Candidate,
+  right: Candidate,
+  analyses: ReadonlyMap<string, EditorialWhy>,
+): number {
   if (left.repeatedCreative !== right.repeatedCreative) {
     return left.repeatedCreative ? -1 : 1;
   }
@@ -461,10 +606,22 @@ function compareCandidates(left: Candidate, right: Candidate): number {
     new Set(right.posts.map((post) => post.platform)).size -
     new Set(left.posts.map((post) => post.platform)).size;
   if (platformDifference !== 0) return platformDifference;
-  const scoreDifference =
-    average(right.posts.map((post) => post.performanceScore ?? 0)) -
-    average(left.posts.map((post) => post.performanceScore ?? 0));
-  if (scoreDifference !== 0) return scoreDifference;
+  const cohortDifference =
+    new Set(right.posts.map((post) => post.publicCohortKey)).size -
+    new Set(left.posts.map((post) => post.publicCohortKey)).size;
+  if (cohortDifference !== 0) return cohortDifference;
+  const evidenceDifference =
+    average(
+      right.posts.map((post) =>
+        analysisWeight(analyses.get(editorialPostKey(post))),
+      ),
+    ) -
+    average(
+      left.posts.map((post) =>
+        analysisWeight(analyses.get(editorialPostKey(post))),
+      ),
+    );
+  if (evidenceDifference !== 0) return evidenceDifference;
   if (right.posts.length !== left.posts.length) {
     return right.posts.length - left.posts.length;
   }
@@ -473,21 +630,25 @@ function compareCandidates(left: Candidate, right: Candidate): number {
   return patternDifference || left.key.localeCompare(right.key);
 }
 
-function compareSeedPosts(left: RankedPost, right: RankedPost): number {
-  if (left.performanceScore !== right.performanceScore) {
-    return (right.performanceScore ?? -1) - (left.performanceScore ?? -1);
-  }
-  const confidenceDifference =
-    confidenceWeight(right.confidence) - confidenceWeight(left.confidence);
-  if (confidenceDifference !== 0) return confidenceDifference;
+function compareSeedPosts(left: IdeaRankedPost, right: IdeaRankedPost): number {
   const platformDifference =
     PLATFORM_ORDER.indexOf(left.platform) - PLATFORM_ORDER.indexOf(right.platform);
   if (platformDifference !== 0) return platformDifference;
+  const formatDifference = canonicalFormat(left.format).localeCompare(
+    canonicalFormat(right.format),
+  );
+  if (formatDifference !== 0) return formatDifference;
+  if (left.publicCohortRank !== right.publicCohortRank) {
+    return left.publicCohortRank - right.publicCohortRank;
+  }
   return left.externalId.localeCompare(right.externalId);
 }
 
-function selectSeeds(posts: readonly RankedPost[], limit: number): RankedPost[] {
-  const selected: RankedPost[] = [];
+function selectSeeds(
+  posts: readonly IdeaRankedPost[],
+  limit: number,
+): IdeaRankedPost[] {
+  const selected: IdeaRankedPost[] = [];
   const seen = new Set<string>();
   for (const platform of PLATFORM_ORDER) {
     const seed = posts.find((post) => post.platform === platform);
@@ -503,6 +664,45 @@ function selectSeeds(posts: readonly RankedPost[], limit: number): RankedPost[] 
     seen.add(key);
   }
   return selected.sort(compareSeedPosts).slice(0, limit);
+}
+
+function publicCohortKey(post: Pick<RankedPost, "platform" | "format">): string {
+  return `${post.platform}:${canonicalFormat(post.format)}`;
+}
+
+function canonicalFormat(value: string | null): string {
+  return value?.trim().toLowerCase().replace(/[\s-]+/g, "_") || "unknown";
+}
+
+function publicMetric(value: number | null): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : null;
+}
+
+function pollVotes(post: RankedPost): number | null {
+  const raw = post.raw;
+  if (!raw) return null;
+  const value =
+    typeof raw.pollVotes === "number"
+      ? raw.pollVotes
+      : typeof raw.pollTotalVotes === "number"
+        ? raw.pollTotalVotes
+        : null;
+  return publicMetric(value);
+}
+
+function cohortDisplayLabel(post: IdeaRankedPost): string {
+  const format = canonicalFormat(post.format)
+    .split("_")
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+  return `${platformLabel(post.platform)} · ${format || "Format inconnu"}`;
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function orderedPlatforms(values: readonly SocialPlatform[]): SocialPlatform[] {

@@ -98,6 +98,18 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 1);
   assert.match(component, /role="dialog"/);
   assert.match(component, /event\.key !== "Tab"/);
+  const postCard = component.slice(
+    component.indexOf("function PostCard"),
+    component.indexOf("function PostMediaPreview"),
+  );
+  assert.match(postCard, /Pourquoi ça ressort/);
+  assert.match(postCard, /aria-labelledby=\{editorialAnalysisId\}/);
+  assert.match(postCard, /editorialAnalysis\.mechanism/);
+  assert.match(postCard, /editorialAnalysis\.comparison/);
+  assert.match(postCard, /editorialAnalysis\.transferableLesson/);
+  assert.doesNotMatch(postCard, /score_explanation|performance_score|\/100/);
+  assert.match(component, /parsePostRaw\(post\.raw_json\)/);
+  assert.match(component, /raw\.pollVotes = post\.poll_votes/);
   assert.match(socialMedia, /youtube-nocookie\.com\/embed/);
   assert.match(socialMedia, /tiktok\.com\/player\/v1/);
   assert.match(socialMedia, /format === "short"/);

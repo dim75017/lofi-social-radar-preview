@@ -1,4 +1,9 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner.ts";
+import {
+  buildEditorialAnalysisMap,
+  editorialPostKey,
+  type EditorialWhy,
+} from "./social-editorial-analysis.ts";
 import { isInScopeSocialPost } from "./social-formats.ts";
 import { buildSocialAnalysis, rankPosts } from "./social-score.ts";
 
@@ -63,6 +68,7 @@ export type PublicWorkspacePost = {
   first_seen_at: string;
   last_seen_at: string;
   last_metric_at: string;
+  editorial_analysis: EditorialWhy;
   [key: string]: unknown;
 };
 
@@ -158,6 +164,7 @@ export function mergeWorkspaceWithPublicHistory(
     [...merged.values()],
     workspace?.generatedAt ?? snapshot.generatedAt,
   );
+  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
   const liveByKey = new Map(
     (workspace?.posts ?? []).map((post) => [workspacePostKey(post), post]),
   );
@@ -165,6 +172,7 @@ export function mergeWorkspaceWithPublicHistory(
   const posts = ranked.map((post) => {
     const live = liveByKey.get(postKey(post));
     const account = ACCOUNT_META[post.platform];
+    const editorialAnalysis = editorialAnalyses.get(editorialPostKey(post));
     const firstObservedAt =
       rawString(post.raw, "firstObservedAt") ?? snapshot.generatedAt;
     const lastObservedAt =
@@ -210,6 +218,9 @@ export function mergeWorkspaceWithPublicHistory(
         typeof live?.last_seen_at === "string" ? live.last_seen_at : lastObservedAt,
       last_metric_at:
         typeof live?.last_metric_at === "string" ? live.last_metric_at : lastObservedAt,
+      editorial_analysis:
+        editorialAnalysis ??
+        buildEditorialAnalysisMap([post]).get(editorialPostKey(post))!,
     } satisfies PublicWorkspacePost;
   });
 

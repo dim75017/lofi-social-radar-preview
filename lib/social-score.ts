@@ -1,4 +1,9 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner";
+import {
+  buildEditorialAnalysisMap,
+  editorialPostKey,
+} from "./social-editorial-analysis.ts";
+import { rankPostsByPublicMetric } from "./social-ranking.ts";
 
 export type SocialMetric =
   | "views"
@@ -161,6 +166,7 @@ export function buildSocialAnalysis(
   const referenceTime = validDate(now);
   const ranked = rankPosts(posts, referenceTime);
   const byPlatform = groupBy(ranked, (post) => post.platform);
+  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
   const coverage: PlatformAnalysis[] = [];
   const insights: SocialInsight[] = [];
 
@@ -206,13 +212,18 @@ export function buildSocialAnalysis(
       id: `${platform}-top-${top.externalId}`,
       platform,
       title: `${platformLabel(platform)} · ${displayTitle(top)}`,
-      detail: top.scoreExplanation,
-      confidence: top.confidence,
+      detail: (() => {
+        const analysis = editorialAnalyses.get(editorialPostKey(top));
+        return analysis
+          ? `${analysis.mechanism} ${analysis.comparison} À reproduire : ${analysis.transferableLesson}`
+          : "Le texte public ne permet pas encore une lecture éditoriale spécifique.";
+      })(),
+      confidence: editorialAnalyses.get(editorialPostKey(top))?.confidence ?? "low",
     });
   }
 
   const platformCount = byPlatform.size;
-  const editorialInsights = buildEditorialInsights(ranked);
+  const editorialInsights = buildEditorialInsights(ranked, editorialAnalyses);
   return {
     generatedAt: referenceTime.toISOString(),
     postCount: posts.length,
@@ -231,132 +242,110 @@ export function buildSocialAnalysis(
   };
 }
 
-function buildEditorialInsights(posts: readonly RankedPost[]): SocialInsight[] {
-  const scored = posts.filter((post) => post.performanceScore !== null);
-  if (scored.length === 0) return [];
-
-  const insights: SocialInsight[] = [];
-  const creativeGroups = new Map<string, RankedPost[]>();
-  for (const post of scored) {
-    const key = creativeKey(post);
-    if (key.split(" ").length < 4) continue;
-    const group = creativeGroups.get(key);
-    if (group) group.push(post);
-    else creativeGroups.set(key, [post]);
+function buildEditorialInsights(
+  posts: readonly RankedPost[],
+  analyses: ReturnType<typeof buildEditorialAnalysisMap>,
+): SocialInsight[] {
+  const cohorts = new Map<string, RankedPost[]>();
+  for (const post of posts) {
+    const key = `${post.platform}:${post.format ?? "unknown"}`;
+    cohorts.set(key, [...(cohorts.get(key) ?? []), post]);
   }
 
-  const crossPlatform = [...creativeGroups.entries()]
+  const categoryInsights = [...cohorts.values()]
+    .filter((cohort) => cohort.length >= 2)
+    .map((cohort) => {
+      const top = publicTopPost(cohort);
+      return { cohort, top, analysis: analyses.get(editorialPostKey(top)) };
+    })
+    .filter((item) => item.analysis !== undefined)
+    .sort((left, right) =>
+      right.cohort.length !== left.cohort.length
+        ? right.cohort.length - left.cohort.length
+        : editorialPostKey(left.top).localeCompare(editorialPostKey(right.top)),
+    )
+    .slice(0, 3)
+    .map(({ top, analysis }) => ({
+      id: `editorial-${top.platform}-${top.externalId}`,
+      platform: top.platform,
+      title: analysis!.headline,
+      detail: `${analysis!.mechanism} ${analysis!.comparison} À reproduire : ${analysis!.transferableLesson}`,
+      confidence: analysis!.confidence,
+    }));
+
+  const leaders = [...cohorts.values()]
+    .filter((cohort) => cohort.length >= 2)
+    .map(publicTopPost);
+  const creativeGroups = groupBy(leaders, normalizedCreativeKey);
+  const reusedCreative = [...creativeGroups.entries()]
     .map(([key, group]) => ({
       key,
       group,
       platforms: new Set(group.map((post) => post.platform)),
-      averageScore:
-        group.reduce((sum, post) => sum + (post.performanceScore ?? 0), 0) /
-        group.length,
     }))
-    .filter((candidate) => candidate.platforms.size >= 2)
+    .filter(
+      (candidate) =>
+        candidate.key.split(" ").length >= 4 && candidate.platforms.size >= 2,
+    )
     .sort((left, right) =>
       right.platforms.size !== left.platforms.size
         ? right.platforms.size - left.platforms.size
-        : right.averageScore - left.averageScore,
+        : left.key.localeCompare(right.key),
     )[0];
 
-  if (crossPlatform) {
-    const platformNames = [...crossPlatform.platforms].map(platformLabel);
-    const pattern = editorialPattern(crossPlatform.group[0]);
-    insights.push({
-      id: `cross-platform-${crossPlatform.key}`,
+  if (!reusedCreative) return categoryInsights;
+  const reference = reusedCreative.group[0];
+  const analysis = analyses.get(editorialPostKey(reference));
+  const platformNames = [...reusedCreative.platforms]
+    .sort(
+      (left, right) =>
+        PLATFORM_SORT_ORDER.indexOf(left) - PLATFORM_SORT_ORDER.indexOf(right),
+    )
+    .map(platformLabel);
+  return [
+    {
+      id: `cross-platform-${reusedCreative.key}`,
       platform: "all",
-      title: `Créatif cross-platform · ${displayTitle(crossPlatform.group[0])}`,
-      detail: `La même accroche ressort sur ${joinFrench(platformNames)} avec un score moyen de ${Math.round(crossPlatform.averageScore)}/100. Le ressort « ${pattern} » mérite un nouveau test décliné nativement sur chaque réseau.`,
-      confidence: crossPlatform.platforms.size >= 3 ? "medium" : "low",
-    });
-  }
-
-  const top = scored[0];
-  insights.push({
-    id: `global-top-${top.platform}-${top.externalId}`,
-    platform: top.platform,
-    title: `Signal n°1 · ${displayTitle(top)}`,
-    detail: `${platformLabel(top.platform)} le place en tête de sa cohorte avec ${top.performanceScore}/100. ${top.scoreExplanation} À utiliser comme benchmark de format et d’accroche, pas comme preuve causale.`,
-    confidence: top.confidence,
-  });
-
-  const leaders = scored.slice(0, Math.min(8, scored.length));
-  const patternCounts = new Map<string, number>();
-  for (const post of leaders) {
-    const pattern = editorialPattern(post);
-    patternCounts.set(pattern, (patternCounts.get(pattern) ?? 0) + 1);
-  }
-  const dominant = [...patternCounts.entries()].sort((left, right) => {
-    if (right[1] !== left[1]) return right[1] - left[1];
-    return left[0].localeCompare(right[0]);
-  })[0];
-
-  if (leaders.length >= 3 && dominant && dominant[1] >= 2) {
-    insights.push({
-      id: `dominant-pattern-${dominant[0]}`,
-      platform: "all",
-      title: `Pattern dominant · ${dominant[0]}`,
-      detail: `${dominant[1]} des ${leaders.length} contenus les mieux classés utilisent ce ressort. ${patternAction(dominant[0])}`,
-      confidence: dominant[1] >= 3 ? "medium" : "low",
-    });
-  }
-
-  return insights;
+      title: `Créatif cross-platform · ${displayTitle(reference)}`,
+      detail: `La même accroche apparaît parmi les références de ${joinFrench(platformNames)}. ${analysis?.headline ?? "Le noyau éditorial se transpose d’un réseau à l’autre"} : ${analysis?.mechanism ?? "la formulation conserve la même promesse tout en laissant chaque plateforme adapter son exécution."} À tester avec une déclinaison native par réseau, sans supposer que la répétition suffit à expliquer le résultat.`,
+      confidence: reusedCreative.platforms.size >= 3 ? "medium" : "low",
+    },
+    ...categoryInsights,
+  ];
 }
 
-function creativeKey(post: NormalizedPost): string {
-  const value = post.title?.trim() || post.text?.trim() || "";
-  return value
+function normalizedCreativeKey(post: RankedPost): string {
+  return `${post.text?.trim() || post.title?.trim() || ""}`
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/@[\w.]+/g, "")
-    .replace(/#[\w-]+/g, "")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/@[\w.]+/g, " ")
+    .replace(/#[\p{L}\p{N}_-]+/gu, " ")
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .slice(0, 8)
-    .join(" ");
-}
-
-function editorialPattern(post: NormalizedPost): string {
-  const value = `${post.title ?? ""} ${post.text ?? ""}`.toLowerCase();
-  if (/radio|beats|music|mix|sleep|study|lofi/.test(value)) {
-    return "Musique & usage";
-  }
-  if (/fortnite|game|album|release|merch|listen/.test(value)) {
-    return "Activation";
-  }
-  if (/pocky|maya|girl|character|lore/.test(value)) {
-    return "Personnage & lore";
-  }
-  if (/tell me|comment|\byou\b|\byour\b|\?/.test(value)) {
-    return "Conversation";
-  }
-  return "Relatable & humour";
-}
-
-function patternAction(pattern: string): string {
-  if (pattern === "Musique & usage") {
-    return "La promesse d’usage est immédiatement lisible : contexte, humeur et bénéfice avant le titre du morceau.";
-  }
-  if (pattern === "Activation") {
-    return "L’urgence de sortie ou d’événement semble porter le signal ; tester une accroche plus courte avec une action unique.";
-  }
-  if (pattern === "Personnage & lore") {
-    return "La reconnaissance des personnages et la continuité narrative semblent aider ; privilégier les micro-épisodes sérialisables.";
-  }
-  if (pattern === "Conversation") {
-    return "L’adresse directe réduit la distance avec la communauté ; tester une question simple dès la première ligne.";
-  }
-  return "Le signal vient d’une situation immédiatement reconnaissable et d’une chute courte ; tester trois variantes d’accroche sur le même noyau créatif.";
+    .trim();
 }
 
 function joinFrench(values: readonly string[]): string {
   if (values.length <= 1) return values[0] ?? "";
   return `${values.slice(0, -1).join(", ")} et ${values.at(-1)}`;
+}
+
+function publicTopPost(posts: readonly RankedPost[]): RankedPost {
+  return rankPostsByPublicMetric(
+    posts.map((post) => ({
+      post,
+      external_post_id: post.externalId,
+      format: post.format ?? "unknown",
+      likes: safeMetric(post.likes),
+      views: safeMetric(post.views),
+      comments: safeMetric(post.comments),
+      shares: safeMetric(post.shares),
+      saves: safeMetric(post.saves),
+      poll_votes: sourceMetric(post, "pollVotes"),
+    })),
+  ).posts[0].post;
 }
 
 function comparableValues(

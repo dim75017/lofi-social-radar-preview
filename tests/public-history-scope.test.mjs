@@ -72,6 +72,34 @@ test("poll vote totals are exposed as a first-class UI metric", async () => {
   assert.ok(polls.some((post) => Number.isFinite(post.poll_votes)));
 });
 
+test("every public post carries a content-based editorial why", async () => {
+  const history = await snapshot();
+  const workspace = mergeWorkspaceWithPublicHistory(null, history);
+
+  assert.ok(workspace.posts.length > 0);
+  assert.ok(
+    workspace.posts.every(
+      (post) =>
+        post.editorial_analysis?.version === "editorial-v1" &&
+        post.editorial_analysis.scope === "copy-and-format",
+    ),
+  );
+
+  const microProgress = workspace.posts.find(
+    (post) => post.external_post_id === "Ugkxa0ul261Q-iU9NnzjDxvmyTaCRfvHdPgi",
+  );
+  assert.equal(microProgress?.editorial_analysis.primarySignal, "micro_progress");
+  assert.doesNotMatch(
+    [
+      microProgress?.editorial_analysis.headline,
+      microProgress?.editorial_analysis.mechanism,
+      microProgress?.editorial_analysis.comparison,
+      microProgress?.editorial_analysis.transferableLesson,
+    ].join(" "),
+    /\/100|percentile|score lifetime|likes?|vues?/i,
+  );
+});
+
 test("the YouTube Community filter contains image posts only", async () => {
   const history = await snapshot();
   const youtube = history.posts.filter((post) => post.platform === "youtube");

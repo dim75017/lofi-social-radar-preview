@@ -29,6 +29,7 @@ import {
   publicRankingLabel,
   rankPostsByPublicMetric,
 } from "../lib/social-ranking";
+import type { EditorialWhy } from "../lib/social-editorial-analysis";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
@@ -68,6 +69,7 @@ type SocialPost = {
   shares: number | null;
   saves: number | null;
   poll_votes: number | null;
+  raw_json?: string | null;
   performance_score: number | null;
   score_confidence: "high" | "medium" | "low" | "insufficient";
   score_explanation: string;
@@ -76,6 +78,7 @@ type SocialPost = {
   first_seen_at: string;
   last_seen_at: string;
   last_metric_at: string;
+  editorial_analysis: EditorialWhy;
 };
 
 type Insight = {
@@ -228,80 +231,58 @@ function formatEmptyCopy(platform: Platform, filter: SocialFormatFilter) {
 
 function postLabel(post: SocialPost) {
   if (post.analysis_label) return post.analysis_label;
-  const value = `${post.title} ${post.text}`.toLowerCase();
-  if (/radio|beats|music|mix|sleep|study|lofi/.test(value)) return "Musique & usage";
-  if (/fortnite|game|album|release|merch|listen/.test(value)) return "Activation";
-  if (/pocky|maya|girl|character|lore/.test(value)) return "Personnage & lore";
-  if (/tell me|comment|you|your|\?/.test(value)) return "Conversation";
+  const signal = post.editorial_analysis?.primarySignal;
+  if (signal === "student_meme" || signal === "micro_progress") {
+    return "Études & petites victoires";
+  }
+  if (signal === "collective_ritual" || signal === "care_ritual") {
+    return "Care & communauté";
+  }
+  if (signal === "co_creation" || signal === "identity_choice" || signal === "absurd_poll") {
+    return "Participation";
+  }
+  if (signal === "immersive_activation" || signal === "cultural_bridge") {
+    return "Activation incarnée";
+  }
+  if (signal === "fourth_wall" || signal === "narrative_open_loop") {
+    return "Personnage & micro-histoire";
+  }
+  if (signal === "commercial_copy") return "Information & activation";
+  if (signal === "insufficient") return "Lecture à compléter";
   return "Relatable & humour";
-}
-
-function normalizeCreative(post: SocialPost) {
-  return `${post.title || post.text}`
-    .toLowerCase()
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/@[\w.]+/g, "")
-    .replace(/#[\w-]+/g, "")
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .slice(0, 9)
-    .join(" ");
 }
 
 function localInsights(posts: SocialPost[]): Insight[] {
   if (!posts.length) return [];
-  const ranked = [...posts].sort(
-    (a, b) => (b.performance_score ?? -1) - (a.performance_score ?? -1),
-  );
   const groups = new Map<string, SocialPost[]>();
   for (const post of posts) {
-    const key = normalizeCreative(post);
-    if (key.split(" ").length < 3) continue;
+    const key = `${post.platform}:${post.format}`;
     groups.set(key, [...(groups.get(key) ?? []), post]);
   }
-  const cross = [...groups.values()]
-    .filter((group) => new Set(group.map((post) => post.platform)).size >= 2)
-    .sort((a, b) => {
-      const average = (items: SocialPost[]) =>
-        items.reduce((sum, item) => sum + (item.performance_score ?? 0), 0) / items.length;
-      return average(b) - average(a);
-    })[0];
-  const topFive = ranked.slice(0, Math.min(5, ranked.length));
-  const labels = new Map<string, number>();
-  for (const post of topFive) {
-    const label = postLabel(post);
-    labels.set(label, (labels.get(label) ?? 0) + 1);
-  }
-  const dominant = [...labels.entries()].sort((a, b) => b[1] - a[1])[0];
-  const top = ranked[0];
-  const insights: Insight[] = [];
-
-  if (cross) {
-    const platforms = [...new Set(cross.map((post) => PLATFORM_META[post.platform].label))];
-    insights.push({
-      emoji: "🌍",
-      title: "Créatif cross-platform détecté",
-      summary: `« ${cross[0].title || cross[0].text} » ressort sur ${platforms.join(", ")}.`,
-      evidence: `${cross.length} publications reliées par leur accroche.`,
-    });
-  }
-  insights.push({
-    emoji: "🚀",
-    title: `${PLATFORM_META[top.platform].label} porte le signal n°1`,
-    summary: `« ${top.title || top.text} » est actuellement le post le mieux classé.`,
-    evidence: `${top.performance_score ?? "—"}/100 · ${top.score_explanation}`,
-  });
-  if (dominant) {
-    insights.push({
-      emoji: "🧠",
-      title: `Pattern dominant : ${dominant[0]}`,
-      summary: `${dominant[1]} des ${topFive.length} meilleurs posts utilisent ce ressort éditorial.`,
-      evidence: "Lecture descriptive de l’échantillon visible, pas une causalité.",
-    });
-  }
-  return insights.slice(0, 3);
+  return [...groups.values()]
+    .filter((group) => group.length >= 2)
+    .map((group) => {
+      const top = rankPostsByPublicMetric(group).posts[0];
+      return { group, top, analysis: top.editorial_analysis };
+    })
+    .filter(
+      (item): item is { group: SocialPost[]; top: SocialPost; analysis: EditorialWhy } =>
+        Boolean(item.analysis),
+    )
+    .sort((left, right) =>
+      right.group.length !== left.group.length
+        ? right.group.length - left.group.length
+        : `${left.top.platform}:${left.top.format}`.localeCompare(
+            `${right.top.platform}:${right.top.format}`,
+          ),
+    )
+    .slice(0, 3)
+    .map(({ top, analysis }) => ({
+      emoji: PLATFORM_META[top.platform].emoji,
+      title: analysis.headline,
+      summary: analysis.mechanism,
+      evidence: analysis.comparison,
+    }));
 }
 
 function metrics(post: SocialPost) {
@@ -320,6 +301,8 @@ function metrics(post: SocialPost) {
 }
 
 function normalizedIdeaPost(post: SocialPost) {
+  const raw = parsePostRaw(post.raw_json);
+  if (post.poll_votes !== null) raw.pollVotes = post.poll_votes;
   return {
     platform: post.platform,
     externalId: post.external_post_id,
@@ -334,8 +317,20 @@ function normalizedIdeaPost(post: SocialPost) {
     comments: post.comments,
     shares: post.shares,
     saves: post.saves,
-    raw: null,
+    raw,
   };
+}
+
+function parsePostRaw(value: string | null | undefined): Record<string, unknown> {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? { ...(parsed as Record<string, unknown>) }
+      : {};
+  } catch {
+    return {};
+  }
 }
 
 export function SocialOS({
@@ -566,20 +561,8 @@ export function SocialOS({
     [posts],
   );
   const insights = useMemo(() => {
-    const serverInsights = workspace?.analysis?.insights;
-    return serverInsights?.length
-      ? serverInsights.slice(0, 3).map((insight) => ({
-          emoji:
-            insight.emoji ??
-            (insight.platform && insight.platform !== "all"
-              ? PLATFORM_META[insight.platform].emoji
-              : "🧠"),
-          title: insight.title,
-          summary: insight.summary ?? insight.detail ?? "Analyse descriptive disponible.",
-          evidence: insight.evidence,
-        }))
-      : localInsights(posts);
-  }, [posts, workspace?.analysis?.insights]);
+    return localInsights(posts);
+  }, [posts]);
   const ideaPlan = useMemo(
     () =>
       generateSocialIdeas(posts.map(normalizedIdeaPost), {
@@ -1377,7 +1360,7 @@ function EditorialIdeaCard({
               key={`${seed.platform}:${seed.externalId}`}
             >
               {PLATFORM_META[seed.platform].emoji} {PLATFORM_META[seed.platform].label}
-              <b>{seed.performanceScore}/100</b>
+              <b>post source</b>
               <span>↗</span>
             </a>
           ))}
@@ -1557,6 +1540,8 @@ function PostCard({
   const meta = PLATFORM_META[post.platform];
   const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url);
   const postCopy = post.text || post.title || "Publication sans légende";
+  const editorialAnalysis = post.editorial_analysis;
+  const editorialAnalysisId = `editorial-why-${post.platform}-${post.external_post_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   return (
     <article
       className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
@@ -1596,6 +1581,38 @@ function PostCard({
             <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
           ))}
         </div>
+        {editorialAnalysis ? (
+          <section
+            className={`editorial-why status-${editorialAnalysis.status}`}
+            aria-labelledby={editorialAnalysisId}
+          >
+            <div className="editorial-why-heading">
+              <span id={editorialAnalysisId}>🧠 Pourquoi ça ressort</span>
+              <small>
+                {editorialAnalysis.status === "no-differentiator"
+                  ? "Différence non isolée"
+                  : editorialAnalysis.confidence === "medium"
+                  ? "Comparaison étayée"
+                  : "Hypothèse prudente"}
+              </small>
+            </div>
+            <h4>{editorialAnalysis.headline}</h4>
+            <p>{editorialAnalysis.mechanism}</p>
+            <div className="editorial-why-comparison">
+              <b>Ce qui le différencie</b>
+              <span>{editorialAnalysis.comparison}</span>
+            </div>
+            <div className="editorial-why-lesson">
+              <b>À reproduire</b>
+              <span>{editorialAnalysis.transferableLesson}</span>
+            </div>
+            {editorialAnalysis.limitations[0] ? (
+              <small className="editorial-why-limit">
+                Périmètre : {editorialAnalysis.limitations[0]}
+              </small>
+            ) : null}
+          </section>
+        ) : null}
         <footer>
           <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
           <span className="post-card-actions">
