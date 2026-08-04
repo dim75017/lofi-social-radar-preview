@@ -453,7 +453,7 @@ function formatCardPublishedDate(value: string | null | undefined): string | nul
   if (Number.isNaN(date.getTime())) return null;
   return new Intl.DateTimeFormat("fr-FR", {
     day: "2-digit",
-    month: "short",
+    month: "2-digit",
     year: "numeric",
   }).format(date);
 }
@@ -1622,7 +1622,6 @@ function PostCard({
   onTogglePlayback: (post: SocialPost) => void;
   onOpenDetails: (post: SocialPost) => void;
 }) {
-  const meta = PLATFORM_META[post.platform];
   const isCommunityImage = post.platform === "youtube" && post.format === "community_image";
   const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url || isCommunityImage);
   const postCopy = post.text || post.title || "Publication sans légende";
@@ -1680,9 +1679,6 @@ function PostCard({
             <button type="button" onClick={() => onOpenDetails(post)}>
               Plus d’informations
             </button>
-            <a href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
-              Ouvrir ↗
-            </a>
           </span>
         </footer>
       </div>
