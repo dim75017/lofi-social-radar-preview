@@ -1594,6 +1594,10 @@ function PostCard({
   const postCopy = post.text || post.title || "Publication sans légende";
   const choices = post.format === "community_poll" ? pollChoices(post) : [];
   const publishedDate = formatCardPublishedDate(post.published_at);
+  const footerMetrics = [
+    post.views !== null ? { icon: "👁", label: "vues", value: post.views } : null,
+    post.likes !== null ? { icon: "♥", label: "likes", value: post.likes } : null,
+  ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
   return (
     <article
       className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
@@ -1635,17 +1639,19 @@ function PostCard({
             {choices.map((choice) => <li key={choice}>{choice}</li>)}
           </ul>
         ) : null}
-        <div className="metric-row">
-          {metrics(post).map((metric) => (
-            <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
-          ))}
-        </div>
         <footer>
           {publishedDate ? (
             <time className="post-published-date" dateTime={post.published_at ?? undefined}>
               {publishedDate}
             </time>
           ) : <span />}
+          <span className="post-card-footer-metrics" aria-label="Performances visibles">
+            {footerMetrics.map((metric) => (
+              <span key={metric.label} title={metric.label}>
+                {metric.icon} <b>{formatNumber(metric.value)}</b>
+              </span>
+            ))}
+          </span>
           <span className="post-card-actions">
             <button type="button" onClick={() => onOpenDetails(post)}>
               Plus d’informations
