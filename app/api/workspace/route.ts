@@ -26,6 +26,11 @@ type AuthorizedYouTubeActivity = {
   target?: unknown;
 };
 
+type AuthorizedYouTubeMetric = {
+  likes?: unknown;
+  replies?: unknown;
+};
+
 const FRENCH_MONTHS: Record<string, number> = {
   "janv.": 0,
   "févr.": 1,
@@ -58,6 +63,27 @@ function activityDateToIso(dateLabel: unknown, time: unknown) {
   return new Date(year, FRENCH_MONTHS[match[2]], Number(match[1]), hours, minutes).toISOString();
 }
 
+function nonnegativeMetric(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+async function authorizedYouTubeCommentMetrics() {
+  const candidates = [
+    join(process.cwd(), "data", "private-youtube-comment-metrics.json"),
+    join(process.cwd(), "data", "youtube-comment-metrics.json"),
+    join(process.cwd(), "dist", "data", "youtube-comment-metrics.json"),
+  ];
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(await readFile(candidate, "utf8")) as { results?: Record<string, AuthorizedYouTubeMetric> };
+      if (parsed.results && typeof parsed.results === "object") return parsed.results;
+    } catch {
+      // Metric collection is deliberately optional while the historical scan is running.
+    }
+  }
+  return {} as Record<string, AuthorizedYouTubeMetric>;
+}
+
 async function authorizedYouTubeCommentPosts() {
   let imported: { comments?: unknown };
   try {
@@ -79,6 +105,7 @@ async function authorizedYouTubeCommentPosts() {
     imported = {};
   }
   if (!Array.isArray(imported.comments)) return [];
+  const metrics = await authorizedYouTubeCommentMetrics();
   return imported.comments.flatMap((activity) => {
     const entry = activity as AuthorizedYouTubeActivity;
     if (typeof entry.url !== "string" || typeof entry.comment !== "string") return [];
@@ -89,6 +116,7 @@ async function authorizedYouTubeCommentPosts() {
       return [];
     }
     if (!commentId) return [];
+    const metric = metrics[commentId];
     return [{
       id: `youtube:${commentId}`,
       account_id: "lofigirl-youtube",
@@ -102,8 +130,8 @@ async function authorizedYouTubeCommentPosts() {
       thumbnail_url: null,
       published_at: activityDateToIso(entry.dateLabel, entry.time),
       views: null,
-      likes: null,
-      comments: null,
+      likes: nonnegativeMetric(metric?.likes),
+      comments: nonnegativeMetric(metric?.replies),
       shares: null,
       saves: null,
       raw_json: JSON.stringify({
