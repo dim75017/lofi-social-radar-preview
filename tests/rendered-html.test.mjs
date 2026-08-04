@@ -43,7 +43,7 @@ test("server-renders the live Social Radar shell", async () => {
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia] = await Promise.all([
+  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
@@ -54,6 +54,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-media.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-ranking.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -77,9 +78,19 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
   assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
-  assert.match(component, /Impact cumulé, sans bonus de récence/);
-  assert.match(component, /Comment le classement fonctionne/);
-  assert.match(component, /setActiveVideoPost/);
+  assert.match(component, /Règle de classement/);
+  assert.match(component, /Aucun score composite ni bonus de récence/);
+  assert.match(component, /setActiveMediaPost/);
+  assert.match(component, /MediaPreviewModal/);
+  assert.match(component, /post-visual-trigger/);
+  assert.match(component, /media-image-frame/);
+  assert.match(component, /hasMediaPreview \?/);
+  assert.match(component, /text-only/);
+  assert.doesNotMatch(component, /Lire ici|post-play-button/);
+  assert.doesNotMatch(component, />\s*Tous\s*</);
+  assert.match(component, /categoryFilters\(topPlatform\)\.map/);
+  assert.match(component, /category-results/);
+  assert.match(component, /Historique YouTube encore partiel/);
   assert.match(component, /TIKTOK_THUMBNAIL_CACHE/);
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
   assert.match(component, /sharedTikTokPreviewObserver/);
@@ -90,13 +101,18 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(socialMedia, /youtube-nocookie\.com\/embed/);
   assert.match(socialMedia, /tiktok\.com\/player\/v1/);
   assert.match(socialMedia, /format === "short"/);
+  assert.match(socialRanking, /Likes décroissants/);
+  assert.match(socialRanking, /Vues décroissantes · likes indisponibles/);
+  assert.doesNotMatch(socialRanking, /published_at|performance_score/);
   assert.doesNotMatch(styles, /nav-disclosure|nav-meta/);
+  assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
+  assert.match(styles, /\.media-image-frame/);
   const explicitFontSizes = [...styles.matchAll(/font-size:\s*([0-9.]+)px/g)].map(
     (match) => Number(match[1]),
   );
   assert.ok(explicitFontSizes.length > 100);
   assert.ok(explicitFontSizes.every((size) => size >= 11));
-  assert.match(component, /tous affichés/);
+  assert.doesNotMatch(component, /tous affichés/i);
   assert.match(durations, /All time/);
   assert.match(durations, /180d/);
   assert.match(component, /topFilteredPosts\.map/);

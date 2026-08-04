@@ -25,6 +25,10 @@ import {
   getTikTokOEmbedUrl,
   parseTikTokThumbnailUrl,
 } from "../lib/social-media";
+import {
+  publicRankingLabel,
+  rankPostsByPublicMetric,
+} from "../lib/social-ranking";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
@@ -133,7 +137,7 @@ const NAV: Array<{
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
-  { id: "all", emoji: "🔎", label: "Tous les contenus", group: "Données" },
+  { id: "all", emoji: "🔎", label: "Bibliothèque", group: "Données" },
   { id: "sources", emoji: "🔌", label: "Sources", group: "Données" },
 ];
 
@@ -144,15 +148,15 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
   },
   top: {
     title: "Meilleurs posts",
-    subtitle: "Classement normalisé par plateforme, métriques et âge du contenu.",
+    subtitle: "Chaque catégorie est classée simplement par likes publics.",
   },
   ideas: {
     title: "Idées à produire",
     subtitle: "Des concepts testables dérivés des signaux qui ressortent vraiment.",
   },
   all: {
-    title: "Tous les contenus",
-    subtitle: "Les publications réellement détectées, sans donnée de démonstration.",
+    title: "Bibliothèque par catégorie",
+    subtitle: "Une plateforme et un format à la fois, sans mélanger les catégories.",
   },
   sources: {
     title: "Sources officielles",
@@ -163,6 +167,16 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
 const IDEA_DECISIONS_STORAGE_KEY = "lofi-social-radar:idea-decisions:v1";
 const POSTS_PAGE_SIZE = 48;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
+const DEFAULT_FORMAT_FILTER: Record<Platform, SocialFormatFilter> = {
+  youtube: "short",
+  instagram: "reel",
+  tiktok: "video",
+  x: "static",
+};
+
+function categoryFilters(platform: Platform) {
+  return getFormatFilters(platform).filter((filter) => filter.key !== "all");
+}
 
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -194,20 +208,6 @@ function relativeAge(value: string | null) {
   if (days < 31) return `${days} j`;
   const months = Math.floor(days / 30);
   return `${months} mois`;
-}
-
-function confidenceLabel(value: SocialPost["score_confidence"]) {
-  if (value === "high") return "Confiance forte";
-  if (value === "medium") return "Confiance moyenne";
-  if (value === "low") return "Échantillon limité";
-  return "Non classé";
-}
-
-function scoreTone(score: number | null) {
-  if (score === null) return "muted";
-  if (score >= 80) return "green";
-  if (score >= 60) return "amber";
-  return "muted";
 }
 
 function formatEmptyCopy(platform: Platform, filter: SocialFormatFilter) {
@@ -347,10 +347,10 @@ export function SocialOS({
 }) {
   const [workspace, setWorkspace] = useState<WorkspacePayload | null>(initialWorkspace);
   const [view, setView] = useState<View>("overview");
-  const [platform, setPlatform] = useState<"all" | Platform>("all");
-  const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("all");
-  const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
-  const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
+  const [platform, setPlatform] = useState<Platform>("youtube");
+  const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("short");
+  const [topPlatform, setTopPlatform] = useState<Platform>("youtube");
+  const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("short");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
@@ -361,8 +361,8 @@ export function SocialOS({
   const [postPagination, setPostPagination] = useState({ key: "", count: POSTS_PAGE_SIZE });
   const [ideaDecisions, setIdeaDecisions] = useState<Record<string, IdeaDecision>>({});
   const [ideaDecisionsReady, setIdeaDecisionsReady] = useState(false);
-  const [activeVideoPost, setActiveVideoPost] = useState<SocialPost | null>(null);
-  const closeActiveVideo = useCallback(() => setActiveVideoPost(null), []);
+  const [activeMediaPost, setActiveMediaPost] = useState<SocialPost | null>(null);
+  const closeActiveMedia = useCallback(() => setActiveMediaPost(null), []);
 
   const loadWorkspace = useCallback(async () => {
     if (previewMode) {
@@ -431,7 +431,7 @@ export function SocialOS({
       if (previewMode) {
         if (target) {
           setTopPlatform(target);
-          setTopFormatFilter("all");
+          setTopFormatFilter(DEFAULT_FORMAT_FILTER[target]);
           setTopDuration("all");
           setSearch("");
           setView("top");
@@ -466,10 +466,7 @@ export function SocialOS({
 
   const posts = useMemo(() => workspace?.posts ?? [], [workspace?.posts]);
   const accounts = workspace?.accounts ?? [];
-  const topPosts = useMemo(
-    () => [...posts].sort((a, b) => (b.performance_score ?? -1) - (a.performance_score ?? -1)),
-    [posts],
-  );
+  const topPosts = useMemo(() => rankPostsByPublicMetric(posts).posts, [posts]);
   const searchedTopPosts = useMemo(() => {
     const needle = search.trim().toLowerCase();
     if (!needle) return topPosts;
@@ -486,31 +483,29 @@ export function SocialOS({
     [searchedTopPosts, topDuration, topDurationReference],
   );
   const topPlatformPosts = useMemo(
-    () =>
-      topPlatform === "all"
-        ? durationTopPosts
-        : durationTopPosts.filter((post) => post.platform === topPlatform),
+    () => durationTopPosts.filter((post) => post.platform === topPlatform),
     [durationTopPosts, topPlatform],
   );
-  const topFilteredPosts = useMemo(
+  const topCategoryPosts = useMemo(
     () =>
-      topPlatform === "all" || topFormatFilter === "all"
-        ? topPlatformPosts
-        : topPlatformPosts.filter((post) =>
-            matchesSocialFormatFilter(post, topFormatFilter),
-          ),
-    [topFormatFilter, topPlatform, topPlatformPosts],
+      topPlatformPosts.filter((post) =>
+        matchesSocialFormatFilter(post, topFormatFilter),
+      ),
+    [topFormatFilter, topPlatformPosts],
   );
+  const topCategoryRanking = useMemo(
+    () => rankPostsByPublicMetric(topCategoryPosts),
+    [topCategoryPosts],
+  );
+  const topFilteredPosts = topCategoryRanking.posts;
+  const topRankingMetric = topCategoryRanking.metric;
   const topLifetimeFilteredPosts = useMemo(() => {
-    const platformPosts =
-      topPlatform === "all"
-        ? searchedTopPosts
-        : searchedTopPosts.filter((post) => post.platform === topPlatform);
-    return topPlatform === "all" || topFormatFilter === "all"
-      ? platformPosts
-      : platformPosts.filter((post) =>
-          matchesSocialFormatFilter(post, topFormatFilter),
-        );
+    const platformPosts = searchedTopPosts.filter(
+      (post) => post.platform === topPlatform,
+    );
+    return platformPosts.filter((post) =>
+      matchesSocialFormatFilter(post, topFormatFilter),
+    );
   }, [searchedTopPosts, topFormatFilter, topPlatform]);
   const topEmptyIsDuration =
     topDuration !== "all" && topLifetimeFilteredPosts.length > 0;
@@ -519,12 +514,8 @@ export function SocialOS({
       topDuration === "all"
         ? 0
         : searchedTopPosts.filter((post) => {
-            if (topPlatform !== "all" && post.platform !== topPlatform) return false;
-            if (
-              topPlatform !== "all" &&
-              topFormatFilter !== "all" &&
-              !matchesSocialFormatFilter(post, topFormatFilter)
-            ) {
+            if (post.platform !== topPlatform) return false;
+            if (!matchesSocialFormatFilter(post, topFormatFilter)) {
               return false;
             }
             return !hasKnownSocialPublishedDate(post);
@@ -534,15 +525,46 @@ export function SocialOS({
   const activeTopDuration =
     SOCIAL_DURATION_FILTERS.find((option) => option.key === topDuration) ??
     SOCIAL_DURATION_FILTERS[0];
-  const filteredPosts = useMemo(() => {
-    return searchedTopPosts.filter((post) => {
-      if (platform !== "all" && post.platform !== platform) return false;
-      if (platform !== "all" && formatFilter !== "all") {
-        return matchesSocialFormatFilter(post, formatFilter);
-      }
-      return true;
-    });
+  const filteredCategoryPosts = useMemo(() => {
+    return searchedTopPosts.filter(
+      (post) =>
+        post.platform === platform &&
+        matchesSocialFormatFilter(post, formatFilter),
+    );
   }, [formatFilter, platform, searchedTopPosts]);
+  const filteredRanking = useMemo(
+    () => rankPostsByPublicMetric(filteredCategoryPosts),
+    [filteredCategoryPosts],
+  );
+  const filteredPosts = filteredRanking.posts;
+  const activeTopFormat =
+    categoryFilters(topPlatform).find((filter) => filter.key === topFormatFilter) ??
+    categoryFilters(topPlatform)[0];
+  const activeLibraryFormat =
+    categoryFilters(platform).find((filter) => filter.key === formatFilter) ??
+    categoryFilters(platform)[0];
+  const youtubeCommunityCounts = useMemo(
+    () => ({
+      image: posts.filter(
+        (post) =>
+          post.platform === "youtube" &&
+          matchesSocialFormatFilter(post, "community"),
+      ).length,
+      poll: posts.filter(
+        (post) =>
+          post.platform === "youtube" && matchesSocialFormatFilter(post, "poll"),
+      ).length,
+      text: posts.filter(
+        (post) =>
+          post.platform === "youtube" && matchesSocialFormatFilter(post, "text"),
+      ).length,
+      shorts: posts.filter(
+        (post) =>
+          post.platform === "youtube" && matchesSocialFormatFilter(post, "short"),
+      ).length,
+    }),
+    [posts],
+  );
   const insights = useMemo(() => {
     const serverInsights = workspace?.analysis?.insights;
     return serverInsights?.length
@@ -575,7 +597,7 @@ export function SocialOS({
   const chooseTopPlatform = (target: Platform) => {
     setView("top");
     setTopPlatform(target);
-    setTopFormatFilter("all");
+    setTopFormatFilter(DEFAULT_FORMAT_FILTER[target]);
     setMobileOpen(false);
   };
 
@@ -659,9 +681,8 @@ export function SocialOS({
               {NAV.filter((item) => item.group === group).map((item) => {
                 const isTopItem = item.id === "top";
                 const isTopSection = isTopItem && view === "top";
-                const isActive =
-                  view === item.id && (!isTopItem || topPlatform === "all");
-                const isSectionActive = isTopSection && topPlatform !== "all";
+                const isActive = view === item.id && !isTopItem;
+                const isSectionActive = isTopSection;
 
                 return (
                   <div
@@ -672,21 +693,15 @@ export function SocialOS({
                       className={isActive ? "active" : isSectionActive ? "section-active" : ""}
                       type="button"
                       aria-current={isActive ? "page" : undefined}
-                      aria-label={isTopItem ? "Meilleurs posts, tous les réseaux" : undefined}
+                      aria-label={isTopItem ? "Meilleurs posts par plateforme et catégorie" : undefined}
                       onClick={() => {
                         if (item.id === "top") {
                           setView("top");
-                          setTopPlatform("all");
-                          setTopFormatFilter("all");
                           setMobileOpen(false);
                           return;
                         }
 
                         setView(item.id);
-                        if (item.id === "all") {
-                          setPlatform("all");
-                          setFormatFilter("all");
-                        }
                         setMobileOpen(false);
                       }}
                     >
@@ -820,7 +835,7 @@ export function SocialOS({
                       key={key}
                       onClick={() => {
                         setTopPlatform(key);
-                        setTopFormatFilter("all");
+                        setTopFormatFilter(DEFAULT_FORMAT_FILTER[key]);
                         setTopDuration("all");
                         setSearch("");
                         setView("top");
@@ -887,15 +902,15 @@ export function SocialOS({
               <div className="panel">
                 <div className="panel-head">
                   <div>
-                    <span className="section-kicker">Top performance</span>
-                    <h3>Les posts qui fonctionnent le mieux</h3>
+                    <span className="section-kicker">Top likes publics</span>
+                    <h3>Les publications les plus aimées</h3>
                   </div>
                   <button
                     className="text-button"
                     type="button"
                     onClick={() => {
-                      setTopPlatform("all");
-                      setTopFormatFilter("all");
+                      setTopPlatform("youtube");
+                      setTopFormatFilter("short");
                       setTopDuration("all");
                       setSearch("");
                       setView("top");
@@ -982,7 +997,7 @@ export function SocialOS({
         {workspace && view === "top" ? (
           <div className="view-stack top-platform-view">
             <section
-              className={`top-ranking-controls tone-${topPlatform === "all" ? "blue" : PLATFORM_META[topPlatform].tone}`}
+              className={`top-ranking-controls tone-${PLATFORM_META[topPlatform].tone}`}
               aria-label="Contrôles du classement"
             >
               <div className="top-duration-control-row">
@@ -1003,7 +1018,9 @@ export function SocialOS({
                     </button>
                   ))}
                 </div>
-                <span className="top-ranking-sort">🏆 Impact cumulé, sans bonus de récence</span>
+                <span className="top-ranking-sort">
+                  🏆 {publicRankingLabel(topRankingMetric)}
+                </span>
               </div>
 
               <div className="top-ranking-control-row">
@@ -1018,45 +1035,55 @@ export function SocialOS({
 
                 <span className="top-ranking-count">
                   <b>{topFilteredPosts.length}</b>
-                  <small>{activeTopDuration.label} · tous affichés</small>
+                  <small>{activeTopDuration.label} · contenus collectés</small>
                 </span>
               </div>
 
-              {topPlatform !== "all" ? (
-                <div className="top-format-control-row">
-                  <span className="section-kicker">
-                    Formats {PLATFORM_META[topPlatform].label}
-                  </span>
-                  <div
-                    className="format-filter-tabs top-format-tabs"
-                    aria-label={`Formats ${PLATFORM_META[topPlatform].label}`}
-                  >
-                    {getFormatFilters(topPlatform).map((filter) => {
-                      const count = topPlatformPosts.filter((post) =>
-                        matchesSocialFormatFilter(post, filter.key),
-                      ).length;
-                      return (
-                        <button
-                          className={topFormatFilter === filter.key ? "active" : ""}
-                          type="button"
-                          aria-pressed={topFormatFilter === filter.key}
-                          onClick={() => setTopFormatFilter(filter.key)}
-                          key={filter.key}
-                        >
-                          {filter.emoji} {filter.label} <span>{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+              <div className="top-format-control-row">
+                <span className="section-kicker">
+                  Catégories {PLATFORM_META[topPlatform].label}
+                </span>
+                <div
+                  className="format-filter-tabs top-format-tabs"
+                  role="group"
+                  aria-label={`Catégories ${PLATFORM_META[topPlatform].label}`}
+                >
+                  {categoryFilters(topPlatform).map((filter) => {
+                    const count = topPlatformPosts.filter((post) =>
+                      matchesSocialFormatFilter(post, filter.key),
+                    ).length;
+                    return (
+                      <button
+                        className={topFormatFilter === filter.key ? "active" : ""}
+                        type="button"
+                        aria-pressed={topFormatFilter === filter.key}
+                        onClick={() => setTopFormatFilter(filter.key)}
+                        key={filter.key}
+                      >
+                        {filter.emoji} {filter.label} <span>{count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              ) : null}
+              </div>
 
               <div className="top-ranking-method">
-                <span>🧮 Comment le classement fonctionne</span>
+                <span>🧮 Règle de classement</span>
                 <p>
-                  Score lifetime sur les compteurs cumulés. Coefficients de base : vues 45 %, likes 25 %, commentaires 15 %, partages 10 %, sauvegardes 5 % et votes 45 % pour les sondages. Les poids sont renormalisés selon les signaux publics disponibles. Les posts sont comparés uniquement au même réseau et au même format, sans bonus de récence.
+                  Les contenus de cette catégorie sont triés par likes décroissants. Quand les likes ne sont pas disponibles — actuellement le cas des Shorts collectés — les vues publiques servent provisoirement de classement. Aucun score composite ni bonus de récence n’ordonne cette liste.
                 </p>
               </div>
+
+              {topPlatform === "youtube" ? (
+                <div className="history-gap-notice">
+                  <span>⚠️</span>
+                  <p>
+                    <b>Historique YouTube encore partiel.</b>{" "}
+                    {youtubeCommunityCounts.shorts} Shorts et {youtubeCommunityCounts.image + youtubeCommunityCounts.poll + youtubeCommunityCounts.text} posts Communauté sont actuellement collectés, dont {youtubeCommunityCounts.image} images, {youtubeCommunityCounts.poll} sondages et {youtubeCommunityCounts.text} textes. Ce sont des contenus observés, pas les totaux historiques certifiés de la chaîne.
+                  </p>
+                  <button className="button ghost compact" type="button" onClick={() => setView("sources")}>Voir la couverture →</button>
+                </div>
+              ) : null}
 
               {topUndatedCount > 0 ? (
                 <p className="top-undated-note">
@@ -1067,56 +1094,57 @@ export function SocialOS({
               ) : null}
             </section>
 
-            {topFilteredPosts.length ? (
-              <div className="post-grid top-ranking-grid">
-                {topFilteredPosts.map((post, index) => (
-                  <PostCard
-                    post={post}
-                    rank={index + 1}
-                    compact={false}
-                    onPlay={setActiveVideoPost}
-                    key={post.id}
-                  />
-                ))}
-              </div>
-            ) : topPlatform !== "all" ? (
-              <div className={`format-empty-state top-ranking-empty tone-${PLATFORM_META[topPlatform].tone}`}>
-                <span>{topFormatFilter === "comment" ? "💭" : "📡"}</span>
+            <section
+              className={`category-results tone-${PLATFORM_META[topPlatform].tone}`}
+              aria-labelledby="active-category-title"
+            >
+              <header className="category-results-header">
                 <div>
-                  <h3>
-                    {topEmptyIsDuration
-                      ? "Aucun contenu daté dans cette période"
-                      : search.trim()
-                        ? "Aucun résultat pour cette recherche"
-                        : "Aucun contenu disponible pour ce format"}
-                  </h3>
-                  <p>
-                    {topEmptyIsDuration
-                      ? "Essaie une durée plus large ou reviens à All time."
-                      : search.trim()
-                        ? "Essaie une autre accroche ou efface la recherche."
-                        : formatEmptyCopy(topPlatform, topFormatFilter)}
-                  </p>
+                  <span className="section-kicker">Catégorie active</span>
+                  <h2 id="active-category-title">
+                    {activeTopFormat?.emoji ?? "📂"} {PLATFORM_META[topPlatform].label} · {activeTopFormat?.label ?? topFormatFilter}
+                  </h2>
                 </div>
-                <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
-                  Voir les limites →
-                </button>
-              </div>
-            ) : (
-              <div className="empty-state">
-                <span>🔎</span>
-                <h3>
-                  {topEmptyIsDuration
-                    ? "Aucun contenu daté dans cette période"
-                    : "Aucun post ne correspond"}
-                </h3>
-                <p>
-                  {topEmptyIsDuration
-                    ? "Essaie une durée plus large ou reviens à All time."
-                    : "Essaie une autre recherche."}
-                </p>
-              </div>
-            )}
+                <span>{topFilteredPosts.length} collectés · {publicRankingLabel(topRankingMetric)}</span>
+              </header>
+
+              {topFilteredPosts.length ? (
+                <div className="post-grid top-ranking-grid">
+                  {topFilteredPosts.map((post, index) => (
+                    <PostCard
+                      post={post}
+                      rank={index + 1}
+                      compact={false}
+                      onOpenMedia={setActiveMediaPost}
+                      key={post.id}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={`format-empty-state top-ranking-empty tone-${PLATFORM_META[topPlatform].tone}`}>
+                  <span>{topFormatFilter === "comment" ? "💭" : "📡"}</span>
+                  <div>
+                    <h3>
+                      {topEmptyIsDuration
+                        ? "Aucun contenu daté dans cette période"
+                        : search.trim()
+                          ? "Aucun résultat pour cette recherche"
+                          : "Aucun contenu disponible pour cette catégorie"}
+                    </h3>
+                    <p>
+                      {topEmptyIsDuration
+                        ? "Essaie une durée plus large ou reviens à All time."
+                        : search.trim()
+                          ? "Essaie une autre accroche ou efface la recherche."
+                          : formatEmptyCopy(topPlatform, topFormatFilter)}
+                    </p>
+                  </div>
+                  <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
+                    Voir les limites →
+                  </button>
+                </div>
+              )}
+            </section>
           </div>
         ) : null}
 
@@ -1124,16 +1152,6 @@ export function SocialOS({
           <div className="view-stack">
             <div className="toolbar social-toolbar">
               <div className="filter-tabs" aria-label="Filtrer par plateforme">
-                <button
-                  className={platform === "all" ? "active" : ""}
-                  type="button"
-                  onClick={() => {
-                    setPlatform("all");
-                    setFormatFilter("all");
-                  }}
-                >
-                  Tous
-                </button>
                 {PLATFORM_ORDER.map((key) => (
                   <button
                     className={platform === key ? "active" : ""}
@@ -1141,7 +1159,7 @@ export function SocialOS({
                     key={key}
                     onClick={() => {
                       setPlatform(key);
-                      setFormatFilter("all");
+                      setFormatFilter(DEFAULT_FORMAT_FILTER[key]);
                     }}
                   >
                     {PLATFORM_META[key].emoji} {PLATFORM_META[key].label}
@@ -1155,9 +1173,12 @@ export function SocialOS({
               <span className="result-count"><b>{filteredPosts.length}</b> contenus</span>
             </div>
 
-            {platform !== "all" ? (
-              <div className="format-filter-tabs all-format-filters" aria-label={`Formats ${PLATFORM_META[platform].label}`}>
-                {getFormatFilters(platform).map((filter) => (
+            <div
+              className="format-filter-tabs all-format-filters"
+              role="group"
+              aria-label={`Catégories ${PLATFORM_META[platform].label}`}
+            >
+                {categoryFilters(platform).map((filter) => (
                   <button
                     className={formatFilter === filter.key ? "active" : ""}
                     type="button"
@@ -1168,55 +1189,66 @@ export function SocialOS({
                     {filter.emoji} {filter.label}
                   </button>
                 ))}
-              </div>
-            ) : null}
-
-            <div className="post-list-grid">
-              {visiblePosts.map((post, index) => (
-                <PostCard
-                  post={post}
-                  rank={index + 1}
-                  compact
-                  onPlay={setActiveVideoPost}
-                  key={post.id}
-                />
-              ))}
             </div>
-            {visiblePosts.length < filteredPosts.length ? (
-              <div className="progressive-pagination">
-                <span>
-                  {visiblePosts.length} sur {filteredPosts.length} contenus affichés
-                </span>
-                <button
-                  className="button ghost"
-                  type="button"
-                  onClick={() =>
-                    setPostPagination({
-                      key: paginationKey,
-                      count: visiblePostCount + POSTS_PAGE_SIZE,
-                    })
-                  }
-                >
-                  Afficher {Math.min(POSTS_PAGE_SIZE, filteredPosts.length - visiblePosts.length)} de plus ↓
-                </button>
-              </div>
-            ) : null}
-            {!filteredPosts.length ? (
-              <div className="empty-state">
-                <span>{formatFilter === "comment" ? "💭" : "🔎"}</span>
-                <h3>Aucun contenu pour ce filtre</h3>
-                <p>
-                  {platform === "all"
-                    ? "Essaie une autre recherche."
-                    : formatEmptyCopy(platform, formatFilter)}
-                </p>
-                {platform !== "all" ? (
+
+            <section
+              className={`category-results tone-${PLATFORM_META[platform].tone}`}
+              aria-labelledby="library-category-title"
+            >
+              <header className="category-results-header">
+                <div>
+                  <span className="section-kicker">Catégorie active</span>
+                  <h2 id="library-category-title">
+                    {activeLibraryFormat?.emoji ?? "📂"} {PLATFORM_META[platform].label} · {activeLibraryFormat?.label ?? formatFilter}
+                  </h2>
+                </div>
+                <span>{filteredPosts.length} collectés · {publicRankingLabel(filteredRanking.metric)}</span>
+              </header>
+
+              {filteredPosts.length ? (
+                <>
+                  <div className="post-list-grid">
+                    {visiblePosts.map((post, index) => (
+                      <PostCard
+                        post={post}
+                        rank={index + 1}
+                        compact
+                        onOpenMedia={setActiveMediaPost}
+                        key={post.id}
+                      />
+                    ))}
+                  </div>
+                  {visiblePosts.length < filteredPosts.length ? (
+                    <div className="progressive-pagination">
+                      <span>
+                        {visiblePosts.length} sur {filteredPosts.length} contenus affichés
+                      </span>
+                      <button
+                        className="button ghost"
+                        type="button"
+                        onClick={() =>
+                          setPostPagination({
+                            key: paginationKey,
+                            count: visiblePostCount + POSTS_PAGE_SIZE,
+                          })
+                        }
+                      >
+                        Afficher {Math.min(POSTS_PAGE_SIZE, filteredPosts.length - visiblePosts.length)} de plus ↓
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="empty-state">
+                  <span>{formatFilter === "comment" ? "💭" : "🔎"}</span>
+                  <h3>Aucun contenu pour cette catégorie</h3>
+                  <p>{formatEmptyCopy(platform, formatFilter)}</p>
                   <button className="button ghost" type="button" onClick={() => setView("sources")}>
                     Voir les limites →
                   </button>
-                ) : null}
-              </div>
-            ) : null}
+                </div>
+              )}
+            </section>
           </div>
         ) : null}
 
@@ -1281,7 +1313,7 @@ export function SocialOS({
         ) : null}
       </main>
 
-      <VideoPlayerModal post={activeVideoPost} onClose={closeActiveVideo} />
+      <MediaPreviewModal post={activeMediaPost} onClose={closeActiveMedia} />
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
@@ -1419,6 +1451,12 @@ function EditorialIdeaCard({
 
 function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
   const meta = PLATFORM_META[post.platform];
+  const rowMetric =
+    post.likes !== null
+      ? { icon: "♥", label: `${formatNumber(post.likes)} likes` }
+      : post.views !== null
+        ? { icon: "▶", label: `${formatNumber(post.views)} vues` }
+        : { icon: "—", label: "Métrique publique indisponible" };
   return (
     <a className="social-post-row" href={post.url} target="_blank" rel="noreferrer">
       <span className="rank">{String(rank).padStart(2, "0")}</span>
@@ -1432,7 +1470,7 @@ function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
           <span key={metric.label}>{metric.icon} {formatNumber(metric.value)}</span>
         ))}
       </span>
-      <span className={`mini-score score-${scoreTone(post.performance_score)}`}>{post.performance_score ?? "—"}</span>
+      <span className="mini-score" title={rowMetric.label}>{rowMetric.icon}</span>
     </a>
   );
 }
@@ -1509,48 +1547,58 @@ function PostCard({
   post,
   rank,
   compact,
-  onPlay,
+  onOpenMedia,
 }: {
   post: SocialPost;
   rank: number;
   compact: boolean;
-  onPlay: (post: SocialPost) => void;
+  onOpenMedia: (post: SocialPost) => void;
 }) {
   const meta = PLATFORM_META[post.platform];
+  const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url);
+  const postCopy = post.text || post.title || "Publication sans légende";
   return (
     <article
-      className={`social-post-card ${compact ? "compact" : ""}`}
+      className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
     >
-      <PostMediaPreview post={post} rank={rank} onPlay={onPlay} />
+      {hasMediaPreview ? (
+        <PostMediaPreview post={post} rank={rank} onOpenMedia={onOpenMedia} />
+      ) : null}
       <div className="post-card-body">
+        {!hasMediaPreview ? (
+          <div className="post-card-meta-row">
+            <span className={`inline-platform-badge tone-${meta.tone}`}>
+              {meta.emoji} {meta.label}
+            </span>
+            <span className="inline-post-rank">#{rank}</span>
+          </div>
+        ) : null}
         <div className="post-card-title">
           <div>
             <span className="section-kicker">{postLabel(post)} · {getSocialFormatLabel(post)}</span>
-            <h3>
-              <a href={post.url} target="_blank" rel="noreferrer">
-                {post.title || post.text || "Publication sans légende"}
-              </a>
-            </h3>
+            {hasMediaPreview ? (
+              <h3>
+                <a href={post.url} target="_blank" rel="noreferrer">
+                  {post.title || post.text || "Publication sans légende"}
+                </a>
+              </h3>
+            ) : (
+              <p className="post-text-content">
+                <a href={post.url} target="_blank" rel="noreferrer">
+                  {postCopy}
+                </a>
+              </p>
+            )}
           </div>
-          <span className={`score-badge score-${scoreTone(post.performance_score)}`}>
-            <b>{post.performance_score ?? "—"}</b><small>/100</small>
-          </span>
         </div>
         <div className="metric-row">
           {metrics(post).map((metric) => (
             <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
           ))}
         </div>
-        {!compact ? (
-          <div className="why-box">
-            <span>Pourquoi ça ressort</span>
-            <p>{post.score_explanation}</p>
-          </div>
-        ) : null}
         <footer>
           <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
           <span className="post-card-actions">
-            <span className={`confidence confidence-${post.score_confidence}`}>{confidenceLabel(post.score_confidence)}</span>
             <a href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
               Ouvrir ↗
             </a>
@@ -1564,11 +1612,11 @@ function PostCard({
 function PostMediaPreview({
   post,
   rank,
-  onPlay,
+  onOpenMedia,
 }: {
   post: SocialPost;
   rank: number;
-  onPlay: (post: SocialPost) => void;
+  onOpenMedia: (post: SocialPost) => void;
 }) {
   const meta = PLATFORM_META[post.platform];
   const video = getSocialVideoEmbed(post);
@@ -1623,58 +1671,51 @@ function PostMediaPreview({
 
   return (
     <div
-      className={`post-visual ${video ? "is-playable" : ""}`}
+      className={`post-visual ${video ? "is-playable" : "is-image"}`}
       ref={previewRef}
     >
-      {thumbnail ? (
-        <img
-          src={thumbnail}
-          alt={`Aperçu de ${post.title || post.text || `la publication ${meta.label}`}`}
-          loading="lazy"
-          onError={() => {
-            if (videoPlatform === "tiktok" && videoExternalId) {
-              TIKTOK_THUMBNAIL_CACHE.delete(videoExternalId);
-              if (thumbnailSource !== "oembed") {
-                setShouldLoadTikTokThumbnail(true);
+      <button
+        className="post-visual-trigger"
+        type="button"
+        onClick={() => onOpenMedia(post)}
+        disabled={!video && !thumbnail}
+        aria-label={
+          video
+            ? `Lire « ${post.title || post.text || "cette vidéo"} » directement dans le radar`
+            : `Agrandir « ${post.title || post.text || "cette publication"} »`
+        }
+      >
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt=""
+            loading="lazy"
+            onError={() => {
+              if (videoPlatform === "tiktok" && videoExternalId) {
+                TIKTOK_THUMBNAIL_CACHE.delete(videoExternalId);
+                if (thumbnailSource !== "oembed") {
+                  setShouldLoadTikTokThumbnail(true);
+                }
               }
-            }
-            setThumbnailSource("none");
-            setThumbnail(null);
-          }}
-        />
-      ) : (
-        <span className="post-preview-placeholder" aria-hidden="true">
-          <b>{meta.emoji}</b>
-          {video ? <small>Aperçu {meta.label}</small> : null}
-        </span>
-      )}
-      {video ? (
-        <button
-          className="post-play-button"
-          type="button"
-          onClick={() => onPlay(post)}
-          aria-label={`Lire « ${post.title || post.text || "cette vidéo"} » directement dans le radar`}
-        >
-          <span aria-hidden="true">▶</span>
-          <b>Lire ici</b>
-        </button>
-      ) : null}
-      {!video ? (
-        <a
-          className="post-visual-link"
-          href={post.url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Ouvrir « ${post.title || post.text || "cette publication"} » sur ${meta.label}`}
-        />
-      ) : null}
+              setThumbnailSource("none");
+              setThumbnail(null);
+            }}
+          />
+        ) : (
+          <span className="post-preview-placeholder" aria-hidden="true">
+            <b>{meta.emoji}</b>
+            {video ? <small>Aperçu {meta.label}</small> : null}
+          </span>
+        )}
+        {video ? <span className="media-play-mark" aria-hidden="true">▶</span> : null}
+      </button>
       <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
       <span className="post-rank">#{rank}</span>
     </div>
   );
 }
 
-function VideoPlayerModal({
+function MediaPreviewModal({
   post,
   onClose,
 }: {
@@ -1684,7 +1725,8 @@ function VideoPlayerModal({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
   const video = post ? getSocialVideoEmbed(post) : null;
-  const isOpen = video !== null;
+  const imageUrl = !video ? post?.thumbnail_url ?? null : null;
+  const isOpen = Boolean(post && (video || imageUrl));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -1724,50 +1766,56 @@ function VideoPlayerModal({
     };
   }, [isOpen, onClose]);
 
-  if (!post || !video) return null;
+  if (!post || (!video && !imageUrl)) return null;
   const meta = PLATFORM_META[post.platform];
-  const title = post.title || post.text || `Vidéo ${meta.label}`;
+  const title = post.title || post.text || `Publication ${meta.label}`;
 
   return (
     <div
-      className="video-modal-backdrop"
-      onMouseDown={(event) => {
+      className="media-modal-backdrop"
+      onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <section
-        className={`video-modal tone-${meta.tone}`}
+        className={`media-modal ${video ? "is-video" : "is-image"} tone-${meta.tone}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="video-modal-title"
+        aria-labelledby="media-modal-title"
         ref={modalRef}
       >
         <header>
           <div>
-            <span>{meta.emoji} Lecture dans le radar</span>
-            <h2 id="video-modal-title">{title}</h2>
+            <span>{meta.emoji} {video ? "Lecture dans le radar" : "Aperçu de la publication"}</span>
+            <h2 id="media-modal-title">{title}</h2>
           </div>
           <button
-            className="video-modal-close"
+            className="media-modal-close"
             type="button"
             onClick={onClose}
             ref={closeButtonRef}
-            aria-label="Fermer la vidéo"
+            aria-label="Fermer l’aperçu"
           >
             ✕
           </button>
         </header>
-        <div className="video-player-frame">
-          <iframe
-            src={video.playerUrl}
-            title={`Lecteur ${meta.label} : ${title}`}
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
+        {video ? (
+          <div className="video-player-frame">
+            <iframe
+              src={video.playerUrl}
+              title={`Lecteur ${meta.label} : ${title}`}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="media-image-frame">
+            <img src={imageUrl ?? undefined} alt={`Publication ${meta.label} : ${title}`} />
+          </div>
+        )}
         <footer>
-          <span>Lecteur officiel {meta.label} · Shorts et TikTok uniquement</span>
+          <span>{video ? `Lecteur officiel ${meta.label}` : `Image publique ${meta.label}`}</span>
           <a href={post.url} target="_blank" rel="noreferrer">
             Ouvrir sur {meta.label} ↗
           </a>

@@ -165,6 +165,10 @@ export function mergeWorkspaceWithPublicHistory(
   const posts = ranked.map((post) => {
     const live = liveByKey.get(postKey(post));
     const account = ACCOUNT_META[post.platform];
+    const firstObservedAt =
+      rawString(post.raw, "firstObservedAt") ?? snapshot.generatedAt;
+    const lastObservedAt =
+      rawString(post.raw, "lastObservedAt") ?? firstObservedAt;
     return {
       ...(live ?? {}),
       id: `${post.platform}:${post.externalId}`,
@@ -201,11 +205,11 @@ export function mergeWorkspaceWithPublicHistory(
           ? live.source_kind
           : "public-profile-history",
       first_seen_at:
-        typeof live?.first_seen_at === "string" ? live.first_seen_at : snapshot.generatedAt,
+        typeof live?.first_seen_at === "string" ? live.first_seen_at : firstObservedAt,
       last_seen_at:
-        typeof live?.last_seen_at === "string" ? live.last_seen_at : snapshot.generatedAt,
+        typeof live?.last_seen_at === "string" ? live.last_seen_at : lastObservedAt,
       last_metric_at:
-        typeof live?.last_metric_at === "string" ? live.last_metric_at : snapshot.generatedAt,
+        typeof live?.last_metric_at === "string" ? live.last_metric_at : lastObservedAt,
     } satisfies PublicWorkspacePost;
   });
 
@@ -375,6 +379,13 @@ function rawNumber(
   key: string,
 ): number | null {
   return raw ? numberOrNull(raw[key]) : null;
+}
+
+function rawString(
+  raw: Record<string, unknown> | null,
+  key: string,
+): string | null {
+  return raw ? stringOrNull(raw[key]) : null;
 }
 
 function countByPlatform(posts: readonly PublicWorkspacePost[]): Map<SocialPlatform, number> {

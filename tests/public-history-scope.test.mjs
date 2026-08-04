@@ -92,3 +92,40 @@ test("the YouTube Community filter contains image posts only", async () => {
       .every((post) => !matchesSocialFormatFilter(post, "community")),
   );
 });
+
+test("the public collector accumulates rolling Community windows", async () => {
+  const collector = await readFile(
+    new URL("../scripts/collect_public_history.py", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(collector, /load_existing_posts/);
+  assert.match(collector, /existing_keys - observed_keys/);
+  assert.match(collector, /Snapshot cumulatif append-only/);
+  assert.match(collector, /max\(current_poll_votes, incoming_poll_votes\)/);
+});
+
+test("preserved history keeps per-post observation timestamps", async () => {
+  const history = await snapshot();
+  const post = history.posts[0];
+  const firstObservedAt = "2026-07-01T10:00:00Z";
+  const lastObservedAt = "2026-07-02T10:00:00Z";
+  const workspace = mergeWorkspaceWithPublicHistory(null, {
+    ...history,
+    generatedAt: "2026-08-04T10:00:00Z",
+    posts: [
+      {
+        ...post,
+        raw: { ...post.raw, firstObservedAt, lastObservedAt },
+      },
+    ],
+  });
+  const mapped = workspace.posts.find(
+    (item) => item.external_post_id === post.externalId,
+  );
+
+  assert.ok(mapped);
+  assert.equal(mapped.first_seen_at, firstObservedAt);
+  assert.equal(mapped.last_seen_at, lastObservedAt);
+  assert.equal(mapped.last_metric_at, lastObservedAt);
+});

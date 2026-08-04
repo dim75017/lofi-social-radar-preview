@@ -142,20 +142,34 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    output = args.output if args.output.is_absolute() else ROOT / args.output
+    collected_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     selected_sources = [
         source
         for source in SOURCES
         if args.platform == "all" or source["platform"] == args.platform
     ]
+    selected_platforms = {source["platform"] for source in selected_sources}
 
+    existing_snapshot = load_existing_snapshot(output)
     posts_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    existing_posts = load_existing_posts(existing_snapshot)
+    for post in existing_posts:
+        seeded_post = seed_existing_observation_timestamps(
+            post, existing_snapshot.get("generatedAt")
+        )
+        posts_by_key[(post["platform"], post["externalId"])] = seeded_post
+    existing_keys = {key for key in posts_by_key if key[0] in selected_platforms}
+    observed_keys: set[tuple[str, str]] = set()
     source_coverages: list[dict[str, Any]] = []
 
     for source in selected_sources:
         scope_posts, source_coverage = collect_source(source, args.max_items)
         source_coverages.append(source_coverage)
         for post in scope_posts:
+            post = mark_post_observed(post, collected_at)
             key = (post["platform"], post["externalId"])
+            observed_keys.add(key)
             current = posts_by_key.get(key)
             posts_by_key[key] = post if current is None else merge_posts(current, post)
 
@@ -163,14 +177,28 @@ def main() -> int:
     coverage = aggregate_coverage(
         source_coverages, posts, args.platform, limited_by_argument=bool(args.max_items)
     )
+    coverage = merge_coverage_with_existing(
+        coverage,
+        existing_snapshot,
+        selected_platforms,
+        preserve_unselected=args.platform != "all",
+    )
+    preserved_only: dict[str, int] = {}
+    for platform, _external_id in existing_keys - observed_keys:
+        preserved_only[platform] = preserved_only.get(platform, 0) + 1
+    for item in coverage:
+        preserved_count = preserved_only.get(item["platform"], 0)
+        if preserved_count:
+            item["limitations"].append(
+                f"Snapshot cumulatif append-only : {preserved_count} contenu(s) observé(s) lors de relevés antérieurs sont conservés même s’ils ne figurent plus dans la fenêtre publique courante."
+            )
     snapshot = {
-        "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generatedAt": collected_at,
         "coverage": coverage,
         "posts": posts,
     }
     validate_snapshot(snapshot, args.platform)
 
-    output = args.output if args.output.is_absolute() else ROOT / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
     temporary.write_text(
@@ -180,6 +208,97 @@ def main() -> int:
 
     print_summary(snapshot, output)
     return 0
+
+
+def load_existing_snapshot(output: Path) -> dict[str, Any]:
+    """Charge le snapshot sans transformer une corruption en historique vide."""
+    if not output.is_file():
+        return {"coverage": [], "posts": []}
+    try:
+        payload = json.loads(output.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(
+            f"snapshot existant illisible, collecte interrompue sans écriture : {output}"
+        ) from error
+    if not isinstance(payload, dict):
+        raise RuntimeError("le snapshot existant doit être un objet JSON")
+    if not isinstance(payload.get("generatedAt"), str) or not payload["generatedAt"]:
+        raise RuntimeError("le snapshot existant doit contenir generatedAt")
+    posts = payload.get("posts")
+    coverage = payload.get("coverage")
+    if not isinstance(posts, list) or not isinstance(coverage, list):
+        raise RuntimeError(
+            "le snapshot existant doit contenir les tableaux posts et coverage"
+        )
+    for index, post in enumerate(posts):
+        if (
+            not isinstance(post, dict)
+            or not isinstance(post.get("platform"), str)
+            or not isinstance(post.get("externalId"), str)
+            or not post["externalId"]
+            or not isinstance(post.get("raw"), dict)
+        ):
+            raise RuntimeError(f"post existant invalide à l'index {index}")
+    for index, item in enumerate(coverage):
+        if not isinstance(item, dict) or not isinstance(item.get("platform"), str):
+            raise RuntimeError(f"couverture existante invalide à l'index {index}")
+    return payload
+
+
+def load_existing_posts(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Conserve toutes les plateformes lors d'une collecte partielle append-only."""
+    return list(snapshot["posts"])
+
+
+def seed_existing_observation_timestamps(
+    post: dict[str, Any], fallback: Any
+) -> dict[str, Any]:
+    """Migre un ancien snapshot sans faire paraître ses posts comme rescannés."""
+    seeded = dict(post)
+    raw = dict(post.get("raw") or {})
+    if isinstance(fallback, str) and fallback:
+        if not isinstance(raw.get("firstObservedAt"), str):
+            raw["firstObservedAt"] = fallback
+        if not isinstance(raw.get("lastObservedAt"), str):
+            raw["lastObservedAt"] = fallback
+    seeded["raw"] = raw
+    return seeded
+
+
+def mark_post_observed(post: dict[str, Any], observed_at: str) -> dict[str, Any]:
+    """Horodate uniquement les contenus effectivement vus pendant ce relevé."""
+    observed = dict(post)
+    raw = dict(post.get("raw") or {})
+    if not isinstance(raw.get("firstObservedAt"), str):
+        raw["firstObservedAt"] = observed_at
+    raw["lastObservedAt"] = observed_at
+    observed["raw"] = raw
+    return observed
+
+
+def merge_coverage_with_existing(
+    current: list[dict[str, Any]],
+    existing_snapshot: dict[str, Any],
+    selected_platforms: set[str],
+    *,
+    preserve_unselected: bool,
+) -> list[dict[str, Any]]:
+    """Remplace la couverture collectée sans effacer les autres plateformes."""
+    merged = json.loads(json.dumps(current, ensure_ascii=False))
+    if preserve_unselected:
+        merged.extend(
+            json.loads(
+                json.dumps(
+                    [
+                        item
+                        for item in existing_snapshot["coverage"]
+                        if item["platform"] not in selected_platforms
+                    ],
+                    ensure_ascii=False,
+                )
+            )
+        )
+    return merged
 
 
 def collect_source(
@@ -752,9 +871,47 @@ def merge_posts(
         "publishedAtPrecision",
         "liveStatus",
         "availability",
+        "publicPublishedLabel",
+        "communityImageCount",
+        "pollChoices",
     ):
         if raw.get(key) is None and incoming_raw.get(key) is not None:
             raw[key] = incoming_raw[key]
+    metric_sources = raw.get("metricSources")
+    incoming_metric_sources = incoming_raw.get("metricSources")
+    if isinstance(metric_sources, dict) or isinstance(incoming_metric_sources, dict):
+        merged_metric_sources = (
+            dict(metric_sources) if isinstance(metric_sources, dict) else {}
+        )
+        if isinstance(incoming_metric_sources, dict):
+            merged_metric_sources.update(incoming_metric_sources)
+        raw["metricSources"] = merged_metric_sources
+    first_observed_values = [
+        value
+        for value in (
+            raw.get("firstObservedAt"),
+            incoming_raw.get("firstObservedAt"),
+        )
+        if isinstance(value, str) and value
+    ]
+    last_observed_values = [
+        value
+        for value in (
+            raw.get("lastObservedAt"),
+            incoming_raw.get("lastObservedAt"),
+        )
+        if isinstance(value, str) and value
+    ]
+    if first_observed_values:
+        raw["firstObservedAt"] = min(first_observed_values)
+    if last_observed_values:
+        raw["lastObservedAt"] = max(last_observed_values)
+    current_poll_votes = nonnegative_int(raw.get("pollVotes"))
+    incoming_poll_votes = nonnegative_int(incoming_raw.get("pollVotes"))
+    if current_poll_votes is None:
+        raw["pollVotes"] = incoming_poll_votes
+    elif incoming_poll_votes is not None:
+        raw["pollVotes"] = max(current_poll_votes, incoming_poll_votes)
     merged["raw"] = raw
     return merged
 
@@ -907,25 +1064,70 @@ def sort_posts(posts: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def validate_snapshot(snapshot: dict[str, Any], platform_filter: str) -> None:
-    expected_urls = set()
-    if platform_filter in {"all", "youtube"}:
-        expected_urls.add("https://www.youtube.com/@LofiGirl")
-    if platform_filter in {"all", "tiktok"}:
-        expected_urls.add("https://www.tiktok.com/@lofigirl")
-    if platform_filter == "all":
-        expected_urls.update(
-            {"https://www.instagram.com/lofigirl/", "https://x.com/lofigirl"}
-        )
-    actual_urls = {item["accountUrl"] for item in snapshot["coverage"]}
-    if actual_urls != expected_urls:
-        raise RuntimeError("la couverture ne correspond pas aux comptes officiels attendus")
+    official_account_urls = {
+        "youtube": "https://www.youtube.com/@LofiGirl",
+        "tiktok": "https://www.tiktok.com/@lofigirl",
+        "instagram": "https://www.instagram.com/lofigirl/",
+        "x": "https://x.com/lofigirl",
+    }
+    required_platforms = (
+        {"youtube", "tiktok", "instagram", "x"}
+        if platform_filter == "all"
+        else {platform_filter}
+    )
+    coverage_platforms: set[str] = set()
+    for item in snapshot["coverage"]:
+        platform = item.get("platform") if isinstance(item, dict) else None
+        if platform not in official_account_urls:
+            raise RuntimeError(f"plateforme de couverture inattendue : {platform}")
+        if platform in coverage_platforms:
+            raise RuntimeError(f"couverture dupliquée : {platform}")
+        coverage_platforms.add(platform)
+        if item.get("accountUrl") != official_account_urls[platform]:
+            raise RuntimeError(f"compte officiel incorrect pour {platform}")
+        item_count = item.get("itemCount")
+        if isinstance(item_count, bool) or not isinstance(item_count, int) or item_count < 0:
+            raise RuntimeError(f"compteur de couverture invalide pour {platform}")
+    if not required_platforms.issubset(coverage_platforms):
+        raise RuntimeError("la couverture ne contient pas toutes les plateformes requises")
 
     keys: set[tuple[str, str]] = set()
+    post_counts: dict[str, int] = {}
     for post in snapshot["posts"]:
+        if not isinstance(post, dict):
+            raise RuntimeError("un post du snapshot n'est pas un objet")
+        for field in ("platform", "externalId", "url", "format", "raw"):
+            if field not in post:
+                raise RuntimeError(f"champ obligatoire absent du post : {field}")
+        if (
+            not isinstance(post["externalId"], str)
+            or not post["externalId"]
+            or not isinstance(post["url"], str)
+            or not post["url"]
+            or not isinstance(post["format"], str)
+            or not isinstance(post["raw"], dict)
+        ):
+            raise RuntimeError(f"post mal formé : {post.get('externalId')}")
         key = (post["platform"], post["externalId"])
         if key in keys:
             raise RuntimeError(f"doublon après normalisation : {key}")
         keys.add(key)
+        post_counts[post["platform"]] = post_counts.get(post["platform"], 0) + 1
+        for metric in ("views", "likes", "comments", "shares", "saves"):
+            value = post.get(metric)
+            if value is not None and nonnegative_number(value) is None:
+                raise RuntimeError(f"métrique {metric} invalide pour {key}")
+        poll_votes = post["raw"].get("pollVotes")
+        if poll_votes is not None and (
+            isinstance(poll_votes, bool)
+            or not isinstance(poll_votes, int)
+            or poll_votes < 0
+        ):
+            raise RuntimeError(f"nombre de votes invalide pour {key}")
+        if post["format"] == "community_poll":
+            poll_choices = post["raw"].get("pollChoices")
+            if not isinstance(poll_choices, list) or len(poll_choices) < 2:
+                raise RuntimeError(f"choix de sondage invalides pour {key}")
         if post["platform"] == "tiktok" and post["thumbnailUrl"] is not None:
             raise RuntimeError("une miniature TikTok signée a été conservée")
         if post["platform"] == "youtube" and post["format"] not in {
@@ -943,6 +1145,14 @@ def validate_snapshot(snapshot: dict[str, Any], platform_filter: str) -> None:
             )
         if post["platform"] not in {"youtube", "tiktok"}:
             raise RuntimeError(f"plateforme inattendue : {post['platform']}")
+
+    for item in snapshot["coverage"]:
+        expected_count = post_counts.get(item["platform"], 0)
+        if item["itemCount"] != expected_count:
+            raise RuntimeError(
+                f"couverture incohérente pour {item['platform']} : "
+                f"{item['itemCount']} annoncé(s), {expected_count} post(s) présent(s)"
+            )
 
     serialized = json.dumps(snapshot, ensure_ascii=False)
     if SIGNED_TIKTOK_PATTERN.search(serialized):

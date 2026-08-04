@@ -6,18 +6,18 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 ## Fonctionnalités
 
-- Navigation interactive : Command Center, meilleurs posts, idées à produire, tous les contenus et état des sources.
+- Navigation interactive : Command Center, meilleurs posts, idées à produire, bibliothèque par catégorie et état des sources.
 - Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
-- « Meilleurs posts » affiche par défaut tout l’historique disponible, de la meilleure performance cumulée à la plus faible. YouTube, Instagram, TikTok et X restent toujours visibles sous cette catégorie dans la navigation ; le contenu conserve le filtre de durée (7 jours, 30 jours, 3 mois, 6 mois, 1 an ou All time), la recherche et les formats natifs.
-- Score lifetime fondé sur les volumes cumulés, normalisé à l’intérieur de chaque plateforme et de chaque format, sans bonus de récence et sans remplacer les métriques absentes par des zéros.
+- « Meilleurs posts » impose toujours une plateforme et une catégorie actives : aucun filtre « Tous » ne mélange les formats. Les contenus sont triés par likes publics décroissants dans chaque catégorie ; les Shorts utilisent provisoirement les vues, car leurs likes ne sont pas présents dans le snapshot public actuel.
+- Le filtre de durée (7 jours, 30 jours, 3 mois, 6 mois, 1 an ou All time) et la recherche restent disponibles. Le score analytique composite demeure réservé aux analyses et aux idées ; il n’ordonne plus la liste visible.
 - Moteur d’idées explicable : chaque proposition cite les posts sources, le signal observé, le hook, le format et les déclinaisons YouTube, Instagram, TikTok et X.
 - Décisions éditoriales locales : « À produire », « À retravailler » ou « Écarter ».
-- Recherche, filtres de formats et sous-catégories de plateformes entièrement interactifs ; les TikTok et YouTube Shorts proposent un aperçu officiel et une lecture directe dans le radar. Le classement Meilleurs posts n’est ni tronqué ni paginé.
+- Recherche, catégories et sous-catégories de plateformes entièrement interactives. Les aperçus média sont carrés : un clic sur un TikTok ou un Short lance directement le lecteur, un clic sur une image ouvre une grande preview, et les posts texte n’affichent aucune fausse vignette. Le classement Meilleurs posts n’est ni tronqué ni paginé.
 - Interface responsive alignée sur les Radars YouTube et Spotify, avec assets officiels Lofi Girl uniquement.
 
 ## Couverture des données publiques
 
-- **YouTube** : uniquement les Shorts et les posts Communauté publics. Dans les filtres, « Communauté · image » contient strictement les 94 posts avec image ; les 17 sondages et 89 posts texte ont leurs propres boutons. Les vidéos longues et les lives sont entièrement exclus. L’onglet public livre actuellement 200 posts Communauté avant d’arrêter sa pagination ; cela ne garantit pas l’absence de posts plus anciens.
+- **YouTube** : uniquement les Shorts et les posts Communauté publics. Les nombres visibles sont des contenus **collectés**, pas des totaux historiques : la fenêtre publique livre actuellement 200 posts Communauté (94 images, 17 sondages et 89 textes), puis arrête sa pagination. Le scanner conserve désormais les relevés de façon cumulative et dédupliquée pour ne plus perdre les posts qui sortent de cette fenêtre. Les vidéos longues et les lives sont entièrement exclus.
 - **Dates YouTube** : les 319 Shorts dont la date publique n’est pas récupérable restent inclus dans All time et sont exclus des durées bornées, sans leur inventer une date à partir de l’import.
 - **TikTok** : catalogue public visible du profil officiel, avec dates et métriques publiques disponibles.
 - **X** : cinq publications actuellement accessibles par le scanner public. Un historique plus profond nécessite l’API X appropriée.
@@ -40,4 +40,4 @@ python scripts/collect_public_history.py
 
 ## Étape suivante
 
-Connecter les accès propriétaires Meta, TikTok, X et YouTube Analytics afin d’ajouter portée, watch time, rétention, partages et sauvegardes, puis automatiser les relevés à 1 h, 6 h, 24 h, 72 h et 7 jours.
+Importer l’historique propriétaire YouTube Posts pour récupérer les publications Communauté antérieures à la fenêtre publique, puis connecter YouTube Data API afin d’ajouter les likes et dates exactes des Shorts. Connecter ensuite les accès propriétaires Meta, TikTok et X et automatiser les relevés à 1 h, 6 h, 24 h, 72 h et 7 jours.
