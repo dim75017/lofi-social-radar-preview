@@ -61,6 +61,30 @@ test("normalizes inside each platform before building a global order", () => {
   assert.equal(byId.get("x-high").platformRank, 1);
 });
 
+test("ranks Community polls with their public vote totals", () => {
+  const ranked = rankPosts(
+    [
+      post({
+        externalId: "poll-high",
+        format: "community_poll",
+        likes: 1_000,
+        raw: { pollVotes: 40_000 },
+      }),
+      post({
+        externalId: "poll-low",
+        format: "community_poll",
+        likes: 1_000,
+        raw: { pollVotes: 4_000 },
+      }),
+    ],
+    NOW,
+  );
+
+  assert.equal(ranked[0].externalId, "poll-high");
+  assert.ok(ranked[0].metricCoverage.includes("pollVotes"));
+  assert.match(ranked[0].scoreExplanation, /votes du sondage/i);
+});
+
 test("keeps posts with no public metric unscored and reports descriptive caveats", () => {
   const posts = [
     post({

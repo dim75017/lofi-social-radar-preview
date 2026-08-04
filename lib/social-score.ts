@@ -1,6 +1,12 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner";
 
-export type SocialMetric = "views" | "likes" | "comments" | "shares" | "saves";
+export type SocialMetric =
+  | "views"
+  | "likes"
+  | "comments"
+  | "shares"
+  | "saves"
+  | "pollVotes";
 
 export type ScoreConfidence = "high" | "medium" | "low" | "insufficient";
 
@@ -40,13 +46,21 @@ export type SocialAnalysis = {
   caveats: string[];
 };
 
-const METRICS: SocialMetric[] = ["views", "likes", "comments", "shares", "saves"];
+const METRICS: SocialMetric[] = [
+  "views",
+  "likes",
+  "comments",
+  "shares",
+  "saves",
+  "pollVotes",
+];
 const METRIC_WEIGHTS: Record<SocialMetric, number> = {
   views: 0.45,
   likes: 0.25,
   comments: 0.15,
   shares: 0.1,
   saves: 0.05,
+  pollVotes: 0.2,
 };
 const METRIC_LABELS: Record<SocialMetric, string> = {
   views: "niveau de vues",
@@ -54,6 +68,7 @@ const METRIC_LABELS: Record<SocialMetric, string> = {
   comments: "commentaires par vue",
   shares: "partages par vue",
   saves: "sauvegardes par vue",
+  pollVotes: "votes du sondage",
 };
 
 type ScoreDraft = RankedPost;
@@ -151,7 +166,7 @@ export function buildSocialAnalysis(
     const platformPosts = byPlatform.get(platform) ?? [];
     const top = platformPosts.find((post) => post.performanceScore !== null) ?? null;
     const availableMetrics = METRICS.filter((metric) =>
-      platformPosts.some((post) => post[metric] !== null),
+      platformPosts.some((post) => sourceMetric(post, metric) !== null),
     );
     coverage.push({
       platform,
@@ -357,7 +372,21 @@ function comparableValues(
     comments: engagementValue(post.comments, denominator, ageDays),
     shares: engagementValue(post.shares, denominator, ageDays),
     saves: engagementValue(post.saves, denominator, ageDays),
+    pollVotes: engagementValue(sourceMetric(post, "pollVotes"), denominator, ageDays),
   };
+}
+
+function sourceMetric(post: NormalizedPost, metric: SocialMetric): number | null {
+  if (metric !== "pollVotes") return safeMetric(post[metric]);
+  const raw = post.raw;
+  if (!raw) return null;
+  return safeMetric(
+    typeof raw.pollVotes === "number"
+      ? raw.pollVotes
+      : typeof raw.pollTotalVotes === "number"
+        ? raw.pollTotalVotes
+        : null,
+  );
 }
 
 function engagementValue(

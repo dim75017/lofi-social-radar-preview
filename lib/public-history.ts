@@ -1,4 +1,5 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner.ts";
+import { isInScopeSocialPost } from "./social-formats.ts";
 import { buildSocialAnalysis, rankPosts } from "./social-score.ts";
 
 export type HistoryCoverage = {
@@ -53,6 +54,7 @@ export type PublicWorkspacePost = {
   comments: number | null;
   shares: number | null;
   saves: number | null;
+  poll_votes: number | null;
   performance_score: number | null;
   score_confidence: "high" | "medium" | "low" | "insufficient";
   score_explanation: string;
@@ -138,11 +140,12 @@ export function mergeWorkspaceWithPublicHistory(
 ): PublicWorkspacePayload {
   const livePosts = (workspace?.posts ?? [])
     .map(normalizedFromWorkspace)
-    .filter((post): post is NormalizedPost => post !== null);
+    .filter((post): post is NormalizedPost => post !== null)
+    .filter((post) => isInScopeSocialPost(post));
   const merged = new Map<string, NormalizedPost>();
 
   for (const post of snapshot.posts) {
-    if (!isUsablePost(post)) continue;
+    if (!isUsablePost(post) || !isInScopeSocialPost(post)) continue;
     merged.set(postKey(post), sanitizePost(post));
   }
   for (const post of livePosts) {
@@ -180,6 +183,9 @@ export function mergeWorkspaceWithPublicHistory(
       comments: post.comments,
       shares: post.shares,
       saves: post.saves,
+      poll_votes:
+        rawNumber(post.raw, "pollVotes") ??
+        rawNumber(post.raw, "pollTotalVotes"),
       raw_json: post.raw == null ? null : JSON.stringify(post.raw),
       performance_score: post.performanceScore,
       confidence: post.confidence,
@@ -253,7 +259,7 @@ export function mergeWorkspaceWithPublicHistory(
   return {
     mode,
     notice:
-      "Historique public des comptes officiels Lofi Girl. YouTube et TikTok sont énumérés sur leurs pages publiques ; les limites Instagram et X restent affichées et aucune métrique manquante n’est inventée.",
+      "Historique public des comptes officiels Lofi Girl, limité aux formats éditoriaux demandés. Sur YouTube, seuls les Shorts et posts Communauté sont inclus : les vidéos longues et lives sont exclus. Les limites de collecte des commentaires écrits par le compte restent visibles et aucune métrique manquante n’est inventée.",
     generatedAt,
     accounts,
     posts,
@@ -362,6 +368,13 @@ function stringOrNull(value: unknown): string | null {
 
 function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function rawNumber(
+  raw: Record<string, unknown> | null,
+  key: string,
+): number | null {
+  return raw ? numberOrNull(raw[key]) : null;
 }
 
 function countByPlatform(posts: readonly PublicWorkspacePost[]): Map<SocialPlatform, number> {

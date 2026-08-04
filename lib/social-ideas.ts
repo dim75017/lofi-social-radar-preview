@@ -305,20 +305,20 @@ function adaptationsFor(
 
   return {
     youtube: {
-      format: "Short vertical de 15 à 25 secondes",
-      execution: `Accroche lisible dans la première seconde, progression en trois plans et boucle propre. ${callToAction}`,
+      format: "Short ou post Communauté natif",
+      execution: `Choisir un Short si le signal gagnant repose sur le rythme, ou un post Communauté (texte, image ou sondage) si l’idée appelle une réponse directe. ${callToAction}`,
     },
     instagram: {
-      format: "Reel 9:16 + Story de relais",
-      execution: `Placer le message clé sur la cover, garder une composition enregistrable et relayer avec un sticker natif. ${callToAction}`,
+      format: "Reel 9:16 ou post statique",
+      execution: `Utiliser un Reel pour une scène rythmée, ou un post statique lorsque l’accroche doit être comprise et enregistrée d’un coup d’œil. ${callToAction}`,
     },
     tiktok: {
       format: "Vidéo verticale de 9 à 18 secondes",
       execution: `Commencer directement dans la scène, utiliser un montage plus vif et une légende très courte. ${callToAction}`,
     },
     x: {
-      format: "Clip court ou image officielle + texte",
-      execution: `Formuler l’idée en une phrase autonome, joindre l’asset officiel pertinent et ouvrir un fil seulement si la révélation le justifie. ${callToAction}`,
+      format: "Texte, visuel statique ou clip court",
+      execution: `Formuler l’idée en une phrase autonome, puis choisir texte seul, asset officiel statique ou clip selon le signal observé. ${callToAction}`,
     },
   };
 }

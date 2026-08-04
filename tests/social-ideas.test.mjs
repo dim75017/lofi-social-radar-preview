@@ -80,6 +80,15 @@ test("generates deterministic ideas with cited seeds and a native adaptation for
   assert.ok(first.ideas[0].observedSignal.evidence.every((item) => /https:\/\//.test(item)));
   assert.ok(first.ideas[0].hook.length > 10);
   assert.ok(first.ideas[0].proposedFormat.length > 20);
+  assert.match(
+    first.ideas[0].platformAdaptations.youtube.format,
+    /Short.*Communauté/i,
+  );
+  assert.doesNotMatch(
+    `${first.ideas[0].platformAdaptations.youtube.format} ${first.ideas[0].platformAdaptations.youtube.execution}`,
+    /vidéo longue|live\s*stream/i,
+  );
+  assert.match(first.ideas[0].platformAdaptations.instagram.format, /Reel.*statique/i);
 });
 
 test("labels every proposal as non-causal and bans generated-AI visuals", () => {

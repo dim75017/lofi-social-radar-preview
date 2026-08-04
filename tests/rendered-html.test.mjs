@@ -40,12 +40,14 @@ test("server-renders the live Social Radar shell", async () => {
   assert.doesNotMatch(html, /🧪 Démo|Données de démonstration|codex-preview|react-loading-skeleton/i);
 });
 
-test("keeps real social collection and persistence explicit", async () => {
-  const [hosting, schema, component, scanner, packageJson] = await Promise.all([
+test("keeps real social collection, post formats and persistence explicit", async () => {
+  const [hosting, schema, component, formats, scanner, publicHistory, packageJson] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-formats.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-scanner.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/public-history.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
@@ -55,10 +57,18 @@ test("keeps real social collection and persistence explicit", async () => {
   assert.match(schema, /postMetricSnapshots/);
   assert.match(schema, /scanRuns/);
   assert.match(scanner, /youtube\.com\/feeds\/videos\.xml/);
+  assert.match(scanner, /youtube\.com\/@LofiGirl\/shorts/);
+  assert.match(scanner, /youtube\.com\/@LofiGirl\/posts/);
+  assert.match(scanner, /vidéos longues et lives exclus/i);
   assert.match(scanner, /instagram\.com/);
   assert.match(scanner, /tiktok\.com/);
   assert.match(scanner, /x\.com/);
   assert.match(component, /Chaque réseau est comparé à lui-même/);
   assert.match(component, /métriques absentes sont retirées/i);
+  assert.match(component, /platform-accordion-trigger/);
+  assert.match(formats, /Commentaires/);
+  assert.match(component, /commentaires écrits par @LofiGirl/i);
+  assert.match(publicHistory, /isInScopeSocialPost/);
+  assert.match(publicHistory, /seuls les Shorts et posts Communauté sont inclus/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

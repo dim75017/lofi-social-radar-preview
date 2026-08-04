@@ -29,6 +29,8 @@ if not YTDLP_VENDOR.is_dir():
 sys.path.insert(0, str(YTDLP_VENDOR))
 
 from yt_dlp import YoutubeDL, version as yt_dlp_version  # noqa: E402
+from yt_dlp.extractor.youtube import YoutubeTabIE  # noqa: E402
+from yt_dlp.utils import parse_count  # noqa: E402
 
 
 YOUTUBE_CHANNEL_ID = "UCSJ4gkVC6NrvII8umztf0Ow"
@@ -37,18 +39,13 @@ TIKTOK_HANDLE = "lofigirl"
 SOURCES = (
     {
         "platform": "youtube",
-        "scope": "videos",
-        "accountUrl": "https://www.youtube.com/@LofiGirl/videos",
-    },
-    {
-        "platform": "youtube",
         "scope": "shorts",
         "accountUrl": "https://www.youtube.com/@LofiGirl/shorts",
     },
     {
         "platform": "youtube",
-        "scope": "streams",
-        "accountUrl": "https://www.youtube.com/@LofiGirl/streams",
+        "scope": "community",
+        "accountUrl": "https://www.youtube.com/@LofiGirl/community",
     },
     {
         "platform": "tiktok",
@@ -90,11 +87,13 @@ STATIC_COVERAGE = (
 
 BASE_LIMITATIONS = {
     "youtube": [
+        "Périmètre volontairement limité aux Shorts et aux posts Communauté publics de la chaîne ; les vidéos longues et les lives sont exclus.",
         "Inventaire issu des onglets publics de la chaîne, sans YouTube Studio ni Analytics propriétaire.",
         "Les contenus privés, supprimés, réservés aux membres ou non listés ne sont pas accessibles.",
-        "Les dates YouTube sont approximées par yt-dlp depuis les libellés relatifs des onglets publics, sauf date de diffusion planifiée explicitement fournie.",
-        "Les likes, commentaires, partages, sauvegardes, impressions, rétention et abonnements générés ne sont pas exposés de façon fiable par les listes publiques.",
-        "Les onglets peuvent se chevaucher ; le tableau posts est dédupliqué par identifiant vidéo.",
+        "Les dates YouTube sont approximées par yt-dlp depuis les libellés relatifs des onglets publics.",
+        "Les listes publiques exposent les vues des Shorts et les likes des posts Communauté, mais pas de façon fiable les commentaires, partages, sauvegardes, impressions, rétention ou abonnements générés.",
+        "Les commentaires publiés par le compte Lofi Girl ne sont pas énumérables depuis le profil public ; un accès propriétaire YouTube est requis.",
+        "Le tableau posts est dédupliqué par identifiant public YouTube.",
     ],
     "tiktok": [
         "Inventaire limité à ce que le profil public TikTok livre à yt-dlp au moment de la collecte ; l’exhaustivité historique n’est pas garantie.",
@@ -188,35 +187,16 @@ def collect_source(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     platform = source["platform"]
     scope = source["scope"]
+    if platform == "youtube" and scope == "community":
+        return collect_youtube_community(source, max_items)
+
     limitations = list(BASE_LIMITATIONS[platform])
-    options: dict[str, Any] = {
-        "skip_download": True,
-        "extract_flat": "in_playlist",
-        "ignoreerrors": True,
-        "quiet": True,
-        "no_warnings": True,
-        "cachedir": False,
-        "socket_timeout": 25,
-        "retries": 2,
-        "fragment_retries": 0,
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/127.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-    }
+    options = ydl_options(platform)
     if max_items:
         options["playlistend"] = max_items
         limitations.append(
             f"Collecte volontairement limitée à {max_items} éléments par source pour ce snapshot."
         )
-    if platform == "youtube":
-        options["extractor_args"] = {
-            "youtubetab": {"approximate_date": [""]}
-        }
 
     try:
         with YoutubeDL(options) as ydl:
@@ -240,6 +220,128 @@ def collect_source(
         status = "available" if normalized else "empty"
         return normalized, coverage_record(source, status, normalized, limitations)
     except Exception as error:  # yt-dlp exposes several extractor-specific errors
+        limitations.append(f"Collecte indisponible : {clean_error(error)}")
+        return [], coverage_record(source, "unavailable", [], limitations)
+
+
+def ydl_options(platform: str) -> dict[str, Any]:
+    options: dict[str, Any] = {
+        "skip_download": True,
+        "extract_flat": "in_playlist",
+        "ignoreerrors": True,
+        "quiet": True,
+        "no_warnings": True,
+        "cachedir": False,
+        "socket_timeout": 25,
+        "retries": 2,
+        "fragment_retries": 0,
+        "http_headers": {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/127.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "en-US,en;q=0.9",
+        },
+    }
+    if platform == "youtube":
+        options["extractor_args"] = {
+            "youtubetab": {"approximate_date": [""]}
+        }
+    return options
+
+
+class YoutubeCommunityPostIE(YoutubeTabIE):
+    """Expose public Community post renderers through yt-dlp pagination."""
+
+    def _post_thread_entries(self, post_thread_renderer: dict[str, Any]):
+        post = (
+            ((post_thread_renderer.get("post") or {}).get("backstagePostRenderer"))
+            or {}
+        )
+        if post.get("postId"):
+            yield post
+
+
+def collect_youtube_community(
+    source: dict[str, str], max_items: int
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    limitations = list(BASE_LIMITATIONS["youtube"])
+    limitations.append(
+        "Les posts Communauté sont lus via la pagination publique interne de YouTube, car l’API Data v3 ne fournit pas de ressource Community Post."
+    )
+    if max_items:
+        limitations.append(
+            f"Collecte volontairement limitée à {max_items} éléments pour ce snapshot."
+        )
+
+    try:
+        options = ydl_options("youtube")
+        with YoutubeDL(options) as ydl:
+            extractor = YoutubeCommunityPostIE(ydl)
+            data, ytcfg = extractor._extract_data(
+                source["accountUrl"], f"{YOUTUBE_CHANNEL_ID} community"
+            )
+            tabs = extractor._extract_tab_renderers(data)
+            selected_tab = extractor._extract_selected_tab(tabs)
+            tab_identifier = clean_text(selected_tab.get("tabIdentifier"))
+            tab_title = clean_text(selected_tab.get("title"))
+            if tab_identifier != "FEcommunity_page" and (
+                not tab_title or "community" not in tab_title.casefold()
+            ):
+                raise RuntimeError(
+                    f"onglet YouTube inattendu ({tab_identifier or tab_title or 'inconnu'})"
+                )
+
+            renderers = extractor._entries(
+                selected_tab,
+                f"{YOUTUBE_CHANNEL_ID} community",
+                ytcfg,
+                extractor._extract_delegated_session_id(ytcfg, data),
+                extractor._extract_visitor_data(data, ytcfg),
+            )
+            normalized: list[dict[str, Any]] = []
+            unsupported = 0
+            for renderer in renderers:
+                post = normalize_community_post(extractor, renderer)
+                if post is None:
+                    unsupported += 1
+                else:
+                    normalized.append(post)
+                if max_items and len(normalized) >= max_items:
+                    break
+
+        normalized = deduplicate_scope(normalized)
+        if unsupported:
+            limitations.append(
+                f"{unsupported} post(s) Communauté avec un format public non pris en charge ont été ignorés."
+            )
+        if normalized:
+            format_counts: dict[str, int] = {}
+            for post in normalized:
+                post_format = post["format"]
+                format_counts[post_format] = format_counts.get(post_format, 0) + 1
+            limitations.append(
+                "Formats Communauté récupérés : "
+                + ", ".join(
+                    f"{post_format}={count}"
+                    for post_format, count in sorted(format_counts.items())
+                )
+                + "."
+            )
+            dated = sorted(
+                post["publishedAt"]
+                for post in normalized
+                if post.get("publishedAt") is not None
+            )
+            limitations.append(
+                f"La pagination publique s’est arrêtée après {len(normalized)} posts Communauté"
+                + (f", le plus ancien étant daté approximativement du {dated[0]}" if dated else "")
+                + " ; cela ne certifie pas l’absence de posts plus anciens."
+            )
+        status = "limited" if normalized else "empty"
+        return normalized, coverage_record(source, status, normalized, limitations)
+    except Exception as error:
         limitations.append(f"Collecte indisponible : {clean_error(error)}")
         return [], coverage_record(source, "unavailable", [], limitations)
 
@@ -283,6 +385,180 @@ def verify_account(source: dict[str, str], info: dict[str, Any]) -> None:
         )
 
 
+def normalize_community_post(
+    extractor: YoutubeCommunityPostIE, renderer: dict[str, Any]
+) -> dict[str, Any] | None:
+    external_id = clean_text(renderer.get("postId"))
+    if not external_id or not re.fullmatch(r"Ug[A-Za-z0-9_-]+", external_id):
+        return None
+
+    author_channel_id = first_text(
+        (((renderer.get("authorEndpoint") or {}).get("profileCardCommand") or {}).get(
+            "profileOwnerExternalChannelId"
+        )),
+        next(
+            (
+                (((run.get("navigationEndpoint") or {}).get("browseEndpoint") or {}).get(
+                    "browseId"
+                ))
+                for run in ((renderer.get("authorText") or {}).get("runs") or [])
+                if isinstance(run, dict)
+            ),
+            None,
+        ),
+    )
+    if author_channel_id and author_channel_id != YOUTUBE_CHANNEL_ID:
+        raise RuntimeError(
+            f"auteur Communauté inattendu ({author_channel_id}, attendu {YOUTUBE_CHANNEL_ID})"
+        )
+
+    attachment = renderer.get("backstageAttachment") or {}
+    if not isinstance(attachment, dict):
+        return None
+    poll_renderer = attachment.get("pollRenderer")
+    has_image = bool(
+        attachment.get("backstageImageRenderer")
+        or attachment.get("postMultiImageRenderer")
+    )
+    if isinstance(poll_renderer, dict):
+        post_format = "community_poll"
+    elif has_image:
+        post_format = "community_image"
+    elif not attachment:
+        post_format = "community_text"
+    else:
+        # A Community post containing an attached long video is deliberately
+        # not reclassified as a social post in this product scope.
+        return None
+
+    text = renderer_text(renderer.get("contentText"))
+    published_label = renderer_text(renderer.get("publishedTimeText"))
+    timestamp = (
+        extractor._parse_time_text(published_label, report_failure=False)
+        if published_label
+        else None
+    )
+    published_at = (
+        datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z")
+        if isinstance(timestamp, (int, float)) and timestamp > 0
+        else None
+    )
+
+    likes = public_count(renderer.get("voteCount"))
+    poll_choices = (
+        [
+            choice_text
+            for choice in poll_renderer.get("choices") or []
+            if isinstance(choice, dict)
+            and (choice_text := renderer_text(choice.get("text"))) is not None
+        ]
+        if isinstance(poll_renderer, dict)
+        else []
+    )
+    poll_votes = (
+        public_count(poll_renderer.get("totalVotes"))
+        if isinstance(poll_renderer, dict)
+        else None
+    )
+    thumbnail_url, image_count = community_thumbnail(attachment)
+    metric_sources = (
+        {"likes": "YouTube Community voteCount public"} if likes is not None else {}
+    )
+
+    return {
+        "platform": "youtube",
+        "externalId": external_id,
+        "url": f"https://www.youtube.com/post/{external_id}",
+        "title": text[:160] if text else None,
+        "text": text,
+        "format": post_format,
+        "thumbnailUrl": thumbnail_url,
+        "publishedAt": published_at,
+        "views": None,
+        "likes": likes,
+        "comments": None,
+        "shares": None,
+        "saves": None,
+        "raw": {
+            "collector": "yt-dlp YouTube public browse pagination",
+            "collectorVersion": yt_dlp_version.__version__,
+            "collectionScopes": ["community"],
+            "publishedAtPrecision": "approximate" if published_at else None,
+            "publicPublishedLabel": published_label,
+            "communityImageCount": image_count,
+            "pollChoices": poll_choices,
+            "pollVotes": poll_votes,
+            "metricSources": metric_sources,
+        },
+    }
+
+
+def renderer_text(value: Any) -> str | None:
+    if isinstance(value, str):
+        return clean_text(value)
+    if not isinstance(value, dict):
+        return None
+    simple_text = clean_text(value.get("simpleText"))
+    if simple_text:
+        return simple_text
+    runs = value.get("runs")
+    if not isinstance(runs, list):
+        return None
+    return clean_text(
+        "".join(
+            str(run.get("text") or "") for run in runs if isinstance(run, dict)
+        )
+    )
+
+
+def public_count(value: Any) -> int | None:
+    text = renderer_text(value)
+    if not text and isinstance(value, dict):
+        text = clean_text(
+            (((value.get("accessibility") or {}).get("accessibilityData") or {}).get(
+                "label"
+            ))
+        )
+    parsed = parse_count(text) if text else None
+    return parsed if isinstance(parsed, int) and parsed >= 0 else None
+
+
+def community_thumbnail(attachment: dict[str, Any]) -> tuple[str | None, int]:
+    image_renderers: list[dict[str, Any]] = []
+    single_image = attachment.get("backstageImageRenderer")
+    if isinstance(single_image, dict):
+        image_renderers.append(single_image)
+    multi_image = attachment.get("postMultiImageRenderer")
+    if isinstance(multi_image, dict):
+        for item in multi_image.get("images") or []:
+            image_renderer = (
+                item.get("backstageImageRenderer") if isinstance(item, dict) else None
+            )
+            if isinstance(image_renderer, dict):
+                image_renderers.append(image_renderer)
+
+    candidates: list[tuple[int, str]] = []
+    for image_renderer in image_renderers:
+        thumbnails = (image_renderer.get("image") or {}).get("thumbnails") or []
+        for thumbnail in thumbnails:
+            if not isinstance(thumbnail, dict):
+                continue
+            url = clean_text(thumbnail.get("url"))
+            if not url:
+                continue
+            if url.startswith("//"):
+                url = f"https:{url}"
+            if not url.startswith("https://"):
+                continue
+            width = nonnegative_int(thumbnail.get("width")) or 0
+            height = nonnegative_int(thumbnail.get("height")) or 0
+            candidates.append((width * height, url))
+    thumbnail_url = max(candidates, default=(0, None))[1]
+    return thumbnail_url, len(image_renderers)
+
+
 def normalize_entry(
     platform: str, scope: str, entry: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -299,16 +575,11 @@ def normalize_entry(
 
     description = clean_text(entry.get("description"))
     if platform == "youtube":
-        url = (
-            f"https://www.youtube.com/shorts/{external_id}"
-            if scope == "shorts"
-            else f"https://www.youtube.com/watch?v={external_id}"
-        )
+        if scope != "shorts":
+            return None
+        url = f"https://www.youtube.com/shorts/{external_id}"
         thumbnail_url = f"https://i.ytimg.com/vi/{external_id}/hqdefault.jpg"
-        post_format = {
-            "shorts": "short",
-            "streams": "livestream",
-        }.get(scope, "video")
+        post_format = "short"
     else:
         url = f"https://www.tiktok.com/@{TIKTOK_HANDLE}/video/{external_id}"
         # Never persist TikTok CDN thumbnails: they include expiring signatures.
@@ -457,7 +728,12 @@ def merge_posts(
         ):
             merged[field] = max(current_value, incoming_value)
 
-    format_priority = {"video": 0, "livestream": 1, "short": 2}
+    format_priority = {
+        "community_text": 0,
+        "community_image": 1,
+        "community_poll": 2,
+        "short": 3,
+    }
     if format_priority.get(incoming["format"], 0) > format_priority.get(
         merged["format"], 0
     ):
@@ -529,6 +805,9 @@ def aggregate_coverage(
         youtube_with_views = sum(
             1 for post in youtube_posts if post.get("views") is not None
         )
+        youtube_with_likes = sum(
+            1 for post in youtube_posts if post.get("likes") is not None
+        )
         if youtube_dated < len(youtube_posts):
             limitations.append(
                 f"Une date est exposée pour {youtube_dated}/{len(youtube_posts)} contenus ; les bornes oldest/newest portent uniquement sur ce sous-ensemble daté."
@@ -536,6 +815,10 @@ def aggregate_coverage(
         if youtube_with_views < len(youtube_posts):
             limitations.append(
                 f"Un compteur de vues est exposé pour {youtube_with_views}/{len(youtube_posts)} contenus ; les autres valeurs restent nulles."
+            )
+        if youtube_with_likes < len(youtube_posts):
+            limitations.append(
+                f"Un compteur de likes est exposé pour {youtube_with_likes}/{len(youtube_posts)} contenus ; les autres valeurs restent nulles."
             )
         statuses = {item["status"] for item in youtube_sources}
         status = (
@@ -549,7 +832,7 @@ def aggregate_coverage(
             aggregate_platform_record(
                 platform="youtube",
                 account_url="https://www.youtube.com/@LofiGirl",
-                scope="videos + shorts + streams",
+                scope="shorts + community posts",
                 status=status,
                 posts=youtube_posts,
                 limitations=limitations,
@@ -645,6 +928,19 @@ def validate_snapshot(snapshot: dict[str, Any], platform_filter: str) -> None:
         keys.add(key)
         if post["platform"] == "tiktok" and post["thumbnailUrl"] is not None:
             raise RuntimeError("une miniature TikTok signée a été conservée")
+        if post["platform"] == "youtube" and post["format"] not in {
+            "short",
+            "community_image",
+            "community_poll",
+            "community_text",
+        }:
+            raise RuntimeError(
+                f"format YouTube hors périmètre : {post['format']} ({post['externalId']})"
+            )
+        if post["platform"] == "youtube" and "/watch" in post["url"]:
+            raise RuntimeError(
+                f"URL vidéo longue YouTube hors périmètre : {post['url']}"
+            )
         if post["platform"] not in {"youtube", "tiktok"}:
             raise RuntimeError(f"plateforme inattendue : {post['platform']}")
 

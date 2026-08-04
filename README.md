@@ -7,21 +7,24 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 ## Fonctionnalités
 
 - Navigation interactive : Command Center, meilleurs posts, idées à produire, tous les contenus et état des sources.
-- Catalogue public historique de **848 contenus visibles** au 4 août 2026 : 457 YouTube, 386 TikTok et 5 X.
+- Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
+- « Meilleurs posts » organisé en quatre dépliants YouTube, Instagram, TikTok et X, chacun avec ses filtres de formats natifs.
 - Classement normalisé à l’intérieur de chaque plateforme, sans remplacer les métriques absentes par des zéros.
 - Moteur d’idées explicable : chaque proposition cite les posts sources, le signal observé, le hook, le format et les déclinaisons YouTube, Instagram, TikTok et X.
 - Décisions éditoriales locales : « À produire », « À retravailler » ou « Écarter ».
-- Recherche, filtres, pagination progressive et cartes entièrement cliquables.
+- Recherche, filtres de formats, pagination progressive, dépliants et cartes entièrement cliquables.
 - Interface responsive alignée sur les Radars YouTube et Spotify, avec assets officiels Lofi Girl uniquement.
 
 ## Couverture des données publiques
 
-- **YouTube** : catalogue public visible de la chaîne officielle, incluant vidéos, Shorts et lives. Certains anciens contenus n’exposent pas toutes les dates ou métriques.
+- **YouTube** : uniquement les Shorts et les posts Communauté publics (image, texte et sondage). Les vidéos longues et les lives sont entièrement exclus. L’onglet public livre actuellement 200 posts Communauté avant d’arrêter sa pagination ; cela ne garantit pas l’absence de posts plus anciens.
 - **TikTok** : catalogue public visible du profil officiel, avec dates et métriques publiques disponibles.
 - **X** : cinq publications actuellement accessibles par le scanner public. Un historique plus profond nécessite l’API X appropriée.
 - **Instagram** : le profil officiel déclare 1 673 publications, mais l’historique complet et ses insights nécessitent l’autorisation Meta du compte propriétaire. Aucun chiffre n’est inventé en attendant.
 
 La couverture porte sur les contenus encore publics et visibles : les contenus supprimés, privés ou non répertoriés ne peuvent pas être certifiés par un scan public.
+
+Les filtres « Commentaires » désignent les commentaires écrits par le compte Lofi Girl. Leur collecte complète nécessite les exports ou accès propriétaires des plateformes ; le radar affiche cette limite au lieu de fabriquer des résultats.
 
 ## Commandes
 

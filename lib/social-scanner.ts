@@ -2,6 +2,7 @@ export type SocialPlatform = "youtube" | "instagram" | "tiktok" | "x";
 
 export type SocialSourceKind =
   | "youtube_atom"
+  | "youtube_public_profile"
   | "instagram_profile_embed"
   | "tiktok_creator_embed"
   | "x_server_rendered_profile";
@@ -38,6 +39,8 @@ const ACCOUNTS = {
     channelId: "UCSJ4gkVC6NrvII8umztf0Ow",
     feedUrl:
       "https://www.youtube.com/feeds/videos.xml?channel_id=UCSJ4gkVC6NrvII8umztf0Ow",
+    shortsUrl: "https://www.youtube.com/@LofiGirl/shorts",
+    communityUrl: "https://www.youtube.com/@LofiGirl/posts",
   },
   instagram: {
     handle: "lofigirl",
@@ -83,10 +86,36 @@ export async function scanPlatform(
 }
 
 async function scanYouTube(): Promise<ScanResult> {
-  const xml = await fetchPublicText(
-    "youtube",
-    ACCOUNTS.youtube.feedUrl,
-    "application/atom+xml, application/xml;q=0.9, text/xml;q=0.8",
+  const [feedResult, shortsResult, communityResult] = await Promise.allSettled([
+    fetchPublicText(
+      "youtube",
+      ACCOUNTS.youtube.feedUrl,
+      "application/atom+xml, application/xml;q=0.9, text/xml;q=0.8",
+    ),
+    fetchPublicText(
+      "youtube",
+      ACCOUNTS.youtube.shortsUrl,
+      "text/html,application/xhtml+xml",
+    ),
+    fetchPublicText(
+      "youtube",
+      ACCOUNTS.youtube.communityUrl,
+      "text/html,application/xhtml+xml",
+    ),
+  ]);
+  const xml = feedResult.status === "fulfilled" ? feedResult.value : "";
+  const shortsPage =
+    shortsResult.status === "fulfilled" ? shortsResult.value : "";
+  const communityPage =
+    communityResult.status === "fulfilled" ? communityResult.value : "";
+  if (!xml && !shortsPage && !communityPage) {
+    throw new SocialScanError(
+      "youtube",
+      "Les onglets publics Shorts et Communauté sont momentanément indisponibles.",
+    );
+  }
+  const shortIds = new Set(
+    uniqueMatches(shortsPage, /"videoId":"([A-Za-z0-9_-]{6,20})"/g),
   );
   const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/gi)];
   const posts: NormalizedPost[] = [];
@@ -94,20 +123,15 @@ async function scanYouTube(): Promise<ScanResult> {
   for (const entryMatch of entries.slice(0, MAX_POSTS_PER_SOURCE)) {
     const entry = entryMatch[1];
     const videoId = xmlTag(entry, "yt:videoId");
-    if (!videoId) continue;
+    if (!videoId || !shortIds.has(videoId)) continue;
 
-    const alternateLinkTag =
-      entry.match(/<link\b(?=[^>]*\brel=["']alternate["'])[^>]*>/i)?.[0] ??
-      "";
-    const alternateUrl = xmlAttribute(alternateLinkTag, "href");
     const title = xmlTag(entry, "title") ?? "";
     const description = xmlTag(entry, "media:description") ?? "";
     const thumbnailTag = entry.match(/<media:thumbnail\b[^>]*>/i)?.[0] ?? "";
     const statisticsTag = entry.match(/<media:statistics\b[^>]*>/i)?.[0] ?? "";
     const starRatingTag = entry.match(/<media:starRating\b[^>]*>/i)?.[0] ?? "";
     const publishedAt = normalizeDate(xmlTag(entry, "published"));
-    const url =
-      alternateUrl ?? `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+    const url = `https://www.youtube.com/shorts/${encodeURIComponent(videoId)}`;
 
     posts.push({
       platform: "youtube",
@@ -115,7 +139,7 @@ async function scanYouTube(): Promise<ScanResult> {
       url,
       title,
       text: description,
-      format: url.includes("/shorts/") ? "short" : "video",
+      format: "short",
       thumbnailUrl: xmlAttribute(thumbnailTag, "url"),
       publishedAt,
       views: countOrNull(xmlAttribute(statisticsTag, "views")),
@@ -133,7 +157,9 @@ async function scanYouTube(): Promise<ScanResult> {
     });
   }
 
-  const parsedChannelId = xmlTag(xml, "yt:channelId");
+  if (communityPage) posts.push(...youtubeCommunityPosts(communityPage));
+
+  const parsedChannelId = xml ? xmlTag(xml, "yt:channelId") : null;
   const channelId =
     parsedChannelId && /^UC[A-Za-z0-9_-]{22}$/.test(parsedChannelId)
       ? parsedChannelId
@@ -142,9 +168,9 @@ async function scanYouTube(): Promise<ScanResult> {
     platform: "youtube",
     externalAccountId: channelId,
     followerCount: null,
-    sourceKind: "youtube_atom",
+    sourceKind: "youtube_public_profile",
     coverage:
-      "Flux Atom public · dernières publications et vues actuelles uniquement · abonnés, likes, commentaires, partages, sauvegardes et rétention absents.",
+      `Onglets publics Shorts${xml && shortsPage ? " ✓" : " indisponible"} + Communauté${communityPage ? " ✓" : " indisponible"} · ${posts.length} contenus récents dans ce relevé · vidéos longues et lives exclus · commentaires écrits par le compte non énumérables sans accès propriétaire.`,
     status: "limited",
     posts,
   };
@@ -385,6 +411,178 @@ async function scanX(): Promise<ScanResult> {
     status: "limited",
     posts,
   };
+}
+
+function youtubeCommunityPosts(source: string): NormalizedPost[] {
+  const initialData = youtubeInitialData(source);
+  if (!initialData) return [];
+
+  const renderers: unknown[] = [];
+  collectValuesByKey(initialData, "backstagePostRenderer", renderers);
+  const seen = new Set<string>();
+  const posts: NormalizedPost[] = [];
+
+  for (const value of renderers) {
+    const renderer = asRecord(value);
+    const postId = stringOrNull(renderer?.postId);
+    const authorId = nestedString(renderer, [
+      "authorEndpoint",
+      "browseEndpoint",
+      "browseId",
+    ]);
+    if (
+      !renderer ||
+      !postId ||
+      seen.has(postId) ||
+      (authorId && authorId !== ACCOUNTS.youtube.channelId)
+    ) {
+      continue;
+    }
+    seen.add(postId);
+
+    const text = rendererText(renderer.contentText);
+    const attachment = asRecord(renderer.backstageAttachment);
+    const attachmentJson = attachment ? JSON.stringify(attachment) : "";
+    const isPoll = /"(?:pollRenderer|backstagePollRenderer|pollChoiceRenderer)"/.test(
+      attachmentJson,
+    );
+    const hasImage = /"(?:backstageImageRenderer|imageRenderer)"/.test(
+      attachmentJson,
+    );
+    const format = isPoll
+      ? "community_poll"
+      : hasImage
+        ? "community_image"
+        : attachment
+          ? "community_post"
+          : "community_text";
+    const pollVotes = isPoll ? firstCountForKeys(attachment, ["totalVotes", "totalVotesText"]) : null;
+
+    posts.push({
+      platform: "youtube",
+      externalId: postId,
+      url: `https://www.youtube.com/post/${encodeURIComponent(postId)}`,
+      title: shortTitle(text || (isPoll ? "Sondage Communauté" : "Post Communauté")),
+      text,
+      format,
+      thumbnailUrl: firstThumbnailUrl(attachment),
+      publishedAt: null,
+      views: null,
+      likes: compactCountOrNull(rendererText(renderer.voteCount)),
+      comments: communityReplyCount(renderer.actionButtons),
+      shares: null,
+      saves: null,
+      raw: {
+        source: "youtube_public_community",
+        publishedLabel: rendererText(renderer.publishedTimeText) || null,
+        pollVotes,
+        attachmentType: format,
+        metricSources: {
+          likes: "compteur public du post Communauté",
+          comments: "compteur public du post Communauté",
+          pollVotes: isPoll ? "total public du sondage" : null,
+        },
+      },
+    });
+    if (posts.length >= MAX_POSTS_PER_SOURCE) break;
+  }
+
+  return posts;
+}
+
+function youtubeInitialData(source: string): unknown | null {
+  for (const marker of [
+    "var ytInitialData = ",
+    'window["ytInitialData"] = ',
+  ]) {
+    const markerIndex = source.indexOf(marker);
+    if (markerIndex < 0) continue;
+    const start = skipWhitespace(source, markerIndex + marker.length);
+    const payload = balancedJsonValue(source, start);
+    if (!payload) continue;
+    try {
+      return JSON.parse(payload);
+    } catch {
+      // Try the other supported assignment form before giving up.
+    }
+  }
+  return null;
+}
+
+function rendererText(value: unknown): string {
+  const record = asRecord(value);
+  if (!record) return typeof value === "string" ? value.trim() : "";
+  const simpleText = stringOrNull(record.simpleText);
+  if (simpleText) return simpleText;
+  const runs = Array.isArray(record.runs) ? record.runs : [];
+  return runs
+    .map((run) => stringOrNull(asRecord(run)?.text) ?? "")
+    .join("")
+    .trim();
+}
+
+function collectValuesByKey(
+  value: unknown,
+  key: string,
+  output: unknown[],
+  depth = 0,
+): void {
+  if (depth > 30 || value === null || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    for (const item of value) collectValuesByKey(item, key, output, depth + 1);
+    return;
+  }
+  for (const [entryKey, entryValue] of Object.entries(value)) {
+    if (entryKey === key) output.push(entryValue);
+    else collectValuesByKey(entryValue, key, output, depth + 1);
+  }
+}
+
+function firstThumbnailUrl(value: unknown): string | null {
+  const thumbnailArrays: unknown[] = [];
+  collectValuesByKey(value, "thumbnails", thumbnailArrays);
+  for (const candidate of thumbnailArrays) {
+    if (!Array.isArray(candidate)) continue;
+    for (const thumbnail of [...candidate].reverse()) {
+      const url = stringOrNull(asRecord(thumbnail)?.url);
+      if (url) return url.startsWith("//") ? `https:${url}` : url;
+    }
+  }
+  return null;
+}
+
+function firstCountForKeys(value: unknown, keys: string[]): number | null {
+  for (const key of keys) {
+    const candidates: unknown[] = [];
+    collectValuesByKey(value, key, candidates);
+    for (const candidate of candidates) {
+      const count = compactCountOrNull(rendererText(candidate));
+      if (count !== null) return count;
+    }
+  }
+  return null;
+}
+
+function communityReplyCount(value: unknown): number | null {
+  const labels: unknown[] = [];
+  collectValuesByKey(value, "label", labels);
+  for (const label of labels) {
+    if (typeof label !== "string" || !/(?:comments?|replies?)/i.test(label)) continue;
+    const count = compactCountOrNull(label);
+    if (count !== null) return count;
+  }
+  return null;
+}
+
+function compactCountOrNull(value: string): number | null {
+  const match = value.match(/([\d.,]+)\s*([KMB])?/i);
+  if (!match) return null;
+  const suffix = match[2]?.toUpperCase();
+  const multiplier = suffix === "K" ? 1_000 : suffix === "M" ? 1_000_000 : suffix === "B" ? 1_000_000_000 : 1;
+  const numeric = Number.parseFloat(
+    match[1].replace(/,(?=\d{3}\b)/g, "").replace(",", "."),
+  );
+  return Number.isFinite(numeric) ? Math.round(numeric * multiplier) : null;
 }
 
 async function fetchPublicText(
