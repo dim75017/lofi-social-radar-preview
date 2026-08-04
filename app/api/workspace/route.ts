@@ -6,59 +6,13 @@ import {
   runSocialScan,
   socialDataNeedsScan,
 } from "../../../db/runtime";
-import type {
-  NormalizedPost,
-  SocialPlatform,
-} from "../../../lib/social-scanner";
-import { buildSocialAnalysis } from "../../../lib/social-score";
+import publicHistory from "../../../data/public-history.json";
+import {
+  mergeWorkspaceWithPublicHistory,
+  type PublicHistorySnapshot,
+} from "../../../lib/public-history";
 
 export const dynamic = "force-dynamic";
-
-type WorkspacePost = {
-  platform: string;
-  external_id: string;
-  url: string;
-  title: string;
-  text: string;
-  format: string;
-  thumbnail_url: string | null;
-  published_at: string | null;
-  views: number | null;
-  likes: number | null;
-  comments: number | null;
-  shares: number | null;
-  saves: number | null;
-  raw_json: string | null;
-  [key: string]: unknown;
-};
-
-function rawFromJson(value: string | null): NormalizedPost["raw"] {
-  if (!value) return null;
-  try {
-    return JSON.parse(value) as NormalizedPost["raw"];
-  } catch {
-    return null;
-  }
-}
-
-function normalizedFromWorkspace(post: WorkspacePost): NormalizedPost {
-  return {
-    platform: post.platform as SocialPlatform,
-    externalId: post.external_id,
-    url: post.url,
-    title: post.title || null,
-    text: post.text || null,
-    format: post.format || null,
-    thumbnailUrl: post.thumbnail_url,
-    publishedAt: post.published_at,
-    views: post.views,
-    likes: post.likes,
-    comments: post.comments,
-    shares: post.shares,
-    saves: post.saves,
-    raw: rawFromJson(post.raw_json),
-  };
-}
 
 export async function GET(request: Request) {
   try {
@@ -126,7 +80,7 @@ export async function GET(request: Request) {
                     p.performance_score DESC,
                     p.published_at DESC`,
         )
-        .all<WorkspacePost>(),
+        .all<Record<string, unknown>>(),
       db
         .prepare(
           `SELECT * FROM scan_runs
@@ -136,26 +90,21 @@ export async function GET(request: Request) {
         .all(),
     ]);
 
-    const posts = postResult.results ?? [];
-    let analysis: ReturnType<typeof buildSocialAnalysis> | null = null;
-    if (posts.length > 0) {
-      try {
-        analysis = buildSocialAnalysis(posts.map(normalizedFromWorkspace));
-      } catch {
-        analysis = null;
-      }
-    }
-
-    return Response.json({
+    const workspace = mergeWorkspaceWithPublicHistory(
+      {
       mode: "live",
       notice:
         "Données publiques des comptes officiels Lofi Girl. Les couvertures limitées sont signalées explicitement et aucune métrique manquante n’est inventée.",
       generatedAt: new Date().toISOString(),
       accounts: accountResult.results ?? [],
-      posts,
+      posts: postResult.results ?? [],
       scans: scanResult.results ?? [],
-      analysis,
-    });
+      },
+      publicHistory as PublicHistorySnapshot,
+      "live",
+    );
+
+    return Response.json(workspace);
   } catch (error) {
     return routeError(error);
   }

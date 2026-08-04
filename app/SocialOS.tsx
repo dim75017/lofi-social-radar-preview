@@ -4,8 +4,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  generateSocialIdeas,
+  type SocialIdea,
+} from "../lib/social-ideas";
+
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
-type View = "overview" | "top" | "all" | "sources";
+type View = "overview" | "top" | "ideas" | "all" | "sources";
+type IdeaDecision = "produce" | "rework" | "discard";
 
 type SocialAccount = {
   id: string;
@@ -50,18 +56,6 @@ type SocialPost = {
   last_metric_at: string;
 };
 
-type ScanRun = {
-  id: string;
-  account_id: string;
-  status: "running" | "succeeded" | "partial" | "failed";
-  found_count: number;
-  inserted_count: number;
-  updated_count: number;
-  started_at: string;
-  completed_at: string | null;
-  error: string | null;
-};
-
 type Insight = {
   emoji: string;
   title: string;
@@ -69,13 +63,22 @@ type Insight = {
   evidence?: string;
 };
 
-type WorkspacePayload = {
-  mode: "live";
+export type WorkspacePayload = {
+  mode: "live" | "public-snapshot";
   notice: string;
   generatedAt: string;
   accounts: SocialAccount[];
   posts: SocialPost[];
-  scans: ScanRun[];
+  scans: unknown[];
+  historyCoverage?: Array<{
+    platform: Platform;
+    scope: string;
+    status: string;
+    itemCount: number;
+    oldestPublishedAt: string | null;
+    newestPublishedAt: string | null;
+    limitations: string[];
+  }>;
   analysis?: {
     insights?: Array<
       Partial<Insight> & {
@@ -111,6 +114,7 @@ const NAV: Array<{
 }> = [
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
+  { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
   { id: "all", emoji: "🔎", label: "Tous les contenus", group: "Données" },
   { id: "sources", emoji: "🔌", label: "Sources", group: "Données" },
 ];
@@ -124,6 +128,10 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
     title: "Meilleurs posts",
     subtitle: "Classement normalisé par plateforme, métriques et âge du contenu.",
   },
+  ideas: {
+    title: "Idées à produire",
+    subtitle: "Des concepts testables dérivés des signaux qui ressortent vraiment.",
+  },
   all: {
     title: "Tous les contenus",
     subtitle: "Les publications réellement détectées, sans donnée de démonstration.",
@@ -133,6 +141,9 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
     subtitle: "Couverture, fraîcheur et limites visibles pour chaque réseau.",
   },
 };
+
+const IDEA_DECISIONS_STORAGE_KEY = "lofi-social-radar:idea-decisions:v1";
+const POSTS_PAGE_SIZE = 48;
 
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -270,18 +281,51 @@ function metrics(post: SocialPost) {
   ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
 }
 
-export function SocialOS() {
-  const [workspace, setWorkspace] = useState<WorkspacePayload | null>(null);
+function normalizedIdeaPost(post: SocialPost) {
+  return {
+    platform: post.platform,
+    externalId: post.external_post_id,
+    url: post.url,
+    title: post.title || null,
+    text: post.text || null,
+    format: post.format || null,
+    thumbnailUrl: post.thumbnail_url,
+    publishedAt: post.published_at,
+    views: post.views,
+    likes: post.likes,
+    comments: post.comments,
+    shares: post.shares,
+    saves: post.saves,
+    raw: null,
+  };
+}
+
+export function SocialOS({
+  initialWorkspace = null,
+  previewMode = false,
+}: {
+  initialWorkspace?: WorkspacePayload | null;
+  previewMode?: boolean;
+}) {
+  const [workspace, setWorkspace] = useState<WorkspacePayload | null>(initialWorkspace);
   const [view, setView] = useState<View>("overview");
   const [platform, setPlatform] = useState<"all" | Platform>("all");
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [postPagination, setPostPagination] = useState({ key: "", count: POSTS_PAGE_SIZE });
+  const [ideaDecisions, setIdeaDecisions] = useState<Record<string, IdeaDecision>>({});
+  const [ideaDecisionsReady, setIdeaDecisionsReady] = useState(false);
 
   const loadWorkspace = useCallback(async () => {
+    if (previewMode) {
+      if (initialWorkspace) setWorkspace(initialWorkspace);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -294,14 +338,15 @@ export function SocialOS() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [initialWorkspace, previewMode]);
 
   useEffect(() => {
+    if (previewMode || initialWorkspace) return;
     const timeout = window.setTimeout(() => {
       void loadWorkspace();
     }, 0);
     return () => window.clearTimeout(timeout);
-  }, [loadWorkspace]);
+  }, [initialWorkspace, loadWorkspace, previewMode]);
 
   useEffect(() => {
     if (!toast) return;
@@ -309,8 +354,50 @@ export function SocialOS() {
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
-  const runScan = useCallback(
-    async (target?: Platform) => {
+  useEffect(() => {
+    let parsed: Record<string, IdeaDecision> = {};
+    try {
+      const saved = window.localStorage.getItem(IDEA_DECISIONS_STORAGE_KEY);
+      if (saved) {
+        parsed = JSON.parse(saved) as Record<string, IdeaDecision>;
+      }
+    } catch {
+      // Local decisions are optional; the radar stays usable if storage is blocked.
+    }
+    const timeout = window.setTimeout(() => {
+      setIdeaDecisions(parsed);
+      setIdeaDecisionsReady(true);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (!ideaDecisionsReady) return;
+    try {
+      window.localStorage.setItem(
+        IDEA_DECISIONS_STORAGE_KEY,
+        JSON.stringify(ideaDecisions),
+      );
+    } catch {
+      // Keep the in-memory state when the browser refuses local storage.
+    }
+  }, [ideaDecisions, ideaDecisionsReady]);
+
+  const runScan = async (target?: Platform) => {
+      if (previewMode) {
+        if (target) {
+          setPlatform(target);
+          setView("top");
+          setToast(
+            `${PLATFORM_META[target].label} · ${workspace?.accounts.find((account) => account.platform === target)?.post_count ?? 0} contenus du snapshot`,
+          );
+        } else {
+          setView("ideas");
+          setToast(`Idées recalculées sur ${workspace?.posts.length ?? 0} contenus publics`);
+        }
+        setMobileOpen(false);
+        return;
+      }
       setScanning(true);
       setError("");
       try {
@@ -328,9 +415,7 @@ export function SocialOS() {
       } finally {
         setScanning(false);
       }
-    },
-    [loadWorkspace],
-  );
+  };
 
   const posts = useMemo(() => workspace?.posts ?? [], [workspace?.posts]);
   const accounts = workspace?.accounts ?? [];
@@ -361,6 +446,33 @@ export function SocialOS() {
         }))
       : localInsights(posts);
   }, [posts, workspace?.analysis?.insights]);
+  const ideaPlan = useMemo(
+    () =>
+      generateSocialIdeas(posts.map(normalizedIdeaPost), {
+        now: workspace?.generatedAt,
+        maxIdeas: 6,
+        winnersPerPlatform: 4,
+      }),
+    [posts, workspace?.generatedAt],
+  );
+  const paginationKey = `${view}:${platform}:${search}`;
+  const visiblePostCount =
+    postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
+  const visiblePosts =
+    view === "all"
+      ? filteredPosts.slice(0, visiblePostCount)
+      : filteredPosts.slice(0, 20);
+
+  const setIdeaDecision = useCallback((ideaId: string, decision: IdeaDecision) => {
+    setIdeaDecisions((current) => ({ ...current, [ideaId]: decision }));
+    const label =
+      decision === "produce"
+        ? "Ajoutée à produire"
+        : decision === "rework"
+          ? "Ajoutée à retravailler"
+          : "Idée écartée";
+    setToast(label);
+  }, []);
   const activeSources = accounts.filter((account) => account.post_count > 0).length;
   const lastSuccess = accounts
     .map((account) => account.last_success_at)
@@ -370,6 +482,7 @@ export function SocialOS() {
 
   const navCount = (id: View) => {
     if (id === "top") return Math.min(10, posts.length);
+    if (id === "ideas") return ideaPlan.ideas.length;
     if (id === "all") return posts.length;
     if (id === "sources") return accounts.length;
     return undefined;
@@ -406,8 +519,20 @@ export function SocialOS() {
         </div>
 
         <div className="radar-switch" aria-label="Produit actif">
-          <span>▶ YouTube</span>
-          <span>♫ Spotify</span>
+          <a
+            href="https://dim75017.github.io/youtube-radar-kx9v2m/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            ▶ YouTube
+          </a>
+          <a
+            href="https://dim75017.github.io/youtube-radar-kx9v2m/spotify/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            ♫ Spotify
+          </a>
           <span className="on">● Social</span>
         </div>
 
@@ -445,7 +570,11 @@ export function SocialOS() {
             </div>
           </div>
           <button className="refresh-button" type="button" disabled={scanning} onClick={() => void runScan()}>
-            {scanning ? "⏳ Collecte…" : "↻ Scanner les réseaux"}
+            {scanning
+              ? "⏳ Collecte…"
+              : previewMode
+                ? "💡 Recalculer les idées"
+                : "↻ Scanner les réseaux"}
           </button>
         </div>
       </aside>
@@ -456,14 +585,20 @@ export function SocialOS() {
             <span className="eyebrow">Social & Community Intelligence OS</span>
             <h2>
               {NAV.find((item) => item.id === view)?.emoji} {VIEW_COPY[view].title}
-              <span className="top-pill">Live V1</span>
+              <span className="top-pill">{previewMode ? "Public V2" : "Live V2"}</span>
             </h2>
             <p>{VIEW_COPY[view].subtitle}</p>
           </div>
           <div className="top-actions">
-            <span className="demo-pill live-pill">● Données publiques réelles</span>
+            <span className="demo-pill live-pill">
+              ● {previewMode ? "Snapshot public interactif" : "Données publiques réelles"}
+            </span>
             <button className="button primary" type="button" disabled={scanning} onClick={() => void runScan()}>
-              {scanning ? "⏳ Scan en cours" : "🔄 Scanner maintenant"}
+              {scanning
+                ? "⏳ Scan en cours"
+                : previewMode
+                  ? "💡 Générer les idées"
+                  : "🔄 Scanner maintenant"}
             </button>
           </div>
         </header>
@@ -528,6 +663,24 @@ export function SocialOS() {
                   );
                 })}
               </div>
+              <div className="history-proof">
+                <span className="history-proof-icon" aria-hidden="true">🗂️</span>
+                <div>
+                  <span className="section-kicker">Périmètre historique vérifié</span>
+                  <h3>{posts.length} contenus publics actuellement exploitables</h3>
+                  <p>
+                    <b>{accounts.find((account) => account.platform === "youtube")?.post_count ?? 0} YouTube</b>
+                    {" · "}
+                    <b>{accounts.find((account) => account.platform === "tiktok")?.post_count ?? 0} TikTok</b>
+                    {" · "}
+                    <b>{accounts.find((account) => account.platform === "x")?.post_count ?? 0} X</b>.
+                    Instagram et l’historique X complet nécessitent la connexion propriétaire ; les contenus privés, supprimés ou non listés ne sont pas inventés.
+                  </p>
+                </div>
+                <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
+                  Voir les limites →
+                </button>
+              </div>
             </section>
 
             <section>
@@ -585,6 +738,56 @@ export function SocialOS() {
           </div>
         ) : null}
 
+        {workspace && view === "ideas" ? (
+          <div className="view-stack editorial-ideas-view">
+            <div className="ideas-summary">
+              <span className="ideas-summary-icon" aria-hidden="true">💡</span>
+              <div>
+                <span className="section-kicker">Moteur éditorial explicable</span>
+                <h3>{ideaPlan.ideas.length} pistes dérivées des posts gagnants</h3>
+                <p>
+                  Chaque piste cite ses sources et reste une hypothèse à tester — jamais une
+                  promesse de performance.
+                </p>
+              </div>
+              <span className="official-assets-pill">🔒 Assets officiels uniquement</span>
+            </div>
+
+            {ideaPlan.ideas.length ? (
+              <div className="editorial-ideas-list">
+                {ideaPlan.ideas.map((idea, index) => (
+                  <EditorialIdeaCard
+                    idea={idea}
+                    index={index + 1}
+                    decision={ideaDecisions[idea.id]}
+                    onDecision={setIdeaDecision}
+                    key={idea.id}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <span>💡</span>
+                <h3>Pas encore assez de signal public</h3>
+                <p>Le moteur attend au moins un post classable avant de proposer une idée.</p>
+                <button
+                  className="button primary"
+                  type="button"
+                  disabled={scanning}
+                  onClick={() => void runScan()}
+                >
+                  {scanning ? "Scan en cours…" : "Scanner les réseaux"}
+                </button>
+              </div>
+            )}
+
+            <div className="ideas-method-note">
+              <span>🧭</span>
+              <p>{ideaPlan.caveats[0]} {ideaPlan.caveats[2]}</p>
+            </div>
+          </div>
+        ) : null}
+
         {workspace && (view === "top" || view === "all") ? (
           <div className="view-stack">
             <div className="toolbar social-toolbar">
@@ -604,10 +807,29 @@ export function SocialOS() {
             </div>
 
             <div className={view === "top" ? "post-grid" : "post-list-grid"}>
-              {(view === "top" ? filteredPosts.slice(0, 20) : filteredPosts).map((post, index) => (
+              {visiblePosts.map((post, index) => (
                 <PostCard post={post} rank={index + 1} compact={view === "all"} key={post.id} />
               ))}
             </div>
+            {view === "all" && visiblePosts.length < filteredPosts.length ? (
+              <div className="progressive-pagination">
+                <span>
+                  {visiblePosts.length} sur {filteredPosts.length} contenus affichés
+                </span>
+                <button
+                  className="button ghost"
+                  type="button"
+                  onClick={() =>
+                    setPostPagination({
+                      key: paginationKey,
+                      count: visiblePostCount + POSTS_PAGE_SIZE,
+                    })
+                  }
+                >
+                  Afficher {Math.min(POSTS_PAGE_SIZE, filteredPosts.length - visiblePosts.length)} de plus ↓
+                </button>
+              </div>
+            ) : null}
             {!filteredPosts.length ? (
               <div className="empty-state">
                 <span>🔎</span>
@@ -652,7 +874,9 @@ export function SocialOS() {
                     </div>
                     <div className="source-actions">
                       <a className="button ghost compact" href={account.profile_url} target="_blank" rel="noreferrer">Voir le profil ↗</a>
-                      <button className="button primary compact" type="button" disabled={scanning} onClick={() => void runScan(account.platform)}>↻ Scanner {meta.label}</button>
+                      <button className="button primary compact" type="button" disabled={scanning} onClick={() => void runScan(account.platform)}>
+                        {previewMode ? `🏆 Voir le top ${meta.label}` : `↻ Scanner ${meta.label}`}
+                      </button>
                     </div>
                   </article>
                 );
@@ -664,6 +888,136 @@ export function SocialOS() {
 
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
+  );
+}
+
+function EditorialIdeaCard({
+  idea,
+  index,
+  decision,
+  onDecision,
+}: {
+  idea: SocialIdea;
+  index: number;
+  decision?: IdeaDecision;
+  onDecision: (ideaId: string, decision: IdeaDecision) => void;
+}) {
+  const decisionLabel =
+    decision === "produce"
+      ? "À produire"
+      : decision === "rework"
+        ? "À retravailler"
+        : decision === "discard"
+          ? "Écartée"
+          : "À décider";
+  const confidence =
+    idea.confidence === "high"
+      ? "Confiance forte"
+      : idea.confidence === "medium"
+        ? "Confiance moyenne"
+        : "Signal limité";
+
+  return (
+    <article className={`editorial-idea-card decision-${decision ?? "none"}`}>
+      <header className="editorial-idea-head">
+        <div>
+          <div className="editorial-idea-meta">
+            <span>Idée {String(index).padStart(2, "0")}</span>
+            <span>{confidence} · {idea.confidenceScore}/100</span>
+            <span className={`idea-decision-status status-${decision ?? "none"}`}>
+              {decisionLabel}
+            </span>
+          </div>
+          <h3>{idea.title}</h3>
+        </div>
+        <div className={`idea-confidence-score confidence-${idea.confidence}`}>
+          <b>{idea.confidenceScore}</b>
+          <small>/100</small>
+        </div>
+      </header>
+
+      <div className="editorial-signal-box">
+        <span>📡 Signal observé</span>
+        <p>{idea.observedSignal.summary}</p>
+        <div className="idea-seeds" aria-label="Posts sources">
+          {idea.seedPosts.map((seed) => (
+            <a
+              href={seed.url}
+              target="_blank"
+              rel="noreferrer"
+              title={seed.label}
+              key={`${seed.platform}:${seed.externalId}`}
+            >
+              {PLATFORM_META[seed.platform].emoji} {PLATFORM_META[seed.platform].label}
+              <b>{seed.performanceScore}/100</b>
+              <span>↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div className="idea-concept-grid">
+        <div className="idea-concept-block">
+          <span>🎬 Format proposé</span>
+          <p>{idea.proposedFormat}</p>
+        </div>
+        <div className="idea-concept-block hook-block">
+          <span>🪝 Hook</span>
+          <p>« {idea.hook} »</p>
+        </div>
+      </div>
+
+      <div className="idea-platforms">
+        <span className="idea-section-label">Déclinaisons natives</span>
+        <div className="idea-platform-grid">
+          {(["youtube", "instagram", "tiktok", "x"] as Platform[]).map((platform) => {
+            const adaptation = idea.platformAdaptations[platform];
+            return (
+              <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
+                <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
+                <strong>{adaptation.format}</strong>
+                <p>{adaptation.execution}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="idea-confidence-note">
+        <span>🧪</span>
+        <p>{idea.confidenceRationale}</p>
+      </div>
+
+      <footer className="editorial-idea-footer">
+        <p>🔒 Assets officiels uniquement · {idea.limits[0]}</p>
+        <div className="editorial-decision-actions" aria-label="Décision locale">
+          <button
+            className="decision-button produce"
+            type="button"
+            aria-pressed={decision === "produce"}
+            onClick={() => onDecision(idea.id, "produce")}
+          >
+            ✅ À produire
+          </button>
+          <button
+            className="decision-button rework"
+            type="button"
+            aria-pressed={decision === "rework"}
+            onClick={() => onDecision(idea.id, "rework")}
+          >
+            🛠️ À retravailler
+          </button>
+          <button
+            className="decision-button discard"
+            type="button"
+            aria-pressed={decision === "discard"}
+            onClick={() => onDecision(idea.id, "discard")}
+          >
+            ✕ Écarter
+          </button>
+        </div>
+      </footer>
+    </article>
   );
 }
 
@@ -690,12 +1044,18 @@ function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
 function PostCard({ post, rank, compact }: { post: SocialPost; rank: number; compact: boolean }) {
   const meta = PLATFORM_META[post.platform];
   return (
-    <article className={`social-post-card ${compact ? "compact" : ""}`}>
-      <a className="post-visual" href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
+    <a
+      className={`social-post-card ${compact ? "compact" : ""}`}
+      href={post.url}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`Ouvrir « ${post.title || post.text || "publication"} » sur ${meta.label}`}
+    >
+      <div className="post-visual">
         {post.thumbnail_url ? <img src={post.thumbnail_url} alt="" loading="lazy" /> : <span>{meta.emoji}</span>}
         <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
         <span className="post-rank">#{rank}</span>
-      </a>
+      </div>
       <div className="post-card-body">
         <div className="post-card-title">
           <div>
@@ -722,6 +1082,6 @@ function PostCard({ post, rank, compact }: { post: SocialPost; rank: number; com
           <span className={`confidence confidence-${post.score_confidence}`}>{confidenceLabel(post.score_confidence)}</span>
         </footer>
       </div>
-    </article>
+    </a>
   );
 }
