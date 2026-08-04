@@ -3836,6 +3836,8 @@ a {
   align-items: center;
   justify-content: flex-end;
   gap: 5px;
+  flex-wrap: wrap;
+  row-gap: 5px;
 }
 
 .post-card-footer-metrics > span {
