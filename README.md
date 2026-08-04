@@ -8,11 +8,11 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 - Navigation interactive : Command Center, meilleurs posts, idées à produire, tous les contenus et état des sources.
 - Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
-- « Meilleurs posts » organisé en quatre dépliants YouTube, Instagram, TikTok et X, chacun avec ses filtres de formats natifs.
+- « Meilleurs posts » affiche tout le classement dans un flux continu, avec un seul sélecteur dépliant pour Toutes les plateformes, YouTube, Instagram, TikTok ou X, puis les filtres natifs de la plateforme choisie.
 - Classement normalisé à l’intérieur de chaque plateforme, sans remplacer les métriques absentes par des zéros.
 - Moteur d’idées explicable : chaque proposition cite les posts sources, le signal observé, le hook, le format et les déclinaisons YouTube, Instagram, TikTok et X.
 - Décisions éditoriales locales : « À produire », « À retravailler » ou « Écarter ».
-- Recherche, filtres de formats, pagination progressive, dépliants et cartes entièrement cliquables.
+- Recherche, filtres de formats, sélecteur de plateforme et cartes entièrement cliquables ; le classement Meilleurs posts n’est ni tronqué ni paginé.
 - Interface responsive alignée sur les Radars YouTube et Spotify, avec assets officiels Lofi Girl uniquement.
 
 ## Couverture des données publiques

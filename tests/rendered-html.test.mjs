@@ -65,7 +65,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(scanner, /x\.com/);
   assert.match(component, /Chaque réseau est comparé à lui-même/);
   assert.match(component, /métriques absentes sont retirées/i);
-  assert.match(component, /platform-accordion-trigger/);
+  assert.match(component, /top-platform-picker/);
+  assert.match(component, /Toutes les plateformes/);
+  assert.match(component, /posts classés · tous affichés/);
+  assert.match(component, /topFilteredPosts\.map/);
+  assert.doesNotMatch(component, /slice\(0,\s*12\)|Top 12 affiché/);
   assert.match(formats, /Commentaires/);
   assert.match(component, /commentaires écrits par @LofiGirl/i);
   assert.match(publicHistory, /isInScopeSocialPost/);

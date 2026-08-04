@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- thumbnails come from live social sources with dynamic hosts. */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   generateSocialIdeas,
@@ -152,18 +152,6 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
 const IDEA_DECISIONS_STORAGE_KEY = "lofi-social-radar:idea-decisions:v1";
 const POSTS_PAGE_SIZE = 48;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
-const DEFAULT_TOP_FORMAT_FILTERS: Record<Platform, SocialFormatFilter> = {
-  youtube: "all",
-  instagram: "all",
-  tiktok: "all",
-  x: "all",
-};
-const DEFAULT_OPEN_TOP_PLATFORMS: Record<Platform, boolean> = {
-  youtube: true,
-  instagram: false,
-  tiktok: false,
-  x: false,
-};
 
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -350,12 +338,9 @@ export function SocialOS({
   const [view, setView] = useState<View>("overview");
   const [platform, setPlatform] = useState<"all" | Platform>("all");
   const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("all");
-  const [topFormatFilters, setTopFormatFilters] = useState<
-    Record<Platform, SocialFormatFilter>
-  >(DEFAULT_TOP_FORMAT_FILTERS);
-  const [openTopPlatforms, setOpenTopPlatforms] = useState<Record<Platform, boolean>>(
-    DEFAULT_OPEN_TOP_PLATFORMS,
-  );
+  const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
+  const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
+  const topPlatformDetailsRef = useRef<HTMLDetailsElement>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
@@ -432,9 +417,9 @@ export function SocialOS({
   const runScan = async (target?: Platform) => {
       if (previewMode) {
         if (target) {
-          setPlatform(target);
-          setFormatFilter("all");
-          setOpenTopPlatforms((current) => ({ ...current, [target]: true }));
+          setTopPlatform(target);
+          setTopFormatFilter("all");
+          setSearch("");
           setView("top");
           setToast(
             `${PLATFORM_META[target].label} · ${workspace?.accounts.find((account) => account.platform === target)?.post_count ?? 0} contenus du snapshot`,
@@ -478,6 +463,22 @@ export function SocialOS({
       `${post.title} ${post.text} ${post.format}`.toLowerCase().includes(needle),
     );
   }, [search, topPosts]);
+  const topPlatformPosts = useMemo(
+    () =>
+      topPlatform === "all"
+        ? searchedTopPosts
+        : searchedTopPosts.filter((post) => post.platform === topPlatform),
+    [searchedTopPosts, topPlatform],
+  );
+  const topFilteredPosts = useMemo(
+    () =>
+      topPlatform === "all" || topFormatFilter === "all"
+        ? topPlatformPosts
+        : topPlatformPosts.filter((post) =>
+            matchesSocialFormatFilter(post, topFormatFilter),
+          ),
+    [topFormatFilter, topPlatform, topPlatformPosts],
+  );
   const filteredPosts = useMemo(() => {
     return searchedTopPosts.filter((post) => {
       if (platform !== "all" && post.platform !== platform) return false;
@@ -516,6 +517,14 @@ export function SocialOS({
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
   const visiblePosts = filteredPosts.slice(0, visiblePostCount);
 
+  const chooseTopPlatform = (target: "all" | Platform) => {
+    setTopPlatform(target);
+    setTopFormatFilter("all");
+    if (topPlatformDetailsRef.current) {
+      topPlatformDetailsRef.current.open = false;
+    }
+  };
+
   const setIdeaDecision = useCallback((ideaId: string, decision: IdeaDecision) => {
     setIdeaDecisions((current) => ({ ...current, [ideaId]: decision }));
     const label =
@@ -534,7 +543,7 @@ export function SocialOS({
     .at(-1) as string | undefined;
 
   const navCount = (id: View) => {
-    if (id === "top") return PLATFORM_ORDER.length;
+    if (id === "top") return posts.length;
     if (id === "ideas") return ideaPlan.ideas.length;
     if (id === "all") return posts.length;
     if (id === "sources") return accounts.length;
@@ -600,6 +609,11 @@ export function SocialOS({
                   type="button"
                   onClick={() => {
                     setView(item.id);
+                    if (item.id === "top") {
+                      setTopPlatform("all");
+                      setTopFormatFilter("all");
+                      setSearch("");
+                    }
                     if (item.id === "all") {
                       setPlatform("all");
                       setFormatFilter("all");
@@ -700,9 +714,9 @@ export function SocialOS({
                       className={`source-status-card tone-${meta.tone}`}
                       key={key}
                       onClick={() => {
-                        setPlatform(key);
-                        setFormatFilter("all");
-                        setOpenTopPlatforms((current) => ({ ...current, [key]: true }));
+                        setTopPlatform(key);
+                        setTopFormatFilter("all");
+                        setSearch("");
                         setView("top");
                       }}
                     >
@@ -849,139 +863,136 @@ export function SocialOS({
 
         {workspace && view === "top" ? (
           <div className="view-stack top-platform-view">
-            <div className="toolbar top-platform-toolbar">
-              <div>
-                <span className="section-kicker">Classements natifs</span>
-                <b>Ouvre une plateforme, puis choisis son format.</b>
-              </div>
-              <label className="search-box">
-                <span aria-hidden="true">⌕</span>
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Chercher une accroche, un format…"
-                />
-              </label>
-            </div>
-
-            <div className="platform-accordion-list">
-              {PLATFORM_ORDER.map((key) => {
-                const meta = PLATFORM_META[key];
-                const platformPosts = searchedTopPosts.filter(
-                  (post) => post.platform === key,
-                );
-                const selectedFilter = topFormatFilters[key];
-                const matchingPosts = platformPosts.filter((post) =>
-                  matchesSocialFormatFilter(post, selectedFilter),
-                );
-                const bestScore = platformPosts.find(
-                  (post) => post.performance_score !== null,
-                )?.performance_score;
-                const panelId = `top-platform-${key}`;
-                const open = openTopPlatforms[key];
-
-                return (
-                  <section
-                    className={`platform-accordion tone-${meta.tone} ${open ? "open" : ""}`}
-                    key={key}
-                  >
+            <section
+              className={`top-ranking-controls tone-${topPlatform === "all" ? "blue" : PLATFORM_META[topPlatform].tone}`}
+              aria-label="Contrôles du classement"
+            >
+              <div className="top-ranking-control-row">
+                <details className="top-platform-picker" ref={topPlatformDetailsRef}>
+                  <summary>
+                    <span className="top-platform-current">
+                      <small>Plateforme</small>
+                      <b>
+                        {topPlatform === "all"
+                          ? "🌐 Toutes les plateformes"
+                          : `${PLATFORM_META[topPlatform].emoji} ${PLATFORM_META[topPlatform].label}`}
+                      </b>
+                    </span>
+                    <span className="top-platform-total">
+                      <b>{topPlatformPosts.length}</b>
+                      <small>posts</small>
+                    </span>
+                    <span className="top-platform-chevron" aria-hidden="true">⌄</span>
+                  </summary>
+                  <div className="top-platform-menu" aria-label="Choisir une plateforme">
                     <button
-                      className="platform-accordion-trigger"
+                      className={topPlatform === "all" ? "active" : ""}
                       type="button"
-                      aria-expanded={open}
-                      aria-controls={panelId}
-                      onClick={() =>
-                        setOpenTopPlatforms((current) => ({
-                          ...current,
-                          [key]: !current[key],
-                        }))
-                      }
+                      aria-pressed={topPlatform === "all"}
+                      onClick={() => chooseTopPlatform("all")}
                     >
-                      <span className="platform-accordion-logo">{meta.emoji}</span>
-                      <span className="platform-accordion-copy">
-                        <b>{meta.label}</b>
-                        <small>{platformPosts.length} post{platformPosts.length > 1 ? "s" : ""} dans le périmètre</small>
-                      </span>
-                      <span className="platform-accordion-score">
-                        <small>Meilleur score</small>
-                        <b>{bestScore ?? "—"}<i>/100</i></b>
-                      </span>
-                      <span className="platform-accordion-chevron" aria-hidden="true">⌄</span>
+                      <span>🌐 Toutes les plateformes</span>
+                      <b>{searchedTopPosts.length}</b>
                     </button>
+                    {PLATFORM_ORDER.map((key) => {
+                      const meta = PLATFORM_META[key];
+                      const count = searchedTopPosts.filter(
+                        (post) => post.platform === key,
+                      ).length;
+                      return (
+                        <button
+                          className={topPlatform === key ? "active" : ""}
+                          type="button"
+                          aria-pressed={topPlatform === key}
+                          onClick={() => chooseTopPlatform(key)}
+                          key={key}
+                        >
+                          <span>{meta.emoji} {meta.label}</span>
+                          <b>{count}</b>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </details>
 
-                    {open ? (
-                      <div className="platform-accordion-panel" id={panelId}>
-                        <div className="format-filter-tabs" aria-label={`Formats ${meta.label}`}>
-                          {getFormatFilters(key).map((filter) => {
-                            const count = platformPosts.filter((post) =>
-                              matchesSocialFormatFilter(post, filter.key),
-                            ).length;
-                            return (
-                              <button
-                                className={selectedFilter === filter.key ? "active" : ""}
-                                type="button"
-                                aria-pressed={selectedFilter === filter.key}
-                                onClick={() =>
-                                  setTopFormatFilters((current) => ({
-                                    ...current,
-                                    [key]: filter.key,
-                                  }))
-                                }
-                                key={filter.key}
-                              >
-                                {filter.emoji} {filter.label} <span>{count}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
+                <label className="search-box top-ranking-search">
+                  <span aria-hidden="true">⌕</span>
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Chercher une accroche, un format…"
+                  />
+                </label>
 
-                        {matchingPosts.length ? (
-                          <>
-                            <div className="post-grid platform-post-grid">
-                              {matchingPosts.slice(0, 12).map((post, index) => (
-                                <PostCard
-                                  post={post}
-                                  rank={index + 1}
-                                  compact={false}
-                                  key={post.id}
-                                />
-                              ))}
-                            </div>
-                            {matchingPosts.length > 12 ? (
-                              <div className="platform-post-more">
-                                <span>Top 12 affiché sur {matchingPosts.length} contenus classés</span>
-                                <button
-                                  className="button ghost compact"
-                                  type="button"
-                                  onClick={() => {
-                                    setPlatform(key);
-                                    setFormatFilter(selectedFilter);
-                                    setView("all");
-                                  }}
-                                >
-                                  Voir tous les contenus {meta.label} →
-                                </button>
-                              </div>
-                            ) : null}
-                          </>
-                        ) : (
-                          <div className="format-empty-state">
-                            <span>{selectedFilter === "comment" ? "💭" : "📡"}</span>
-                            <div>
-                              <h3>Aucun contenu disponible pour ce format</h3>
-                              <p>{formatEmptyCopy(key, selectedFilter)}</p>
-                            </div>
-                            <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
-                              Voir les limites →
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
-                  </section>
-                );
-              })}
-            </div>
+                <span className="top-ranking-count">
+                  <b>{topFilteredPosts.length}</b>
+                  <small>posts classés · tous affichés</small>
+                </span>
+              </div>
+
+              {topPlatform !== "all" ? (
+                <div className="top-format-control-row">
+                  <span className="section-kicker">
+                    Formats {PLATFORM_META[topPlatform].label}
+                  </span>
+                  <div
+                    className="format-filter-tabs top-format-tabs"
+                    aria-label={`Formats ${PLATFORM_META[topPlatform].label}`}
+                  >
+                    {getFormatFilters(topPlatform).map((filter) => {
+                      const count = topPlatformPosts.filter((post) =>
+                        matchesSocialFormatFilter(post, filter.key),
+                      ).length;
+                      return (
+                        <button
+                          className={topFormatFilter === filter.key ? "active" : ""}
+                          type="button"
+                          aria-pressed={topFormatFilter === filter.key}
+                          onClick={() => setTopFormatFilter(filter.key)}
+                          key={filter.key}
+                        >
+                          {filter.emoji} {filter.label} <span>{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="top-ranking-note">
+                  Classement continu des quatre plateformes. Choisis-en une pour afficher ses formats natifs.
+                </p>
+              )}
+            </section>
+
+            {topFilteredPosts.length ? (
+              <div className="post-grid top-ranking-grid">
+                {topFilteredPosts.map((post, index) => (
+                  <PostCard
+                    post={post}
+                    rank={index + 1}
+                    compact={false}
+                    key={post.id}
+                  />
+                ))}
+              </div>
+            ) : topPlatform !== "all" ? (
+              <div className={`format-empty-state top-ranking-empty tone-${PLATFORM_META[topPlatform].tone}`}>
+                <span>{topFormatFilter === "comment" ? "💭" : "📡"}</span>
+                <div>
+                  <h3>Aucun contenu disponible pour ce format</h3>
+                  <p>{formatEmptyCopy(topPlatform, topFormatFilter)}</p>
+                </div>
+                <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
+                  Voir les limites →
+                </button>
+              </div>
+            ) : (
+              <div className="empty-state">
+                <span>🔎</span>
+                <h3>Aucun post ne correspond</h3>
+                <p>Essaie une autre recherche.</p>
+              </div>
+            )}
           </div>
         ) : null}
 
