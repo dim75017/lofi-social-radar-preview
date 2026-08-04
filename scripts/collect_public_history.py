@@ -110,6 +110,7 @@ SENSITIVE_KEY_PATTERN = re.compile(
 SIGNED_TIKTOK_PATTERN = re.compile(
     r"(?:x-signature|x-expires|x-bogus|signature=|token=)", re.IGNORECASE
 )
+METRIC_FIELDS = ("views", "likes", "comments", "shares", "saves")
 
 
 def parse_args() -> argparse.Namespace:
@@ -253,7 +254,12 @@ def load_existing_posts(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
 def seed_existing_observation_timestamps(
     post: dict[str, Any], fallback: Any
 ) -> dict[str, Any]:
-    """Migre un ancien snapshot sans faire paraître ses posts comme rescannés."""
+    """Migre un ancien snapshot sans faire paraître ses posts comme rescannés.
+
+    Les valeurs déjà versionnées ont bien été observées à la date de génération
+    du snapshot. On les conserve donc comme premier point réel, sans prétendre
+    qu'il s'agit des métriques au lancement du contenu.
+    """
     seeded = dict(post)
     raw = dict(post.get("raw") or {})
     if isinstance(fallback, str) and fallback:
@@ -262,6 +268,10 @@ def seed_existing_observation_timestamps(
         if not isinstance(raw.get("lastObservedAt"), str):
             raw["lastObservedAt"] = fallback
     seeded["raw"] = raw
+    history = normalize_metric_history(raw.get("metricHistory"))
+    if not history and isinstance(fallback, str) and fallback:
+        history = [metric_history_point(seeded, fallback)]
+    raw["metricHistory"] = history
     return seeded
 
 
@@ -273,7 +283,60 @@ def mark_post_observed(post: dict[str, Any], observed_at: str) -> dict[str, Any]
         raw["firstObservedAt"] = observed_at
     raw["lastObservedAt"] = observed_at
     observed["raw"] = raw
+    raw["metricHistory"] = merge_metric_histories(
+        raw.get("metricHistory"),
+        [metric_history_point(observed, observed_at)],
+    )
     return observed
+
+
+def metric_history_point(post: dict[str, Any], captured_at: str) -> dict[str, Any]:
+    """Crée un relevé factuel ; les signaux absents restent explicitement nuls."""
+    raw = post.get("raw") if isinstance(post.get("raw"), dict) else {}
+    point: dict[str, Any] = {
+        "capturedAt": captured_at,
+        **{field: nonnegative_int(post.get(field)) for field in METRIC_FIELDS},
+        "pollVotes": nonnegative_int(raw.get("pollVotes")),
+    }
+    source = clean_text(raw.get("collector"))
+    if source:
+        point["source"] = source
+    return point
+
+
+def normalize_metric_history(value: Any) -> list[dict[str, Any]]:
+    """Valide et déduplique une série sans transformer une corruption en vide."""
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise RuntimeError("metricHistory doit être un tableau")
+
+    by_captured_at: dict[str, dict[str, Any]] = {}
+    for entry in value:
+        if not isinstance(entry, dict):
+            raise RuntimeError("un point metricHistory n'est pas un objet")
+        captured_at = entry.get("capturedAt")
+        if not isinstance(captured_at, str) or not captured_at:
+            raise RuntimeError("un point metricHistory n'a pas de capturedAt")
+        current = by_captured_at.get(captured_at, {"capturedAt": captured_at})
+        for field in (*METRIC_FIELDS, "pollVotes"):
+            incoming = entry.get(field)
+            if incoming is not None:
+                current[field] = incoming
+            elif field not in current:
+                current[field] = None
+        source = entry.get("source")
+        if isinstance(source, str) and source:
+            current["source"] = source
+        by_captured_at[captured_at] = current
+    return [by_captured_at[key] for key in sorted(by_captured_at)]
+
+
+def merge_metric_histories(*values: Any) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    for value in values:
+        merged.extend(normalize_metric_history(value))
+    return normalize_metric_history(merged)
 
 
 def merge_coverage_with_existing(
@@ -886,6 +949,10 @@ def merge_posts(
         if isinstance(incoming_metric_sources, dict):
             merged_metric_sources.update(incoming_metric_sources)
         raw["metricSources"] = merged_metric_sources
+    raw["metricHistory"] = merge_metric_histories(
+        raw.get("metricHistory"),
+        incoming_raw.get("metricHistory"),
+    )
     first_observed_values = [
         value
         for value in (
@@ -1117,6 +1184,22 @@ def validate_snapshot(snapshot: dict[str, Any], platform_filter: str) -> None:
             value = post.get(metric)
             if value is not None and nonnegative_number(value) is None:
                 raise RuntimeError(f"métrique {metric} invalide pour {key}")
+        metric_history = post["raw"].get("metricHistory")
+        if metric_history is not None:
+            normalized_history = normalize_metric_history(metric_history)
+            if len(normalized_history) != len(metric_history):
+                raise RuntimeError(f"metricHistory dupliqué pour {key}")
+            for point in normalized_history:
+                for metric in (*METRIC_FIELDS, "pollVotes"):
+                    value = point.get(metric)
+                    if value is not None and (
+                        isinstance(value, bool)
+                        or not isinstance(value, int)
+                        or value < 0
+                    ):
+                        raise RuntimeError(
+                            f"métrique historique {metric} invalide pour {key}"
+                        )
         poll_votes = post["raw"].get("pollVotes")
         if poll_votes is not None and (
             isinstance(poll_votes, bool)

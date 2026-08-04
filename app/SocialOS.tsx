@@ -26,7 +26,6 @@ import {
   parseTikTokThumbnailUrl,
 } from "../lib/social-media";
 import {
-  publicRankingLabel,
   rankPostsByPublicMetric,
 } from "../lib/social-ranking";
 import type { EditorialWhy } from "../lib/social-editorial-analysis";
@@ -34,6 +33,17 @@ import type { EditorialWhy } from "../lib/social-editorial-analysis";
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
 type IdeaDecision = "produce" | "rework" | "discard";
+
+type MetricSnapshot = {
+  captured_at: string;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  saves: number | null;
+  poll_votes: number | null;
+  source: "live-scanner" | "public-history-collector" | string;
+};
 
 type SocialAccount = {
   id: string;
@@ -78,6 +88,8 @@ type SocialPost = {
   first_seen_at: string;
   last_seen_at: string;
   last_metric_at: string;
+  published_at_precision?: "exact" | "approximate" | "unknown";
+  metric_history?: MetricSnapshot[];
   editorial_analysis: EditorialWhy;
 };
 
@@ -151,7 +163,7 @@ const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
   },
   top: {
     title: "Meilleurs posts",
-    subtitle: "Chaque catégorie est classée simplement par likes publics.",
+    subtitle: "Les formats qui ont le mieux fonctionné, plateforme par plateforme.",
   },
   ideas: {
     title: "Idées à produire",
@@ -197,6 +209,19 @@ function formatDate(value: string | null, withTime = false) {
     day: "2-digit",
     month: "short",
     ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+  }).format(date);
+}
+
+function formatDetailedDate(value: string | null | undefined) {
+  if (!value) return "Non disponible";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 }
 
@@ -300,6 +325,84 @@ function metrics(post: SocialPost) {
   ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
 }
 
+type MetricKey = "views" | "likes" | "comments" | "shares" | "saves" | "poll_votes";
+
+const METRIC_META: Record<MetricKey, { icon: string; label: string }> = {
+  views: { icon: "👁", label: "vues" },
+  likes: { icon: "♥", label: "likes" },
+  comments: { icon: "💬", label: "commentaires" },
+  shares: { icon: "↗", label: "partages" },
+  saves: { icon: "🔖", label: "sauvegardes" },
+  poll_votes: { icon: "🗳️", label: "votes" },
+};
+
+function normalizedMetricHistory(post: SocialPost): MetricSnapshot[] {
+  const fallback: MetricSnapshot = {
+    captured_at: post.last_metric_at,
+    views: post.views,
+    likes: post.likes,
+    comments: post.comments,
+    shares: post.shares,
+    saves: post.saves,
+    poll_votes: post.poll_votes,
+    source: post.source_kind || "public-history-collector",
+  };
+  const source = post.metric_history?.length ? post.metric_history : [fallback];
+  const byPoint = new Map<string, MetricSnapshot>();
+  for (const point of source) {
+    if (!point?.captured_at || Number.isNaN(new Date(point.captured_at).getTime())) continue;
+    const cleaned = {
+      captured_at: point.captured_at,
+      views: numberOrNull(point.views),
+      likes: numberOrNull(point.likes),
+      comments: numberOrNull(point.comments),
+      shares: numberOrNull(point.shares),
+      saves: numberOrNull(point.saves),
+      poll_votes: numberOrNull(point.poll_votes),
+      source: point.source || "public-history-collector",
+    } satisfies MetricSnapshot;
+    byPoint.set(`${cleaned.source}:${cleaned.captured_at}`, cleaned);
+  }
+  return [...byPoint.values()].sort((left, right) =>
+    left.captured_at.localeCompare(right.captured_at),
+  );
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function primaryTimelineMetric(post: SocialPost, history: MetricSnapshot[]): MetricKey | null {
+  const preferred: MetricKey[] = ["views", "likes", "poll_votes", "comments", "shares", "saves"];
+  return preferred.find((key) => post[key] !== null || history.some((point) => point[key] !== null)) ?? null;
+}
+
+function observationDelay(post: SocialPost, capturedAt: string | undefined) {
+  if (!post.published_at || !capturedAt) {
+    return "Impossible de relier ce relevé au lancement : la date publique exacte manque.";
+  }
+  if (post.published_at_precision && post.published_at_precision !== "exact") {
+    return "La date de publication est approximative : ce relevé n’est pas présenté comme une mesure de lancement.";
+  }
+  const delayMs = new Date(capturedAt).getTime() - new Date(post.published_at).getTime();
+  if (!Number.isFinite(delayMs) || delayMs < 0) {
+    return "Ce relevé n’est pas présenté comme une mesure de lancement.";
+  }
+  const hours = Math.round(delayMs / 3_600_000);
+  if (hours <= 24) {
+    return `Premier relevé ${Math.max(0, hours)} h après publication : proche du lancement, mais pas le compteur exact à H0.`;
+  }
+  const days = Math.max(1, Math.round(hours / 24));
+  return `Premier relevé ${days} j après publication : ce n’est pas une mesure de lancement.`;
+}
+
+function isNearLaunchObservation(post: SocialPost, capturedAt: string | undefined) {
+  if (!post.published_at || !capturedAt) return false;
+  if (post.published_at_precision && post.published_at_precision !== "exact") return false;
+  const delayMs = new Date(capturedAt).getTime() - new Date(post.published_at).getTime();
+  return Number.isFinite(delayMs) && delayMs >= 0 && delayMs <= 86_400_000;
+}
+
 function normalizedIdeaPost(post: SocialPost) {
   const raw = parsePostRaw(post.raw_json);
   if (post.poll_votes !== null) raw.pollVotes = post.poll_votes;
@@ -347,7 +450,6 @@ export function SocialOS({
   const [topPlatform, setTopPlatform] = useState<Platform>("youtube");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("short");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState("");
@@ -356,8 +458,13 @@ export function SocialOS({
   const [postPagination, setPostPagination] = useState({ key: "", count: POSTS_PAGE_SIZE });
   const [ideaDecisions, setIdeaDecisions] = useState<Record<string, IdeaDecision>>({});
   const [ideaDecisionsReady, setIdeaDecisionsReady] = useState(false);
-  const [activeMediaPost, setActiveMediaPost] = useState<SocialPost | null>(null);
-  const closeActiveMedia = useCallback(() => setActiveMediaPost(null), []);
+  const [activeDetailsPost, setActiveDetailsPost] = useState<SocialPost | null>(null);
+  const [activeInlineVideoId, setActiveInlineVideoId] = useState<string | null>(null);
+  const closeActiveDetails = useCallback(() => setActiveDetailsPost(null), []);
+  const toggleInlineVideo = useCallback((post: SocialPost) => {
+    const postId = `${post.platform}:${post.external_post_id}`;
+    setActiveInlineVideoId((current) => current === postId ? null : postId);
+  }, []);
 
   const loadWorkspace = useCallback(async () => {
     if (previewMode) {
@@ -428,7 +535,6 @@ export function SocialOS({
           setTopPlatform(target);
           setTopFormatFilter(DEFAULT_FORMAT_FILTER[target]);
           setTopDuration("all");
-          setSearch("");
           setView("top");
           setToast(
             `${PLATFORM_META[target].label} · ${workspace?.accounts.find((account) => account.platform === target)?.post_count ?? 0} contenus du snapshot`,
@@ -462,20 +568,13 @@ export function SocialOS({
   const posts = useMemo(() => workspace?.posts ?? [], [workspace?.posts]);
   const accounts = workspace?.accounts ?? [];
   const topPosts = useMemo(() => rankPostsByPublicMetric(posts).posts, [posts]);
-  const searchedTopPosts = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    if (!needle) return topPosts;
-    return topPosts.filter((post) =>
-      `${post.title} ${post.text} ${post.format}`.toLowerCase().includes(needle),
-    );
-  }, [search, topPosts]);
   const topDurationReference = workspace?.generatedAt ?? "";
   const durationTopPosts = useMemo(
     () =>
-      searchedTopPosts.filter((post) =>
+      topPosts.filter((post) =>
         matchesSocialDuration(post, topDuration, topDurationReference),
       ),
-    [searchedTopPosts, topDuration, topDurationReference],
+    [topDuration, topDurationReference, topPosts],
   );
   const topPlatformPosts = useMemo(
     () => durationTopPosts.filter((post) => post.platform === topPlatform),
@@ -493,45 +592,40 @@ export function SocialOS({
     [topCategoryPosts],
   );
   const topFilteredPosts = topCategoryRanking.posts;
-  const topRankingMetric = topCategoryRanking.metric;
   const topLifetimeFilteredPosts = useMemo(() => {
-    const platformPosts = searchedTopPosts.filter(
+    const platformPosts = topPosts.filter(
       (post) => post.platform === topPlatform,
     );
     return platformPosts.filter((post) =>
       matchesSocialFormatFilter(post, topFormatFilter),
     );
-  }, [searchedTopPosts, topFormatFilter, topPlatform]);
+  }, [topFormatFilter, topPlatform, topPosts]);
   const topEmptyIsDuration =
     topDuration !== "all" && topLifetimeFilteredPosts.length > 0;
   const topUndatedCount = useMemo(
     () =>
       topDuration === "all"
         ? 0
-        : searchedTopPosts.filter((post) => {
+        : topPosts.filter((post) => {
             if (post.platform !== topPlatform) return false;
             if (!matchesSocialFormatFilter(post, topFormatFilter)) {
               return false;
             }
             return !hasKnownSocialPublishedDate(post);
           }).length,
-    [searchedTopPosts, topDuration, topFormatFilter, topPlatform],
+    [topDuration, topFormatFilter, topPlatform, topPosts],
   );
-  const activeTopDuration =
-    SOCIAL_DURATION_FILTERS.find((option) => option.key === topDuration) ??
-    SOCIAL_DURATION_FILTERS[0];
   const filteredCategoryPosts = useMemo(() => {
-    return searchedTopPosts.filter(
+    return topPosts.filter(
       (post) =>
         post.platform === platform &&
         matchesSocialFormatFilter(post, formatFilter),
     );
-  }, [formatFilter, platform, searchedTopPosts]);
-  const filteredRanking = useMemo(
+  }, [formatFilter, platform, topPosts]);
+  const filteredPosts = useMemo(
     () => rankPostsByPublicMetric(filteredCategoryPosts),
     [filteredCategoryPosts],
-  );
-  const filteredPosts = filteredRanking.posts;
+  ).posts;
   const activeTopFormat =
     categoryFilters(topPlatform).find((filter) => filter.key === topFormatFilter) ??
     categoryFilters(topPlatform)[0];
@@ -572,7 +666,7 @@ export function SocialOS({
       }),
     [posts, workspace?.generatedAt],
   );
-  const paginationKey = `${view}:${platform}:${formatFilter}:${search}`;
+  const paginationKey = `${view}:${platform}:${formatFilter}`;
   const visiblePostCount =
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
   const visiblePosts = filteredPosts.slice(0, visiblePostCount);
@@ -820,7 +914,6 @@ export function SocialOS({
                         setTopPlatform(key);
                         setTopFormatFilter(DEFAULT_FORMAT_FILTER[key]);
                         setTopDuration("all");
-                        setSearch("");
                         setView("top");
                       }}
                     >
@@ -885,7 +978,7 @@ export function SocialOS({
               <div className="panel">
                 <div className="panel-head">
                   <div>
-                    <span className="section-kicker">Top likes publics</span>
+                    <span className="section-kicker">Posts à retenir</span>
                     <h3>Les publications les plus aimées</h3>
                   </div>
                   <button
@@ -895,7 +988,6 @@ export function SocialOS({
                       setTopPlatform("youtube");
                       setTopFormatFilter("short");
                       setTopDuration("all");
-                      setSearch("");
                       setView("top");
                     }}
                   >
@@ -1001,25 +1093,6 @@ export function SocialOS({
                     </button>
                   ))}
                 </div>
-                <span className="top-ranking-sort">
-                  🏆 {publicRankingLabel(topRankingMetric)}
-                </span>
-              </div>
-
-              <div className="top-ranking-control-row">
-                <label className="search-box top-ranking-search">
-                  <span aria-hidden="true">⌕</span>
-                  <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Chercher une accroche, un format…"
-                  />
-                </label>
-
-                <span className="top-ranking-count">
-                  <b>{topFilteredPosts.length}</b>
-                  <small>{activeTopDuration.label} · contenus collectés</small>
-                </span>
               </div>
 
               <div className="top-format-control-row">
@@ -1050,19 +1123,12 @@ export function SocialOS({
                 </div>
               </div>
 
-              <div className="top-ranking-method">
-                <span>🧮 Règle de classement</span>
-                <p>
-                  Les contenus de cette catégorie sont triés par likes décroissants. Quand les likes ne sont pas disponibles — actuellement le cas des Shorts collectés — les vues publiques servent provisoirement de classement. Aucun score composite ni bonus de récence n’ordonne cette liste.
-                </p>
-              </div>
-
               {topPlatform === "youtube" ? (
                 <div className="history-gap-notice">
-                  <span>⚠️</span>
+                  <span>🗂️</span>
                   <p>
-                    <b>Historique YouTube encore partiel.</b>{" "}
-                    {youtubeCommunityCounts.shorts} Shorts et {youtubeCommunityCounts.image + youtubeCommunityCounts.poll + youtubeCommunityCounts.text} posts Communauté sont actuellement collectés, dont {youtubeCommunityCounts.image} images, {youtubeCommunityCounts.poll} sondages et {youtubeCommunityCounts.text} textes. Ce sont des contenus observés, pas les totaux historiques certifiés de la chaîne.
+                    <b>Historique visible chargé jusqu’au dernier lot.</b>{" "}
+                    {youtubeCommunityCounts.shorts} Shorts et {youtubeCommunityCounts.image + youtubeCommunityCounts.poll + youtubeCommunityCounts.text} posts Communauté sont conservés, dont {youtubeCommunityCounts.image} images, {youtubeCommunityCounts.poll} sondages et {youtubeCommunityCounts.text} textes. Les contenus supprimés, privés ou réservés aux membres restent naturellement hors de portée.
                   </p>
                   <button className="button ghost compact" type="button" onClick={() => setView("sources")}>Voir la couverture →</button>
                 </div>
@@ -1088,7 +1154,6 @@ export function SocialOS({
                     {activeTopFormat?.emoji ?? "📂"} {PLATFORM_META[topPlatform].label} · {activeTopFormat?.label ?? topFormatFilter}
                   </h2>
                 </div>
-                <span>{topFilteredPosts.length} collectés · {publicRankingLabel(topRankingMetric)}</span>
               </header>
 
               {topFilteredPosts.length ? (
@@ -1098,7 +1163,9 @@ export function SocialOS({
                       post={post}
                       rank={index + 1}
                       compact={false}
-                      onOpenMedia={setActiveMediaPost}
+                      isPlaying={activeInlineVideoId === `${post.platform}:${post.external_post_id}`}
+                      onTogglePlayback={toggleInlineVideo}
+                      onOpenDetails={setActiveDetailsPost}
                       key={post.id}
                     />
                   ))}
@@ -1110,16 +1177,12 @@ export function SocialOS({
                     <h3>
                       {topEmptyIsDuration
                         ? "Aucun contenu daté dans cette période"
-                        : search.trim()
-                          ? "Aucun résultat pour cette recherche"
-                          : "Aucun contenu disponible pour cette catégorie"}
+                        : "Aucun contenu disponible pour cette catégorie"}
                     </h3>
                     <p>
                       {topEmptyIsDuration
                         ? "Essaie une durée plus large ou reviens à All time."
-                        : search.trim()
-                          ? "Essaie une autre accroche ou efface la recherche."
-                          : formatEmptyCopy(topPlatform, topFormatFilter)}
+                        : formatEmptyCopy(topPlatform, topFormatFilter)}
                     </p>
                   </div>
                   <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
@@ -1149,11 +1212,6 @@ export function SocialOS({
                   </button>
                 ))}
               </div>
-              <label className="search-box">
-                <span aria-hidden="true">⌕</span>
-                <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Chercher une accroche, un format…" />
-              </label>
-              <span className="result-count"><b>{filteredPosts.length}</b> contenus</span>
             </div>
 
             <div
@@ -1185,7 +1243,6 @@ export function SocialOS({
                     {activeLibraryFormat?.emoji ?? "📂"} {PLATFORM_META[platform].label} · {activeLibraryFormat?.label ?? formatFilter}
                   </h2>
                 </div>
-                <span>{filteredPosts.length} collectés · {publicRankingLabel(filteredRanking.metric)}</span>
               </header>
 
               {filteredPosts.length ? (
@@ -1196,7 +1253,9 @@ export function SocialOS({
                         post={post}
                         rank={index + 1}
                         compact
-                        onOpenMedia={setActiveMediaPost}
+                        isPlaying={activeInlineVideoId === `${post.platform}:${post.external_post_id}`}
+                        onTogglePlayback={toggleInlineVideo}
+                        onOpenDetails={setActiveDetailsPost}
                         key={post.id}
                       />
                     ))}
@@ -1296,7 +1355,7 @@ export function SocialOS({
         ) : null}
       </main>
 
-      <MediaPreviewModal post={activeMediaPost} onClose={closeActiveMedia} />
+      <PostDetailsModal post={activeDetailsPost} onClose={closeActiveDetails} />
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
@@ -1530,24 +1589,32 @@ function PostCard({
   post,
   rank,
   compact,
-  onOpenMedia,
+  isPlaying,
+  onTogglePlayback,
+  onOpenDetails,
 }: {
   post: SocialPost;
   rank: number;
   compact: boolean;
-  onOpenMedia: (post: SocialPost) => void;
+  isPlaying: boolean;
+  onTogglePlayback: (post: SocialPost) => void;
+  onOpenDetails: (post: SocialPost) => void;
 }) {
   const meta = PLATFORM_META[post.platform];
   const hasMediaPreview = Boolean(getSocialVideoEmbed(post) || post.thumbnail_url);
   const postCopy = post.text || post.title || "Publication sans légende";
-  const editorialAnalysis = post.editorial_analysis;
-  const editorialAnalysisId = `editorial-why-${post.platform}-${post.external_post_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   return (
     <article
       className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
     >
       {hasMediaPreview ? (
-        <PostMediaPreview post={post} rank={rank} onOpenMedia={onOpenMedia} />
+        <PostMediaPreview
+          post={post}
+          rank={rank}
+          isPlaying={isPlaying}
+          onTogglePlayback={onTogglePlayback}
+          onOpenDetails={onOpenDetails}
+        />
       ) : null}
       <div className="post-card-body">
         {!hasMediaPreview ? (
@@ -1581,41 +1648,12 @@ function PostCard({
             <span key={metric.label} title={metric.label}>{metric.icon} <b>{formatNumber(metric.value)}</b></span>
           ))}
         </div>
-        {editorialAnalysis ? (
-          <section
-            className={`editorial-why status-${editorialAnalysis.status}`}
-            aria-labelledby={editorialAnalysisId}
-          >
-            <div className="editorial-why-heading">
-              <span id={editorialAnalysisId}>🧠 Pourquoi ça ressort</span>
-              <small>
-                {editorialAnalysis.status === "no-differentiator"
-                  ? "Différence non isolée"
-                  : editorialAnalysis.confidence === "medium"
-                  ? "Comparaison étayée"
-                  : "Hypothèse prudente"}
-              </small>
-            </div>
-            <h4>{editorialAnalysis.headline}</h4>
-            <p>{editorialAnalysis.mechanism}</p>
-            <div className="editorial-why-comparison">
-              <b>Ce qui le différencie</b>
-              <span>{editorialAnalysis.comparison}</span>
-            </div>
-            <div className="editorial-why-lesson">
-              <b>À reproduire</b>
-              <span>{editorialAnalysis.transferableLesson}</span>
-            </div>
-            {editorialAnalysis.limitations[0] ? (
-              <small className="editorial-why-limit">
-                Périmètre : {editorialAnalysis.limitations[0]}
-              </small>
-            ) : null}
-          </section>
-        ) : null}
         <footer>
           <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
           <span className="post-card-actions">
+            <button type="button" onClick={() => onOpenDetails(post)}>
+              Plus d’informations
+            </button>
             <a href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
               Ouvrir ↗
             </a>
@@ -1629,11 +1667,15 @@ function PostCard({
 function PostMediaPreview({
   post,
   rank,
-  onOpenMedia,
+  isPlaying,
+  onTogglePlayback,
+  onOpenDetails,
 }: {
   post: SocialPost;
   rank: number;
-  onOpenMedia: (post: SocialPost) => void;
+  isPlaying: boolean;
+  onTogglePlayback: (post: SocialPost) => void;
+  onOpenDetails: (post: SocialPost) => void;
 }) {
   const meta = PLATFORM_META[post.platform];
   const video = getSocialVideoEmbed(post);
@@ -1688,51 +1730,77 @@ function PostMediaPreview({
 
   return (
     <div
-      className={`post-visual ${video ? "is-playable" : "is-image"}`}
+      className={`post-visual platform-${post.platform} ${video ? "is-playable" : "is-image"} ${video && isPlaying ? "is-playing" : ""}`}
       ref={previewRef}
     >
-      <button
-        className="post-visual-trigger"
-        type="button"
-        onClick={() => onOpenMedia(post)}
-        disabled={!video && !thumbnail}
-        aria-label={
-          video
-            ? `Lire « ${post.title || post.text || "cette vidéo"} » directement dans le radar`
-            : `Agrandir « ${post.title || post.text || "cette publication"} »`
-        }
-      >
-        {thumbnail ? (
-          <img
-            src={thumbnail}
-            alt=""
-            loading="lazy"
-            onError={() => {
-              if (videoPlatform === "tiktok" && videoExternalId) {
-                TIKTOK_THUMBNAIL_CACHE.delete(videoExternalId);
-                if (thumbnailSource !== "oembed") {
-                  setShouldLoadTikTokThumbnail(true);
+      {video && isPlaying ? (
+        <>
+          <div className="inline-video-frame">
+            <iframe
+              src={video.playerUrl}
+              title={`Lecteur ${meta.label} : ${post.title || post.text || "publication"}`}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+          <button
+            className="inline-player-close"
+            type="button"
+            onClick={() => onTogglePlayback(post)}
+            aria-label="Fermer le lecteur intégré"
+          >
+            ✕
+          </button>
+        </>
+      ) : (
+        <button
+          className="post-visual-trigger"
+          type="button"
+          onClick={() => video ? onTogglePlayback(post) : onOpenDetails(post)}
+          disabled={!video && !thumbnail}
+          aria-label={
+            video
+              ? `Lire « ${post.title || post.text || "cette vidéo"} » directement dans le radar`
+              : `Voir les informations de « ${post.title || post.text || "cette publication"} »`
+          }
+        >
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt=""
+              loading="lazy"
+              onError={() => {
+                if (videoPlatform === "tiktok" && videoExternalId) {
+                  TIKTOK_THUMBNAIL_CACHE.delete(videoExternalId);
+                  if (thumbnailSource !== "oembed") {
+                    setShouldLoadTikTokThumbnail(true);
+                  }
                 }
-              }
-              setThumbnailSource("none");
-              setThumbnail(null);
-            }}
-          />
-        ) : (
-          <span className="post-preview-placeholder" aria-hidden="true">
-            <b>{meta.emoji}</b>
-            {video ? <small>Aperçu {meta.label}</small> : null}
-          </span>
-        )}
-        {video ? <span className="media-play-mark" aria-hidden="true">▶</span> : null}
-      </button>
-      <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
-      <span className="post-rank">#{rank}</span>
+                setThumbnailSource("none");
+                setThumbnail(null);
+              }}
+            />
+          ) : (
+            <span className="post-preview-placeholder" aria-hidden="true">
+              <b>{meta.emoji}</b>
+              {video ? <small>Aperçu {meta.label}</small> : null}
+            </span>
+          )}
+          {video ? <span className="media-play-mark" aria-hidden="true">▶</span> : null}
+        </button>
+      )}
+      {!isPlaying ? (
+        <>
+          <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
+          <span className="post-rank">#{rank}</span>
+        </>
+      ) : null}
     </div>
   );
 }
 
-function MediaPreviewModal({
+function PostDetailsModal({
   post,
   onClose,
 }: {
@@ -1741,9 +1809,7 @@ function MediaPreviewModal({
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
-  const video = post ? getSocialVideoEmbed(post) : null;
-  const imageUrl = !video ? post?.thumbnail_url ?? null : null;
-  const isOpen = Boolean(post && (video || imageUrl));
+  const isOpen = Boolean(post);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -1760,7 +1826,7 @@ function MediaPreviewModal({
       if (event.key !== "Tab") return;
       const focusable = Array.from(
         modalRef.current?.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], iframe, [tabindex]:not([tabindex="-1"])',
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
         ) ?? [],
       ).filter((element) => element.offsetParent !== null);
       if (!focusable.length) return;
@@ -1783,56 +1849,182 @@ function MediaPreviewModal({
     };
   }, [isOpen, onClose]);
 
-  if (!post || (!video && !imageUrl)) return null;
+  if (!post) return null;
   const meta = PLATFORM_META[post.platform];
   const title = post.title || post.text || `Publication ${meta.label}`;
+  const thumbnail = getSocialVideoEmbed(post)?.posterUrl ?? post.thumbnail_url;
+  const history = normalizedMetricHistory(post);
+  const primaryMetric = primaryTimelineMetric(post, history);
+  const timelinePoints = primaryMetric
+    ? history.filter((point) => point[primaryMetric] !== null)
+    : [];
+  const firstPoint = timelinePoints[0];
+  const lastPoint = timelinePoints.at(-1);
+  const firstValue = primaryMetric && firstPoint ? firstPoint[primaryMetric] : null;
+  const lastValue = primaryMetric && lastPoint ? lastPoint[primaryMetric] : null;
+  const totalDelta = firstValue !== null && lastValue !== null ? lastValue - firstValue : null;
+  const nearLaunch = isNearLaunchObservation(post, firstPoint?.captured_at);
+  const editorialAnalysis = post.editorial_analysis;
+  const editorialAnalysisId = `details-editorial-${post.platform}-${post.external_post_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+  const precisionLabel = post.published_at_precision === "exact"
+    ? "Date exacte"
+    : post.published_at_precision === "approximate"
+      ? "Date approximative"
+      : "Précision inconnue";
 
   return (
     <div
-      className="media-modal-backdrop"
+      className="post-details-backdrop"
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <section
-        className={`media-modal ${video ? "is-video" : "is-image"} tone-${meta.tone}`}
+        className={`post-details-modal tone-${meta.tone}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="media-modal-title"
+        aria-labelledby="post-details-title"
         ref={modalRef}
       >
         <header>
           <div>
-            <span>{meta.emoji} {video ? "Lecture dans le radar" : "Aperçu de la publication"}</span>
-            <h2 id="media-modal-title">{title}</h2>
+            <span>{meta.emoji} Fiche détaillée · {getSocialFormatLabel(post)}</span>
+            <h2 id="post-details-title">{title}</h2>
           </div>
           <button
-            className="media-modal-close"
+            className="post-details-close"
             type="button"
             onClick={onClose}
             ref={closeButtonRef}
-            aria-label="Fermer l’aperçu"
+            aria-label="Fermer la fiche détaillée"
           >
             ✕
           </button>
         </header>
-        {video ? (
-          <div className="video-player-frame">
-            <iframe
-              src={video.playerUrl}
-              title={`Lecteur ${meta.label} : ${title}`}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
+
+        <div className={`post-details-summary ${thumbnail ? "has-thumbnail" : ""}`}>
+          {thumbnail ? (
+            <img src={thumbnail} alt="" />
+          ) : null}
+          <div>
+            <span className="section-kicker">Publication</span>
+            <p>{post.text || post.title || "Aucun texte public associé."}</p>
+            <div className="metric-row details-current-metrics">
+              {metrics(post).map((metric) => (
+                <span key={metric.label} title={metric.label}>
+                  {metric.icon} <b>{formatNumber(metric.value)}</b> {metric.label}
+                </span>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="media-image-frame">
-            <img src={imageUrl ?? undefined} alt={`Publication ${meta.label} : ${title}`} />
+        </div>
+
+        <div className="post-observation-grid">
+          <div>
+            <span>Publié</span>
+            <b>{formatDetailedDate(post.published_at)}</b>
+            <small>{post.published_at ? precisionLabel : "Date publique absente"}</small>
           </div>
-        )}
+          <div>
+            <span>Premier relevé</span>
+            <b>{formatDetailedDate(firstPoint?.captured_at ?? post.first_seen_at)}</b>
+            <small>Première valeur réellement enregistrée par le radar</small>
+          </div>
+          <div className="launch-observation-card">
+            <span>Mesure au lancement</span>
+            <b>
+              {nearLaunch && primaryMetric && firstValue !== null
+                ? `${formatNumber(firstValue)} ${METRIC_META[primaryMetric].label} au 1er relevé`
+                : "Non mesurée"}
+            </b>
+            <small>{observationDelay(post, firstPoint?.captured_at)}</small>
+          </div>
+          <div>
+            <span>Dernier relevé</span>
+            <b>{formatDetailedDate(lastPoint?.captured_at ?? post.last_metric_at)}</b>
+            <small>{history.length} point{history.length > 1 ? "s" : ""} de mesure conservé{history.length > 1 ? "s" : ""}</small>
+          </div>
+        </div>
+
+        <section className="metric-evolution" aria-labelledby="metric-evolution-title">
+          <div className="details-section-heading">
+            <div>
+              <span className="section-kicker">Évolution mesurée</span>
+              <h3 id="metric-evolution-title">
+                {primaryMetric ? `${METRIC_META[primaryMetric].icon} ${METRIC_META[primaryMetric].label}` : "Aucune métrique publique"}
+              </h3>
+            </div>
+            {totalDelta !== null && timelinePoints.length > 1 ? (
+              <span className={`metric-delta ${totalDelta >= 0 ? "positive" : "negative"}`}>
+                {totalDelta >= 0 ? "+" : ""}{formatNumber(totalDelta)} depuis le premier relevé
+              </span>
+            ) : null}
+          </div>
+          {timelinePoints.length > 1 && primaryMetric ? (
+            <div className="metric-timeline">
+              {timelinePoints.slice(-8).map((point, index, points) => {
+                const value = point[primaryMetric];
+                const previousValue = index > 0 ? points[index - 1][primaryMetric] : null;
+                const delta = value !== null && previousValue !== null ? value - previousValue : null;
+                return (
+                  <div key={`${point.source}:${point.captured_at}`}>
+                    <span>{formatDetailedDate(point.captured_at)}</span>
+                    <b>{formatNumber(value)}</b>
+                    <small>
+                      {delta === null || index === 0
+                        ? "Premier point affiché"
+                        : `${delta >= 0 ? "+" : ""}${formatNumber(delta)}`}
+                    </small>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="metric-history-empty">
+              <span>📍</span>
+              <div>
+                <b>Un seul relevé disponible pour l’instant</b>
+                <p>La progression s’affichera automatiquement dès le prochain scan. Le radar ne reconstruit pas une courbe passée qu’il n’a pas observée.</p>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {editorialAnalysis ? (
+          <section
+            className={`editorial-why details-editorial-why status-${editorialAnalysis.status}`}
+            aria-labelledby={editorialAnalysisId}
+          >
+            <div className="editorial-why-heading">
+              <span id={editorialAnalysisId}>🧠 Pourquoi ça ressort</span>
+              <small>
+                {editorialAnalysis.status === "no-differentiator"
+                  ? "Différence non isolée"
+                  : editorialAnalysis.confidence === "medium"
+                    ? "Comparaison étayée"
+                    : "Hypothèse prudente"}
+              </small>
+            </div>
+            <h4>{editorialAnalysis.headline}</h4>
+            <p>{editorialAnalysis.mechanism}</p>
+            <div className="editorial-why-comparison">
+              <b>Ce qui le différencie</b>
+              <span>{editorialAnalysis.comparison}</span>
+            </div>
+            <div className="editorial-why-lesson">
+              <b>À reproduire</b>
+              <span>{editorialAnalysis.transferableLesson}</span>
+            </div>
+            {editorialAnalysis.limitations[0] ? (
+              <small className="editorial-why-limit">
+                Périmètre : {editorialAnalysis.limitations[0]}
+              </small>
+            ) : null}
+          </section>
+        ) : null}
+
         <footer>
-          <span>{video ? `Lecteur officiel ${meta.label}` : `Image publique ${meta.label}`}</span>
+          <span>Données publiques réellement observées · aucune trajectoire inventée</span>
           <a href={post.url} target="_blank" rel="noreferrer">
             Ouvrir sur {meta.label} ↗
           </a>

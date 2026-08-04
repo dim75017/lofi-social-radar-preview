@@ -78,19 +78,23 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
   assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
-  assert.match(component, /Règle de classement/);
-  assert.match(component, /Aucun score composite ni bonus de récence/);
-  assert.match(component, /setActiveMediaPost/);
-  assert.match(component, /MediaPreviewModal/);
+  assert.doesNotMatch(component, /Règle de classement/);
+  assert.doesNotMatch(component, /Chercher une accroche, un format/);
+  assert.doesNotMatch(component, /publicRankingLabel/);
+  assert.match(component, /activeInlineVideoId/);
+  assert.match(component, /PostDetailsModal/);
   assert.match(component, /post-visual-trigger/);
-  assert.match(component, /media-image-frame/);
+  assert.match(component, /inline-video-frame/);
+  assert.match(component, /Plus d’informations/);
+  assert.match(component, /Mesure au lancement/);
+  assert.match(component, /metric_history/);
   assert.match(component, /hasMediaPreview \?/);
   assert.match(component, /text-only/);
   assert.doesNotMatch(component, /Lire ici|post-play-button/);
   assert.doesNotMatch(component, />\s*Tous\s*</);
   assert.match(component, /categoryFilters\(topPlatform\)\.map/);
   assert.match(component, /category-results/);
-  assert.match(component, /Historique YouTube encore partiel/);
+  assert.match(component, /Historique visible chargé jusqu’au dernier lot/);
   assert.match(component, /TIKTOK_THUMBNAIL_CACHE/);
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
   assert.match(component, /sharedTikTokPreviewObserver/);
@@ -102,12 +106,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     component.indexOf("function PostCard"),
     component.indexOf("function PostMediaPreview"),
   );
-  assert.match(postCard, /Pourquoi ça ressort/);
-  assert.match(postCard, /aria-labelledby=\{editorialAnalysisId\}/);
-  assert.match(postCard, /editorialAnalysis\.mechanism/);
-  assert.match(postCard, /editorialAnalysis\.comparison/);
-  assert.match(postCard, /editorialAnalysis\.transferableLesson/);
+  assert.doesNotMatch(postCard, /Pourquoi ça ressort/);
   assert.doesNotMatch(postCard, /score_explanation|performance_score|\/100/);
+  const detailsModal = component.slice(component.indexOf("function PostDetailsModal"));
+  assert.match(detailsModal, /Pourquoi ça ressort/);
+  assert.match(detailsModal, /aria-labelledby=\{editorialAnalysisId\}/);
+  assert.match(detailsModal, /editorialAnalysis\.mechanism/);
+  assert.match(detailsModal, /editorialAnalysis\.comparison/);
+  assert.match(detailsModal, /editorialAnalysis\.transferableLesson/);
   assert.match(component, /parsePostRaw\(post\.raw_json\)/);
   assert.match(component, /raw\.pollVotes = post\.poll_votes/);
   assert.match(socialMedia, /youtube-nocookie\.com\/embed/);
@@ -118,7 +124,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(socialRanking, /published_at|performance_score/);
   assert.doesNotMatch(styles, /nav-disclosure|nav-meta/);
   assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
-  assert.match(styles, /\.media-image-frame/);
+  assert.match(styles, /\.inline-video-frame/);
+  assert.match(styles, /\.post-details-modal/);
+  assert.match(styles, /platform-youtube[\s\S]*?scale\(1\.18\)/);
   const explicitFontSizes = [...styles.matchAll(/font-size:\s*([0-9.]+)px/g)].map(
     (match) => Number(match[1]),
   );

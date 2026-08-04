@@ -107,7 +107,11 @@ test("the YouTube Community filter contains image posts only", async () => {
     matchesSocialFormatFilter(post, "community"),
   );
 
-  assert.equal(communityImages.length, 94);
+  assert.equal(
+    communityImages.length,
+    youtube.filter((post) => post.format === "community_image").length,
+  );
+  assert.ok(communityImages.length > 1_000);
   assert.ok(communityImages.every((post) => post.format === "community_image"));
   assert.ok(
     youtube
@@ -144,7 +148,12 @@ test("preserved history keeps per-post observation timestamps", async () => {
     posts: [
       {
         ...post,
-        raw: { ...post.raw, firstObservedAt, lastObservedAt },
+        raw: {
+          ...post.raw,
+          firstObservedAt,
+          lastObservedAt,
+          metricHistory: [],
+        },
       },
     ],
   });
@@ -155,5 +164,104 @@ test("preserved history keeps per-post observation timestamps", async () => {
   assert.ok(mapped);
   assert.equal(mapped.first_seen_at, firstObservedAt);
   assert.equal(mapped.last_seen_at, lastObservedAt);
-  assert.equal(mapped.last_metric_at, lastObservedAt);
+  assert.equal(mapped.last_metric_at, "2026-08-04T10:00:00Z");
+});
+
+test("the workspace exposes factual metric observations without inventing launch data", async () => {
+  const history = await snapshot();
+  const post = history.posts.find((item) => item.platform === "tiktok");
+  assert.ok(post);
+  const firstCapturedAt = "2026-08-04T09:00:00Z";
+  const secondCapturedAt = "2026-08-04T15:00:00Z";
+  const thirdCapturedAt = "2026-08-04T21:00:00Z";
+  const historicalPost = {
+    ...post,
+    views: 160,
+    likes: 18,
+    raw: {
+      ...post.raw,
+      publishedAtPrecision: "exact",
+      metricHistory: [
+        {
+          capturedAt: firstCapturedAt,
+          views: 100,
+          likes: 10,
+          comments: 1,
+          shares: 2,
+          saves: 3,
+          pollVotes: null,
+          source: "public-history-collector",
+        },
+        {
+          capturedAt: secondCapturedAt,
+          views: 160,
+          likes: 18,
+          comments: 2,
+          shares: 3,
+          saves: 5,
+          pollVotes: null,
+          source: "public-history-collector",
+        },
+      ],
+    },
+  };
+  const workspace = mergeWorkspaceWithPublicHistory(
+    {
+      generatedAt: thirdCapturedAt,
+      posts: [
+        {
+          platform: post.platform,
+          external_post_id: post.externalId,
+          url: post.url,
+          title: post.title,
+          text: post.text,
+          format: post.format,
+          thumbnail_url: post.thumbnailUrl,
+          published_at: post.publishedAt,
+          views: 220,
+          likes: 25,
+          metric_history: [
+            {
+              captured_at: secondCapturedAt,
+              views: 160,
+              likes: 18,
+              source: "live-scanner",
+            },
+            {
+              captured_at: thirdCapturedAt,
+              views: 220,
+              likes: 25,
+              source: "live-scanner",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      ...history,
+      posts: [historicalPost],
+    },
+  );
+  const mapped = workspace.posts[0];
+
+  assert.deepEqual(
+    mapped.metric_history.map((point) => point.captured_at),
+    [firstCapturedAt, secondCapturedAt, thirdCapturedAt],
+  );
+  assert.deepEqual(
+    mapped.metric_history.map((point) => point.views),
+    [100, 160, 220],
+  );
+  assert.equal(mapped.published_at_precision, "exact");
+  assert.equal("launch_metrics" in mapped, false);
+});
+
+test("a legacy snapshot is exposed as one observation at generatedAt", async () => {
+  const history = await snapshot();
+  const workspace = mergeWorkspaceWithPublicHistory(null, history);
+  const post = workspace.posts.find((item) => item.platform === "youtube");
+
+  assert.ok(post);
+  assert.equal(post.metric_history.length, 1);
+  assert.equal(post.metric_history[0].captured_at, history.generatedAt);
 });

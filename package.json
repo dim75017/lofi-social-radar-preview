@@ -10,7 +10,7 @@
     "build": "vinext build",
     "build:preview": "vite build --config preview/vite.config.ts",
     "start": "vinext start",
-    "test": "vinext build && node --test tests/rendered-html.test.mjs tests/public-history-scope.test.mjs tests/social-duration.test.mjs tests/social-editorial-analysis.test.mjs tests/social-formats.test.mjs tests/social-ideas.test.mjs tests/social-media.test.mjs tests/social-ranking.test.mjs tests/social-score.test.mjs",
+    "test": "vinext build && node --test tests/rendered-html.test.mjs tests/public-history-scope.test.mjs tests/live-metric-history.test.mjs tests/social-duration.test.mjs tests/social-editorial-analysis.test.mjs tests/social-formats.test.mjs tests/social-ideas.test.mjs tests/social-media.test.mjs tests/social-ranking.test.mjs tests/social-score.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern work --ignore-pattern outputs",
     "db:generate": "drizzle-kit generate"
   },

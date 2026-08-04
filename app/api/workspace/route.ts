@@ -11,6 +11,7 @@ import {
   mergeWorkspaceWithPublicHistory,
   type PublicHistorySnapshot,
 } from "../../../lib/public-history";
+import { attachLiveMetricHistory } from "../../../lib/live-metric-history";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +26,11 @@ export async function GET(request: Request) {
     }
 
     const db = getD1();
-    const [accountResult, postResult, scanResult] = await Promise.all([
-      db
-        .prepare(
-          `SELECT a.id, a.platform, a.handle, a.display_name,
+    const [accountResult, postResult, metricSnapshotResult, scanResult] =
+      await Promise.all([
+        db
+          .prepare(
+            `SELECT a.id, a.platform, a.handle, a.display_name,
                   a.profile_url, a.external_account_id, a.verified,
                   a.follower_count,
                   COALESCE(a.source_kind, 'pending') AS source_kind,
@@ -55,11 +57,11 @@ export async function GET(request: Request) {
              WHEN 'tiktok' THEN 3
              ELSE 4
            END`,
-        )
-        .all(),
-      db
-        .prepare(
-          `SELECT
+          )
+          .all(),
+        db
+          .prepare(
+            `SELECT
              p.id, p.account_id, p.platform, p.external_id,
              p.external_id AS external_post_id, p.url,
              COALESCE(p.title, '') AS title,
@@ -71,7 +73,6 @@ export async function GET(request: Request) {
              p.cohort_key, p.score_explanation, p.metric_coverage,
              p.rank, p.platform_rank, p.raw_json, p.first_seen_at,
              p.last_seen_at, p.created_at, p.updated_at,
-             p.updated_at AS last_metric_at,
              a.source_kind AS source_kind,
              NULL AS analysis_label
            FROM social_posts p
@@ -79,26 +80,39 @@ export async function GET(request: Request) {
            ORDER BY p.performance_score IS NULL ASC,
                     p.performance_score DESC,
                     p.published_at DESC`,
-        )
-        .all<Record<string, unknown>>(),
-      db
-        .prepare(
-          `SELECT * FROM scan_runs
+          )
+          .all<Record<string, unknown>>(),
+        db
+          .prepare(
+            `SELECT post_id, scan_run_id, captured_at,
+                  views, likes, comments, shares, saves
+           FROM post_metric_snapshots
+           ORDER BY post_id ASC, captured_at ASC, id ASC`,
+          )
+          .all<Record<string, unknown>>(),
+        db
+          .prepare(
+            `SELECT * FROM scan_runs
            ORDER BY started_at DESC
            LIMIT 40`,
-        )
-        .all(),
-    ]);
+          )
+          .all(),
+      ]);
+
+    const livePosts = attachLiveMetricHistory(
+      postResult.results ?? [],
+      metricSnapshotResult.results ?? [],
+    );
 
     const workspace = mergeWorkspaceWithPublicHistory(
       {
-      mode: "live",
-      notice:
-        "Données publiques des comptes officiels Lofi Girl. Les couvertures limitées sont signalées explicitement et aucune métrique manquante n’est inventée.",
-      generatedAt: new Date().toISOString(),
-      accounts: accountResult.results ?? [],
-      posts: postResult.results ?? [],
-      scans: scanResult.results ?? [],
+        mode: "live",
+        notice:
+          "Données publiques des comptes officiels Lofi Girl. Les couvertures limitées sont signalées explicitement et aucune métrique manquante n’est inventée.",
+        generatedAt: new Date().toISOString(),
+        accounts: accountResult.results ?? [],
+        posts: livePosts,
+        scans: scanResult.results ?? [],
       },
       publicHistory as PublicHistorySnapshot,
       "live",

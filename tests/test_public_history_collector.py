@@ -101,15 +101,72 @@ class CollectorAppendOnlyTests(unittest.TestCase):
         old_time = "2026-08-01T10:00:00Z"
         new_time = "2026-08-04T10:00:00Z"
         old_post = self.collector.seed_existing_observation_timestamps(
-            {"platform": "tiktok", "externalId": "old", "raw": {}}, old_time
+            {
+                "platform": "tiktok",
+                "externalId": "old",
+                "views": 12,
+                "likes": 3,
+                "raw": {"collector": "test-collector"},
+            },
+            old_time,
         )
         observed_post = self.collector.mark_post_observed(
-            {"platform": "youtube", "externalId": "seen", "raw": {}}, new_time
+            {
+                "platform": "youtube",
+                "externalId": "seen",
+                "views": 20,
+                "raw": {"collector": "test-collector"},
+            },
+            new_time,
         )
 
         self.assertEqual(old_post["raw"]["lastObservedAt"], old_time)
+        self.assertEqual(
+            old_post["raw"]["metricHistory"],
+            [
+                {
+                    "capturedAt": old_time,
+                    "views": 12,
+                    "likes": 3,
+                    "comments": None,
+                    "shares": None,
+                    "saves": None,
+                    "pollVotes": None,
+                    "source": "test-collector",
+                }
+            ],
+        )
         self.assertEqual(observed_post["raw"]["firstObservedAt"], new_time)
         self.assertEqual(observed_post["raw"]["lastObservedAt"], new_time)
+        self.assertEqual(observed_post["raw"]["metricHistory"][0]["views"], 20)
+
+    def test_metric_history_accumulates_exact_observations_and_deduplicates(self):
+        first_time = "2026-08-04T10:00:00Z"
+        second_time = "2026-08-04T16:00:00Z"
+        base = {
+            "platform": "tiktok",
+            "externalId": "video",
+            "format": "video",
+            "url": "https://www.tiktok.com/@lofigirl/video/123",
+            "views": 100,
+            "likes": 10,
+            "comments": 1,
+            "shares": 2,
+            "saves": 3,
+            "raw": {"collector": "test-collector"},
+        }
+        first = self.collector.mark_post_observed(base, first_time)
+        second = self.collector.mark_post_observed(
+            {**base, "views": 160, "likes": 18}, second_time
+        )
+
+        merged = self.collector.merge_posts(first, second)
+        merged_again = self.collector.merge_posts(merged, second)
+        history = merged_again["raw"]["metricHistory"]
+
+        self.assertEqual([point["capturedAt"] for point in history], [first_time, second_time])
+        self.assertEqual([point["views"] for point in history], [100, 160])
+        self.assertEqual(merged_again["views"], 160)
 
     def test_metric_sources_are_merged_key_by_key(self):
         current = {
@@ -168,6 +225,16 @@ class CollectorAppendOnlyTests(unittest.TestCase):
             self.collector.validate_snapshot(snapshot, "youtube")
 
         snapshot["posts"][0]["raw"]["pollVotes"] = 5
+        snapshot["posts"][0]["raw"]["metricHistory"] = [
+            {
+                "capturedAt": "2026-08-04T10:00:00Z",
+                "views": -1,
+            }
+        ]
+        with self.assertRaisesRegex(RuntimeError, "historique views invalide"):
+            self.collector.validate_snapshot(snapshot, "youtube")
+
+        del snapshot["posts"][0]["raw"]["metricHistory"]
         snapshot["coverage"][0]["itemCount"] = 999
         with self.assertRaisesRegex(RuntimeError, "couverture incohérente"):
             self.collector.validate_snapshot(snapshot, "youtube")

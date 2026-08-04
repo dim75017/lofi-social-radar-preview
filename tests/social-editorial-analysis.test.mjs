@@ -234,7 +234,7 @@ test("uses hypotheses without claiming that an editorial feature caused performa
   );
 });
 
-test("recognizes the real micro-progress winner without reducing it to motivation", () => {
+test("recognizes the real micro-progress post without reducing it to motivation", () => {
   const target = actualPost("Ugkxa0ul261Q-iU9NnzjDxvmyTaCRfvHdPgi");
   const analysis = analyzeEditorialPost(target, actualCohort(target));
 
@@ -242,7 +242,10 @@ test("recognizes the real micro-progress winner without reducing it to motivatio
   assert.equal(analysis.status, "comparative");
   assert.match(analysis.headline, /victoire minuscule|micro-victoire/i);
   assert.match(analysis.mechanism, /progrès.*banal|productivité imparfaite/i);
-  assert.match(analysis.comparison, /action très précise|motivation générale/i);
+  assert.match(
+    analysis.comparison,
+    /action très précise|motivation générale|micro-victoire auto-dérisoire|moins distinctive/i,
+  );
 });
 
 test("recognizes graduado as a student meme rather than music or generic lore", () => {

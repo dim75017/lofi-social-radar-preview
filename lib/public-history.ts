@@ -24,6 +24,19 @@ export type PublicHistorySnapshot = {
   posts: NormalizedPost[];
 };
 
+export type PublicMetricSnapshot = {
+  captured_at: string;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  saves: number | null;
+  poll_votes: number | null;
+  source: string | null;
+};
+
+export type PublishedAtPrecision = "exact" | "approximate" | "unknown";
+
 export type PublicWorkspaceAccount = {
   id: string;
   platform: SocialPlatform;
@@ -54,6 +67,7 @@ export type PublicWorkspacePost = {
   format: string;
   thumbnail_url: string | null;
   published_at: string | null;
+  published_at_precision: PublishedAtPrecision;
   views: number | null;
   likes: number | null;
   comments: number | null;
@@ -68,6 +82,7 @@ export type PublicWorkspacePost = {
   first_seen_at: string;
   last_seen_at: string;
   last_metric_at: string;
+  metric_history: PublicMetricSnapshot[];
   editorial_analysis: EditorialWhy;
   [key: string]: unknown;
 };
@@ -144,15 +159,22 @@ export function mergeWorkspaceWithPublicHistory(
   snapshot: PublicHistorySnapshot,
   mode: PublicWorkspacePayload["mode"] = "live",
 ): PublicWorkspacePayload {
+  const liveObservedAt = workspace?.generatedAt ?? snapshot.generatedAt;
   const livePosts = (workspace?.posts ?? [])
     .map(normalizedFromWorkspace)
     .filter((post): post is NormalizedPost => post !== null)
-    .filter((post) => isInScopeSocialPost(post));
+    .filter((post) => isInScopeSocialPost(post))
+    .map((post) => ensureMetricHistory(post, liveObservedAt, "live-workspace"));
   const merged = new Map<string, NormalizedPost>();
 
   for (const post of snapshot.posts) {
     if (!isUsablePost(post) || !isInScopeSocialPost(post)) continue;
-    merged.set(postKey(post), sanitizePost(post));
+    merged.set(
+      postKey(post),
+      sanitizePost(
+        ensureMetricHistory(post, snapshot.generatedAt, "public-history-snapshot"),
+      ),
+    );
   }
   for (const post of livePosts) {
     const key = postKey(post);
@@ -173,10 +195,15 @@ export function mergeWorkspaceWithPublicHistory(
     const live = liveByKey.get(postKey(post));
     const account = ACCOUNT_META[post.platform];
     const editorialAnalysis = editorialAnalyses.get(editorialPostKey(post));
+    const metricHistory = metricHistoryFromRaw(post.raw);
     const firstObservedAt =
-      rawString(post.raw, "firstObservedAt") ?? snapshot.generatedAt;
+      rawString(post.raw, "firstObservedAt") ??
+      metricHistory.at(0)?.captured_at ??
+      snapshot.generatedAt;
     const lastObservedAt =
-      rawString(post.raw, "lastObservedAt") ?? firstObservedAt;
+      rawString(post.raw, "lastObservedAt") ??
+      metricHistory.at(-1)?.captured_at ??
+      firstObservedAt;
     return {
       ...(live ?? {}),
       id: `${post.platform}:${post.externalId}`,
@@ -190,6 +217,7 @@ export function mergeWorkspaceWithPublicHistory(
       format: post.format ?? "Publication",
       thumbnail_url: post.thumbnailUrl,
       published_at: post.publishedAt,
+      published_at_precision: publishedAtPrecision(post),
       views: post.views,
       likes: post.likes,
       comments: post.comments,
@@ -217,7 +245,10 @@ export function mergeWorkspaceWithPublicHistory(
       last_seen_at:
         typeof live?.last_seen_at === "string" ? live.last_seen_at : lastObservedAt,
       last_metric_at:
-        typeof live?.last_metric_at === "string" ? live.last_metric_at : lastObservedAt,
+        typeof live?.last_metric_at === "string"
+          ? live.last_metric_at
+          : metricHistory.at(-1)?.captured_at ?? lastObservedAt,
+      metric_history: metricHistory,
       editorial_analysis:
         editorialAnalysis ??
         buildEditorialAnalysisMap([post]).get(editorialPostKey(post))!,
@@ -294,6 +325,11 @@ function normalizedFromWorkspace(
   if (!isPlatform(platform) || typeof externalId !== "string" || typeof url !== "string") {
     return null;
   }
+  const raw = rawValue(value.raw_json);
+  const workspaceMetricHistory = mergeMetricHistories(
+    metricHistoryFromRaw(raw),
+    metricHistoryFromUnknown(value.metric_history),
+  );
   return {
     platform,
     externalId,
@@ -308,7 +344,13 @@ function normalizedFromWorkspace(
     comments: numberOrNull(value.comments),
     shares: numberOrNull(value.shares),
     saves: numberOrNull(value.saves),
-    raw: rawValue(value.raw_json),
+    raw:
+      workspaceMetricHistory.length > 0
+        ? {
+            ...(raw ?? {}),
+            metricHistory: workspaceMetricHistory.map(metricSnapshotToRaw),
+          }
+        : raw,
   };
 }
 
@@ -330,6 +372,13 @@ function sanitizePost(post: NormalizedPost): NormalizedPost {
 }
 
 function mergePost(history: NormalizedPost, live: NormalizedPost): NormalizedPost {
+  const historyRaw =
+    typeof history.raw === "object" && history.raw ? history.raw : {};
+  const liveRaw = typeof live.raw === "object" && live.raw ? live.raw : {};
+  const metricHistory = mergeMetricHistories(
+    metricHistoryFromRaw(historyRaw),
+    metricHistoryFromRaw(liveRaw),
+  );
   return {
     platform: live.platform,
     externalId: live.externalId,
@@ -345,8 +394,9 @@ function mergePost(history: NormalizedPost, live: NormalizedPost): NormalizedPos
     shares: live.shares ?? history.shares,
     saves: live.saves ?? history.saves,
     raw: {
-      ...(typeof history.raw === "object" && history.raw ? history.raw : {}),
-      ...(typeof live.raw === "object" && live.raw ? live.raw : {}),
+      ...historyRaw,
+      ...liveRaw,
+      metricHistory: metricHistory.map(metricSnapshotToRaw),
     },
   };
 }
@@ -367,6 +417,122 @@ function workspacePostKey(post: Record<string, unknown>): string {
   return `${String(post.platform ?? "")}:${String(post.external_post_id ?? post.external_id ?? "")}`;
 }
 
+function ensureMetricHistory(
+  post: NormalizedPost,
+  capturedAt: string,
+  fallbackSource: string,
+): NormalizedPost {
+  const raw = typeof post.raw === "object" && post.raw ? post.raw : {};
+  const existing = metricHistoryFromRaw(raw);
+  if (existing.length > 0) {
+    return {
+      ...post,
+      raw: { ...raw, metricHistory: existing.map(metricSnapshotToRaw) },
+    };
+  }
+  const firstObservation: PublicMetricSnapshot = {
+    captured_at: capturedAt,
+    views: nonnegativeNumberOrNull(post.views),
+    likes: nonnegativeNumberOrNull(post.likes),
+    comments: nonnegativeNumberOrNull(post.comments),
+    shares: nonnegativeNumberOrNull(post.shares),
+    saves: nonnegativeNumberOrNull(post.saves),
+    poll_votes:
+      rawNumber(raw, "pollVotes") ?? rawNumber(raw, "pollTotalVotes"),
+    source: rawString(raw, "collector") ?? fallbackSource,
+  };
+  return {
+    ...post,
+    raw: { ...raw, metricHistory: [metricSnapshotToRaw(firstObservation)] },
+  };
+}
+
+function metricHistoryFromRaw(
+  raw: Record<string, unknown> | null,
+): PublicMetricSnapshot[] {
+  return raw ? metricHistoryFromUnknown(raw.metricHistory) : [];
+}
+
+function metricHistoryFromUnknown(value: unknown): PublicMetricSnapshot[] {
+  let candidate = value;
+  if (typeof value === "string" && value) {
+    try {
+      candidate = JSON.parse(value) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(candidate)) return [];
+  const parsed = candidate
+    .map(metricSnapshotFromUnknown)
+    .filter((point): point is PublicMetricSnapshot => point !== null);
+  return mergeMetricHistories(parsed);
+}
+
+function metricSnapshotFromUnknown(value: unknown): PublicMetricSnapshot | null {
+  if (!value || typeof value !== "object") return null;
+  const point = value as Record<string, unknown>;
+  const capturedAt = stringOrNull(point.capturedAt ?? point.captured_at);
+  if (!capturedAt) return null;
+  return {
+    captured_at: capturedAt,
+    views: nonnegativeNumberOrNull(point.views),
+    likes: nonnegativeNumberOrNull(point.likes),
+    comments: nonnegativeNumberOrNull(point.comments),
+    shares: nonnegativeNumberOrNull(point.shares),
+    saves: nonnegativeNumberOrNull(point.saves),
+    poll_votes: nonnegativeNumberOrNull(point.pollVotes ?? point.poll_votes),
+    source: stringOrNull(point.source),
+  };
+}
+
+function mergeMetricHistories(
+  ...histories: readonly PublicMetricSnapshot[][]
+): PublicMetricSnapshot[] {
+  const byCapturedAt = new Map<string, PublicMetricSnapshot>();
+  for (const history of histories) {
+    for (const point of history) {
+      const current = byCapturedAt.get(point.captured_at);
+      byCapturedAt.set(point.captured_at, {
+        captured_at: point.captured_at,
+        views: point.views ?? current?.views ?? null,
+        likes: point.likes ?? current?.likes ?? null,
+        comments: point.comments ?? current?.comments ?? null,
+        shares: point.shares ?? current?.shares ?? null,
+        saves: point.saves ?? current?.saves ?? null,
+        poll_votes: point.poll_votes ?? current?.poll_votes ?? null,
+        source: point.source ?? current?.source ?? null,
+      });
+    }
+  }
+  return [...byCapturedAt.values()].sort((left, right) =>
+    left.captured_at.localeCompare(right.captured_at),
+  );
+}
+
+function metricSnapshotToRaw(
+  point: PublicMetricSnapshot,
+): Record<string, unknown> {
+  return {
+    capturedAt: point.captured_at,
+    views: point.views,
+    likes: point.likes,
+    comments: point.comments,
+    shares: point.shares,
+    saves: point.saves,
+    pollVotes: point.poll_votes,
+    source: point.source,
+  };
+}
+
+function publishedAtPrecision(post: NormalizedPost): PublishedAtPrecision {
+  if (!post.publishedAt) return "unknown";
+  const precision = rawString(post.raw, "publishedAtPrecision");
+  return precision === "exact" || precision === "approximate"
+    ? precision
+    : "unknown";
+}
+
 function rawValue(value: unknown): NormalizedPost["raw"] {
   if (value && typeof value === "object") return value as NormalizedPost["raw"];
   if (typeof value !== "string" || !value) return null;
@@ -383,6 +549,11 @@ function stringOrNull(value: unknown): string | null {
 
 function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function nonnegativeNumberOrNull(value: unknown): number | null {
+  const number = numberOrNull(value);
+  return number !== null && number >= 0 ? number : null;
 }
 
 function rawNumber(
