@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { scanPlatform } from "../lib/social-scanner.ts";
 import { buildSocialAnalysis, rankPosts } from "../lib/social-score.ts";
 
 const NOW = "2026-08-04T12:00:00.000Z";
+const PUBLIC_HISTORY = JSON.parse(
+  readFileSync(new URL("../data/public-history.json", import.meta.url), "utf8"),
+);
 
 function post(overrides) {
   return {
@@ -39,6 +43,61 @@ test("renormalizes available metric weights instead of treating missing metrics 
   assert.equal(ranked[0].performanceScore, 100);
   assert.deepEqual(ranked[0].metricCoverage, ["views"]);
   assert.equal(ranked[1].performanceScore, 0);
+});
+
+test("ranks lifetime impact ahead of recent momentum", () => {
+  const candidates = [
+    post({
+      platform: "tiktok",
+      format: "video",
+      externalId: "recent",
+      publishedAt: "2026-08-01T18:06:26Z",
+      views: 862_100,
+      likes: 164_200,
+      comments: 982,
+      shares: 14_400,
+      saves: 10_000,
+    }),
+    post({
+      platform: "tiktok",
+      format: "video",
+      externalId: "lifetime-winner",
+      publishedAt: "2025-07-29T18:21:43Z",
+      views: 38_000_000,
+      likes: 6_200_000,
+      comments: 24_400,
+      shares: 413_200,
+      saves: 499_600,
+    }),
+  ];
+
+  const now = rankPosts(candidates, NOW);
+  const yearsLater = rankPosts(candidates, "2030-08-04T12:00:00.000Z");
+
+  assert.equal(now[0].externalId, "lifetime-winner");
+  assert.equal(now[0].performanceScore, 100);
+  assert.equal(yearsLater[0].externalId, "lifetime-winner");
+  assert.equal(yearsLater[0].performanceScore, now[0].performanceScore);
+  assert.match(now[0].scoreExplanation, /lifetime/i);
+  assert.doesNotMatch(now[0].scoreExplanation, /par vue|par jour/i);
+});
+
+test("keeps the known public-history winners at the top", () => {
+  const ranked = rankPosts(PUBLIC_HISTORY.posts, PUBLIC_HISTORY.generatedAt);
+  const tiktok = ranked.filter((item) => item.platform === "tiktok");
+  const communityImages = ranked.filter(
+    (item) => item.platform === "youtube" && item.format === "community_image",
+  );
+  const communityPolls = ranked.filter(
+    (item) => item.platform === "youtube" && item.format === "community_poll",
+  );
+
+  assert.equal(tiktok[0].externalId, "7532570759349226774");
+  assert.equal(tiktok[0].views, 38_000_000);
+  assert.equal(communityImages[0].externalId, "UgkxPVBPcqiFVIIF3xWa_M_Qz_KHYTBo575z");
+  assert.equal(communityImages[0].likes, 40_000);
+  assert.equal(communityPolls[0].externalId, "Ugkxf_p8lv6eXEtCH0kQrhwx8WuM_LGbKyLO");
+  assert.equal(communityPolls[0].raw.pollVotes, 99_000);
 });
 
 test("normalizes inside each platform before building a global order", () => {

@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- thumbnails come from live social sources with dynamic hosts. */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   generateSocialIdeas,
@@ -20,6 +20,11 @@ import {
   matchesSocialDuration,
   type SocialDurationFilter,
 } from "../lib/social-duration";
+import {
+  getSocialVideoEmbed,
+  getTikTokOEmbedUrl,
+  parseTikTokThumbnailUrl,
+} from "../lib/social-media";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
@@ -347,7 +352,6 @@ export function SocialOS({
   const [topPlatform, setTopPlatform] = useState<"all" | Platform>("all");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("all");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
-  const [topNavExpanded, setTopNavExpanded] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
@@ -357,6 +361,8 @@ export function SocialOS({
   const [postPagination, setPostPagination] = useState({ key: "", count: POSTS_PAGE_SIZE });
   const [ideaDecisions, setIdeaDecisions] = useState<Record<string, IdeaDecision>>({});
   const [ideaDecisionsReady, setIdeaDecisionsReady] = useState(false);
+  const [activeVideoPost, setActiveVideoPost] = useState<SocialPost | null>(null);
+  const closeActiveVideo = useCallback(() => setActiveVideoPost(null), []);
 
   const loadWorkspace = useCallback(async () => {
     if (previewMode) {
@@ -429,7 +435,6 @@ export function SocialOS({
           setTopDuration("all");
           setSearch("");
           setView("top");
-          setTopNavExpanded(true);
           setToast(
             `${PLATFORM_META[target].label} · ${workspace?.accounts.find((account) => account.platform === target)?.post_count ?? 0} contenus du snapshot`,
           );
@@ -571,7 +576,6 @@ export function SocialOS({
     setView("top");
     setTopPlatform(target);
     setTopFormatFilter("all");
-    setTopNavExpanded(true);
     setMobileOpen(false);
   };
 
@@ -668,26 +672,17 @@ export function SocialOS({
                       className={isActive ? "active" : isSectionActive ? "section-active" : ""}
                       type="button"
                       aria-current={isActive ? "page" : undefined}
-                      aria-expanded={isTopItem ? topNavExpanded : undefined}
-                      aria-controls={isTopItem ? "top-platform-subnav" : undefined}
+                      aria-label={isTopItem ? "Meilleurs posts, tous les réseaux" : undefined}
                       onClick={() => {
                         if (item.id === "top") {
-                          const isCurrentAll = view === "top" && topPlatform === "all";
-                          if (isCurrentAll) {
-                            setTopNavExpanded((expanded) => !expanded);
-                          } else {
-                            setView("top");
-                            setTopPlatform("all");
-                            setTopFormatFilter("all");
-                            setTopDuration("all");
-                            setSearch("");
-                            setTopNavExpanded(true);
-                          }
+                          setView("top");
+                          setTopPlatform("all");
+                          setTopFormatFilter("all");
+                          setMobileOpen(false);
                           return;
                         }
 
                         setView(item.id);
-                        setTopNavExpanded(false);
                         if (item.id === "all") {
                           setPlatform("all");
                           setFormatFilter("all");
@@ -698,21 +693,13 @@ export function SocialOS({
                       <span className="nav-emoji">{item.emoji}</span>
                       <span className="nav-text">{item.label}</span>
                       {isTopItem ? (
-                        <span className="nav-meta">
-                          <span className="nav-count">{navCount(item.id)}</span>
-                          <span
-                            className={`nav-disclosure ${topNavExpanded ? "open" : ""}`}
-                            aria-hidden="true"
-                          >
-                            ⌄
-                          </span>
-                        </span>
+                        <span className="nav-count">{navCount(item.id)}</span>
                       ) : navCount(item.id) !== undefined ? (
                         <span className="nav-count">{navCount(item.id)}</span>
                       ) : null}
                     </button>
 
-                    {isTopSection && topNavExpanded ? (
+                    {isTopItem ? (
                       <div
                         className="nav-submenu"
                         id="top-platform-subnav"
@@ -721,14 +708,15 @@ export function SocialOS({
                       >
                         {PLATFORM_ORDER.map((key) => {
                           const meta = PLATFORM_META[key];
+                          const isPlatformActive = view === "top" && topPlatform === key;
                           const count = posts.filter(
                             (post) => post.platform === key,
                           ).length;
                           return (
                             <button
-                              className={topPlatform === key ? "active" : ""}
+                              className={isPlatformActive ? "active" : ""}
                               type="button"
-                              aria-current={topPlatform === key ? "page" : undefined}
+                              aria-current={isPlatformActive ? "page" : undefined}
                               aria-label={`${meta.label}, ${count} posts`}
                               title={`${meta.label} · ${count} posts`}
                               onClick={() => chooseTopPlatform(key)}
@@ -836,7 +824,6 @@ export function SocialOS({
                         setTopDuration("all");
                         setSearch("");
                         setView("top");
-                        setTopNavExpanded(true);
                       }}
                     >
                       <span className="source-logo">{meta.emoji}</span>
@@ -912,7 +899,6 @@ export function SocialOS({
                       setTopDuration("all");
                       setSearch("");
                       setView("top");
-                      setTopNavExpanded(true);
                     }}
                   >
                     Voir tout →
@@ -1017,7 +1003,7 @@ export function SocialOS({
                     </button>
                   ))}
                 </div>
-                <span className="top-ranking-sort">🏆 Meilleure performance d’abord</span>
+                <span className="top-ranking-sort">🏆 Impact cumulé, sans bonus de récence</span>
               </div>
 
               <div className="top-ranking-control-row">
@@ -1063,11 +1049,14 @@ export function SocialOS({
                     })}
                   </div>
                 </div>
-              ) : (
-                <p className="top-ranking-note">
-                  Classement continu, de la meilleure performance à la plus faible. Les plateformes se choisissent sous « Meilleurs posts » dans le menu de gauche.
+              ) : null}
+
+              <div className="top-ranking-method">
+                <span>🧮 Comment le classement fonctionne</span>
+                <p>
+                  Score lifetime sur les compteurs cumulés. Coefficients de base : vues 45 %, likes 25 %, commentaires 15 %, partages 10 %, sauvegardes 5 % et votes 45 % pour les sondages. Les poids sont renormalisés selon les signaux publics disponibles. Les posts sont comparés uniquement au même réseau et au même format, sans bonus de récence.
                 </p>
-              )}
+              </div>
 
               {topUndatedCount > 0 ? (
                 <p className="top-undated-note">
@@ -1085,6 +1074,7 @@ export function SocialOS({
                     post={post}
                     rank={index + 1}
                     compact={false}
+                    onPlay={setActiveVideoPost}
                     key={post.id}
                   />
                 ))}
@@ -1183,7 +1173,13 @@ export function SocialOS({
 
             <div className="post-list-grid">
               {visiblePosts.map((post, index) => (
-                <PostCard post={post} rank={index + 1} compact key={post.id} />
+                <PostCard
+                  post={post}
+                  rank={index + 1}
+                  compact
+                  onPlay={setActiveVideoPost}
+                  key={post.id}
+                />
               ))}
             </div>
             {visiblePosts.length < filteredPosts.length ? (
@@ -1285,6 +1281,7 @@ export function SocialOS({
         ) : null}
       </main>
 
+      <VideoPlayerModal post={activeVideoPost} onClose={closeActiveVideo} />
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
@@ -1440,26 +1437,100 @@ function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
   );
 }
 
-function PostCard({ post, rank, compact }: { post: SocialPost; rank: number; compact: boolean }) {
+type TikTokThumbnailCacheEntry = { url: string; expiresAt: number };
+
+const TIKTOK_THUMBNAIL_CACHE = new Map<string, TikTokThumbnailCacheEntry>();
+const TIKTOK_THUMBNAIL_REQUESTS = new Map<string, Promise<string | null>>();
+const TIKTOK_PREVIEW_TARGETS = new Map<Element, () => void>();
+let sharedTikTokPreviewObserver: IntersectionObserver | null = null;
+
+function getCachedTikTokThumbnail(externalId: string): string | null {
+  const cached = TIKTOK_THUMBNAIL_CACHE.get(externalId);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    TIKTOK_THUMBNAIL_CACHE.delete(externalId);
+    return null;
+  }
+  return cached.url;
+}
+
+function requestTikTokThumbnail(
+  externalId: string,
+  oEmbedUrl: string,
+): Promise<string | null> {
+  const cached = getCachedTikTokThumbnail(externalId);
+  if (cached) return Promise.resolve(cached);
+  const pending = TIKTOK_THUMBNAIL_REQUESTS.get(externalId);
+  if (pending) return pending;
+
+  const request = fetch(oEmbedUrl, { mode: "cors" })
+    .then(async (response) => {
+      if (!response.ok) return null;
+      const payload = (await response.json()) as { thumbnail_url?: unknown };
+      const thumbnail = parseTikTokThumbnailUrl(payload.thumbnail_url);
+      if (!thumbnail) return null;
+      TIKTOK_THUMBNAIL_CACHE.set(externalId, thumbnail);
+      return thumbnail.url;
+    })
+    .catch(() => null)
+    .finally(() => TIKTOK_THUMBNAIL_REQUESTS.delete(externalId));
+  TIKTOK_THUMBNAIL_REQUESTS.set(externalId, request);
+  return request;
+}
+
+function observeTikTokPreview(target: Element, onVisible: () => void): () => void {
+  if (typeof IntersectionObserver === "undefined") {
+    onVisible();
+    return () => undefined;
+  }
+  if (!sharedTikTokPreviewObserver) {
+    sharedTikTokPreviewObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const callback = TIKTOK_PREVIEW_TARGETS.get(entry.target);
+          TIKTOK_PREVIEW_TARGETS.delete(entry.target);
+          sharedTikTokPreviewObserver?.unobserve(entry.target);
+          callback?.();
+        }
+      },
+      { rootMargin: "420px" },
+    );
+  }
+  TIKTOK_PREVIEW_TARGETS.set(target, onVisible);
+  sharedTikTokPreviewObserver.observe(target);
+  return () => {
+    TIKTOK_PREVIEW_TARGETS.delete(target);
+    sharedTikTokPreviewObserver?.unobserve(target);
+  };
+}
+
+function PostCard({
+  post,
+  rank,
+  compact,
+  onPlay,
+}: {
+  post: SocialPost;
+  rank: number;
+  compact: boolean;
+  onPlay: (post: SocialPost) => void;
+}) {
   const meta = PLATFORM_META[post.platform];
   return (
-    <a
+    <article
       className={`social-post-card ${compact ? "compact" : ""}`}
-      href={post.url}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`Ouvrir « ${post.title || post.text || "publication"} » sur ${meta.label}`}
     >
-      <div className="post-visual">
-        {post.thumbnail_url ? <img src={post.thumbnail_url} alt="" loading="lazy" /> : <span>{meta.emoji}</span>}
-        <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
-        <span className="post-rank">#{rank}</span>
-      </div>
+      <PostMediaPreview post={post} rank={rank} onPlay={onPlay} />
       <div className="post-card-body">
         <div className="post-card-title">
           <div>
             <span className="section-kicker">{postLabel(post)} · {getSocialFormatLabel(post)}</span>
-            <h3>{post.title || post.text || "Publication sans légende"}</h3>
+            <h3>
+              <a href={post.url} target="_blank" rel="noreferrer">
+                {post.title || post.text || "Publication sans légende"}
+              </a>
+            </h3>
           </div>
           <span className={`score-badge score-${scoreTone(post.performance_score)}`}>
             <b>{post.performance_score ?? "—"}</b><small>/100</small>
@@ -1478,9 +1549,230 @@ function PostCard({ post, rank, compact }: { post: SocialPost; rank: number; com
         ) : null}
         <footer>
           <span>{post.published_at ? `Publié il y a ${relativeAge(post.published_at)}` : "Date publique absente"} · relevé {formatDate(post.last_metric_at, true)}</span>
-          <span className={`confidence confidence-${post.score_confidence}`}>{confidenceLabel(post.score_confidence)}</span>
+          <span className="post-card-actions">
+            <span className={`confidence confidence-${post.score_confidence}`}>{confidenceLabel(post.score_confidence)}</span>
+            <a href={post.url} target="_blank" rel="noreferrer" aria-label={`Ouvrir sur ${meta.label}`}>
+              Ouvrir ↗
+            </a>
+          </span>
         </footer>
       </div>
-    </a>
+    </article>
+  );
+}
+
+function PostMediaPreview({
+  post,
+  rank,
+  onPlay,
+}: {
+  post: SocialPost;
+  rank: number;
+  onPlay: (post: SocialPost) => void;
+}) {
+  const meta = PLATFORM_META[post.platform];
+  const video = getSocialVideoEmbed(post);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const videoPlatform = video?.platform;
+  const videoExternalId = video?.externalId;
+  const posterUrl = video?.posterUrl ?? post.thumbnail_url;
+  const oEmbedUrl = getTikTokOEmbedUrl(post);
+  const cachedTikTokThumbnail =
+    videoPlatform === "tiktok" && videoExternalId
+      ? getCachedTikTokThumbnail(videoExternalId)
+      : null;
+  const initialThumbnail = posterUrl ?? cachedTikTokThumbnail;
+  const [thumbnail, setThumbnail] = useState<string | null>(initialThumbnail);
+  const [thumbnailSource, setThumbnailSource] = useState<
+    "poster" | "cache" | "oembed" | "none"
+  >(posterUrl ? "poster" : cachedTikTokThumbnail ? "cache" : "none");
+  const [shouldLoadTikTokThumbnail, setShouldLoadTikTokThumbnail] = useState(
+    videoPlatform === "tiktok" && !initialThumbnail,
+  );
+
+  useEffect(() => {
+    if (
+      videoPlatform !== "tiktok" ||
+      !videoExternalId ||
+      !oEmbedUrl ||
+      !shouldLoadTikTokThumbnail
+    ) {
+      return;
+    }
+    let cancelled = false;
+    const loadThumbnail = () => {
+      void requestTikTokThumbnail(videoExternalId, oEmbedUrl).then((url) => {
+        if (cancelled) return;
+        setShouldLoadTikTokThumbnail(false);
+        if (!url) return;
+        setThumbnail(url);
+        setThumbnailSource("oembed");
+      });
+    };
+
+    const target = previewRef.current;
+    let stopObserving: () => void = () => undefined;
+    if (target) stopObserving = observeTikTokPreview(target, loadThumbnail);
+    else loadThumbnail();
+
+    return () => {
+      cancelled = true;
+      stopObserving();
+    };
+  }, [oEmbedUrl, shouldLoadTikTokThumbnail, videoExternalId, videoPlatform]);
+
+  return (
+    <div
+      className={`post-visual ${video ? "is-playable" : ""}`}
+      ref={previewRef}
+    >
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt={`Aperçu de ${post.title || post.text || `la publication ${meta.label}`}`}
+          loading="lazy"
+          onError={() => {
+            if (videoPlatform === "tiktok" && videoExternalId) {
+              TIKTOK_THUMBNAIL_CACHE.delete(videoExternalId);
+              if (thumbnailSource !== "oembed") {
+                setShouldLoadTikTokThumbnail(true);
+              }
+            }
+            setThumbnailSource("none");
+            setThumbnail(null);
+          }}
+        />
+      ) : (
+        <span className="post-preview-placeholder" aria-hidden="true">
+          <b>{meta.emoji}</b>
+          {video ? <small>Aperçu {meta.label}</small> : null}
+        </span>
+      )}
+      {video ? (
+        <button
+          className="post-play-button"
+          type="button"
+          onClick={() => onPlay(post)}
+          aria-label={`Lire « ${post.title || post.text || "cette vidéo"} » directement dans le radar`}
+        >
+          <span aria-hidden="true">▶</span>
+          <b>Lire ici</b>
+        </button>
+      ) : null}
+      {!video ? (
+        <a
+          className="post-visual-link"
+          href={post.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Ouvrir « ${post.title || post.text || "cette publication"} » sur ${meta.label}`}
+        />
+      ) : null}
+      <span className={`platform-badge tone-${meta.tone}`}>{meta.emoji} {meta.label}</span>
+      <span className="post-rank">#{rank}</span>
+    </div>
+  );
+}
+
+function VideoPlayerModal({
+  post,
+  onClose,
+}: {
+  post: SocialPost | null;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLElement>(null);
+  const video = post ? getSocialVideoEmbed(post) : null;
+  const isOpen = video !== null;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        modalRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], iframe, [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1) ?? first;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [isOpen, onClose]);
+
+  if (!post || !video) return null;
+  const meta = PLATFORM_META[post.platform];
+  const title = post.title || post.text || `Vidéo ${meta.label}`;
+
+  return (
+    <div
+      className="video-modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className={`video-modal tone-${meta.tone}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="video-modal-title"
+        ref={modalRef}
+      >
+        <header>
+          <div>
+            <span>{meta.emoji} Lecture dans le radar</span>
+            <h2 id="video-modal-title">{title}</h2>
+          </div>
+          <button
+            className="video-modal-close"
+            type="button"
+            onClick={onClose}
+            ref={closeButtonRef}
+            aria-label="Fermer la vidéo"
+          >
+            ✕
+          </button>
+        </header>
+        <div className="video-player-frame">
+          <iframe
+            src={video.playerUrl}
+            title={`Lecteur ${meta.label} : ${title}`}
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+        <footer>
+          <span>Lecteur officiel {meta.label} · Shorts et TikTok uniquement</span>
+          <a href={post.url} target="_blank" rel="noreferrer">
+            Ouvrir sur {meta.label} ↗
+          </a>
+        </footer>
+      </section>
+    </div>
   );
 }

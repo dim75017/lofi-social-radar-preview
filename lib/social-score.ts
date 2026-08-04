@@ -54,34 +54,40 @@ const METRICS: SocialMetric[] = [
   "saves",
   "pollVotes",
 ];
+const PLATFORM_SORT_ORDER: SocialPlatform[] = [
+  "youtube",
+  "instagram",
+  "tiktok",
+  "x",
+];
 const METRIC_WEIGHTS: Record<SocialMetric, number> = {
   views: 0.45,
   likes: 0.25,
   comments: 0.15,
   shares: 0.1,
   saves: 0.05,
-  pollVotes: 0.2,
+  pollVotes: 0.45,
 };
 const METRIC_LABELS: Record<SocialMetric, string> = {
-  views: "niveau de vues",
-  likes: "likes par vue",
-  comments: "commentaires par vue",
-  shares: "partages par vue",
-  saves: "sauvegardes par vue",
-  pollVotes: "votes du sondage",
+  views: "vues cumulées",
+  likes: "likes cumulés",
+  comments: "commentaires cumulés",
+  shares: "partages cumulés",
+  saves: "sauvegardes cumulées",
+  pollVotes: "votes du sondage cumulés",
 };
 
 type ScoreDraft = RankedPost;
 
 export function rankPosts(
   posts: readonly NormalizedPost[],
-  now: Date | string | number = new Date(),
+  _now: Date | string | number = new Date(),
 ): RankedPost[] {
-  const referenceTime = validDate(now);
+  void _now; // Kept for API compatibility; lifetime scoring is intentionally age-independent.
   const comparable = posts.map((post) => ({
     post,
     formatKey: normalizeFormat(post.format),
-    values: comparableValues(post, referenceTime),
+    values: comparableValues(post),
   }));
   const byPlatform = groupBy(comparable, (item) => item.post.platform);
   const drafts: ScoreDraft[] = [];
@@ -90,12 +96,8 @@ export function rankPosts(
     const byFormat = groupBy(platformPosts, (item) => item.formatKey);
 
     for (const item of platformPosts) {
-      const exactCohort = byFormat.get(item.formatKey) ?? [];
-      const cohort = exactCohort.length >= 2 ? exactCohort : platformPosts;
-      const cohortKey =
-        exactCohort.length >= 2
-          ? `${platform}:${item.formatKey}`
-          : `${platform}:all`;
+      const cohort = byFormat.get(item.formatKey) ?? [item];
+      const cohortKey = `${platform}:${item.formatKey}`;
       const metricCoverage = METRICS.filter(
         (metric) => item.values[metric] !== null,
       );
@@ -222,7 +224,7 @@ export function buildSocialAnalysis(
     coverage,
     insights: [...editorialInsights, ...insights],
     caveats: [
-      "Les scores sont des percentiles calculés dans chaque plateforme et ne comparent jamais les volumes bruts entre réseaux.",
+      "Les scores lifetime transforment les compteurs cumulés en percentiles dans chaque plateforme et chaque format ; ils ne comparent jamais directement les volumes bruts entre réseaux.",
       "Une métrique absente est exclue puis les poids restants sont renormalisés ; elle n’est jamais remplacée par zéro.",
       "Les enseignements sont descriptifs et probabilistes : ils ne démontrent pas une causalité créative.",
     ],
@@ -359,20 +361,14 @@ function joinFrench(values: readonly string[]): string {
 
 function comparableValues(
   post: NormalizedPost,
-  now: Date,
 ): Record<SocialMetric, number | null> {
-  const ageDays = publicationAgeDays(post.publishedAt, now);
-  const views = safeMetric(post.views);
-  const denominator = views !== null && views > 0 ? views : null;
-
   return {
-    views:
-      views === null ? null : ageDays === null ? views : views / Math.max(1, ageDays),
-    likes: engagementValue(post.likes, denominator, ageDays),
-    comments: engagementValue(post.comments, denominator, ageDays),
-    shares: engagementValue(post.shares, denominator, ageDays),
-    saves: engagementValue(post.saves, denominator, ageDays),
-    pollVotes: engagementValue(sourceMetric(post, "pollVotes"), denominator, ageDays),
+    views: safeMetric(post.views),
+    likes: safeMetric(post.likes),
+    comments: safeMetric(post.comments),
+    shares: safeMetric(post.shares),
+    saves: safeMetric(post.saves),
+    pollVotes: sourceMetric(post, "pollVotes"),
   };
 }
 
@@ -387,24 +383,6 @@ function sourceMetric(post: NormalizedPost, metric: SocialMetric): number | null
         ? raw.pollTotalVotes
         : null,
   );
-}
-
-function engagementValue(
-  value: number | null,
-  views: number | null,
-  ageDays: number | null,
-): number | null {
-  const metric = safeMetric(value);
-  if (metric === null) return null;
-  if (views !== null && views > 0) return (metric / views) * 1_000;
-  return ageDays === null ? metric : metric / Math.max(1, ageDays);
-}
-
-function publicationAgeDays(value: string | null, now: Date): number | null {
-  if (!value) return null;
-  const timestamp = Date.parse(value);
-  if (!Number.isFinite(timestamp)) return null;
-  return Math.max(1 / 24, (now.getTime() - timestamp) / 86_400_000);
 }
 
 function percentileRank(values: readonly number[], value: number): number {
@@ -453,8 +431,9 @@ function explainScore(
       ({ metric, percentile }) =>
         `${METRIC_LABELS[metric]} au ${percentile}e percentile`,
     );
-  const coverage = `${metricCoverage.length}/${METRICS.length} métriques publiques disponibles`;
-  return `Score ${score}/100 dans une cohorte ${platformLabel(platform)} de ${cohortSize} contenu${cohortSize > 1 ? "s" : ""} · ${strongest.join(" · ")} · ${coverage}. Lecture descriptive, pas causale.`;
+  const signalLabel = metricCoverage.length > 1 ? "signaux" : "signal";
+  const coverage = `${metricCoverage.length} ${signalLabel} public${metricCoverage.length > 1 ? "s" : ""} comparable${metricCoverage.length > 1 ? "s" : ""}`;
+  return `Score lifetime ${score}/100 dans une cohorte ${platformLabel(platform)} de ${cohortSize} contenu${cohortSize > 1 ? "s" : ""} du même format · ${strongest.join(" · ")} · ${coverage}. Aucun bonus de récence. Lecture descriptive, pas causale.`;
 }
 
 function compareRankedPosts(left: ScoreDraft, right: ScoreDraft): number {
@@ -466,11 +445,20 @@ function compareRankedPosts(left: ScoreDraft, right: ScoreDraft): number {
   const confidenceDifference =
     confidenceOrder(right.confidence) - confidenceOrder(left.confidence);
   if (confidenceDifference !== 0) return confidenceDifference;
-  const viewDifference = (right.views ?? -1) - (left.views ?? -1);
-  if (viewDifference !== 0) return viewDifference;
-  const dateDifference =
-    sortableTimestamp(right.publishedAt) - sortableTimestamp(left.publishedAt);
-  if (dateDifference !== 0) return dateDifference;
+  if (left.cohortKey === right.cohortKey) {
+    for (const metric of METRICS) {
+      const metricDifference =
+        (sourceMetric(right, metric) ?? -1) -
+        (sourceMetric(left, metric) ?? -1);
+      if (metricDifference !== 0) return metricDifference;
+    }
+  }
+  const platformDifference =
+    PLATFORM_SORT_ORDER.indexOf(left.platform) -
+    PLATFORM_SORT_ORDER.indexOf(right.platform);
+  if (platformDifference !== 0) return platformDifference;
+  const cohortDifference = left.cohortKey.localeCompare(right.cohortKey);
+  if (cohortDifference !== 0) return cohortDifference;
   return `${left.platform}:${left.externalId}`.localeCompare(
     `${right.platform}:${right.externalId}`,
   );
@@ -508,9 +496,7 @@ function groupBy<T, K>(
 
 function platformOrder(values: IterableIterator<SocialPlatform>): SocialPlatform[] {
   const present = new Set(values);
-  return (["youtube", "instagram", "tiktok", "x"] as SocialPlatform[]).filter(
-    (platform) => present.has(platform),
-  );
+  return PLATFORM_SORT_ORDER.filter((platform) => present.has(platform));
 }
 
 function platformLabel(platform: SocialPlatform): string {
@@ -530,10 +516,4 @@ function confidenceOrder(value: ScoreConfidence): number {
   if (value === "medium") return 2;
   if (value === "low") return 1;
   return 0;
-}
-
-function sortableTimestamp(value: string | null): number {
-  if (!value) return 0;
-  const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp) ? timestamp : 0;
 }

@@ -35,13 +35,15 @@ test("server-renders the live Social Radar shell", async () => {
   assert.match(html, /<title>Lofi Social Radar<\/title>/i);
   assert.match(html, /Command Center/);
   assert.match(html, /Meilleurs posts/);
+  assert.match(html, /id="top-platform-subnav"/);
   assert.match(html, /Données publiques réelles/);
   assert.match(html, /Instagram, X, TikTok et YouTube/);
+  assert.doesNotMatch(html, /<iframe\b/i);
   assert.doesNotMatch(html, /🧪 Démo|Données de démonstration|codex-preview|react-loading-skeleton/i);
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson] = await Promise.all([
+  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
@@ -50,6 +52,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../lib/social-scanner.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/public-history.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-media.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -68,12 +72,30 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /métriques absentes sont retirées/i);
   assert.match(component, /top-platform-subnav/);
   assert.match(component, /Plateformes des meilleurs posts/);
-  assert.match(component, /aria-expanded=\{isTopItem \? topNavExpanded : undefined\}/);
-  assert.match(component, /setTopNavExpanded\(\(expanded\) => !expanded\)/);
+  assert.doesNotMatch(component, /topNavExpanded|setTopNavExpanded|nav-disclosure|aria-expanded/);
+  assert.match(component, /view === "top" && topPlatform === key/);
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
   assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
-  assert.match(component, /Meilleure performance d’abord/);
+  assert.match(component, /Impact cumulé, sans bonus de récence/);
+  assert.match(component, /Comment le classement fonctionne/);
+  assert.match(component, /setActiveVideoPost/);
+  assert.match(component, /TIKTOK_THUMBNAIL_CACHE/);
+  assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
+  assert.match(component, /sharedTikTokPreviewObserver/);
+  assert.match(component, /IntersectionObserver/);
+  assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 1);
+  assert.match(component, /role="dialog"/);
+  assert.match(component, /event\.key !== "Tab"/);
+  assert.match(socialMedia, /youtube-nocookie\.com\/embed/);
+  assert.match(socialMedia, /tiktok\.com\/player\/v1/);
+  assert.match(socialMedia, /format === "short"/);
+  assert.doesNotMatch(styles, /nav-disclosure|nav-meta/);
+  const explicitFontSizes = [...styles.matchAll(/font-size:\s*([0-9.]+)px/g)].map(
+    (match) => Number(match[1]),
+  );
+  assert.ok(explicitFontSizes.length > 100);
+  assert.ok(explicitFontSizes.every((size) => size >= 11));
   assert.match(component, /tous affichés/);
   assert.match(durations, /All time/);
   assert.match(durations, /180d/);
