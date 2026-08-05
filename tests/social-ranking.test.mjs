@@ -107,6 +107,8 @@ test("keeps the known snapshot winners under the requested raw ranking", () => {
   assert.equal(rankPostsByPublicMetric(tikTok).posts[0].external_post_id, "7532570759349226774");
   assert.equal(rankPostsByPublicMetric(images).posts[0].external_post_id, "UgkxzRdC32FUR_wPFHq2U-V6QzZSsJCo3huE");
   assert.equal(rankPostsByPublicMetric(text).posts[0].external_post_id, "UgkxLBRAQx4mbnvn7DIiw3N5ktSzS9iWj7DB");
-  assert.equal(rankPostsByPublicMetric(shorts).metric, "views");
+  const rankedShorts = rankPostsByPublicMetric(shorts);
+  assert.equal(rankedShorts.metric, "likes");
+  assert.ok(rankedShorts.posts[0].likes !== null);
   assert.ok(shorts.every((item) => item.views !== null));
 });

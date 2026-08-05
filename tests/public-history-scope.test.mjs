@@ -258,7 +258,14 @@ test("the workspace exposes factual metric observations without inventing launch
 
 test("a legacy snapshot is exposed as one observation at generatedAt", async () => {
   const history = await snapshot();
-  const workspace = mergeWorkspaceWithPublicHistory(null, history);
+  const source = history.posts.find((item) => item.platform === "youtube");
+  assert.ok(source);
+  const legacyRaw = { ...(source.raw ?? {}) };
+  delete legacyRaw.metricHistory;
+  const workspace = mergeWorkspaceWithPublicHistory(null, {
+    ...history,
+    posts: [{ ...source, raw: legacyRaw }],
+  });
   const post = workspace.posts.find((item) => item.platform === "youtube");
 
   assert.ok(post);

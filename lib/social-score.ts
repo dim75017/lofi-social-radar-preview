@@ -84,12 +84,18 @@ const METRIC_LABELS: Record<SocialMetric, string> = {
 
 type ScoreDraft = RankedPost;
 
+type ComparablePost = {
+  post: NormalizedPost;
+  formatKey: string;
+  values: Record<SocialMetric, number | null>;
+};
+
 export function rankPosts(
   posts: readonly NormalizedPost[],
   _now: Date | string | number = new Date(),
 ): RankedPost[] {
   void _now; // Kept for API compatibility; lifetime scoring is intentionally age-independent.
-  const comparable = posts.map((post) => ({
+  const comparable: ComparablePost[] = posts.map((post) => ({
     post,
     formatKey: normalizeFormat(post.format),
     values: comparableValues(post),
@@ -99,6 +105,17 @@ export function rankPosts(
 
   for (const [platform, platformPosts] of byPlatform) {
     const byFormat = groupBy(platformPosts, (item) => item.formatKey);
+    const percentileLookups = new Map<
+      string,
+      Map<SocialMetric, Map<number, number>>
+    >();
+    for (const [formatKey, cohort] of byFormat) {
+      const byMetric = new Map<SocialMetric, Map<number, number>>();
+      for (const metric of METRICS) {
+        byMetric.set(metric, buildPercentileLookup(cohort, metric));
+      }
+      percentileLookups.set(formatKey, byMetric);
+    }
 
     for (const item of platformPosts) {
       const cohort = byFormat.get(item.formatKey) ?? [item];
@@ -113,11 +130,9 @@ export function rankPosts(
       for (const metric of metricCoverage) {
         const value = item.values[metric];
         if (value === null) continue;
-        const referenceValues = cohort
-          .map((candidate) => candidate.values[metric])
-          .filter((candidate): candidate is number => candidate !== null);
-        if (referenceValues.length === 0) continue;
-        const percentile = percentileRank(referenceValues, value);
+        const percentile =
+          percentileLookups.get(item.formatKey)?.get(metric)?.get(value);
+        if (percentile === undefined) continue;
         metricPercentiles[metric] = percentile;
         weightedScore += percentile * METRIC_WEIGHTS[metric];
         availableWeight += METRIC_WEIGHTS[metric];
@@ -165,8 +180,18 @@ export function buildSocialAnalysis(
 ): SocialAnalysis {
   const referenceTime = validDate(now);
   const ranked = rankPosts(posts, referenceTime);
+  return buildSocialAnalysisFromRanked(ranked, referenceTime);
+}
+
+export function buildSocialAnalysisFromRanked(
+  ranked: readonly RankedPost[],
+  now: Date | string | number = new Date(),
+  precomputedEditorialAnalyses?: ReturnType<typeof buildEditorialAnalysisMap>,
+): SocialAnalysis {
+  const referenceTime = validDate(now);
   const byPlatform = groupBy(ranked, (post) => post.platform);
-  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
+  const editorialAnalyses =
+    precomputedEditorialAnalyses ?? buildEditorialAnalysisMap(ranked);
   const coverage: PlatformAnalysis[] = [];
   const insights: SocialInsight[] = [];
 
@@ -226,12 +251,12 @@ export function buildSocialAnalysis(
   const editorialInsights = buildEditorialInsights(ranked, editorialAnalyses);
   return {
     generatedAt: referenceTime.toISOString(),
-    postCount: posts.length,
+    postCount: ranked.length,
     platformCount,
     headline:
-      posts.length === 0
+      ranked.length === 0
         ? "Aucun contenu public exploitable pour le moment."
-        : `${posts.length} contenus publics comparés séparément sur ${platformCount} plateforme${platformCount > 1 ? "s" : ""}.`,
+        : `${ranked.length} contenus publics comparés séparément sur ${platformCount} plateforme${platformCount > 1 ? "s" : ""}.`,
     coverage,
     insights: [...editorialInsights, ...insights],
     caveats: [
@@ -249,7 +274,9 @@ function buildEditorialInsights(
   const cohorts = new Map<string, RankedPost[]>();
   for (const post of posts) {
     const key = `${post.platform}:${post.format ?? "unknown"}`;
-    cohorts.set(key, [...(cohorts.get(key) ?? []), post]);
+    const cohort = cohorts.get(key);
+    if (cohort) cohort.push(post);
+    else cohorts.set(key, [post]);
   }
 
   const categoryInsights = [...cohorts.values()]
@@ -374,17 +401,42 @@ function sourceMetric(post: NormalizedPost, metric: SocialMetric): number | null
   );
 }
 
-function percentileRank(values: readonly number[], value: number): number {
-  if (values.length <= 1) return 50;
-  let below = 0;
-  let equal = 0;
-  for (const candidate of values) {
-    if (candidate < value) below += 1;
-    else if (candidate === value) equal += 1;
+function buildPercentileLookup(
+  cohort: readonly ComparablePost[],
+  metric: SocialMetric,
+): Map<number, number> {
+  const values = cohort
+    .map((candidate) => candidate.values[metric])
+    .filter((candidate): candidate is number => candidate !== null)
+    .sort((left, right) => left - right);
+  const percentiles = new Map<number, number>();
+  if (values.length === 0) return percentiles;
+  if (values.length === 1) {
+    percentiles.set(values[0], 50);
+    return percentiles;
   }
-  return Math.round(
-    ((below + Math.max(0, equal - 1) / 2) / (values.length - 1)) * 100,
-  );
+
+  let firstEqual = 0;
+  while (firstEqual < values.length) {
+    let afterEqual = firstEqual + 1;
+    while (
+      afterEqual < values.length &&
+      values[afterEqual] === values[firstEqual]
+    ) {
+      afterEqual += 1;
+    }
+    const equalCount = afterEqual - firstEqual;
+    percentiles.set(
+      values[firstEqual],
+      Math.round(
+        ((firstEqual + Math.max(0, equalCount - 1) / 2) /
+          (values.length - 1)) *
+          100,
+      ),
+    );
+    firstEqual = afterEqual;
+  }
+  return percentiles;
 }
 
 function scoreConfidence(

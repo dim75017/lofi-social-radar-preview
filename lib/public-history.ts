@@ -5,7 +5,7 @@ import {
   type EditorialWhy,
 } from "./social-editorial-analysis.ts";
 import { isInScopeSocialPost } from "./social-formats.ts";
-import { buildSocialAnalysis, rankPosts } from "./social-score.ts";
+import { buildSocialAnalysisFromRanked, rankPosts } from "./social-score.ts";
 
 export type HistoryCoverage = {
   platform: SocialPlatform;
@@ -301,7 +301,6 @@ export function mergeWorkspaceWithPublicHistory(
     } satisfies PublicWorkspaceAccount;
   });
 
-  const normalizedPosts: NormalizedPost[] = ranked;
   return {
     mode,
     notice:
@@ -311,7 +310,9 @@ export function mergeWorkspaceWithPublicHistory(
     posts,
     scans: workspace?.scans ?? [],
     analysis:
-      normalizedPosts.length > 0 ? buildSocialAnalysis(normalizedPosts, generatedAt) : null,
+      ranked.length > 0
+        ? buildSocialAnalysisFromRanked(ranked, generatedAt, editorialAnalyses)
+        : null,
     historyCoverage: snapshot.coverage,
   };
 }

@@ -98,6 +98,33 @@ type PreparedPost = {
   primarySignal: EditorialSignalKey | "insufficient";
 };
 
+type PreparedCohortContext = {
+  size: number;
+  orderedIndex: ReadonlyMap<PreparedPost, number>;
+  signalCounts: ReadonlyMap<PreparedPost["primarySignal"], number>;
+  comparators: ReadonlyMap<PreparedPost, PreparedPost>;
+};
+
+type ComparatorCandidate = {
+  item: PreparedPost;
+  orderedIndex: number;
+  publishedAt: number | null;
+  territoryMask: number;
+};
+
+type ComparatorChoice = {
+  candidate: PreparedPost;
+  score: number;
+};
+
+type ComparatorTarget = {
+  item: PreparedPost;
+  orderedIndex: number;
+  publishedAt: number | null;
+  upperHalf: boolean;
+  best: ComparatorChoice | null;
+};
+
 type SignalTemplate = {
   headline: string;
   mechanism: string;
@@ -316,14 +343,32 @@ export function buildEditorialAnalysisMap(
   const cohorts = new Map<string, PreparedPost[]>();
   for (const item of prepared) {
     const cohortKey = `${item.post.platform}:${canonicalFormat(item.post.format)}`;
-    cohorts.set(cohortKey, [...(cohorts.get(cohortKey) ?? []), item]);
+    const cohort = cohorts.get(cohortKey);
+    if (cohort) cohort.push(item);
+    else cohorts.set(cohortKey, [item]);
   }
 
   const result = new Map<string, EditorialWhy>();
   for (const cohort of cohorts.values()) {
     const ordered = orderPreparedPosts(cohort);
+    const orderedIndex = new Map(
+      ordered.map((item, index) => [item, index] as const),
+    );
+    const signalCounts = new Map<PreparedPost["primarySignal"], number>();
+    for (const item of cohort) {
+      signalCounts.set(
+        item.primarySignal,
+        (signalCounts.get(item.primarySignal) ?? 0) + 1,
+      );
+    }
+    const context: PreparedCohortContext = {
+      size: cohort.length,
+      orderedIndex,
+      signalCounts,
+      comparators: selectComparators(cohort, ordered, orderedIndex, signalCounts),
+    };
     for (const target of cohort) {
-      result.set(target.key, analyzePreparedPost(target, cohort, ordered));
+      result.set(target.key, analyzePreparedPost(target, context));
     }
   }
   return result;
@@ -367,24 +412,24 @@ export function editorialThemeLabel(post: EditorialAnalysisPost): string {
 
 function analyzePreparedPost(
   target: PreparedPost,
-  cohort: readonly PreparedPost[],
-  ordered: readonly PreparedPost[],
+  context: PreparedCohortContext,
 ): EditorialWhy {
   if (target.primarySignal === "insufficient") return insufficientAnalysis(target.post);
 
   const template = SIGNAL_TEMPLATES[target.primarySignal];
-  const peers = cohort.filter((item) => item.key !== target.key);
-  const sameSignalPeers = peers.filter(
-    (item) => item.primarySignal === target.primarySignal,
+  const peerCount = Math.max(0, context.size - 1);
+  const sameSignalPeerCount = Math.max(
+    0,
+    (context.signalCounts.get(target.primarySignal) ?? 0) - 1,
   );
   const noDifferentiator =
-    peers.length >= 2 && sameSignalPeers.length / peers.length >= 0.8;
+    peerCount >= 2 && sameSignalPeerCount / peerCount >= 0.8;
   const comparator = noDifferentiator
     ? null
-    : selectComparator(target, peers, ordered, target.primarySignal);
-  const targetIndex = ordered.findIndex((item) => item.key === target.key);
+    : context.comparators.get(target) ?? null;
+  const targetIndex = context.orderedIndex.get(target) ?? -1;
   const comparatorIndex = comparator
-    ? ordered.findIndex((item) => item.key === comparator.key)
+    ? context.orderedIndex.get(comparator) ?? -1
     : -1;
   const targetComesFirst =
     comparator !== null &&
@@ -427,8 +472,8 @@ function analyzePreparedPost(
     transferableLesson: template.lesson,
     mechanisms,
     comparatorPostIds: comparator ? [comparator.post.externalId] : [],
-    limitations: analysisLimitations(target, cohort.length),
-    confidence: comparator && cohort.length >= 6 ? "medium" : "low",
+    limitations: analysisLimitations(target, context.size),
+    confidence: comparator && context.size >= 6 ? "medium" : "low",
     version: "editorial-v1",
   };
 }
@@ -564,54 +609,291 @@ function selectPrimarySignal(
   return "relatable_humour";
 }
 
-function selectComparator(
-  target: PreparedPost,
-  peers: readonly PreparedPost[],
-  ordered: readonly PreparedPost[],
-  signal: EditorialSignalKey,
-): PreparedPost | null {
-  if (!peers.length) return null;
-  const targetIndex = ordered.findIndex((item) => item.key === target.key);
-  const targetInUpperHalf = targetIndex >= 0 && targetIndex < Math.ceil(ordered.length / 2);
-  const territorySignals: RawSignal[] = [
-    "academic",
-    "brand_world",
-    "care",
-    "cultural",
-    "everyday",
-    "seasonal",
-  ];
+const COMPARATOR_TERRITORIES: readonly RawSignal[] = [
+  "academic",
+  "brand_world",
+  "care",
+  "cultural",
+  "everyday",
+  "seasonal",
+];
 
-  return [...peers]
-    .map((candidate) => {
-      const candidateIndex = ordered.findIndex((item) => item.key === candidate.key);
-      const sharedTerritories = territorySignals.filter(
-        (key) => target.signals.has(key) && candidate.signals.has(key),
-      ).length;
-      const oppositeSignal = candidate.primarySignal !== signal ? 4 : 0;
-      const usefulDirection = targetInUpperHalf
-        ? candidateIndex > targetIndex
-          ? 3
-          : 0
-        : candidateIndex < targetIndex
-          ? 3
-          : 0;
-      const dateProximity = dateCloseness(target.post.publishedAt, candidate.post.publishedAt);
-      return {
-        candidate,
-        score:
-          sharedTerritories * 6 +
-          oppositeSignal +
-          usefulDirection +
-          dateProximity +
-          (candidate.copy ? 1 : 0),
-      };
-    })
+const COMPARATOR_DATE_WINDOWS = [
+  { milliseconds: 366 * 86_400_000, bonus: 1 },
+  { milliseconds: 92 * 86_400_000, bonus: 2 },
+  { milliseconds: 31 * 86_400_000, bonus: 3 },
+] as const;
+
+/**
+ * Selects the same comparator as the former per-post exhaustive scan, but uses
+ * the comparator's finite score buckets plus offline rank/date range queries.
+ * The number of territory masks and primary signals is bounded, so a cohort is
+ * processed in O(n log n) rather than repeatedly scanning and sorting all peers.
+ */
+function selectComparators(
+  cohort: readonly PreparedPost[],
+  ordered: readonly PreparedPost[],
+  orderedIndex: ReadonlyMap<PreparedPost, number>,
+  signalCounts: ReadonlyMap<PreparedPost["primarySignal"], number>,
+): Map<PreparedPost, PreparedPost> {
+  const result = new Map<PreparedPost, PreparedPost>();
+  if (cohort.length <= 1) return result;
+
+  const candidates: ComparatorCandidate[] = ordered.map((item, index) => ({
+    item,
+    orderedIndex: index,
+    publishedAt: parsedDate(item.post.publishedAt),
+    territoryMask: comparatorTerritoryMask(item.signals),
+  }));
+  const targetGroups = new Map<
+    string,
+    {
+      territoryMask: number;
+      signal: EditorialSignalKey;
+      targets: ComparatorTarget[];
+    }
+  >();
+  const peerCount = cohort.length - 1;
+
+  for (const item of cohort) {
+    if (item.primarySignal === "insufficient") continue;
+    const sameSignalPeerCount = Math.max(
+      0,
+      (signalCounts.get(item.primarySignal) ?? 0) - 1,
+    );
+    if (peerCount >= 2 && sameSignalPeerCount / peerCount >= 0.8) continue;
+
+    const index = orderedIndex.get(item);
+    if (index === undefined) continue;
+    const territoryMask = comparatorTerritoryMask(item.signals);
+    const groupKey = `${territoryMask}:${item.primarySignal}`;
+    const target: ComparatorTarget = {
+      item,
+      orderedIndex: index,
+      publishedAt: parsedDate(item.post.publishedAt),
+      upperHalf: index < Math.ceil(ordered.length / 2),
+      best: null,
+    };
+    const group = targetGroups.get(groupKey);
+    if (group) group.targets.push(target);
+    else {
+      targetGroups.set(groupKey, {
+        territoryMask,
+        signal: item.primarySignal,
+        targets: [target],
+      });
+    }
+  }
+
+  for (const group of targetGroups.values()) {
+    selectComparatorsForTargetGroup(group, candidates, ordered.length);
+    for (const target of group.targets) {
+      if (target.best) result.set(target.item, target.best.candidate);
+    }
+  }
+  return result;
+}
+
+function selectComparatorsForTargetGroup(
+  group: {
+    territoryMask: number;
+    signal: EditorialSignalKey;
+    targets: ComparatorTarget[];
+  },
+  candidates: readonly ComparatorCandidate[],
+  cohortSize: number,
+) {
+  const scoreBuckets = new Map<number, ComparatorCandidate[]>();
+  for (const candidate of candidates) {
+    const sharedTerritories = bitCount(
+      group.territoryMask & candidate.territoryMask,
+    );
+    const score =
+      sharedTerritories * 6 +
+      (candidate.item.primarySignal !== group.signal ? 4 : 0) +
+      (candidate.item.copy ? 1 : 0);
+    const bucket = scoreBuckets.get(score);
+    if (bucket) bucket.push(candidate);
+    else scoreBuckets.set(score, [candidate]);
+  }
+
+  const datedTargets = group.targets
+    .filter(
+      (target): target is ComparatorTarget & { publishedAt: number } =>
+        target.publishedAt !== null,
+    )
     .sort((left, right) =>
-      right.score !== left.score
-        ? right.score - left.score
-        : left.candidate.key.localeCompare(right.candidate.key),
-    )[0]?.candidate ?? null;
+      left.publishedAt !== right.publishedAt
+        ? left.publishedAt - right.publishedAt
+        : left.orderedIndex - right.orderedIndex,
+    );
+
+  for (const [baseScore, bucket] of scoreBuckets) {
+    const staticTree = new ComparatorRangeMinTree(cohortSize);
+    for (const candidate of bucket) {
+      staticTree.update(candidate.orderedIndex, candidate);
+    }
+    for (const target of group.targets) {
+      considerDirectionalCandidates(target, staticTree, baseScore, 0, cohortSize);
+    }
+
+    if (datedTargets.length === 0) continue;
+    const datedCandidates = bucket
+      .filter(
+        (candidate): candidate is ComparatorCandidate & { publishedAt: number } =>
+          candidate.publishedAt !== null,
+      )
+      .sort((left, right) =>
+        left.publishedAt !== right.publishedAt
+          ? left.publishedAt - right.publishedAt
+          : left.orderedIndex - right.orderedIndex,
+      );
+    if (datedCandidates.length === 0) continue;
+
+    for (const window of COMPARATOR_DATE_WINDOWS) {
+      const tree = new ComparatorRangeMinTree(cohortSize);
+      let firstActive = 0;
+      let afterLastActive = 0;
+
+      for (const target of datedTargets) {
+        const latest = target.publishedAt + window.milliseconds;
+        const earliest = target.publishedAt - window.milliseconds;
+        while (
+          afterLastActive < datedCandidates.length &&
+          datedCandidates[afterLastActive].publishedAt <= latest
+        ) {
+          const candidate = datedCandidates[afterLastActive];
+          tree.update(candidate.orderedIndex, candidate);
+          afterLastActive += 1;
+        }
+        while (
+          firstActive < afterLastActive &&
+          datedCandidates[firstActive].publishedAt < earliest
+        ) {
+          const candidate = datedCandidates[firstActive];
+          tree.update(candidate.orderedIndex, null);
+          firstActive += 1;
+        }
+        considerDirectionalCandidates(
+          target,
+          tree,
+          baseScore,
+          window.bonus,
+          cohortSize,
+        );
+      }
+    }
+  }
+}
+
+function considerDirectionalCandidates(
+  target: ComparatorTarget,
+  tree: ComparatorRangeMinTree,
+  baseScore: number,
+  dateBonus: number,
+  cohortSize: number,
+) {
+  const before = tree.query(0, target.orderedIndex);
+  const after = tree.query(target.orderedIndex + 1, cohortSize);
+  const useful = target.upperHalf ? after : before;
+  const other = target.upperHalf ? before : after;
+  considerComparator(target, useful, baseScore + dateBonus + 3);
+  considerComparator(target, other, baseScore + dateBonus);
+}
+
+function considerComparator(
+  target: ComparatorTarget,
+  candidate: ComparatorCandidate | null,
+  score: number,
+) {
+  if (!candidate || candidate.item.key === target.item.key) return;
+  if (
+    target.best === null ||
+    score > target.best.score ||
+    (score === target.best.score &&
+      candidate.item.key.localeCompare(target.best.candidate.key) < 0)
+  ) {
+    target.best = { candidate: candidate.item, score };
+  }
+}
+
+class ComparatorRangeMinTree {
+  readonly leafCount: number;
+  readonly values: (ComparatorCandidate | null)[];
+
+  constructor(length: number) {
+    let leafCount = 1;
+    while (leafCount < length) leafCount *= 2;
+    this.leafCount = leafCount;
+    this.values = Array.from({ length: leafCount * 2 }, () => null);
+  }
+
+  update(index: number, value: ComparatorCandidate | null) {
+    let cursor = this.leafCount + index;
+    this.values[cursor] = value;
+    while (cursor > 1) {
+      cursor = Math.floor(cursor / 2);
+      this.values[cursor] = earlierComparatorCandidate(
+        this.values[cursor * 2],
+        this.values[cursor * 2 + 1],
+      );
+    }
+  }
+
+  query(start: number, end: number): ComparatorCandidate | null {
+    if (start >= end) return null;
+    let left = this.leafCount + start;
+    let right = this.leafCount + end;
+    let best: ComparatorCandidate | null = null;
+    while (left < right) {
+      if (left % 2 === 1) {
+        best = earlierComparatorCandidate(best, this.values[left]);
+        left += 1;
+      }
+      if (right % 2 === 1) {
+        right -= 1;
+        best = earlierComparatorCandidate(best, this.values[right]);
+      }
+      left = Math.floor(left / 2);
+      right = Math.floor(right / 2);
+    }
+    return best;
+  }
+}
+
+function earlierComparatorCandidate(
+  left: ComparatorCandidate | null,
+  right: ComparatorCandidate | null,
+): ComparatorCandidate | null {
+  if (!left) return right;
+  if (!right) return left;
+  const keyDifference = left.item.key.localeCompare(right.item.key);
+  if (keyDifference !== 0) return keyDifference < 0 ? left : right;
+  return left.orderedIndex <= right.orderedIndex ? left : right;
+}
+
+function comparatorTerritoryMask(signals: ReadonlySet<RawSignal>): number {
+  let mask = 0;
+  for (let index = 0; index < COMPARATOR_TERRITORIES.length; index += 1) {
+    if (signals.has(COMPARATOR_TERRITORIES[index])) mask |= 1 << index;
+  }
+  return mask;
+}
+
+function bitCount(value: number): number {
+  let count = 0;
+  let remaining = value;
+  while (remaining !== 0) {
+    remaining &= remaining - 1;
+    count += 1;
+  }
+  return count;
+}
+
+function parsedDate(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function formatSpecificMechanism(target: PreparedPost): EditorialMechanism | null {
@@ -777,17 +1059,6 @@ function pollVotes(post: EditorialAnalysisPost): number | null {
 
 function canonicalFormat(value: string | null): string {
   return cleanString(value)?.toLowerCase().replace(/[\s-]+/g, "_") ?? "unknown";
-}
-
-function dateCloseness(left: string | null, right: string | null): number {
-  if (!left || !right) return 0;
-  const difference = Math.abs(Date.parse(left) - Date.parse(right));
-  if (!Number.isFinite(difference)) return 0;
-  const days = difference / 86_400_000;
-  if (days <= 31) return 3;
-  if (days <= 92) return 2;
-  if (days <= 366) return 1;
-  return 0;
 }
 
 function addIf(signals: Set<RawSignal>, signal: RawSignal, condition: boolean) {

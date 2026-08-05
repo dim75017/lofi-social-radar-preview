@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
 import test from "node:test";
 
 import {
@@ -345,3 +346,46 @@ test("returns no-differentiator when every peer has the same editorial profile",
   );
   assert.doesNotMatch(analysis.comparison, /celui-ci.*(?:se distingue|explique)/i);
 });
+
+test(
+  "builds a large mixed editorial cohort without pairwise rescans",
+  { timeout: 12_000 },
+  () => {
+    const patterns = [
+      'not to flex but i moved one task from "to do" to "done"',
+      "Final exams: we study together, so will you?",
+      "Lofi Girl explores Fortnite and uncovers hidden secrets, available now",
+      "Lofi Girl final form meme",
+      "go to bed, reminder: you got this",
+      "not to flex, i'll do it tomorrow",
+      "Our new album collection is available now with music for every quiet study session tonight",
+      "quiet desk",
+    ];
+    const cohort = Array.from({ length: 4_000 }, (_, index) =>
+      post({
+        externalId: `large-${index.toString().padStart(4, "0")}`,
+        title: patterns[index % patterns.length],
+        publishedAt: new Date(
+          Date.UTC(2015, 0, 1) + index * 86_400_000,
+        ).toISOString(),
+        likes: 10_000 - index,
+        views: 100_000 - index * 3,
+        comments: index % 300,
+      }),
+    );
+
+    const startedAt = performance.now();
+    const analyses = buildEditorialAnalysisMap(cohort);
+    const elapsed = performance.now() - startedAt;
+    const comparativeCount = [...analyses.values()].filter(
+      (analysis) => analysis.status === "comparative",
+    ).length;
+
+    assert.equal(analyses.size, cohort.length);
+    assert.ok(comparativeCount > 3_500, "the comparator path must be exercised");
+    assert.ok(
+      elapsed < 8_000,
+      `large editorial cohort took ${Math.round(elapsed)}ms`,
+    );
+  },
+);

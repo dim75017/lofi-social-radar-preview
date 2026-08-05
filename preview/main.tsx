@@ -16,7 +16,7 @@ const initialWorkspace = mergeWorkspaceWithPublicHistory(
 );
 
 const LIVE_PUBLIC_HISTORY_URL =
-  "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/public-history.json";
+  "https://dim75017.github.io/lofi-social-radar-preview/data/public-history.json";
 
 function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);

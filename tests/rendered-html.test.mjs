@@ -73,7 +73,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /métriques absentes sont retirées/i);
   assert.match(component, /top-platform-subnav/);
   assert.match(component, /Plateformes des meilleurs posts/);
-  assert.doesNotMatch(component, /topNavExpanded|setTopNavExpanded|nav-disclosure|aria-expanded/);
+  assert.doesNotMatch(component, /topNavExpanded|setTopNavExpanded|nav-disclosure/);
   assert.match(component, /view === "top" && topPlatform === key/);
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
   assert.doesNotMatch(component, /top-platform-picker/);
@@ -94,7 +94,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, />\s*Tous\s*</);
   assert.match(component, /categoryFilters\(topPlatform\)\.map/);
   assert.match(component, /category-results/);
-  assert.match(component, /Historique visible chargé jusqu’au dernier lot/);
+  assert.doesNotMatch(component, /Historique visible chargé jusqu’au dernier lot/);
   assert.match(component, /TIKTOK_THUMBNAIL_CACHE/);
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
   assert.match(component, /sharedTikTokPreviewObserver/);

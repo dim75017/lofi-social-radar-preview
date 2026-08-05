@@ -1,14 +1,7 @@
-name: Backfill Instagram and X history
+name: Backfill Instagram history
 
 on:
   workflow_dispatch:
-    inputs:
-      platform:
-        description: Platform to backfill
-        required: false
-        default: all
-        type: choice
-        options: [all, instagram, x]
   schedule:
     - cron: "41 * * * *"
 
@@ -16,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: instagram-x-history
+  group: lofi-social-history-write
   cancel-in-progress: false
 
 jobs:
@@ -32,12 +25,14 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node scripts/collect_instagram_x_history.mjs
         env:
-          SOCIAL_HISTORY_PLATFORM: ${{ inputs.platform || 'all' }}
+          # X now uses the paid official API workflow. Keeping the legacy
+          # profile scroller away from X prevents it from weakening API rows.
+          SOCIAL_HISTORY_PLATFORM: instagram
       - name: Save public history
         run: |
           git config user.name "lofi-social-radar-bot"
           git config user.email "lofi-social-radar-bot@users.noreply.github.com"
           git add data/public-history.json
-          git diff --cached --quiet || git commit -m "Backfill Instagram and X history"
+          git diff --cached --quiet || git commit -m "Backfill Instagram history"
           git pull --rebase origin main
           git push
