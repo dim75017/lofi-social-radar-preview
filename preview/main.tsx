@@ -2,7 +2,6 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SocialOS, type WorkspacePayload } from "../app/SocialOS";
 import "../app/globals.css";
-import publicHistory from "../data/public-history.json";
 import recentPublic from "../data/recent-public.json";
 import {
   mergeWorkspaceWithPublicHistory,
@@ -11,7 +10,11 @@ import {
 
 const initialWorkspace = mergeWorkspaceWithPublicHistory(
   recentPublic,
-  publicHistory as PublicHistorySnapshot,
+  {
+    generatedAt: recentPublic.generatedAt,
+    coverage: [],
+    posts: [],
+  } satisfies PublicHistorySnapshot,
   "public-snapshot",
 );
 
