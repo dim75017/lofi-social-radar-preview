@@ -1,0 +1,42 @@
+name: Backfill Instagram and X history
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to backfill
+        required: false
+        default: all
+        type: choice
+        options: [all, instagram, x]
+  schedule:
+    - cron: "41 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-x-history
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/collect_instagram_x_history.mjs
+        env:
+          SOCIAL_HISTORY_PLATFORM: ${{ inputs.platform || 'all' }}
+      - name: Save public history
+        run: |
+          git config user.name "lofi-social-radar-bot"
+          git config user.email "lofi-social-radar-bot@users.noreply.github.com"
+          git add data/public-history.json
+          git diff --cached --quiet || git commit -m "Backfill Instagram and X history"
+          git push
