@@ -45,7 +45,13 @@ function PublicPreview() {
     };
   }, []);
 
-  return <SocialOS initialWorkspace={workspace as WorkspacePayload} previewMode />;
+  return (
+    <SocialOS
+      key={`${workspace.generatedAt}:${workspace.posts.length}`}
+      initialWorkspace={workspace as WorkspacePayload}
+      previewMode
+    />
+  );
 }
 
 createRoot(document.getElementById("root")!).render(

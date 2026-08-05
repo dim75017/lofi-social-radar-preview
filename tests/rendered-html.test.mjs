@@ -43,7 +43,7 @@ test("server-renders the live Social Radar shell", async () => {
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking] = await Promise.all([
+  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking, previewEntry] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
@@ -55,6 +55,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-media.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-ranking.ts", import.meta.url), "utf8"),
+    readFile(new URL("../preview/main.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -82,6 +83,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, /Chercher une accroche, un format/);
   assert.doesNotMatch(component, /publicRankingLabel/);
   assert.match(component, /activeInlineVideoId/);
+  assert.match(previewEntry, /key=\{`\$\{workspace\.generatedAt\}:\$\{workspace\.posts\.length\}`\}/);
   assert.match(component, /PostDetailsModal/);
   assert.match(component, /post-visual-trigger/);
   assert.match(component, /inline-video-frame/);
