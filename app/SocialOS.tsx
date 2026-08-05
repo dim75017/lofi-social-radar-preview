@@ -148,13 +148,11 @@ const NAV: Array<{
   id: View;
   emoji: string;
   label: string;
-  group: "Pilotage" | "Données";
+  group: "Pilotage";
 }> = [
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
-  { id: "all", emoji: "🔎", label: "Bibliothèque", group: "Données" },
-  { id: "sources", emoji: "🔌", label: "Sources", group: "Données" },
 ];
 
 const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
@@ -776,7 +774,7 @@ export function SocialOS({
         </div>
 
         <nav className="nav" aria-label="Navigation principale">
-          {(["Pilotage", "Données"] as const).map((group) => (
+          {(["Pilotage"] as const).map((group) => (
             <div className="nav-group" key={group}>
               <div className="nav-label">{group}</div>
               {NAV.filter((item) => item.group === group).map((item) => {
@@ -956,24 +954,6 @@ export function SocialOS({
                     </button>
                   );
                 })}
-              </div>
-              <div className="history-proof">
-                <span className="history-proof-icon" aria-hidden="true">🗂️</span>
-                <div>
-                  <span className="section-kicker">Périmètre historique vérifié</span>
-                  <h3>{posts.length} contenus publics actuellement exploitables</h3>
-                  <p>
-                    <b>{accounts.find((account) => account.platform === "youtube")?.post_count ?? 0} YouTube</b>
-                    {" · "}
-                    <b>{accounts.find((account) => account.platform === "tiktok")?.post_count ?? 0} TikTok</b>
-                    {" · "}
-                    <b>{accounts.find((account) => account.platform === "x")?.post_count ?? 0} X</b>.
-                    Instagram et l’historique X complet nécessitent la connexion propriétaire ; les contenus privés, supprimés ou non listés ne sont pas inventés.
-                  </p>
-                </div>
-                <button className="button ghost compact" type="button" onClick={() => setView("sources")}>
-                  Voir les limites →
-                </button>
               </div>
             </section>
 
