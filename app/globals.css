@@ -3089,7 +3089,8 @@ a {
   white-space: nowrap;
 }
 
-.top-format-control-row {
+.top-format-control-row,
+.top-sort-control-row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3098,7 +3099,8 @@ a {
   padding-top: 10px;
 }
 
-.top-format-control-row > .section-kicker {
+.top-format-control-row > .section-kicker,
+.top-sort-control-row > .section-kicker {
   flex: 0 0 auto;
   margin: 0;
 }
@@ -3799,8 +3801,8 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
   grid-template-areas:
-    "date actions"
-    "metrics metrics";
+    "metrics metrics"
+    "date actions";
   align-items: center;
   column-gap: 10px;
   row-gap: 8px;
@@ -4142,7 +4144,8 @@ a {
   }
 
   .top-duration-control-row,
-  .top-format-control-row {
+  .top-format-control-row,
+  .top-sort-control-row {
     align-items: flex-start;
     flex-direction: column;
   }

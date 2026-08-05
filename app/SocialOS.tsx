@@ -33,6 +33,7 @@ import type { EditorialWhy } from "../lib/social-editorial-analysis";
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
 type IdeaDecision = "produce" | "rework" | "discard";
+type PostSort = "popular" | "recent";
 
 type MetricSnapshot = {
   captured_at: string;
@@ -311,7 +312,7 @@ function localInsights(posts: SocialPost[]): Insight[] {
 }
 
 function metricEmoji(metric: MetricKey, platform?: Platform) {
-  if (metric === "views") return "👀";
+  if (metric === "views") return "📊";
   if (metric === "likes") return platform === "youtube" ? "👍" : "❤️";
   if (metric === "comments") return "💬";
   if (metric === "shares") return "↗️";
@@ -338,10 +339,23 @@ function metrics(post: SocialPost) {
   ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
 }
 
+function sortPosts(posts: readonly SocialPost[], sort: PostSort) {
+  if (sort === "popular") return rankPostsByPublicMetric(posts).posts;
+  return [...posts].sort((left, right) => {
+    const leftDate = left.published_at ? new Date(left.published_at).getTime() : Number.NaN;
+    const rightDate = right.published_at ? new Date(right.published_at).getTime() : Number.NaN;
+    const leftKnown = Number.isFinite(leftDate);
+    const rightKnown = Number.isFinite(rightDate);
+    if (leftKnown && rightKnown && rightDate !== leftDate) return rightDate - leftDate;
+    if (leftKnown !== rightKnown) return leftKnown ? -1 : 1;
+    return rankPostsByPublicMetric([left, right]).posts[0] === left ? -1 : 1;
+  });
+}
+
 type MetricKey = "views" | "likes" | "comments" | "shares" | "saves" | "poll_votes";
 
 const METRIC_META: Record<MetricKey, { icon: string; label: string }> = {
-  views: { icon: "👀", label: "vues" },
+  views: { icon: "📊", label: "vues" },
   likes: { icon: "❤️", label: "likes" },
   comments: { icon: "💬", label: "commentaires" },
   shares: { icon: "↗", label: "partages" },
@@ -481,6 +495,8 @@ export function SocialOS({
   const [topPlatform, setTopPlatform] = useState<Platform>("youtube");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("short");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
+  const [topSort, setTopSort] = useState<PostSort>("popular");
+  const [librarySort, setLibrarySort] = useState<PostSort>("popular");
   const [loading, setLoading] = useState(!initialWorkspace);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState("");
@@ -618,11 +634,10 @@ export function SocialOS({
       ),
     [topFormatFilter, topPlatformPosts],
   );
-  const topCategoryRanking = useMemo(
-    () => rankPostsByPublicMetric(topCategoryPosts),
-    [topCategoryPosts],
+  const topFilteredPosts = useMemo(
+    () => sortPosts(topCategoryPosts, topSort),
+    [topCategoryPosts, topSort],
   );
-  const topFilteredPosts = topCategoryRanking.posts;
   const topLifetimeFilteredPosts = useMemo(() => {
     const platformPosts = topPosts.filter(
       (post) => post.platform === topPlatform,
@@ -654,9 +669,9 @@ export function SocialOS({
     );
   }, [formatFilter, platform, topPosts]);
   const filteredPosts = useMemo(
-    () => rankPostsByPublicMetric(filteredCategoryPosts),
-    [filteredCategoryPosts],
-  ).posts;
+    () => sortPosts(filteredCategoryPosts, librarySort),
+    [filteredCategoryPosts, librarySort],
+  );
   const activeTopFormat =
     categoryFilters(topPlatform).find((filter) => filter.key === topFormatFilter) ??
     categoryFilters(topPlatform)[0];
@@ -675,7 +690,7 @@ export function SocialOS({
       }),
     [posts, workspace?.generatedAt],
   );
-  const paginationKey = `${view}:${platform}:${formatFilter}`;
+  const paginationKey = `${view}:${platform}:${formatFilter}:${librarySort}`;
   const visiblePostCount =
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
   const visiblePosts = filteredPosts.slice(0, visiblePostCount);
@@ -1104,6 +1119,18 @@ export function SocialOS({
                 </div>
               </div>
 
+              <div className="top-sort-control-row">
+                <span className="section-kicker">Trier</span>
+                <div className="format-filter-tabs top-sort-tabs" role="group" aria-label="Trier les publications">
+                  <button className={topSort === "popular" ? "active" : ""} type="button" aria-pressed={topSort === "popular"} onClick={() => setTopSort("popular")}>
+                    🏆 Plus populaire
+                  </button>
+                  <button className={topSort === "recent" ? "active" : ""} type="button" aria-pressed={topSort === "recent"} onClick={() => setTopSort("recent")}>
+                    🗓️ Plus récent
+                  </button>
+                </div>
+              </div>
+
               <div className="top-format-control-row">
                 <span className="section-kicker">
                   Catégories {PLATFORM_META[topPlatform].label}
@@ -1209,6 +1236,14 @@ export function SocialOS({
                     {PLATFORM_META[key].emoji} {PLATFORM_META[key].label}
                   </button>
                 ))}
+              </div>
+              <div className="format-filter-tabs library-sort-tabs" role="group" aria-label="Trier les publications de la catégorie">
+                <button className={librarySort === "popular" ? "active" : ""} type="button" aria-pressed={librarySort === "popular"} onClick={() => setLibrarySort("popular")}>
+                  🏆 Plus populaire
+                </button>
+                <button className={librarySort === "recent" ? "active" : ""} type="button" aria-pressed={librarySort === "recent"} onClick={() => setLibrarySort("recent")}>
+                  🗓️ Plus récent
+                </button>
               </div>
             </div>
 

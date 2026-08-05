@@ -32,8 +32,14 @@ def iso_from_details(details: dict[str, Any]) -> str | None:
     return None
 
 
+def nonnegative_int(value: Any) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+        return None
+    return int(value)
+
+
 def update_from_details(post: dict[str, Any], details: dict[str, Any], collected_at: str) -> bool:
-    """Apply only durable public Short metadata and report whether it changed."""
+    """Apply durable public Short metadata and metrics, without inventing a value."""
     published_at = iso_from_details(details)
     if not published_at:
         return False
@@ -47,6 +53,18 @@ def update_from_details(post: dict[str, Any], details: dict[str, Any], collected
     raw["publishedAtPrecision"] = "exact"
     raw["publicMetadataCollectedAt"] = collected_at
     raw["publicMetadataSource"] = "yt-dlp YouTube video page"
+    metric_sources = raw.setdefault("metricSources", {})
+    if not isinstance(metric_sources, dict):
+        metric_sources = {}
+        raw["metricSources"] = metric_sources
+    for field, detail_field in (("views", "view_count"), ("likes", "like_count"), ("comments", "comment_count")):
+        value = nonnegative_int(details.get(detail_field))
+        if value is None:
+            continue
+        if post.get(field) != value:
+            post[field] = value
+            changed = True
+        metric_sources[field] = f"yt-dlp YouTube video page {detail_field}"
     return changed
 
 
