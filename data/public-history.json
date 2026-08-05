@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T15:51:47.685Z",
+  "generatedAt": "2026-08-05T20:48:14.378Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -48,7 +48,7 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "historique public du profil",
       "status": "partial-public-profile",
-      "itemCount": 5,
+      "itemCount": 7,
       "oldestPublishedAt": null,
       "newestPublishedAt": null,
       "limitations": [
@@ -113068,7 +113068,7 @@
       "raw": {
         "collector": "public-profile-pagination",
         "firstObservedAt": "2026-08-05T07:35:03.600Z",
-        "lastObservedAt": "2026-08-05T15:51:34.871Z",
+        "lastObservedAt": "2026-08-05T20:48:03.379Z",
         "metricHistory": [],
         "source": "x-public-profile",
         "collectorVersion": "backfill-v1"
@@ -113091,7 +113091,7 @@
       "raw": {
         "collector": "public-profile-pagination",
         "firstObservedAt": "2026-08-05T07:35:03.600Z",
-        "lastObservedAt": "2026-08-05T15:51:34.871Z",
+        "lastObservedAt": "2026-08-05T20:48:03.379Z",
         "metricHistory": [],
         "source": "x-public-profile",
         "collectorVersion": "backfill-v1"
@@ -113114,7 +113114,53 @@
       "raw": {
         "collector": "public-profile-pagination",
         "firstObservedAt": "2026-08-05T07:35:03.600Z",
-        "lastObservedAt": "2026-08-05T15:51:34.871Z",
+        "lastObservedAt": "2026-08-05T20:48:03.379Z",
+        "metricHistory": [],
+        "source": "x-public-profile",
+        "collectorVersion": "backfill-v1"
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2085033867589685444",
+      "url": "https://x.com/lofigirl/status/2085033867589685444",
+      "title": "",
+      "text": "",
+      "format": "image",
+      "thumbnailUrl": "https://pbs.twimg.com/media/HO-HIuIWIAETDZh?format=webp&name=medium",
+      "publishedAt": null,
+      "views": null,
+      "likes": null,
+      "comments": null,
+      "shares": null,
+      "saves": null,
+      "raw": {
+        "collector": "public-profile-pagination",
+        "firstObservedAt": "2026-08-05T20:47:49.586Z",
+        "lastObservedAt": "2026-08-05T20:47:49.586Z",
+        "metricHistory": [],
+        "source": "x-public-profile",
+        "collectorVersion": "backfill-v1"
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2085078974145659390",
+      "url": "https://x.com/lofigirl/status/2085078974145659390",
+      "title": "",
+      "text": "",
+      "format": "video",
+      "thumbnailUrl": null,
+      "publishedAt": null,
+      "views": null,
+      "likes": null,
+      "comments": null,
+      "shares": null,
+      "saves": null,
+      "raw": {
+        "collector": "public-profile-pagination",
+        "firstObservedAt": "2026-08-05T20:47:49.586Z",
+        "lastObservedAt": "2026-08-05T20:47:49.586Z",
         "metricHistory": [],
         "source": "x-public-profile",
         "collectorVersion": "backfill-v1"
