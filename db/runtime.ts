@@ -224,6 +224,40 @@ const schemaStatements = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_decision_events_entity_created
    ON decision_events(entity_type, entity_id, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS editorial_idea_feedback (
+    idea_id TEXT PRIMARY KEY,
+    decision TEXT NOT NULL,
+    primary_platform TEXT NOT NULL,
+    pattern TEXT NOT NULL,
+    format TEXT NOT NULL,
+    title TEXT NOT NULL,
+    hook TEXT NOT NULL,
+    base_potential_score INTEGER NOT NULL,
+    reason TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_editorial_feedback_decision_updated
+   ON editorial_idea_feedback(decision, updated_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_editorial_feedback_platform_pattern
+   ON editorial_idea_feedback(primary_platform, pattern)`,
+  `CREATE TABLE IF NOT EXISTS editorial_schedule (
+    id TEXT PRIMARY KEY,
+    idea_id TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    hook TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    format TEXT NOT NULL,
+    scheduled_for TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'planned',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_editorial_schedule_date_platform
+   ON editorial_schedule(scheduled_for, platform)`,
+  `CREATE INDEX IF NOT EXISTS idx_editorial_schedule_status_date
+   ON editorial_schedule(status, scheduled_for)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_editorial_schedule_platform_date
+   ON editorial_schedule(platform, scheduled_for)`,
 ];
 
 export const SOCIAL_PLATFORMS = [

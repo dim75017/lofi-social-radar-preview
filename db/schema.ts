@@ -246,3 +246,59 @@ export const decisionEvents = sqliteTable("decision_events", {
     table.createdAt,
   ),
 ]);
+
+export const editorialIdeaFeedback = sqliteTable(
+  "editorial_idea_feedback",
+  {
+    ideaId: text("idea_id").primaryKey(),
+    decision: text("decision").notNull(),
+    primaryPlatform: text("primary_platform").notNull(),
+    pattern: text("pattern").notNull(),
+    format: text("format").notNull(),
+    title: text("title").notNull(),
+    hook: text("hook").notNull(),
+    basePotentialScore: integer("base_potential_score").notNull(),
+    reason: text("reason"),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_editorial_feedback_decision_updated").on(
+      table.decision,
+      table.updatedAt,
+    ),
+    index("idx_editorial_feedback_platform_pattern").on(
+      table.primaryPlatform,
+      table.pattern,
+    ),
+  ],
+);
+
+export const editorialSchedule = sqliteTable(
+  "editorial_schedule",
+  {
+    id: text("id").primaryKey(),
+    ideaId: text("idea_id").notNull().unique(),
+    title: text("title").notNull(),
+    hook: text("hook").notNull(),
+    platform: text("platform").notNull(),
+    format: text("format").notNull(),
+    scheduledFor: text("scheduled_for").notNull(),
+    status: text("status").notNull().default("planned"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_editorial_schedule_date_platform").on(
+      table.scheduledFor,
+      table.platform,
+    ),
+    index("idx_editorial_schedule_status_date").on(
+      table.status,
+      table.scheduledFor,
+    ),
+    uniqueIndex("idx_editorial_schedule_platform_date").on(
+      table.platform,
+      table.scheduledFor,
+    ),
+  ],
+);

@@ -9,6 +9,18 @@ import {
   type SocialIdea,
 } from "../lib/social-ideas";
 import {
+  applyPreferenceLearning,
+  EMPTY_EDITORIAL_WORKFLOW,
+  feedbackForIdea,
+  normalizeWorkflowState,
+  scheduleAcceptedIdea,
+  updateScheduledDate,
+  type EditorialWorkflowState,
+  type IdeaDecision,
+  type LearnedIdea,
+  type ScheduledIdea,
+} from "../lib/editorial-workflow";
+import {
   getFormatFilters,
   getSocialFormatLabel,
   matchesSocialFormatFilter,
@@ -35,8 +47,9 @@ import {
 } from "../lib/social-editorial-analysis";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
-type View = "overview" | "top" | "ideas" | "all" | "sources";
-type IdeaDecision = "produce" | "rework" | "discard";
+type View = "overview" | "top" | "ideas" | "planning" | "all" | "sources";
+type IdeaPlatformFilter = "all" | Platform;
+type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 
 type MetricSnapshot = {
@@ -157,10 +170,12 @@ const NAV: Array<{
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
+  { id: "planning", emoji: "🗓️", label: "Planning", group: "Pilotage" },
 ];
 
-const IDEA_DECISIONS_STORAGE_KEY = "lofi-social-radar:idea-decisions:v1";
+const EDITORIAL_WORKFLOW_STORAGE_KEY = "lofi-social-radar:editorial-workflow:v2";
 const POSTS_PAGE_SIZE = 48;
+const IDEAS_PAGE_SIZE = 10;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
 const DEFAULT_FORMAT_FILTER: Record<Platform, SocialFormatFilter> = {
   youtube: "short",
@@ -491,8 +506,13 @@ export function SocialOS({
   const [toast, setToast] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [postPagination, setPostPagination] = useState({ key: "", count: POSTS_PAGE_SIZE });
-  const [ideaDecisions, setIdeaDecisions] = useState<Record<string, IdeaDecision>>({});
-  const [ideaDecisionsReady, setIdeaDecisionsReady] = useState(false);
+  const [editorialWorkflow, setEditorialWorkflow] = useState<EditorialWorkflowState>(EMPTY_EDITORIAL_WORKFLOW);
+  const [editorialWorkflowReady, setEditorialWorkflowReady] = useState(false);
+  const [editorialWorkflowSyncing, setEditorialWorkflowSyncing] = useState(false);
+  const editorialWorkflowMutationRef = useRef(false);
+  const [ideaPlatformFilter, setIdeaPlatformFilter] = useState<IdeaPlatformFilter>("all");
+  const [ideaStatusFilter, setIdeaStatusFilter] = useState<IdeaStatusFilter>("pending");
+  const [visibleIdeaCount, setVisibleIdeaCount] = useState(IDEAS_PAGE_SIZE);
   const [activeDetailsPost, setActiveDetailsPost] = useState<SocialPost | null>(null);
   const [activeInlineVideoId, setActiveInlineVideoId] = useState<string | null>(null);
   const closeActiveDetails = useCallback(() => setActiveDetailsPost(null), []);
@@ -535,33 +555,56 @@ export function SocialOS({
   }, [toast]);
 
   useEffect(() => {
-    let parsed: Record<string, IdeaDecision> = {};
-    try {
-      const saved = window.localStorage.getItem(IDEA_DECISIONS_STORAGE_KEY);
-      if (saved) {
-        parsed = JSON.parse(saved) as Record<string, IdeaDecision>;
+    let cancelled = false;
+    const loadEditorialWorkflow = async () => {
+      if (previewMode) {
+        let next = EMPTY_EDITORIAL_WORKFLOW;
+        try {
+          const saved = window.localStorage.getItem(EDITORIAL_WORKFLOW_STORAGE_KEY);
+          if (saved) next = normalizeWorkflowState(JSON.parse(saved));
+        } catch {
+          // The public preview remains usable when browser storage is blocked.
+        }
+        if (!cancelled) {
+          setEditorialWorkflow(next);
+          setEditorialWorkflowReady(true);
+        }
+        return;
       }
-    } catch {
-      // Local decisions are optional; the radar stays usable if storage is blocked.
-    }
-    const timeout = window.setTimeout(() => {
-      setIdeaDecisions(parsed);
-      setIdeaDecisionsReady(true);
-    }, 0);
-    return () => window.clearTimeout(timeout);
-  }, []);
+      try {
+        const response = await fetch("/api/editorial-workflow", { cache: "no-store" });
+        const payload = await response.json() as EditorialWorkflowState & { error?: string };
+        if (!response.ok) throw new Error(payload.error || "Le workflow éditorial ne répond pas.");
+        if (!cancelled) setEditorialWorkflow(normalizeWorkflowState(payload));
+      } catch (workflowError) {
+        if (!cancelled) {
+          setError(
+            workflowError instanceof Error
+              ? workflowError.message
+              : "Le workflow éditorial ne répond pas.",
+          );
+        }
+      } finally {
+        if (!cancelled) setEditorialWorkflowReady(true);
+      }
+    };
+    void loadEditorialWorkflow();
+    return () => {
+      cancelled = true;
+    };
+  }, [previewMode]);
 
   useEffect(() => {
-    if (!ideaDecisionsReady) return;
+    if (!previewMode || !editorialWorkflowReady) return;
     try {
       window.localStorage.setItem(
-        IDEA_DECISIONS_STORAGE_KEY,
-        JSON.stringify(ideaDecisions),
+        EDITORIAL_WORKFLOW_STORAGE_KEY,
+        JSON.stringify(editorialWorkflow),
       );
     } catch {
       // Keep the in-memory state when the browser refuses local storage.
     }
-  }, [ideaDecisions, ideaDecisionsReady]);
+  }, [editorialWorkflow, editorialWorkflowReady, previewMode]);
 
   const runScan = async (target?: Platform) => {
       if (previewMode) {
@@ -690,13 +733,44 @@ export function SocialOS({
   }, [posts]);
   const ideaPlan = useMemo(
     () =>
-      generateSocialIdeas(normalizedPosts, {
+      generateSocialIdeas(historyLoading ? [] : normalizedPosts, {
         now: workspace?.generatedAt,
-        maxIdeas: 6,
-        winnersPerPlatform: 4,
+        maxIdeas: 50,
+        winnersPerPlatform: 8,
       }),
-    [normalizedPosts, workspace?.generatedAt],
+    [historyLoading, normalizedPosts, workspace?.generatedAt],
   );
+  const learnedIdeas = useMemo(
+    () => applyPreferenceLearning(ideaPlan.ideas, editorialWorkflow.feedback),
+    [editorialWorkflow.feedback, ideaPlan.ideas],
+  );
+  const filteredIdeas = useMemo(
+    () => learnedIdeas.filter((idea) => {
+      if (ideaPlatformFilter !== "all" && idea.primaryPlatform !== ideaPlatformFilter) {
+        return false;
+      }
+      const decision = editorialWorkflow.feedback[idea.id]?.decision;
+      if (ideaStatusFilter === "pending") return !decision;
+      if (ideaStatusFilter !== "all") return decision === ideaStatusFilter;
+      return true;
+    }),
+    [editorialWorkflow.feedback, ideaPlatformFilter, ideaStatusFilter, learnedIdeas],
+  );
+  const ideaDecisionCounts = useMemo(() => {
+    const counts = { pending: 0, produce: 0, rework: 0, discard: 0 };
+    for (const idea of learnedIdeas) {
+      const decision = editorialWorkflow.feedback[idea.id]?.decision;
+      if (decision) counts[decision] += 1;
+      else counts.pending += 1;
+    }
+    return counts;
+  }, [editorialWorkflow.feedback, learnedIdeas]);
+  const ideaPlatformCounts = useMemo(() => {
+    const counts = { youtube: 0, instagram: 0, tiktok: 0, x: 0 } satisfies Record<Platform, number>;
+    for (const idea of learnedIdeas) counts[idea.primaryPlatform] += 1;
+    return counts;
+  }, [learnedIdeas]);
+  const visibleIdeas = filteredIdeas.slice(0, visibleIdeaCount);
   const activeDetailsAnalysis = useMemo(() => {
     if (!activeDetailsPost) return null;
     if (activeDetailsPost.editorial_analysis) {
@@ -720,16 +794,96 @@ export function SocialOS({
     setMobileOpen(false);
   };
 
-  const setIdeaDecision = useCallback((ideaId: string, decision: IdeaDecision) => {
-    setIdeaDecisions((current) => ({ ...current, [ideaId]: decision }));
-    const label =
-      decision === "produce"
-        ? "Ajoutée à produire"
+  const setIdeaDecision = useCallback(async (idea: SocialIdea, decision: IdeaDecision) => {
+    if (!previewMode && editorialWorkflowMutationRef.current) {
+      setToast("Une décision est déjà en cours d’enregistrement.");
+      return;
+    }
+    if (!previewMode) {
+      editorialWorkflowMutationRef.current = true;
+      setEditorialWorkflowSyncing(true);
+    }
+    const previous = editorialWorkflow;
+    const now = new Date().toISOString();
+    const feedback = feedbackForIdea(idea, decision, now);
+    const schedule = decision === "produce"
+      ? editorialWorkflow.schedule.some((item) => item.ideaId === idea.id)
+        ? editorialWorkflow.schedule
+        : [...editorialWorkflow.schedule, scheduleAcceptedIdea(idea, editorialWorkflow.schedule, now)]
+      : editorialWorkflow.schedule.filter((item) => item.ideaId !== idea.id);
+    const optimistic = {
+      feedback: { ...editorialWorkflow.feedback, [idea.id]: feedback },
+      schedule,
+    };
+    setEditorialWorkflow(optimistic);
+    const scheduled = schedule.find((item) => item.ideaId === idea.id);
+    setToast(
+      decision === "produce" && scheduled
+        ? `✅ Acceptée · planifiée automatiquement le ${formatCardPublishedDate(`${scheduled.scheduledFor}T12:00:00.000Z`)}`
         : decision === "rework"
-          ? "Ajoutée à retravailler"
-          : "Idée écartée";
-    setToast(label);
-  }, []);
+          ? "🛠️ Marquée à retravailler · préférence mémorisée"
+          : "✕ Écartée · préférence mémorisée",
+    );
+    if (previewMode) return;
+
+    try {
+      const response = await fetch("/api/editorial-workflow", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "decide", idea, decision }),
+      });
+      const payload = await response.json() as EditorialWorkflowState & { error?: string };
+      if (!response.ok) throw new Error(payload.error || "Décision non enregistrée.");
+      setEditorialWorkflow(normalizeWorkflowState(payload));
+    } catch (decisionError) {
+      setEditorialWorkflow(previous);
+      setToast(
+        decisionError instanceof Error ? decisionError.message : "Décision non enregistrée.",
+      );
+    } finally {
+      editorialWorkflowMutationRef.current = false;
+      setEditorialWorkflowSyncing(false);
+    }
+  }, [editorialWorkflow, previewMode]);
+
+  const rescheduleIdea = useCallback(async (ideaId: string, scheduledFor: string) => {
+    if (!previewMode && editorialWorkflowMutationRef.current) {
+      setToast("Une modification du planning est déjà en cours.");
+      return;
+    }
+    const previous = editorialWorkflow;
+    let optimisticSchedule: ScheduledIdea[];
+    try {
+      optimisticSchedule = updateScheduledDate(editorialWorkflow.schedule, ideaId, scheduledFor);
+    } catch (scheduleError) {
+      setToast(scheduleError instanceof Error ? scheduleError.message : "Date invalide.");
+      return;
+    }
+    if (!previewMode) {
+      editorialWorkflowMutationRef.current = true;
+      setEditorialWorkflowSyncing(true);
+    }
+    setEditorialWorkflow({ ...editorialWorkflow, schedule: optimisticSchedule });
+    setToast(`🗓️ Déplacée au ${formatCardPublishedDate(`${scheduledFor}T12:00:00.000Z`)}`);
+    if (previewMode) return;
+
+    try {
+      const response = await fetch("/api/editorial-workflow", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "reschedule", ideaId, scheduledFor }),
+      });
+      const payload = await response.json() as EditorialWorkflowState & { error?: string };
+      if (!response.ok) throw new Error(payload.error || "Planning non enregistré.");
+      setEditorialWorkflow(normalizeWorkflowState(payload));
+    } catch (scheduleError) {
+      setEditorialWorkflow(previous);
+      setToast(scheduleError instanceof Error ? scheduleError.message : "Planning non enregistré.");
+    } finally {
+      editorialWorkflowMutationRef.current = false;
+      setEditorialWorkflowSyncing(false);
+    }
+  }, [editorialWorkflow, previewMode]);
   const activeSources = PLATFORM_ORDER.filter(
     (key) => resolvedPlatformCounts[key] > 0,
   ).length;
@@ -742,6 +896,7 @@ export function SocialOS({
   const navCount = (id: View) => {
     if (id === "top") return totalPostCount;
     if (id === "ideas") return ideaPlan.ideas.length;
+    if (id === "planning") return editorialWorkflow.schedule.length;
     if (id === "all") return totalPostCount;
     if (id === "sources") return accounts.length;
     return undefined;
@@ -1056,45 +1211,113 @@ export function SocialOS({
             <div className="ideas-summary">
               <span className="ideas-summary-icon" aria-hidden="true">💡</span>
               <div>
-                <span className="section-kicker">Moteur éditorial explicable</span>
-                <h3>{ideaPlan.ideas.length} pistes dérivées des posts gagnants</h3>
+                <span className="section-kicker">Banque d’idées personnalisée</span>
+                <h3>{ideaPlan.ideas.length} idées classées par potentiel</h3>
                 <p>
-                  Chaque piste cite ses sources et reste une hypothèse à tester — jamais une
-                  promesse de performance.
+                  Le classement apprend de chaque idée acceptée, retravaillée ou refusée.
                 </p>
               </div>
               <span className="official-assets-pill">🔒 Assets officiels uniquement</span>
             </div>
 
-            {historyLoading ? (
+            <div className="idea-workflow-kpis" aria-label="État des idées">
+              <button type="button" onClick={() => setIdeaStatusFilter("pending")}>
+                <span>⏳ À décider</span><b>{ideaDecisionCounts.pending}</b>
+              </button>
+              <button type="button" onClick={() => setIdeaStatusFilter("produce")}>
+                <span>✅ Acceptées</span><b>{ideaDecisionCounts.produce}</b>
+              </button>
+              <button type="button" onClick={() => setIdeaStatusFilter("rework")}>
+                <span>🛠️ À retravailler</span><b>{ideaDecisionCounts.rework}</b>
+              </button>
+              <button type="button" onClick={() => setView("planning")}>
+                <span>🗓️ Planifiées</span><b>{editorialWorkflow.schedule.length}</b>
+              </button>
+            </div>
+
+            <div className="idea-filter-panel">
+              <div className="idea-platform-tabs" aria-label="Filtrer les idées par plateforme">
+                <button
+                  className={ideaPlatformFilter === "all" ? "active" : ""}
+                  type="button"
+                  onClick={() => setIdeaPlatformFilter("all")}
+                >
+                  ✨ Toutes <b>{learnedIdeas.length}</b>
+                </button>
+                {PLATFORM_ORDER.map((key) => (
+                  <button
+                    className={ideaPlatformFilter === key ? "active" : ""}
+                    type="button"
+                    onClick={() => setIdeaPlatformFilter(key)}
+                    key={key}
+                  >
+                    {PLATFORM_META[key].emoji} {PLATFORM_META[key].label} <b>{ideaPlatformCounts[key]}</b>
+                  </button>
+                ))}
+              </div>
+              <div className="idea-status-tabs" aria-label="Filtrer les idées par décision">
+                {([
+                  ["all", "Toutes"],
+                  ["pending", "⏳ À décider"],
+                  ["produce", "✅ Acceptées"],
+                  ["rework", "🛠️ À retravailler"],
+                  ["discard", "✕ Refusées"],
+                ] as Array<[IdeaStatusFilter, string]>).map(([key, label]) => (
+                  <button
+                    className={ideaStatusFilter === key ? "active" : ""}
+                    type="button"
+                    onClick={() => setIdeaStatusFilter(key)}
+                    key={key}
+                  >
+                    {label}
+                  </button>
+                ))}
+                {editorialWorkflowSyncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
+              </div>
+            </div>
+
+            {historyLoading || !editorialWorkflowReady ? (
               <HistoryLoadingState
                 loadedPlatformCount={loadedPlatformCount}
                 label="Génération des idées à partir de l’historique complet"
               />
-            ) : ideaPlan.ideas.length ? (
-              <div className="editorial-ideas-list">
-                {ideaPlan.ideas.map((idea, index) => (
+            ) : visibleIdeas.length ? (
+              <>
+                <div className="editorial-ideas-list compact">
+                  {visibleIdeas.map((idea) => (
                   <EditorialIdeaCard
                     idea={idea}
-                    index={index + 1}
-                    decision={ideaDecisions[idea.id]}
+                    decision={editorialWorkflow.feedback[idea.id]?.decision}
+                    disabled={editorialWorkflowSyncing}
                     onDecision={setIdeaDecision}
                     key={idea.id}
                   />
-                ))}
-              </div>
+                  ))}
+                </div>
+                {visibleIdeaCount < filteredIdeas.length ? (
+                  <button
+                    className="button secondary ideas-load-more"
+                    type="button"
+                    onClick={() => setVisibleIdeaCount((count) => count + IDEAS_PAGE_SIZE)}
+                  >
+                    Afficher 10 idées de plus · {filteredIdeas.length - visibleIdeaCount} restantes
+                  </button>
+                ) : null}
+              </>
             ) : (
               <div className="empty-state">
-                <span>💡</span>
-                <h3>Pas encore assez de signal public</h3>
-                <p>Le moteur attend au moins un post classable avant de proposer une idée.</p>
+                <span>🧭</span>
+                <h3>Aucune idée dans ce filtre</h3>
+                <p>Change de plateforme ou affiche un autre état de décision.</p>
                 <button
-                  className="button primary"
+                  className="button secondary"
                   type="button"
-                  disabled={scanning}
-                  onClick={() => void runScan()}
+                  onClick={() => {
+                    setIdeaPlatformFilter("all");
+                    setIdeaStatusFilter("all");
+                  }}
                 >
-                  {scanning ? "Scan en cours…" : "Scanner les réseaux"}
+                  Voir les 50 idées
                 </button>
               </div>
             )}
@@ -1102,10 +1325,22 @@ export function SocialOS({
             {!historyLoading ? (
               <div className="ideas-method-note">
                 <span>🧭</span>
-                <p>{ideaPlan.caveats[0]} {ideaPlan.caveats[2]}</p>
+                <p>Le potentiel sert à prioriser les tests, pas à promettre une performance. {ideaPlan.caveats[2]}</p>
               </div>
             ) : null}
           </div>
+        ) : null}
+
+        {workspace && view === "planning" ? (
+          <PlanningBoard
+            schedule={editorialWorkflow.schedule}
+            syncing={editorialWorkflowSyncing}
+            onReschedule={rescheduleIdea}
+            onOpenIdeas={() => {
+              setIdeaStatusFilter("pending");
+              setView("ideas");
+            }}
+          />
         ) : null}
 
         {workspace && view === "top" ? (
@@ -1450,14 +1685,14 @@ function HistoryLoadingState({
 
 function EditorialIdeaCard({
   idea,
-  index,
   decision,
+  disabled,
   onDecision,
 }: {
-  idea: SocialIdea;
-  index: number;
+  idea: LearnedIdea;
   decision?: IdeaDecision;
-  onDecision: (ideaId: string, decision: IdeaDecision) => void;
+  disabled: boolean;
+  onDecision: (idea: SocialIdea, decision: IdeaDecision) => void;
 }) {
   const decisionLabel =
     decision === "produce"
@@ -1467,114 +1702,247 @@ function EditorialIdeaCard({
         : decision === "discard"
           ? "Écartée"
           : "À décider";
-  const confidence =
-    idea.confidence === "high"
-      ? "Confiance forte"
-      : idea.confidence === "medium"
-        ? "Confiance moyenne"
-        : "Signal limité";
+  const primaryMeta = PLATFORM_META[idea.primaryPlatform];
+  const primaryAdaptation = idea.platformAdaptations[idea.primaryPlatform];
 
   return (
     <article className={`editorial-idea-card decision-${decision ?? "none"}`}>
       <header className="editorial-idea-head">
-        <div>
+        <div className="editorial-idea-main">
           <div className="editorial-idea-meta">
-            <span>Idée {String(index).padStart(2, "0")}</span>
-            <span>{confidence} · {idea.confidenceScore}/100</span>
+            <span>{primaryMeta.emoji} {primaryMeta.label} · #{idea.platformRank}</span>
+            <span>{primaryAdaptation.format}</span>
             <span className={`idea-decision-status status-${decision ?? "none"}`}>
               {decisionLabel}
             </span>
           </div>
           <h3>{idea.title}</h3>
+          <p className="editorial-idea-hook">« {idea.hook} »</p>
+          <div className="compact-idea-evidence" aria-label="Posts sources">
+            {idea.seedPosts.slice(0, 2).map((seed) => (
+              <a
+                href={seed.url}
+                target="_blank"
+                rel="noreferrer"
+                title={seed.label}
+                key={`${seed.platform}:${seed.externalId}`}
+              >
+                {PLATFORM_META[seed.platform].emoji} Référence #{seed.platformRank ?? "—"}
+              </a>
+            ))}
+          </div>
         </div>
-        <div className={`idea-confidence-score confidence-${idea.confidence}`}>
-          <b>{idea.confidenceScore}</b>
+        <div className={`idea-confidence-score confidence-${idea.confidence}`} title={idea.learningExplanation}>
+          <b>{idea.learnedPotentialScore}</b>
           <small>/100</small>
+          <span>potentiel</span>
         </div>
       </header>
 
-      <div className="editorial-signal-box">
-        <span>📡 Signal observé</span>
-        <p>{idea.observedSignal.summary}</p>
-        <div className="idea-seeds" aria-label="Posts sources">
-          {idea.seedPosts.map((seed) => (
-            <a
-              href={seed.url}
-              target="_blank"
-              rel="noreferrer"
-              title={seed.label}
-              key={`${seed.platform}:${seed.externalId}`}
-            >
-              {PLATFORM_META[seed.platform].emoji} {PLATFORM_META[seed.platform].label}
-              <b>post source</b>
-              <span>↗</span>
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <div className="idea-concept-grid">
-        <div className="idea-concept-block">
-          <span>🎬 Format proposé</span>
-          <p>{idea.proposedFormat}</p>
-        </div>
-        <div className="idea-concept-block hook-block">
-          <span>🪝 Hook</span>
-          <p>« {idea.hook} »</p>
-        </div>
-      </div>
-
-      <div className="idea-platforms">
-        <span className="idea-section-label">Déclinaisons natives</span>
-        <div className="idea-platform-grid">
-          {(["youtube", "instagram", "tiktok", "x"] as Platform[]).map((platform) => {
-            const adaptation = idea.platformAdaptations[platform];
-            return (
-              <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
-                <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
-                <strong>{adaptation.format}</strong>
-                <p>{adaptation.execution}</p>
+      <div className="editorial-idea-actions-row">
+        <details className="editorial-idea-details">
+          <summary>＋ Plus d’informations</summary>
+          <div className="editorial-idea-expanded">
+            <div className="editorial-signal-box">
+              <span>📡 Pourquoi elle a du potentiel</span>
+              <p>{idea.observedSignal.summary}</p>
+              <small>{idea.learningExplanation}</small>
+              <div className="idea-seeds" aria-label="Posts sources">
+                {idea.seedPosts.map((seed) => (
+                  <a
+                    href={seed.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={seed.label}
+                    key={`${seed.platform}:${seed.externalId}`}
+                  >
+                    {PLATFORM_META[seed.platform].emoji} {PLATFORM_META[seed.platform].label}
+                    <b>post source</b>
+                    <span>↗</span>
+                  </a>
+                ))}
               </div>
-            );
-          })}
-        </div>
-      </div>
+            </div>
 
-      <div className="idea-confidence-note">
-        <span>🧪</span>
-        <p>{idea.confidenceRationale}</p>
-      </div>
+            <div className="idea-concept-grid">
+              <div className="idea-concept-block">
+                <span>🎬 Format proposé</span>
+                <p>{idea.proposedFormat}</p>
+              </div>
+              <div className="idea-concept-block hook-block">
+                <span>🪝 Hook</span>
+                <p>« {idea.hook} »</p>
+              </div>
+            </div>
 
-      <footer className="editorial-idea-footer">
-        <p>🔒 Assets officiels uniquement · {idea.limits[0]}</p>
-        <div className="editorial-decision-actions" aria-label="Décision locale">
+            <div className="idea-platforms">
+              <span className="idea-section-label">Déclinaisons possibles</span>
+              <div className="idea-platform-grid">
+                {(["youtube", "instagram", "tiktok", "x"] as Platform[]).map((platform) => {
+                  const adaptation = idea.platformAdaptations[platform];
+                  return (
+                    <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
+                      <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
+                      <strong>{adaptation.format}</strong>
+                      <p>{adaptation.execution}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="idea-confidence-note">
+              <span>🧪</span>
+              <p>{idea.confidenceRationale}</p>
+            </div>
+          </div>
+        </details>
+        <div className="editorial-decision-actions" aria-label="Décider et entraîner le classement">
           <button
             className="decision-button produce"
             type="button"
+            disabled={disabled}
             aria-pressed={decision === "produce"}
-            onClick={() => onDecision(idea.id, "produce")}
+            onClick={() => void onDecision(idea, "produce")}
           >
-            ✅ À produire
+            ✅ Accepter + planifier
           </button>
           <button
             className="decision-button rework"
             type="button"
+            disabled={disabled}
             aria-pressed={decision === "rework"}
-            onClick={() => onDecision(idea.id, "rework")}
+            onClick={() => void onDecision(idea, "rework")}
           >
-            🛠️ À retravailler
+            🛠️ Retravailler
           </button>
           <button
             className="decision-button discard"
             type="button"
+            disabled={disabled}
             aria-pressed={decision === "discard"}
-            onClick={() => onDecision(idea.id, "discard")}
+            onClick={() => void onDecision(idea, "discard")}
           >
-            ✕ Écarter
+            ✕ Refuser
           </button>
         </div>
-      </footer>
+      </div>
     </article>
+  );
+}
+
+function PlanningBoard({
+  schedule,
+  syncing,
+  onReschedule,
+  onOpenIdeas,
+}: {
+  schedule: ScheduledIdea[];
+  syncing: boolean;
+  onReschedule: (ideaId: string, scheduledFor: string) => void;
+  onOpenIdeas: () => void;
+}) {
+  const today = new Date();
+  const start = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
+  const sortedSchedule = [...schedule].sort((left, right) =>
+    left.scheduledFor.localeCompare(right.scheduledFor) || left.platform.localeCompare(right.platform),
+  );
+
+  return (
+    <div className="view-stack editorial-planning-view">
+      <div className="planning-hero">
+        <div>
+          <span className="section-kicker">🗓️ Planning éditorial automatique</span>
+          <h2>{schedule.length} publication{schedule.length > 1 ? "s" : ""} planifiée{schedule.length > 1 ? "s" : ""}</h2>
+          <p>Chaque idée acceptée prend le prochain créneau libre de sa plateforme. Tu peux déplacer la date directement ici.</p>
+        </div>
+        <button className="button primary" type="button" onClick={onOpenIdeas}>
+          💡 Choisir une autre idée
+        </button>
+      </div>
+
+      {syncing ? <div className="planning-sync-state">Synchronisation du planning…</div> : null}
+
+      {schedule.length ? (
+        <>
+          <section className="planning-week-panel">
+            <div className="panel-head">
+              <div>
+                <span className="section-kicker">Cette semaine</span>
+                <h3>Les prochains créneaux</h3>
+              </div>
+            </div>
+            <div className="planning-week-grid">
+              {days.map((day) => {
+                const items = sortedSchedule.filter((item) => item.scheduledFor === day);
+                const date = new Date(`${day}T12:00:00.000Z`);
+                return (
+                  <div className={`planning-day ${items.length ? "has-items" : ""}`} key={day}>
+                    <header>
+                      <span>{new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(date)}</span>
+                      <b>{new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" }).format(date)}</b>
+                    </header>
+                    <div className="planning-day-items">
+                      {items.map((item) => (
+                        <div className={`planning-mini-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
+                          <span>{PLATFORM_META[item.platform].emoji} {PLATFORM_META[item.platform].short}</span>
+                          <b>{item.title}</b>
+                        </div>
+                      ))}
+                      {!items.length ? <small>Libre</small> : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="planning-agenda-panel">
+            <div className="panel-head">
+              <div>
+                <span className="section-kicker">Agenda complet</span>
+                <h3>Toutes les idées acceptées</h3>
+              </div>
+            </div>
+            <div className="planning-agenda-list">
+              {sortedSchedule.map((item) => (
+                <article className={`planning-agenda-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
+                  <span className="planning-platform-icon" aria-hidden="true">{PLATFORM_META[item.platform].emoji}</span>
+                  <div>
+                    <span>{PLATFORM_META[item.platform].label} · {item.format}</span>
+                    <h4>{item.title}</h4>
+                    <p>« {item.hook} »</p>
+                  </div>
+                  <label>
+                    Date
+                    <input
+                      type="date"
+                      disabled={syncing}
+                      value={item.scheduledFor}
+                      onChange={(event) => onReschedule(item.ideaId, event.target.value)}
+                    />
+                  </label>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
+      ) : (
+        <div className="empty-state planning-empty-state">
+          <span>🗓️</span>
+          <h3>Le planning est prêt</h3>
+          <p>Accepte une idée : elle sera placée automatiquement au prochain créneau libre.</p>
+          <button className="button primary" type="button" onClick={onOpenIdeas}>
+            Voir les 50 idées
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
