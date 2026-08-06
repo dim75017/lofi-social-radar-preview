@@ -74,7 +74,7 @@ test("the preview bootstrap exposes exact counters before post cards load", asyn
   );
 });
 
-test("the versioned YouTube history contains only Shorts and Community posts", async () => {
+test("the versioned YouTube history contains Shorts, Community posts and authorized creator comments", async () => {
   const history = await snapshot();
   const youtube = history.posts.filter((post) => post.platform === "youtube");
   const formats = new Set(youtube.map((post) => post.format));
@@ -82,9 +82,10 @@ test("the versioned YouTube history contains only Shorts and Community posts", a
   assert.ok(youtube.length > 0);
   assert.deepEqual(
     [...formats].sort(),
-    ["community_image", "community_poll", "community_text", "short"],
+    ["comment", "community_image", "community_poll", "community_text", "short"],
   );
-  assert.ok(youtube.every((post) => !post.url.includes("/watch")));
+  assert.ok(youtube.filter((post) => post.format !== "comment").every((post) => !post.url.includes("/watch")));
+  assert.ok(youtube.filter((post) => post.format === "comment").every((post) => post.url.includes("lc=")));
   assert.ok(youtube.every((post) => post.format !== "video"));
   assert.ok(youtube.every((post) => post.format !== "livestream"));
 });

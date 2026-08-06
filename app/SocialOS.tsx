@@ -221,7 +221,7 @@ function relativeAge(value: string | null) {
 function formatEmptyCopy(platform: Platform, filter: SocialFormatFilter) {
   if (filter === "comment") {
     if (platform === "youtube") {
-      return "Les commentaires écrits par @LofiGirl ne sont pas énumérables par auteur via l’API publique. Un export propriétaire YouTube est requis.";
+      return "Aucun commentaire YouTube correspondant n’est disponible pour cette période.";
     }
     if (platform === "instagram") {
       return "Les commentaires écrits par @lofigirl nécessitent la connexion du compte professionnel Meta ou un export propriétaire.";

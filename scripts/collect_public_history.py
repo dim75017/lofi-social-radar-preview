@@ -92,7 +92,7 @@ BASE_LIMITATIONS = {
         "Les contenus privés, supprimés, réservés aux membres ou non listés ne sont pas accessibles.",
         "Les dates YouTube sont approximées par yt-dlp depuis les libellés relatifs des onglets publics.",
         "Les listes publiques exposent les vues des Shorts et les likes des posts Communauté, mais pas de façon fiable les commentaires, partages, sauvegardes, impressions, rétention ou abonnements générés.",
-        "Les commentaires publiés par le compte Lofi Girl ne sont pas énumérables depuis le profil public ; un accès propriétaire YouTube est requis.",
+        "Les commentaires publiés par le compte Lofi Girl sont ajoutés lorsqu’un export propriétaire autorisé est disponible ; chaque commentaire conserve son lien YouTube public.",
         "Le tableau posts est dédupliqué par identifiant public YouTube.",
     ],
     "tiktok": [
@@ -1056,7 +1056,7 @@ def aggregate_coverage(
             aggregate_platform_record(
                 platform="youtube",
                 account_url="https://www.youtube.com/@LofiGirl",
-                scope="shorts + community posts",
+                scope="shorts + community posts + commentaires publiés par le compte lorsqu’un export autorisé est disponible",
                 status=status,
                 posts=youtube_posts,
                 limitations=limitations,
@@ -1218,11 +1218,16 @@ def validate_snapshot(snapshot: dict[str, Any], platform_filter: str) -> None:
             "community_image",
             "community_poll",
             "community_text",
+            "comment",
         }:
             raise RuntimeError(
                 f"format YouTube hors périmètre : {post['format']} ({post['externalId']})"
             )
-        if post["platform"] == "youtube" and "/watch" in post["url"]:
+        if (
+            post["platform"] == "youtube"
+            and post["format"] != "comment"
+            and "/watch" in post["url"]
+        ):
             raise RuntimeError(
                 f"URL vidéo longue YouTube hors périmètre : {post['url']}"
             )
