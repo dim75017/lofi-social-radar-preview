@@ -93,6 +93,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /✕ Refusées/);
   assert.match(component, /↻ Nouvelles idées/);
   assert.match(component, /className="reco-grid"/);
+  assert.doesNotMatch(component, /reco-platform-tabs|Filtrer les recommandations par plateforme/);
+  assert.doesNotMatch(component, /className="reco-tags"|recommendation-platform-grid|Déclinaisons possibles/);
+  assert.match(component, /Exécution commune/);
+  assert.match(component, /Une seule création/);
   assert.doesNotMatch(component, /Afficher 10 idées de plus/);
   assert.match(component, /function RoadmapBoard/);
   assert.match(component, /Mois/);
@@ -103,6 +107,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /function RoadmapMonth/);
   assert.match(component, /function RoadmapList/);
   assert.match(component, /function RoadmapDayModal/);
+  assert.doesNotMatch(component, /function RoadmapLegend/);
+  assert.match(component, /Publication commune/);
   assert.doesNotMatch(previewEntry, /key=\{`\$\{workspace\.generatedAt\}:\$\{workspace\.posts\.length\}`\}/);
   assert.match(previewEntry, /public-history-summary\.json/);
   assert.match(previewEntry, /public-history-\$\{platform\}\.json/);
@@ -161,6 +167,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.reco-card\s*\{[\s\S]*?content-visibility:\s*auto/);
   assert.match(styles, /\.reco-quick-actions\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.roadmap-year-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(150px,\s*1fr\)\)/);
+  assert.match(styles, /\.roadmap-calendar-shell\.platform-neutral\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(styles, /\.roadmap-month-days\s*\{[\s\S]*?grid-template-columns:\s*repeat\(7,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.social-post-card\s*\{[\s\S]*?display:\s*flex;[\s\S]*?height:\s*100%;[\s\S]*?flex-direction:\s*column;/);
   assert.match(styles, /\.social-post-card\.poll-card \.poll-choice-list\s*\{[\s\S]*?grid-template-rows:\s*repeat\(5, 36px\)/);

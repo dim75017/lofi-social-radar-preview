@@ -104,7 +104,7 @@ async function decideIdea(request: Request, payload: DecidePayload) {
   const workflow = await readWorkflow();
   const timestamp = new Date().toISOString();
   const scheduledFor = payload.decision === "produce"
-    ? findNextPlanningDate(workflow.schedule, idea.primaryPlatform, timestamp)
+    ? findNextPlanningDate(workflow.schedule, timestamp)
     : null;
   const snapshot = JSON.stringify({
     ...idea,
@@ -210,7 +210,7 @@ async function rescheduleIdea(request: Request, payload: ReschedulePayload) {
   const collisions = workflow.schedule.filter(
     (item) => item.ideaId !== current.ideaId && item.scheduledFor === payload.scheduledFor,
   );
-  if (collisions.some((item) => item.platform === current.platform)) {
+  if (collisions.length) {
     return Response.json(
       { error: "Ce créneau est déjà occupé. Choisis une autre date." },
       { status: 409 },

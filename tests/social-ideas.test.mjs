@@ -78,7 +78,7 @@ test("generates deterministic ideas with cited seeds and a native adaptation for
   ]);
   assert.equal(first.ideas[0].primaryPlatform, "youtube");
   assert.ok(first.ideas[0].potentialScore >= 1 && first.ideas[0].potentialScore <= 100);
-  assert.match(first.ideas[0].observedSignal.summary, /YouTube.*TikTok|TikTok.*YouTube/);
+  assert.doesNotMatch(first.ideas[0].observedSignal.summary, /YouTube|Instagram|TikTok|\bX\b/);
   assert.ok(first.ideas[0].observedSignal.evidence.every((item) => /https:\/\//.test(item)));
   assert.doesNotMatch(
     [
@@ -154,7 +154,7 @@ test("keeps a single-platform, low-cohort idea at low confidence and exposes the
 
   assert.equal(idea.confidence, "low");
   assert.ok(idea.seedPosts.every((seed) => seed.platform === "youtube"));
-  assert.ok(idea.limits.some((limit) => /uniquement sur YouTube/i.test(limit)));
+  assert.ok(idea.limits.some((limit) => /un seul historique réseau/i.test(limit)));
   assert.ok(idea.limits.some((limit) => /petite cohorte|peu de métriques/i.test(limit)));
 });
 
@@ -329,6 +329,15 @@ test("builds a balanced deterministic portfolio of 50 genuinely distinct platfor
         idea.potentialScore <= 100 &&
       Object.keys(idea.platformAdaptations).length === 4,
     ),
+  );
+  const platformNativeIdeas = first.ideas.filter((idea) =>
+    /\b(?:YouTube|Instagram|TikTok|Short|Reel|thread)\b|Post Communauté|Sondage Communauté/i.test(
+      `${idea.title} ${idea.proposedFormat}`,
+    ),
+  );
+  assert.deepEqual(
+    platformNativeIdeas.map((idea) => ({ title: idea.title, format: idea.proposedFormat })),
+    [],
   );
   const exploratory = first.ideas.filter((idea) =>
     idea.limits.some((limit) => /sans précédent direct/i.test(limit)),

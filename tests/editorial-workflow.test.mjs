@@ -37,7 +37,7 @@ function idea(overrides = {}) {
   };
 }
 
-test("accepted patterns and platforms lift similar ideas without overwhelming the base score", () => {
+test("accepted concepts lift similar ideas without learning a platform preference", () => {
   const accepted = idea({ id: "accepted", potentialScore: 70 });
   const rejected = idea({
     id: "rejected",
@@ -78,8 +78,8 @@ test("automatically schedules accepted ideas in the next collision-free slot", (
 
   assert.equal(first.scheduledFor, "2026-08-07");
   assert.equal(second.scheduledFor, "2026-08-08");
-  assert.equal(instagram.scheduledFor, "2026-08-07");
-  assert.equal(findNextPlanningDate([first, instagram], "tiktok", "2026-08-06"), "2026-08-07");
+  assert.equal(instagram.scheduledFor, "2026-08-09");
+  assert.equal(findNextPlanningDate([first, second, instagram], "2026-08-06"), "2026-08-10");
 });
 
 test("a planned idea can be moved and malformed persisted data is ignored", () => {
@@ -100,7 +100,7 @@ test("a planned idea can be moved and malformed persisted data is ignored", () =
   assert.equal(normalized.schedule.length, 1);
 });
 
-test("rescheduling refuses malformed dates and same-platform collisions", () => {
+test("rescheduling refuses malformed dates and any editorial collision", () => {
   const first = scheduleAcceptedIdea(idea(), [], "2026-08-06T12:00:00.000Z");
   const second = scheduleAcceptedIdea(
     idea({ id: "idea-youtube-02" }),
@@ -110,7 +110,7 @@ test("rescheduling refuses malformed dates and same-platform collisions", () => 
 
   assert.throws(
     () => updateScheduledDate([first, second], second.ideaId, first.scheduledFor),
-    /déjà une publication/i,
+    /publication est déjà/i,
   );
   assert.throws(
     () => updateScheduledDate([first], first.ideaId, "2026-99-99"),

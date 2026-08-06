@@ -6259,6 +6259,26 @@ a {
   margin-top: 8px;
 }
 
+.recommendation-common-execution {
+  margin-top: 8px;
+  border: 1px solid rgba(154, 168, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(154, 168, 255, 0.07);
+  padding: 14px;
+}
+
+.recommendation-common-execution b {
+  color: var(--accent-2);
+  font-size: 13px;
+}
+
+.recommendation-common-execution p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .recommendation-caveat {
   display: flex;
   align-items: flex-start;
@@ -6371,6 +6391,10 @@ a {
   grid-template-columns: minmax(0, 1fr) 155px;
   align-items: stretch;
   gap: 18px;
+}
+
+.roadmap-calendar-shell.platform-neutral {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .roadmap-year-grid {

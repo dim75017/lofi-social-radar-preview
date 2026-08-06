@@ -616,7 +616,6 @@ function summarizeObservedSignal(
   seeds: readonly IdeaRankedPost[],
   analyses: readonly EditorialWhy[],
 ): string {
-  const cohortLabels = uniqueStrings(seeds.map(cohortDisplayLabel));
   const readings = uniqueStrings(
     analyses
       .filter((analysis) => analysis.primarySignal !== "insufficient")
@@ -629,19 +628,17 @@ function summarizeObservedSignal(
     : "Le texte public reste trop pauvre pour préciser davantage le mécanisme sans inventer.";
 
   if (!candidate.patternMatch) {
-    return `Aucun post gagnant de ${platformLabel(candidate.primaryPlatform)} ne documente directement le ressort « ${
+    return `Aucun post gagnant ne documente directement le ressort « ${
       PATTERN_LABELS[candidate.pattern]
-    } ». Les ${seeds.length} référence${seeds.length > 1 ? "s" : ""} servent uniquement de niveau de comparaison sur la plateforme : cette idée est un test exploratoire, pas la reproduction d’une recette déjà prouvée.`;
+    } ». Les ${seeds.length} référence${seeds.length > 1 ? "s" : ""} servent uniquement de niveau de comparaison dans l’historique complet : cette idée est un test exploratoire, pas la reproduction d’une recette déjà prouvée.`;
   }
 
   if (candidate.repeatedCreative) {
-    return `Une accroche quasi identique réapparaît dans ${joinFrench(
-      cohortLabels,
-    )}. ${editorialReading}`;
+    return `Une accroche quasi identique réapparaît dans plusieurs publications historiques. ${editorialReading}`;
   }
-  return `${seeds.length} publication${seeds.length > 1 ? "s" : ""} de ${joinFrench(
-    cohortLabels,
-  )} partage${seeds.length > 1 ? "nt" : ""} le ressort « ${
+  return `${seeds.length} publication${seeds.length > 1 ? "s" : ""} historique${
+    seeds.length > 1 ? "s" : ""
+  } partage${seeds.length > 1 ? "nt" : ""} le ressort « ${
     PATTERN_LABELS[candidate.pattern]
   } ». ${editorialReading}`;
 }
@@ -742,9 +739,10 @@ function materializeIdea(
   const confidenceScore = candidate.patternMatch
     ? rawConfidenceScore
     : Math.min(rawConfidenceScore, 45);
-  const template =
+  const template = platformNeutralTemplate(
     candidate.recipe ??
-    ideaTemplate(candidate.pattern, dominantPattern(seeds, analyses));
+    ideaTemplate(candidate.pattern, dominantPattern(seeds, analyses)),
+  );
   const evidence = seeds.map((post) => {
     const analysis = analyses.get(editorialPostKey(post));
     const reading = analysis?.headline ?? "Lecture éditoriale à compléter";
@@ -812,9 +810,9 @@ function ideaTemplate(
   if (pattern === "cross_platform_echo") {
     const base = ideaTemplate(underlyingPattern, "relatable_humour");
     return {
-      title: "Un même moment, quatre exécutions natives",
+      title: "Un même moment, une publication commune",
       proposedFormat:
-        "Mini-campagne en quatre publications : conserver le même noyau éditorial, puis changer rythme, cadrage et appel à l’action selon le réseau.",
+        "Un contenu unique : même visuel ou montage, même texte et même hook, publié partout sans déclinaison.",
       hook: base.hook,
     };
   }
@@ -866,6 +864,29 @@ function ideaTemplate(
   };
 }
 
+function platformNeutralTemplate(template: IdeaTemplate): IdeaTemplate {
+  const title = template.title
+    .replace(/\bun Short\b/giu, "une vidéo")
+    .replace(/\bdu Reel\b/giu, "du contenu")
+    .replace(/\bLe Reel\b/giu, "Le contenu")
+    .replace(/\bReel\b/giu, "contenu")
+    .replace(/\bLe sondage\b/giu, "La question")
+    .replace(/\bthread\b/giu, "série");
+  const proposedFormat = template.proposedFormat
+    .replace(/Sondage Communauté/giu, "Question à choix")
+    .replace(/Posts Communauté/giu, "Publications")
+    .replace(/Post Communauté/giu, "Publication")
+    .replace(/\bShorts\b/giu, "vidéos verticales courtes")
+    .replace(/\bShort\b/giu, "vidéo verticale courte")
+    .replace(/\bReels\b/giu, "vidéos verticales courtes")
+    .replace(/\bReel\b/giu, "vidéo verticale courte")
+    .replace(/\bposts\b/giu, "publications")
+    .replace(/\bpost\b/giu, "publication")
+    .replace(/\bthread\b/giu, "série")
+    .replace(/\bRéponse native\b/giu, "Réponse");
+  return { ...template, title, proposedFormat };
+}
+
 function adaptationsFor(
   pattern: EditorialPattern,
 ): Record<SocialPlatform, PlatformIdeaAdaptation> {
@@ -914,7 +935,7 @@ function buildLimits(
   }
   if (platforms.length === 1) {
     limits.push(
-      `Signal observé uniquement sur ${platformLabel(platforms[0])} ; valider l’idée séparément avant toute généralisation cross-platform.`,
+      "Signal observé dans un seul historique réseau ; valider l’idée avant de généraliser son intérêt.",
     );
   }
   if (analyses.some((analysis) => analysis.confidence === "low")) {

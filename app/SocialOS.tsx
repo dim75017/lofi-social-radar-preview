@@ -48,7 +48,6 @@ import {
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "planning" | "all" | "sources";
-type IdeaPlatformFilter = "all" | Platform;
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 
@@ -509,7 +508,6 @@ export function SocialOS({
   const [editorialWorkflowReady, setEditorialWorkflowReady] = useState(false);
   const [editorialWorkflowSyncing, setEditorialWorkflowSyncing] = useState(false);
   const editorialWorkflowMutationRef = useRef(false);
-  const [ideaPlatformFilter, setIdeaPlatformFilter] = useState<IdeaPlatformFilter>("all");
   const [ideaStatusFilter, setIdeaStatusFilter] = useState<IdeaStatusFilter>("pending");
   const [activeRecommendation, setActiveRecommendation] = useState<LearnedIdea | null>(null);
   const [activeDetailsPost, setActiveDetailsPost] = useState<SocialPost | null>(null);
@@ -746,15 +744,12 @@ export function SocialOS({
   );
   const filteredIdeas = useMemo(
     () => learnedIdeas.filter((idea) => {
-      if (ideaPlatformFilter !== "all" && idea.primaryPlatform !== ideaPlatformFilter) {
-        return false;
-      }
       const decision = editorialWorkflow.feedback[idea.id]?.decision;
       if (ideaStatusFilter === "pending") return !decision || decision === "rework";
       if (ideaStatusFilter !== "all") return decision === ideaStatusFilter;
       return true;
     }),
-    [editorialWorkflow.feedback, ideaPlatformFilter, ideaStatusFilter, learnedIdeas],
+    [editorialWorkflow.feedback, ideaStatusFilter, learnedIdeas],
   );
   const ideaDecisionCounts = useMemo(() => {
     const counts = { pending: 0, produce: 0, rework: 0, discard: 0 };
@@ -765,11 +760,6 @@ export function SocialOS({
     }
     return counts;
   }, [editorialWorkflow.feedback, learnedIdeas]);
-  const ideaPlatformCounts = useMemo(() => {
-    const counts = { youtube: 0, instagram: 0, tiktok: 0, x: 0 } satisfies Record<Platform, number>;
-    for (const idea of learnedIdeas) counts[idea.primaryPlatform] += 1;
-    return counts;
-  }, [learnedIdeas]);
   const visibleIdeas = filteredIdeas;
   const activeDetailsAnalysis = useMemo(() => {
     if (!activeDetailsPost) return null;
@@ -1247,7 +1237,6 @@ export function SocialOS({
                 type="button"
                 disabled={scanning}
                 onClick={() => {
-                  setIdeaPlatformFilter("all");
                   setIdeaStatusFilter("pending");
                   void runScan();
                 }}
@@ -1256,26 +1245,7 @@ export function SocialOS({
               </button>
             </div>
 
-            <div className="reco-platform-tabs" aria-label="Filtrer les recommandations par plateforme">
-              <button
-                className={ideaPlatformFilter === "all" ? "active" : ""}
-                type="button"
-                onClick={() => setIdeaPlatformFilter("all")}
-              >
-                Toutes <b>{learnedIdeas.length}</b>
-              </button>
-              {PLATFORM_ORDER.map((key) => (
-                <button
-                  className={`tone-${PLATFORM_META[key].tone} ${ideaPlatformFilter === key ? "active" : ""}`}
-                  type="button"
-                  onClick={() => setIdeaPlatformFilter(key)}
-                  key={key}
-                >
-                  {PLATFORM_META[key].emoji} {PLATFORM_META[key].label} <b>{ideaPlatformCounts[key]}</b>
-                </button>
-              ))}
-              {editorialWorkflowSyncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
-            </div>
+            {editorialWorkflowSyncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
 
             {historyLoading || !editorialWorkflowReady ? (
               <HistoryLoadingState
@@ -1299,12 +1269,11 @@ export function SocialOS({
               <div className="empty-state reco-empty-state">
                 <span>🧭</span>
                 <h3>Aucune recommandation dans ce filtre</h3>
-                <p>Change de plateforme ou affiche un autre état.</p>
+                <p>Affiche un autre état pour retrouver les recommandations.</p>
                 <button
                   className="button secondary"
                   type="button"
                   onClick={() => {
-                    setIdeaPlatformFilter("all");
                     setIdeaStatusFilter("pending");
                   }}
                 >
@@ -1677,6 +1646,16 @@ function recommendationTier(score: number) {
   return "B";
 }
 
+function recommendationDisplayTitle(value: string) {
+  return value
+    .replace("Un même moment, quatre exécutions natives", "Un même moment, une publication commune")
+    .replace(/\bun Short\b/giu, "une vidéo")
+    .replace(/\bdu Reel\b/giu, "du contenu")
+    .replace(/\bLe Reel\b/giu, "Le contenu")
+    .replace(/\bLe sondage\b/giu, "La question")
+    .replace(/\bthread\b/giu, "série");
+}
+
 function RecommendationCard({
   idea,
   decision,
@@ -1690,17 +1669,15 @@ function RecommendationCard({
   onDecision: (idea: SocialIdea, decision: IdeaDecision) => void;
   onInspect: (idea: LearnedIdea) => void;
 }) {
-  const primaryMeta = PLATFORM_META[idea.primaryPlatform];
-  const primaryAdaptation = idea.platformAdaptations[idea.primaryPlatform];
   const tier = recommendationTier(idea.learnedPotentialScore);
 
   return (
-    <article className={`reco-card tone-${primaryMeta.tone} decision-${decision ?? "pending"}`}>
+    <article className={`reco-card decision-${decision ?? "pending"}`}>
       <button
         className="reco-card-main"
         type="button"
         onClick={() => onInspect(idea)}
-        aria-label={`Voir le détail de la recommandation ${idea.title}`}
+        aria-label={`Voir le détail de la recommandation ${recommendationDisplayTitle(idea.title)}`}
       >
         <header className="reco-card-head">
           <span
@@ -1710,14 +1687,8 @@ function RecommendationCard({
           >
             {tier}
           </span>
-          <h3>{idea.title}</h3>
+          <h3>{recommendationDisplayTitle(idea.title)}</h3>
         </header>
-        <div className="reco-tags">
-          <span className={`platform-tag tone-${primaryMeta.tone}`}>
-            {primaryMeta.emoji} {primaryMeta.label}
-          </span>
-          <span title={primaryAdaptation.format}>{primaryAdaptation.format}</span>
-        </div>
         <p className="reco-description">{idea.observedSignal.summary}</p>
         <p className="reco-hook">« {idea.hook} »</p>
         <span className="reco-more">Voir pourquoi elle a du potentiel →</span>
@@ -1805,7 +1776,6 @@ function RecommendationDetailsModal({
   }, [isOpen, onClose]);
 
   if (!idea) return null;
-  const primaryMeta = PLATFORM_META[idea.primaryPlatform];
   const tier = recommendationTier(idea.learnedPotentialScore);
 
   return (
@@ -1816,7 +1786,7 @@ function RecommendationDetailsModal({
       }}
     >
       <section
-        className={`post-details-modal recommendation-details-modal tone-${primaryMeta.tone}`}
+        className="post-details-modal recommendation-details-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="recommendation-details-title"
@@ -1824,9 +1794,9 @@ function RecommendationDetailsModal({
       >
         <header>
           <div>
-            <span>{primaryMeta.emoji} Recommandation {primaryMeta.label} · Tier {tier}</span>
-            <h2 id="recommendation-details-title">{idea.title}</h2>
-            <small className="details-theme-label">{idea.learnedPotentialScore}/100 de potentiel · #{idea.platformRank} sur {primaryMeta.label}</small>
+            <span>💡 Recommandation · Tier {tier}</span>
+            <h2 id="recommendation-details-title">{recommendationDisplayTitle(idea.title)}</h2>
+            <small className="details-theme-label">{idea.learnedPotentialScore}/100 de potentiel</small>
           </div>
           <button
             className="post-details-close"
@@ -1858,11 +1828,11 @@ function RecommendationDetailsModal({
         <section className="recommendation-detail-section">
           <span className="section-kicker">Posts sources</span>
           <div className="recommendation-source-links">
-            {idea.seedPosts.map((seed) => (
+            {idea.seedPosts.map((seed, index) => (
               <a href={seed.url} target="_blank" rel="noreferrer" key={`${seed.platform}:${seed.externalId}`}>
-                <span>{PLATFORM_META[seed.platform].emoji}</span>
-                <b>{PLATFORM_META[seed.platform].label}</b>
-                <small>Post #{seed.platformRank ?? "—"}</small>
+                <span>🔗</span>
+                <b>Source {index + 1}</b>
+                <small>Voir le post d’origine</small>
                 <strong>↗</strong>
               </a>
             ))}
@@ -1870,18 +1840,10 @@ function RecommendationDetailsModal({
         </section>
 
         <section className="recommendation-detail-section">
-          <span className="section-kicker">Déclinaisons possibles</span>
-          <div className="idea-platform-grid recommendation-platform-grid">
-            {PLATFORM_ORDER.map((platform) => {
-              const adaptation = idea.platformAdaptations[platform];
-              return (
-                <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
-                  <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
-                  <strong>{adaptation.format}</strong>
-                  <p>{adaptation.execution}</p>
-                </div>
-              );
-            })}
+          <span className="section-kicker">Exécution commune</span>
+          <div className="recommendation-common-execution">
+            <b>Une seule création</b>
+            <p>Le même visuel, le même montage et le même texte sont publiés partout, sans déclinaison par réseau.</p>
           </div>
         </section>
 
@@ -1932,14 +1894,12 @@ function RoadmapBoard({
   const [displayMode, setDisplayMode] = useState<RoadmapDisplayMode>("calendar");
   const [cursorYear, setCursorYear] = useState(now.getFullYear());
   const [cursorMonth, setCursorMonth] = useState(now.getMonth());
-  const [platformFilter, setPlatformFilter] = useState<IdeaPlatformFilter>("all");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const closeSelectedDay = useCallback(() => setSelectedDay(null), []);
   const sortedSchedule = [...schedule].sort((left, right) =>
-    left.scheduledFor.localeCompare(right.scheduledFor) || left.platform.localeCompare(right.platform),
+    left.scheduledFor.localeCompare(right.scheduledFor) || left.ideaId.localeCompare(right.ideaId),
   );
   const filteredSchedule = sortedSchedule.filter((item) => {
-    if (platformFilter !== "all" && item.platform !== platformFilter) return false;
     const yearMatches = Number(item.scheduledFor.slice(0, 4)) === cursorYear;
     if (!yearMatches) return false;
     return scale === "year" || Number(item.scheduledFor.slice(5, 7)) - 1 === cursorMonth;
@@ -1951,10 +1911,7 @@ function RoadmapBoard({
     scheduleByDate.set(item.scheduledFor, existing);
   }
   const selectedItems = selectedDay
-    ? sortedSchedule.filter((item) =>
-        item.scheduledFor === selectedDay
-        && (platformFilter === "all" || item.platform === platformFilter),
-      )
+    ? sortedSchedule.filter((item) => item.scheduledFor === selectedDay)
     : [];
   const periodLabel = scale === "year"
     ? String(cursorYear)
@@ -2001,7 +1958,7 @@ function RoadmapBoard({
           onOpenRecommendations={onOpenRecommendations}
         />
       ) : (
-        <div className="roadmap-calendar-shell">
+        <div className="roadmap-calendar-shell platform-neutral">
           {scale === "year" ? (
             <div className="roadmap-year-grid">
               {Array.from({ length: 12 }, (_, month) => (
@@ -2022,11 +1979,6 @@ function RoadmapBoard({
               onSelectDay={setSelectedDay}
             />
           )}
-          <RoadmapLegend
-            schedule={schedule}
-            activePlatform={platformFilter}
-            onChange={setPlatformFilter}
-          />
         </div>
       )}
 
@@ -2072,12 +2024,11 @@ function RoadmapMiniMonth({
           const key = roadmapDateKey(date);
           const outside = date.getUTCMonth() !== month;
           const items = outside ? [] : (scheduleByDate.get(key) ?? []);
-          const primary = items[0];
           return items.length ? (
             <button
-              className={`roadmap-mini-event tone-${PLATFORM_META[primary.platform].tone} ${items.length > 1 ? "multiple" : ""}`}
+              className={`roadmap-mini-event ${items.length > 1 ? "multiple" : ""}`}
               type="button"
-              title={items.map((item) => item.title).join(" · ")}
+              title={items.map((item) => recommendationDisplayTitle(item.title)).join(" · ")}
               aria-label={`${date.getUTCDate()} ${roadmapMonthLabel(year, month)}, ${items.length} publication${items.length > 1 ? "s" : ""}`}
               onClick={() => onSelectDay(key)}
               key={key}
@@ -2121,14 +2072,14 @@ function RoadmapMonth({
               <div className="roadmap-month-events">
                 {items.map((item) => (
                   <button
-                    className={`roadmap-month-event tone-${PLATFORM_META[item.platform].tone}`}
+                    className="roadmap-month-event"
                     type="button"
-                    title={item.title}
+                    title={recommendationDisplayTitle(item.title)}
                     onClick={() => onSelectDay(key)}
                     key={item.id}
                   >
-                    <span>{PLATFORM_META[item.platform].emoji}</span>
-                    <b>{item.title}</b>
+                    <span>✦</span>
+                    <b>{recommendationDisplayTitle(item.title)}</b>
                   </button>
                 ))}
               </div>
@@ -2137,38 +2088,6 @@ function RoadmapMonth({
         })}
       </div>
     </section>
-  );
-}
-
-function RoadmapLegend({
-  schedule,
-  activePlatform,
-  onChange,
-}: {
-  schedule: ScheduledIdea[];
-  activePlatform: IdeaPlatformFilter;
-  onChange: (platform: IdeaPlatformFilter) => void;
-}) {
-  return (
-    <aside className="roadmap-legend" aria-label="Légende et filtre des plateformes">
-      <button className={activePlatform === "all" ? "active" : ""} type="button" onClick={() => onChange("all")}>
-        <span className="legend-all">×</span><b>Toutes</b><small>{schedule.length}</small>
-      </button>
-      {PLATFORM_ORDER.map((platform) => {
-        const meta = PLATFORM_META[platform];
-        const count = schedule.filter((item) => item.platform === platform).length;
-        return (
-          <button
-            className={`${activePlatform === platform ? "active" : ""} tone-${meta.tone}`}
-            type="button"
-            onClick={() => onChange(platform)}
-            key={platform}
-          >
-            <span>{meta.emoji}</span><b>{meta.label}</b><small>{count}</small>
-          </button>
-        );
-      })}
-    </aside>
   );
 }
 
@@ -2197,15 +2116,15 @@ function RoadmapList({
   return (
     <div className="roadmap-list">
       {items.map((item) => (
-        <article className={`roadmap-list-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
+        <article className="roadmap-list-card" key={item.id}>
           <time dateTime={item.scheduledFor}>
             <b>{item.scheduledFor.slice(8, 10)}</b>
             <span>{new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.scheduledFor}T12:00:00.000Z`))}</span>
           </time>
-          <span className="roadmap-list-platform" aria-hidden="true">{PLATFORM_META[item.platform].emoji}</span>
+          <span className="roadmap-list-platform" aria-hidden="true">✦</span>
           <div>
-            <small>{PLATFORM_META[item.platform].label} · {item.format}</small>
-            <h3>{item.title}</h3>
+            <small>Publication commune</small>
+            <h3>{recommendationDisplayTitle(item.title)}</h3>
             <p>« {item.hook} »</p>
           </div>
           <label>
@@ -2290,11 +2209,11 @@ function RoadmapDayModal({
         </header>
         <div className="roadmap-day-modal-list">
           {items.map((item) => (
-            <article className={`tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
-              <span>{PLATFORM_META[item.platform].emoji}</span>
+            <article key={item.id}>
+              <span>✦</span>
               <div>
-                <small>{PLATFORM_META[item.platform].label} · {item.format}</small>
-                <h3>{item.title}</h3>
+                <small>Publication commune</small>
+                <h3>{recommendationDisplayTitle(item.title)}</h3>
                 <p>« {item.hook} »</p>
               </div>
               <label>

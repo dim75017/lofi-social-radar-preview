@@ -64,9 +64,6 @@ export function applyPreferenceLearning(
 
   return ideas
     .map((idea) => {
-      const platformSignal = averageSignal(
-        examples.filter((item) => item.primaryPlatform === idea.primaryPlatform),
-      );
       const patternSignal = averageSignal(
         examples.filter((item) => item.pattern === idea.pattern),
       );
@@ -74,7 +71,7 @@ export function applyPreferenceLearning(
         examples.filter((item) => normalizeFormat(item.format) === normalizeFormat(idea.proposedFormat)),
       );
       const learningDelta = clamp(
-        Math.round(platformSignal * 4 + patternSignal * 6 + formatSignal * 3),
+        Math.round(patternSignal * 8 + formatSignal * 4),
         -12,
         12,
       );
@@ -100,7 +97,6 @@ export function applyPreferenceLearning(
     })
     .sort((left, right) =>
       right.learnedPotentialScore - left.learnedPotentialScore ||
-      left.primaryPlatform.localeCompare(right.primaryPlatform) ||
       left.id.localeCompare(right.id),
     );
 }
@@ -141,7 +137,7 @@ export function scheduleAcceptedIdea(
     hook: idea.hook,
     platform: idea.primaryPlatform,
     format: idea.proposedFormat,
-    scheduledFor: findNextPlanningDate(existing, idea.primaryPlatform, now),
+    scheduledFor: findNextPlanningDate(existing, now),
     status: "planned",
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -150,7 +146,6 @@ export function scheduleAcceptedIdea(
 
 export function findNextPlanningDate(
   schedule: readonly ScheduledIdea[],
-  platform: SocialPlatform,
   now: Date | string | number = new Date(),
 ): string {
   const cursor = startOfUtcDay(now);
@@ -161,8 +156,7 @@ export function findNextPlanningDate(
     const items = schedule.filter(
       (item) => item.status === "planned" && item.scheduledFor === date,
     );
-    const platformOccupied = items.some((item) => item.platform === platform);
-    if (!platformOccupied) return date;
+    if (!items.length) return date;
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
@@ -185,11 +179,10 @@ export function updateScheduledDate(
       (item) =>
         item.ideaId !== ideaId &&
         item.status === "planned" &&
-        item.platform === current.platform &&
         item.scheduledFor === scheduledFor,
     )
   ) {
-    throw new Error("Cette plateforme a déjà une publication prévue à cette date.");
+    throw new Error("Une publication est déjà prévue à cette date.");
   }
   const updatedAt = toIsoTimestamp(now);
   return schedule
@@ -216,7 +209,6 @@ export function normalizeWorkflowState(value: unknown): EditorialWorkflowState {
 
 export function compareScheduleItems(left: ScheduledIdea, right: ScheduledIdea) {
   return left.scheduledFor.localeCompare(right.scheduledFor) ||
-    left.platform.localeCompare(right.platform) ||
     left.ideaId.localeCompare(right.ideaId);
 }
 
