@@ -83,7 +83,12 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, /Chercher une accroche, un format/);
   assert.doesNotMatch(component, /publicRankingLabel/);
   assert.match(component, /activeInlineVideoId/);
-  assert.match(previewEntry, /key=\{`\$\{workspace\.generatedAt\}:\$\{workspace\.posts\.length\}`\}/);
+  assert.doesNotMatch(previewEntry, /key=\{`\$\{workspace\.generatedAt\}:\$\{workspace\.posts\.length\}`\}/);
+  assert.match(previewEntry, /public-history-summary\.json/);
+  assert.match(previewEntry, /public-history-\$\{platform\}\.json/);
+  assert.match(previewEntry, /cache: "force-cache"/);
+  assert.match(component, /resolvedPlatformCounts/);
+  assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);
   assert.match(component, /post-visual-trigger/);
   assert.match(component, /inline-video-frame/);

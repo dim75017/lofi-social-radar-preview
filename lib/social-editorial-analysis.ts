@@ -339,6 +339,29 @@ const SIGNAL_TEMPLATES: Record<EditorialSignalKey, SignalTemplate> = {
 export function buildEditorialAnalysisMap(
   posts: readonly EditorialAnalysisPost[],
 ): Map<string, EditorialWhy> {
+  return buildEditorialAnalysisMapInternal(posts, null);
+}
+
+/**
+ * Analyse uniquement les publications demandées tout en conservant l'ensemble
+ * de leur cohorte comme base de comparaison. Cette variante est destinée aux
+ * aperçus et aux fiches ouvertes à la demande : elle produit exactement la
+ * même analyse que `buildEditorialAnalysisMap`, sans calculer les milliers de
+ * fiches qui ne sont pas encore consultées.
+ */
+export function buildEditorialAnalysisMapForTargets(
+  posts: readonly EditorialAnalysisPost[],
+  targetKeys: Iterable<string>,
+): Map<string, EditorialWhy> {
+  const targets = new Set(targetKeys);
+  if (targets.size === 0) return new Map();
+  return buildEditorialAnalysisMapInternal(posts, targets);
+}
+
+function buildEditorialAnalysisMapInternal(
+  posts: readonly EditorialAnalysisPost[],
+  targetKeys: ReadonlySet<string> | null,
+): Map<string, EditorialWhy> {
   const prepared = posts.map(preparePost);
   const cohorts = new Map<string, PreparedPost[]>();
   for (const item of prepared) {
@@ -350,6 +373,10 @@ export function buildEditorialAnalysisMap(
 
   const result = new Map<string, EditorialWhy>();
   for (const cohort of cohorts.values()) {
+    const targets = targetKeys
+      ? cohort.filter((item) => targetKeys.has(item.key))
+      : cohort;
+    if (targets.length === 0) continue;
     const ordered = orderPreparedPosts(cohort);
     const orderedIndex = new Map(
       ordered.map((item, index) => [item, index] as const),
@@ -365,9 +392,15 @@ export function buildEditorialAnalysisMap(
       size: cohort.length,
       orderedIndex,
       signalCounts,
-      comparators: selectComparators(cohort, ordered, orderedIndex, signalCounts),
+      comparators: selectComparators(
+        cohort,
+        ordered,
+        orderedIndex,
+        signalCounts,
+        new Set(targets),
+      ),
     };
-    for (const target of cohort) {
+    for (const target of targets) {
       result.set(target.key, analyzePreparedPost(target, context));
     }
   }
@@ -378,7 +411,7 @@ export function analyzeEditorialPost(
   post: EditorialAnalysisPost,
   posts: readonly EditorialAnalysisPost[],
 ): EditorialWhy {
-  const analyses = buildEditorialAnalysisMap(posts);
+  const analyses = buildEditorialAnalysisMapForTargets(posts, [editorialPostKey(post)]);
   return analyses.get(editorialPostKey(post)) ?? insufficientAnalysis(post);
 }
 
@@ -635,6 +668,7 @@ function selectComparators(
   ordered: readonly PreparedPost[],
   orderedIndex: ReadonlyMap<PreparedPost, number>,
   signalCounts: ReadonlyMap<PreparedPost["primarySignal"], number>,
+  targets: ReadonlySet<PreparedPost>,
 ): Map<PreparedPost, PreparedPost> {
   const result = new Map<PreparedPost, PreparedPost>();
   if (cohort.length <= 1) return result;
@@ -656,6 +690,7 @@ function selectComparators(
   const peerCount = cohort.length - 1;
 
   for (const item of cohort) {
+    if (!targets.has(item)) continue;
     if (item.primarySignal === "insufficient") continue;
     const sameSignalPeerCount = Math.max(
       0,

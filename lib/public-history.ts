@@ -1,10 +1,12 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner.ts";
 import {
   buildEditorialAnalysisMap,
+  buildEditorialAnalysisMapForTargets,
   editorialPostKey,
   type EditorialWhy,
 } from "./social-editorial-analysis.ts";
 import { isInScopeSocialPost } from "./social-formats.ts";
+import { rankPostsByPublicMetric } from "./social-ranking.ts";
 import { buildSocialAnalysisFromRanked, rankPosts } from "./social-score.ts";
 
 export type HistoryCoverage = {
@@ -22,6 +24,19 @@ export type PublicHistorySnapshot = {
   generatedAt: string;
   coverage: HistoryCoverage[];
   posts: NormalizedPost[];
+};
+
+export type PublicHistorySummary = {
+  generatedAt: string;
+  totalPostCount: number;
+  platformCounts: Record<SocialPlatform, number>;
+  formatCounts: Partial<Record<SocialPlatform, Record<string, number>>>;
+  coverage: HistoryCoverage[];
+};
+
+export type PublicHistoryMergeOptions = {
+  editorialAnalysis?: "all" | "leaders" | "none";
+  accountCounts?: Partial<Record<SocialPlatform, number>>;
 };
 
 export type PublicMetricSnapshot = {
@@ -83,7 +98,7 @@ export type PublicWorkspacePost = {
   last_seen_at: string;
   last_metric_at: string;
   metric_history: PublicMetricSnapshot[];
-  editorial_analysis: EditorialWhy;
+  editorial_analysis?: EditorialWhy;
   [key: string]: unknown;
 };
 
@@ -158,6 +173,7 @@ export function mergeWorkspaceWithPublicHistory(
   workspace: WorkspaceInput | null | undefined,
   snapshot: PublicHistorySnapshot,
   mode: PublicWorkspacePayload["mode"] = "live",
+  options: PublicHistoryMergeOptions = {},
 ): PublicWorkspacePayload {
   const liveObservedAt = workspace?.generatedAt ?? snapshot.generatedAt;
   const livePosts = (workspace?.posts ?? [])
@@ -186,7 +202,16 @@ export function mergeWorkspaceWithPublicHistory(
     [...merged.values()],
     workspace?.generatedAt ?? snapshot.generatedAt,
   );
-  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
+  const editorialMode = options.editorialAnalysis ?? "all";
+  const editorialAnalyses =
+    editorialMode === "all"
+      ? buildEditorialAnalysisMap(ranked)
+      : editorialMode === "leaders"
+        ? buildEditorialAnalysisMapForTargets(
+            ranked,
+            publicEditorialLeaderKeys(ranked),
+          )
+        : new Map<string, EditorialWhy>();
   const liveByKey = new Map(
     (workspace?.posts ?? []).map((post) => [workspacePostKey(post), post]),
   );
@@ -249,9 +274,7 @@ export function mergeWorkspaceWithPublicHistory(
           ? live.last_metric_at
           : metricHistory.at(-1)?.captured_at ?? lastObservedAt,
       metric_history: metricHistory,
-      editorial_analysis:
-        editorialAnalysis ??
-        buildEditorialAnalysisMap([post]).get(editorialPostKey(post))!,
+      ...(editorialAnalysis ? { editorial_analysis: editorialAnalysis } : {}),
     } satisfies PublicWorkspacePost;
   });
 
@@ -268,9 +291,10 @@ export function mergeWorkspaceWithPublicHistory(
     const meta = ACCOUNT_META[platform];
     const existing = baseAccounts.get(platform);
     const coverage = coverageByPlatform.get(platform);
-    const count = counts.get(platform) ?? 0;
+    const count = options.accountCounts?.[platform] ?? counts.get(platform) ?? 0;
+    const coverageComplete = coverage?.status.startsWith("complete") ?? false;
     const coverageLabel = coverage
-      ? coverage.status === "complete-public-profile"
+      ? coverageComplete
         ? `${coverage.scope} · ${coverage.itemCount} contenu${coverage.itemCount > 1 ? "s" : ""} énuméré${coverage.itemCount > 1 ? "s" : ""}.`
         : `${coverage.scope}${count > 0 ? ` · ${count} contenu${count > 1 ? "s" : ""} visible${count > 1 ? "s" : ""} dans le relevé récent.` : "."} ${coverage.limitations[0] ?? "Couverture propriétaire requise."}`
       : platform === "instagram"
@@ -292,7 +316,7 @@ export function mergeWorkspaceWithPublicHistory(
       source_kind: coverage ? "public-profile-history" : "public-profile-limited",
       coverage_label: coverageLabel,
       status:
-        coverage?.status === "complete-public-profile" ? "ready" : "limited",
+        coverageComplete ? "ready" : "limited",
       follower_count: numberOrNull(existing?.follower_count),
       last_scan_at: stringOrNull(existing?.last_scan_at) ?? generatedAt,
       last_success_at: count > 0 ? stringOrNull(existing?.last_success_at) ?? generatedAt : null,
@@ -315,6 +339,51 @@ export function mergeWorkspaceWithPublicHistory(
         : null,
     historyCoverage: snapshot.coverage,
   };
+}
+
+function publicEditorialLeaderKeys(
+  posts: ReturnType<typeof rankPosts>,
+): string[] {
+  const keys = new Set<string>();
+  const cohorts = new Map<string, typeof posts>();
+  const platforms = new Set<SocialPlatform>();
+
+  for (const post of posts) {
+    if (!platforms.has(post.platform)) {
+      platforms.add(post.platform);
+      keys.add(editorialPostKey(post));
+    }
+    const format = (post.format ?? "unknown")
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_");
+    const cohortKey = `${post.platform}:${format}`;
+    const cohort = cohorts.get(cohortKey);
+    if (cohort) cohort.push(post);
+    else cohorts.set(cohortKey, [post]);
+  }
+
+  for (const cohort of cohorts.values()) {
+    const leaders = rankPostsByPublicMetric(
+      cohort.map((post) => {
+        const raw = post.raw && typeof post.raw === "object" ? post.raw : null;
+        return {
+          post,
+          external_post_id: post.externalId,
+          format: post.format ?? "unknown",
+          likes: post.likes,
+          views: post.views,
+          comments: post.comments,
+          shares: post.shares,
+          saves: post.saves,
+          poll_votes:
+            rawNumber(raw, "pollVotes") ?? rawNumber(raw, "pollTotalVotes"),
+        };
+      }),
+    ).posts.slice(0, 4);
+    for (const { post } of leaders) keys.add(editorialPostKey(post));
+  }
+
+  return [...keys];
 }
 
 function normalizedFromWorkspace(

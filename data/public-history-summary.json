@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-08-06T00:38:17.664Z",
+  "totalPostCount": 9155,
+  "platformCounts": {
+    "youtube": 1971,
+    "instagram": 1676,
+    "tiktok": 386,
+    "x": 5122
+  },
+  "formatCounts": {
+    "youtube": {
+      "short": 319,
+      "community": 1087,
+      "poll": 202,
+      "text": 363,
+      "comment": 0
+    },
+    "instagram": {
+      "reel": 370,
+      "static": 1306,
+      "comment": 0
+    },
+    "tiktok": {
+      "video": 386,
+      "comment": 0
+    },
+    "x": {
+      "static": 1148,
+      "video": 354,
+      "text": 3620
+    }
+  },
+  "coverage": [
+    {
+      "platform": "youtube",
+      "accountUrl": "https://www.youtube.com/@LofiGirl",
+      "scope": "319 Shorts + 1 652 posts Communauté",
+      "status": "limited",
+      "itemCount": 1971,
+      "oldestPublishedAt": "2019-08-06T15:13:28.403000Z",
+      "newestPublishedAt": "2026-08-04T14:33:28.403000Z",
+      "limitations": [
+        "Les vidéos longues, lives et contenus non publics sont exclus du périmètre éditorial."
+      ]
+    },
+    {
+      "platform": "instagram",
+      "accountUrl": "https://www.instagram.com/lofigirl/",
+      "scope": "historique public exhaustif du profil Instagram Lofi Girl",
+      "status": "complete-public-profile",
+      "itemCount": 1676,
+      "oldestPublishedAt": "2019-06-05T12:00:00.000Z",
+      "newestPublishedAt": "2026-08-05T12:00:00.000Z",
+      "limitations": [
+        "Les contenus supprimés, privés ou archivés ne sont pas accessibles."
+      ]
+    },
+    {
+      "platform": "tiktok",
+      "accountUrl": "https://www.tiktok.com/@lofigirl",
+      "scope": "profil public complet visible",
+      "status": "complete-public-profile",
+      "itemCount": 386,
+      "oldestPublishedAt": "2022-04-06T17:39:03Z",
+      "newestPublishedAt": "2026-08-03T19:04:00Z",
+      "limitations": [
+        "Les métriques que TikTok ne publie pas restent absentes."
+      ]
+    },
+    {
+      "platform": "x",
+      "accountUrl": "https://x.com/lofigirl",
+      "scope": "archive complète des posts originaux et réponses, retweets exclus",
+      "status": "complete-api-full-archive",
+      "itemCount": 5122,
+      "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
+      "newestPublishedAt": "2026-08-05T19:02:20.000Z",
+      "limitations": [
+        "Les contenus supprimés, privés ou retenus par X ne sont pas accessibles."
+      ]
+    }
+  ]
+}

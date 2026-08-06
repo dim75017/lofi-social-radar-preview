@@ -11,6 +11,69 @@ async function snapshot() {
   );
 }
 
+async function summary() {
+  return JSON.parse(
+    await readFile(
+      new URL("../data/public-history-summary.json", import.meta.url),
+      "utf8",
+    ),
+  );
+}
+
+test("the lightweight preview summary matches the complete history", async () => {
+  const history = await snapshot();
+  const manifest = await summary();
+  const platforms = ["youtube", "instagram", "tiktok", "x"];
+
+  assert.equal(manifest.generatedAt, history.generatedAt);
+  assert.equal(manifest.totalPostCount, history.posts.length);
+  assert.equal(
+    platforms.reduce((total, platform) => total + manifest.platformCounts[platform], 0),
+    history.posts.length,
+  );
+
+  for (const platform of platforms) {
+    const posts = history.posts.filter((post) => post.platform === platform);
+    assert.equal(manifest.platformCounts[platform], posts.length);
+    for (const [filter, count] of Object.entries(manifest.formatCounts[platform])) {
+      assert.equal(
+        posts.filter((post) => matchesSocialFormatFilter(post, filter)).length,
+        count,
+        `${platform}:${filter}`,
+      );
+    }
+  }
+});
+
+test("the preview bootstrap exposes exact counters before post cards load", async () => {
+  const manifest = await summary();
+  const workspace = mergeWorkspaceWithPublicHistory(
+    null,
+    {
+      generatedAt: manifest.generatedAt,
+      coverage: manifest.coverage,
+      posts: [],
+    },
+    "public-snapshot",
+    {
+      editorialAnalysis: "none",
+      accountCounts: manifest.platformCounts,
+    },
+  );
+
+  assert.equal(workspace.posts.length, 0);
+  assert.deepEqual(
+    Object.fromEntries(
+      workspace.accounts.map((account) => [account.platform, account.post_count]),
+    ),
+    manifest.platformCounts,
+  );
+  assert.equal(
+    workspace.accounts.reduce((total, account) => total + account.post_count, 0),
+    manifest.totalPostCount,
+  );
+});
+
 test("the versioned YouTube history contains only Shorts and Community posts", async () => {
   const history = await snapshot();
   const youtube = history.posts.filter((post) => post.platform === "youtube");

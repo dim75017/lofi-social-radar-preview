@@ -28,7 +28,11 @@ import {
 import {
   rankPostsByPublicMetric,
 } from "../lib/social-ranking";
-import type { EditorialWhy } from "../lib/social-editorial-analysis";
+import {
+  buildEditorialAnalysisMapForTargets,
+  editorialPostKey,
+  type EditorialWhy,
+} from "../lib/social-editorial-analysis";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "ideas" | "all" | "sources";
@@ -91,7 +95,7 @@ type SocialPost = {
   last_metric_at: string;
   published_at_precision?: "exact" | "approximate" | "unknown";
   metric_history?: MetricSnapshot[];
-  editorial_analysis: EditorialWhy;
+  editorial_analysis?: EditorialWhy;
 };
 
 type Insight = {
@@ -253,9 +257,9 @@ function formatEmptyCopy(platform: Platform, filter: SocialFormatFilter) {
   return "Aucun contenu public classable n’a été trouvé pour ce format dans le relevé actuel.";
 }
 
-function postLabel(post: SocialPost) {
+function postLabel(post: SocialPost, editorialAnalysis?: EditorialWhy | null) {
   if (post.analysis_label) return post.analysis_label;
-  const signal = post.editorial_analysis?.primarySignal;
+  const signal = (editorialAnalysis ?? post.editorial_analysis)?.primarySignal;
   if (signal === "student_meme" || signal === "micro_progress") {
     return "Études & petites victoires";
   }
@@ -482,11 +486,20 @@ function formatCardPublishedDate(value: string | null | undefined): string | nul
 export function SocialOS({
   initialWorkspace = null,
   previewMode = false,
+  publicCounts,
+  publicFormatCounts,
+  pendingPlatforms = [],
+  historyError = "",
 }: {
   initialWorkspace?: WorkspacePayload | null;
   previewMode?: boolean;
+  publicCounts?: Partial<Record<Platform, number>>;
+  publicFormatCounts?: Partial<Record<Platform, Record<string, number>>>;
+  pendingPlatforms?: Platform[];
+  historyError?: string;
 }) {
-  const [workspace, setWorkspace] = useState<WorkspacePayload | null>(initialWorkspace);
+  const [loadedWorkspace, setLoadedWorkspace] = useState<WorkspacePayload | null>(initialWorkspace);
+  const workspace = previewMode ? initialWorkspace : loadedWorkspace;
   const [view, setView] = useState<View>("overview");
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("short");
@@ -513,7 +526,6 @@ export function SocialOS({
 
   const loadWorkspace = useCallback(async () => {
     if (previewMode) {
-      if (initialWorkspace) setWorkspace(initialWorkspace);
       setLoading(false);
       return;
     }
@@ -523,13 +535,13 @@ export function SocialOS({
       const response = await fetch("/api/workspace", { cache: "no-store" });
       const payload = (await response.json()) as WorkspacePayload & { error?: string };
       if (!response.ok) throw new Error(payload.error || "Le radar ne répond pas.");
-      setWorkspace(payload);
+      setLoadedWorkspace(payload);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Chargement impossible.");
     } finally {
       setLoading(false);
     }
-  }, [initialWorkspace, previewMode]);
+  }, [previewMode]);
 
   useEffect(() => {
     if (previewMode || initialWorkspace) return;
@@ -612,6 +624,26 @@ export function SocialOS({
 
   const posts = useMemo(() => workspace?.posts ?? [], [workspace?.posts]);
   const accounts = workspace?.accounts ?? [];
+  const normalizedPosts = useMemo(
+    () => posts.map(normalizedIdeaPost),
+    [posts],
+  );
+  const resolvedPlatformCounts = useMemo(() => {
+    const counts = { youtube: 0, instagram: 0, tiktok: 0, x: 0 } satisfies Record<Platform, number>;
+    for (const post of posts) counts[post.platform] += 1;
+    for (const key of PLATFORM_ORDER) {
+      const publishedCount = publicCounts?.[key];
+      if (publishedCount !== undefined) counts[key] = publishedCount;
+    }
+    return counts;
+  }, [posts, publicCounts]);
+  const totalPostCount = PLATFORM_ORDER.reduce(
+    (total, key) => total + resolvedPlatformCounts[key],
+    0,
+  );
+  const historyLoading = pendingPlatforms.length > 0;
+  const loadedPlatformCount = PLATFORM_ORDER.length - pendingPlatforms.length;
+  const topPlatformPending = pendingPlatforms.includes(topPlatform);
   const topPosts = useMemo(() => rankPostsByPublicMetric(posts).posts, [posts]);
   const topDurationReference = workspace?.generatedAt ?? "";
   const durationTopPosts = useMemo(
@@ -681,13 +713,24 @@ export function SocialOS({
   }, [posts]);
   const ideaPlan = useMemo(
     () =>
-      generateSocialIdeas(posts.map(normalizedIdeaPost), {
+      generateSocialIdeas(normalizedPosts, {
         now: workspace?.generatedAt,
         maxIdeas: 6,
         winnersPerPlatform: 4,
       }),
-    [posts, workspace?.generatedAt],
+    [normalizedPosts, workspace?.generatedAt],
   );
+  const activeDetailsAnalysis = useMemo(() => {
+    if (!activeDetailsPost) return null;
+    if (activeDetailsPost.editorial_analysis) {
+      return activeDetailsPost.editorial_analysis;
+    }
+    const key = editorialPostKey({
+      platform: activeDetailsPost.platform,
+      externalId: activeDetailsPost.external_post_id,
+    });
+    return buildEditorialAnalysisMapForTargets(normalizedPosts, [key]).get(key) ?? null;
+  }, [activeDetailsPost, normalizedPosts]);
   const paginationKey = `${view}:${platform}:${formatFilter}:${librarySort}`;
   const visiblePostCount =
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
@@ -710,7 +753,9 @@ export function SocialOS({
           : "Idée écartée";
     setToast(label);
   }, []);
-  const activeSources = accounts.filter((account) => account.post_count > 0).length;
+  const activeSources = PLATFORM_ORDER.filter(
+    (key) => resolvedPlatformCounts[key] > 0,
+  ).length;
   const lastSuccess = accounts
     .map((account) => account.last_success_at)
     .filter(Boolean)
@@ -718,9 +763,9 @@ export function SocialOS({
     .at(-1) as string | undefined;
 
   const navCount = (id: View) => {
-    if (id === "top") return posts.length;
+    if (id === "top") return totalPostCount;
     if (id === "ideas") return ideaPlan.ideas.length;
-    if (id === "all") return posts.length;
+    if (id === "all") return totalPostCount;
     if (id === "sources") return accounts.length;
     return undefined;
   };
@@ -823,9 +868,7 @@ export function SocialOS({
                         {PLATFORM_ORDER.map((key) => {
                           const meta = PLATFORM_META[key];
                           const isPlatformActive = view === "top" && topPlatform === key;
-                          const count = posts.filter(
-                            (post) => post.platform === key,
-                          ).length;
+                          const count = resolvedPlatformCounts[key];
                           return (
                             <button
                               className={isPlatformActive ? "active" : ""}
@@ -904,6 +947,16 @@ export function SocialOS({
           </div>
         ) : null}
 
+        {historyError ? (
+          <div className="error-banner" role="alert">
+            <span>⚠️</span>
+            <div>
+              <b>Les fiches détaillées ne sont pas disponibles</b>
+              <p>{historyError}</p>
+            </div>
+          </div>
+        ) : null}
+
         {loading && !workspace ? (
           <div className="scanner-loading">
             <div className="radar-loader">◉</div>
@@ -921,7 +974,9 @@ export function SocialOS({
                   <span className="section-kicker">Couverture maintenant</span>
                   <h3>{activeSources} réseaux avec des posts exploitables</h3>
                 </div>
-                <span className="freshness">{posts.length} contenus · relevé {formatDate(lastSuccess ?? null, true)}</span>
+                <span className="freshness">
+                  {totalPostCount} contenus · relevé {formatDate(lastSuccess ?? null, true)}
+                </span>
               </div>
               <div className="source-status-grid">
                 {(Object.keys(PLATFORM_META) as Platform[]).map((key) => {
@@ -945,7 +1000,7 @@ export function SocialOS({
                         <small>{account?.coverage_label ?? "Source en attente"}</small>
                       </span>
                       <span className="source-count">
-                        <b>{account?.post_count ?? 0}</b>
+                          <b>{resolvedPlatformCounts[key]}</b>
                         <small>posts</small>
                       </span>
                       <span className={`source-state ${account?.status ?? "idle"}`}>
@@ -963,19 +1018,30 @@ export function SocialOS({
                   <span className="section-kicker">Analyse éditoriale</span>
                   <h3>Ce qui mérite l’attention de l’équipe</h3>
                 </div>
-                <span className="freshness">Calculé sur {posts.length} posts réels</span>
+                <span className="freshness">
+                  {historyLoading
+                    ? `${loadedPlatformCount}/4 réseaux prêts`
+                    : `Calculé sur ${posts.length} posts réels`}
+                </span>
               </div>
-              <div className="insight-grid">
-                {insights.map((insight, index) => (
-                  <article className={`insight-card insight-${index + 1}`} key={`${insight.title}-${index}`}>
-                    <span className="insight-emoji">{insight.emoji}</span>
-                    <span className="section-kicker">{index === 0 ? "Signal prioritaire" : "Lecture du radar"}</span>
-                    <h3>{insight.title}</h3>
-                    <p>{insight.summary}</p>
-                    {insight.evidence ? <small>{insight.evidence}</small> : null}
-                  </article>
-                ))}
-              </div>
+              {historyLoading ? (
+                <HistoryLoadingState
+                  loadedPlatformCount={loadedPlatformCount}
+                  label="Analyse des posts en arrière-plan"
+                />
+              ) : (
+                <div className="insight-grid">
+                  {insights.map((insight, index) => (
+                    <article className={`insight-card insight-${index + 1}`} key={`${insight.title}-${index}`}>
+                      <span className="insight-emoji">{insight.emoji}</span>
+                      <span className="section-kicker">{index === 0 ? "Signal prioritaire" : "Lecture du radar"}</span>
+                      <h3>{insight.title}</h3>
+                      <p>{insight.summary}</p>
+                      {insight.evidence ? <small>{insight.evidence}</small> : null}
+                    </article>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="overview-columns social-overview-columns">
@@ -998,11 +1064,19 @@ export function SocialOS({
                     Voir tout →
                   </button>
                 </div>
-                <div className="top-post-list">
-                  {topPosts.slice(0, 5).map((post, index) => (
-                    <PostRow post={post} rank={index + 1} key={post.id} />
-                  ))}
-                </div>
+                {historyLoading ? (
+                  <HistoryLoadingState
+                    loadedPlatformCount={loadedPlatformCount}
+                    label="Préparation du classement complet"
+                    compact
+                  />
+                ) : (
+                  <div className="top-post-list">
+                    {topPosts.slice(0, 5).map((post, index) => (
+                      <PostRow post={post} rank={index + 1} key={post.id} />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="panel methodology-panel">
@@ -1038,7 +1112,12 @@ export function SocialOS({
               <span className="official-assets-pill">🔒 Assets officiels uniquement</span>
             </div>
 
-            {ideaPlan.ideas.length ? (
+            {historyLoading ? (
+              <HistoryLoadingState
+                loadedPlatformCount={loadedPlatformCount}
+                label="Génération des idées à partir de l’historique complet"
+              />
+            ) : ideaPlan.ideas.length ? (
               <div className="editorial-ideas-list">
                 {ideaPlan.ideas.map((idea, index) => (
                   <EditorialIdeaCard
@@ -1066,10 +1145,12 @@ export function SocialOS({
               </div>
             )}
 
-            <div className="ideas-method-note">
-              <span>🧭</span>
-              <p>{ideaPlan.caveats[0]} {ideaPlan.caveats[2]}</p>
-            </div>
+            {!historyLoading ? (
+              <div className="ideas-method-note">
+                <span>🧭</span>
+                <p>{ideaPlan.caveats[0]} {ideaPlan.caveats[2]}</p>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -1121,9 +1202,13 @@ export function SocialOS({
                   aria-label={`Catégories ${PLATFORM_META[topPlatform].label}`}
                 >
                   {categoryFilters(topPlatform).map((filter) => {
-                    const count = topPlatformPosts.filter((post) =>
+                    const loadedCount = topPlatformPosts.filter((post) =>
                       matchesSocialFormatFilter(post, filter.key),
                     ).length;
+                    const count =
+                      topPlatformPending && topDuration === "all"
+                        ? publicFormatCounts?.[topPlatform]?.[filter.key] ?? loadedCount
+                        : loadedCount;
                     return (
                       <button
                         className={topFormatFilter === filter.key ? "active" : ""}
@@ -1161,7 +1246,12 @@ export function SocialOS({
                 </div>
               </header>
 
-              {topFilteredPosts.length ? (
+              {topPlatformPending ? (
+                <HistoryLoadingState
+                  loadedPlatformCount={loadedPlatformCount}
+                  label={`Chargement des fiches ${PLATFORM_META[topPlatform].label}`}
+                />
+              ) : topFilteredPosts.length ? (
                 <div className="post-grid top-ranking-grid">
                   {topFilteredPosts.map((post, index) => (
                     <PostCard
@@ -1368,8 +1458,38 @@ export function SocialOS({
         ) : null}
       </main>
 
-      <PostDetailsModal post={activeDetailsPost} onClose={closeActiveDetails} />
+      <PostDetailsModal
+        post={activeDetailsPost}
+        editorialAnalysis={activeDetailsAnalysis}
+        onClose={closeActiveDetails}
+      />
       {toast ? <div className="toast">✅ {toast}</div> : null}
+    </div>
+  );
+}
+
+function HistoryLoadingState({
+  loadedPlatformCount,
+  label,
+  compact = false,
+}: {
+  loadedPlatformCount: number;
+  label: string;
+  compact?: boolean;
+}) {
+  const progress = Math.max(0, Math.min(100, (loadedPlatformCount / 4) * 100));
+  return (
+    <div className={`history-loading-state ${compact ? "compact" : ""}`} role="status">
+      <span className="history-loading-icon" aria-hidden="true">⏳</span>
+      <div>
+        <b>{label}</b>
+        <small>
+          Les vrais compteurs sont déjà affichés · {loadedPlatformCount}/4 réseaux prêts
+        </small>
+        <span className="history-loading-track" aria-hidden="true">
+          <span style={{ width: `${progress}%` }} />
+        </span>
+      </div>
     </div>
   );
 }
@@ -1845,9 +1965,11 @@ function PostMediaPreview({
 
 function PostDetailsModal({
   post,
+  editorialAnalysis,
   onClose,
 }: {
   post: SocialPost | null;
+  editorialAnalysis: EditorialWhy | null;
   onClose: () => void;
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -1907,8 +2029,7 @@ function PostDetailsModal({
   const lastValue = primaryMetric && lastPoint ? lastPoint[primaryMetric] : null;
   const totalDelta = firstValue !== null && lastValue !== null ? lastValue - firstValue : null;
   const nearLaunch = isNearLaunchObservation(post, firstPoint?.captured_at);
-  const editorialAnalysis = post.editorial_analysis;
-  const detailTheme = postLabel(post);
+  const detailTheme = postLabel(post, editorialAnalysis);
   const editorialAnalysisId = `details-editorial-${post.platform}-${post.external_post_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   const precisionLabel = post.published_at_precision === "exact"
     ? "Date exacte"

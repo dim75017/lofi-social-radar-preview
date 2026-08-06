@@ -1,6 +1,6 @@
 import type { NormalizedPost, SocialPlatform } from "./social-scanner.ts";
 import {
-  buildEditorialAnalysisMap,
+  buildEditorialAnalysisMapForTargets,
   editorialPostKey,
   type EditorialWhy,
 } from "./social-editorial-analysis.ts";
@@ -138,7 +138,10 @@ export function generateSocialIdeas(
   const maxIdeas = boundedInteger(options.maxIdeas, 4, 1, 10);
   const ranked = rankPosts(posts, referenceTime);
   const selection = selectPublicWinners(ranked, winnersPerCohort);
-  const editorialAnalyses = buildEditorialAnalysisMap(ranked);
+  const editorialAnalyses = buildEditorialAnalysisMapForTargets(
+    ranked,
+    selection.winners.map(editorialPostKey),
+  );
   const candidates = buildCandidates(selection.winners, editorialAnalyses).sort(
     (left, right) => compareCandidates(left, right, editorialAnalyses),
   );
