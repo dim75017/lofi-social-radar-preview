@@ -41,7 +41,7 @@ if (!Array.isArray(history.comments)) {
 }
 
 const observedAt = validDate(history.extractedAt) ?? snapshot.generatedAt;
-const publishedAt = new Date().toISOString();
+const publishedAt = validDate(process.env.PUBLIC_HISTORY_PUBLISHED_AT) ?? new Date().toISOString();
 const metricResults = {
   ...(publicMetrics.results ?? {}),
   ...(privateMetrics.results ?? {}),
