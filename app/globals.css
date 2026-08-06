@@ -5759,3 +5759,1218 @@ a {
     text-align: center;
   }
 }
+
+/* Recommendations + Roadmap mirror the working layout of the YouTube Radar. */
+
+.recommendations-view,
+.roadmap-view {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recommendations-heading,
+.roadmap-heading {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.recommendations-heading h2,
+.roadmap-heading h2 {
+  margin: 0;
+  font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 760;
+  letter-spacing: -0.35px;
+}
+
+.reco-controlbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reco-status-tabs {
+  display: grid;
+  width: min(100%, 520px);
+  grid-template-columns: repeat(3, minmax(126px, 1fr));
+  gap: 7px;
+}
+
+.reco-status-tabs button {
+  display: grid;
+  min-height: 40px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(150, 163, 214, 0.06);
+  padding: 8px 11px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1;
+  text-align: center;
+  transition: border-color 130ms, background 130ms, color 130ms;
+}
+
+.reco-status-tabs button span {
+  grid-column: 2;
+  white-space: nowrap;
+}
+
+.reco-status-tabs button b {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  grid-column: 3;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  border-radius: 50%;
+  background: rgba(150, 163, 214, 0.13);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.reco-status-tabs button.pending {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.06);
+  color: #fde68a;
+}
+
+.reco-status-tabs button.pending.active {
+  border-color: rgba(251, 191, 36, 0.78);
+  background: rgba(251, 191, 36, 0.18);
+  color: #fff3bd;
+}
+
+.reco-status-tabs button.validated {
+  border-color: rgba(74, 222, 128, 0.34);
+  background: rgba(74, 222, 128, 0.06);
+  color: #86efac;
+}
+
+.reco-status-tabs button.validated.active {
+  border-color: rgba(74, 222, 128, 0.78);
+  background: rgba(74, 222, 128, 0.18);
+  color: #dcfce7;
+}
+
+.reco-status-tabs button.refused {
+  border-color: rgba(251, 113, 133, 0.34);
+  background: rgba(251, 113, 133, 0.06);
+  color: #fda4af;
+}
+
+.reco-status-tabs button.refused.active {
+  border-color: rgba(251, 113, 133, 0.76);
+  background: rgba(251, 113, 133, 0.17);
+  color: #ffe4e6;
+}
+
+.reco-refresh-button {
+  min-height: 40px;
+  flex: none;
+  border: 1px solid rgba(251, 191, 36, 0.46);
+  border-radius: 10px;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 8px 14px;
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 760;
+  transition: border-color 130ms, background 130ms;
+}
+
+.reco-refresh-button:hover:not(:disabled) {
+  border-color: rgba(251, 191, 36, 0.8);
+  background: rgba(251, 191, 36, 0.18);
+}
+
+.reco-platform-tabs {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 2px;
+}
+
+.reco-platform-tabs button {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(150, 163, 214, 0.045);
+  padding: 6px 10px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.reco-platform-tabs button b {
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.reco-platform-tabs button:hover,
+.reco-platform-tabs button.active {
+  border-color: rgba(154, 168, 255, 0.42);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.reco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr));
+  gap: 14px;
+}
+
+.reco-card {
+  --reco-tone: var(--accent);
+  --reco-tone-soft: var(--accent-soft);
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 270px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--reco-tone);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(21, 25, 42, 0.78), rgba(15, 18, 30, 0.78));
+  padding: 15px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 270px;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 130ms, border-color 130ms, box-shadow 130ms;
+}
+
+.reco-card.tone-red,
+.roadmap-mini-event.tone-red,
+.roadmap-month-event.tone-red,
+.roadmap-list-card.tone-red,
+.roadmap-day-modal-list article.tone-red {
+  --reco-tone: #fb7185;
+  --roadmap-tone: #fb7185;
+  --roadmap-tone-soft: rgba(251, 113, 133, 0.22);
+}
+
+.reco-card.tone-pink,
+.roadmap-mini-event.tone-pink,
+.roadmap-month-event.tone-pink,
+.roadmap-list-card.tone-pink,
+.roadmap-day-modal-list article.tone-pink {
+  --reco-tone: #f472b6;
+  --roadmap-tone: #f472b6;
+  --roadmap-tone-soft: rgba(244, 114, 182, 0.22);
+}
+
+.reco-card.tone-cyan,
+.roadmap-mini-event.tone-cyan,
+.roadmap-month-event.tone-cyan,
+.roadmap-list-card.tone-cyan,
+.roadmap-day-modal-list article.tone-cyan {
+  --reco-tone: #67e8f9;
+  --roadmap-tone: #67e8f9;
+  --roadmap-tone-soft: rgba(103, 232, 249, 0.2);
+}
+
+.reco-card.tone-blue,
+.roadmap-mini-event.tone-blue,
+.roadmap-month-event.tone-blue,
+.roadmap-list-card.tone-blue,
+.roadmap-day-modal-list article.tone-blue {
+  --reco-tone: #8da2fb;
+  --roadmap-tone: #8da2fb;
+  --roadmap-tone-soft: rgba(141, 162, 251, 0.22);
+}
+
+.reco-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--reco-tone) 58%, var(--border));
+  border-left-color: var(--reco-tone);
+  box-shadow: 0 12px 34px -12px rgba(0, 0, 0, 0.58), 0 0 0 1px color-mix(in srgb, var(--reco-tone) 18%, transparent);
+}
+
+.reco-card-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  appearance: none;
+  flex-direction: column;
+  gap: 10px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+}
+
+.reco-card-main:focus-visible {
+  border-radius: 9px;
+  box-shadow: 0 0 0 2px var(--reco-tone);
+}
+
+.reco-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.reco-card-head h3 {
+  display: -webkit-box;
+  min-height: 39px;
+  margin: 1px 0 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 740;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.reco-tier {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  font-family: Sora, Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 820;
+}
+
+.reco-tier.tier-s {
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.18);
+  color: #f87171;
+}
+
+.reco-tier.tier-a {
+  border: 1px solid rgba(251, 146, 60, 0.45);
+  background: rgba(251, 146, 60, 0.18);
+  color: #fb923c;
+}
+
+.reco-tier.tier-b {
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+}
+
+.reco-tags {
+  display: flex;
+  min-height: 23px;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.reco-tags span {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(150, 163, 214, 0.06);
+  padding: 3px 7px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 690;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reco-tags .platform-tag {
+  border-color: color-mix(in srgb, var(--reco-tone) 38%, transparent);
+  background: color-mix(in srgb, var(--reco-tone) 12%, transparent);
+  color: color-mix(in srgb, var(--reco-tone) 80%, white);
+}
+
+.reco-description,
+.reco-hook {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.reco-description {
+  color: var(--muted);
+  font-size: 11.8px;
+  line-height: 1.55;
+  -webkit-line-clamp: 3;
+}
+
+.reco-hook {
+  color: var(--dim);
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.5;
+  -webkit-line-clamp: 2;
+}
+
+.reco-more {
+  margin-top: auto;
+  color: color-mix(in srgb, var(--reco-tone) 72%, white);
+  font-size: 11px;
+  font-weight: 690;
+}
+
+.reco-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.reco-action {
+  min-width: 0;
+  min-height: 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 8px;
+  font-size: 11px;
+  font-weight: 730;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  transition: border-color 120ms, background 120ms, color 120ms;
+}
+
+.reco-action.edit {
+  border-color: rgba(96, 165, 250, 0.38);
+  background: rgba(96, 165, 250, 0.09);
+  color: #bfdbfe;
+}
+
+.reco-action.refuse {
+  border-color: rgba(251, 113, 133, 0.5);
+  background: rgba(251, 113, 133, 0.1);
+  color: #fecdd3;
+}
+
+.reco-action.validate {
+  border-color: rgba(74, 222, 128, 0.48);
+  background: rgba(74, 222, 128, 0.1);
+  color: #bbf7d0;
+}
+
+.reco-action:hover:not(:disabled),
+.reco-action[aria-pressed="true"] {
+  filter: brightness(1.2);
+}
+
+.recommendation-details-modal {
+  width: min(1080px, 94vw);
+}
+
+.recommendation-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 0.82fr));
+  gap: 10px;
+}
+
+.recommendation-detail-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(7, 8, 13, 0.32);
+  padding: 14px;
+}
+
+.recommendation-detail-panel.featured {
+  border-color: rgba(154, 168, 255, 0.24);
+  background: rgba(154, 168, 255, 0.07);
+}
+
+.recommendation-detail-panel p {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.recommendation-detail-panel small {
+  display: block;
+  margin-top: 8px;
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.recommendation-detail-section {
+  margin-top: 16px;
+}
+
+.recommendation-source-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.recommendation-source-links a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(7, 8, 13, 0.35);
+  padding: 10px;
+  text-decoration: none;
+}
+
+.recommendation-source-links a > span {
+  grid-row: 1 / 3;
+  font-size: 19px;
+}
+
+.recommendation-source-links a b {
+  font-size: 12px;
+}
+
+.recommendation-source-links a small {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.recommendation-source-links a strong {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  color: var(--accent-2);
+}
+
+.recommendation-platform-grid {
+  margin-top: 8px;
+}
+
+.recommendation-caveat {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 11px;
+  background: rgba(251, 191, 36, 0.05);
+  padding: 10px 12px;
+}
+
+.recommendation-caveat p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.roadmap-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 13px;
+}
+
+.roadmap-scale-toggle,
+.roadmap-display-toggle {
+  display: flex;
+  width: max-content;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: rgba(150, 163, 214, 0.06);
+  padding: 3px;
+}
+
+.roadmap-scale-toggle {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.roadmap-display-toggle {
+  grid-column: 4;
+  justify-self: end;
+}
+
+.roadmap-scale-toggle button,
+.roadmap-display-toggle button {
+  min-height: 36px;
+  border-radius: 10px;
+  background: transparent;
+  padding: 8px 16px;
+  color: var(--dim);
+  font-size: 12px;
+  font-weight: 730;
+}
+
+.roadmap-display-toggle button {
+  width: 42px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.roadmap-scale-toggle button.active,
+.roadmap-display-toggle button.active {
+  background: #8f9ef8;
+  box-shadow: 0 4px 14px rgba(154, 168, 255, 0.28);
+  color: #fff;
+}
+
+.roadmap-period-navigation {
+  display: flex;
+  grid-column: 2 / 4;
+  align-items: center;
+  justify-self: center;
+  gap: 16px;
+}
+
+.roadmap-period-navigation button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: rgba(150, 163, 214, 0.055);
+  color: var(--text);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.roadmap-period-navigation button:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.roadmap-period-navigation strong {
+  min-width: 170px;
+  font-family: Sora, Inter, sans-serif;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.25px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.roadmap-calendar-shell {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) 155px;
+  align-items: stretch;
+  gap: 18px;
+}
+
+.roadmap-year-grid {
+  display: grid;
+  height: calc(100dvh - 208px);
+  min-height: 710px;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.roadmap-mini-month {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(15, 18, 30, 0.58);
+  padding: clamp(8px, 1.1vh, 12px) clamp(9px, 1vw, 14px);
+}
+
+.roadmap-mini-month h3 {
+  margin: 0 0 5px;
+  font-family: Sora, Inter, sans-serif;
+  font-size: clamp(11px, 1.35vh, 14px);
+  font-weight: 720;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.roadmap-weekdays,
+.roadmap-mini-days {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.roadmap-weekdays {
+  gap: 3px;
+}
+
+.roadmap-weekdays span {
+  color: var(--dim);
+  font-size: clamp(7px, 1vh, 10px);
+  font-weight: 700;
+  text-align: center;
+}
+
+.roadmap-mini-days {
+  min-height: 0;
+  flex: 1;
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.roadmap-mini-days > span,
+.roadmap-mini-event {
+  display: flex;
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  justify-self: center;
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: clamp(8px, 1.18vh, 12px);
+  font-variant-numeric: tabular-nums;
+}
+
+.roadmap-mini-days > span.outside {
+  opacity: 0.2;
+}
+
+.roadmap-mini-event {
+  --roadmap-tone: var(--accent);
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--roadmap-tone) 75%, white);
+  background: var(--roadmap-tone);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--roadmap-tone) 48%, transparent);
+  color: #fff;
+  font-size: clamp(9px, 1.3vh, 13px);
+  font-weight: 820;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: transform 120ms;
+}
+
+.roadmap-mini-event:hover {
+  z-index: 3;
+  transform: scale(1.2);
+}
+
+.roadmap-mini-event small {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  background: #fff;
+  color: #11131d;
+  font-size: 11px;
+  text-shadow: none;
+}
+
+.roadmap-legend {
+  display: flex;
+  min-width: 150px;
+  align-self: center;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.roadmap-legend button {
+  display: grid;
+  grid-template-columns: 23px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  padding: 7px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: left;
+  transition: border-color 130ms, background 130ms, color 130ms, opacity 130ms;
+}
+
+.roadmap-legend button:hover,
+.roadmap-legend button.active {
+  border-color: var(--border);
+  background: rgba(150, 163, 214, 0.08);
+  color: var(--text);
+}
+
+.roadmap-legend button:not(.active) {
+  opacity: 0.62;
+}
+
+.roadmap-legend button span {
+  font-size: 17px;
+  text-align: center;
+}
+
+.roadmap-legend button .legend-all {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.roadmap-legend button b {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-legend button small {
+  color: var(--dim);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.roadmap-month-calendar {
+  min-width: 720px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(15, 18, 30, 0.58);
+}
+
+.roadmap-month-weekdays,
+.roadmap-month-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.roadmap-month-weekdays {
+  border-bottom: 1px solid var(--border);
+  background: rgba(21, 25, 42, 0.65);
+}
+
+.roadmap-month-weekdays span {
+  padding: 9px 6px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.roadmap-month-day {
+  position: relative;
+  min-height: clamp(100px, calc((100dvh - 315px) / 6), 168px);
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 7px;
+}
+
+.roadmap-month-day:nth-child(7n) {
+  border-right: 0;
+}
+
+.roadmap-month-day:nth-last-child(-n + 7) {
+  border-bottom: 0;
+}
+
+.roadmap-month-day.outside {
+  background: rgba(5, 6, 10, 0.35);
+}
+
+.roadmap-month-day.outside > .roadmap-month-day-number {
+  opacity: 0.3;
+}
+
+.roadmap-month-day-number {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  color: var(--dim);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.roadmap-month-events {
+  display: flex;
+  margin-top: 22px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.roadmap-month-event {
+  --roadmap-tone: var(--accent);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--roadmap-tone) 48%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--roadmap-tone) 20%, rgba(12, 14, 23, 0.9));
+  padding: 5px 6px;
+  color: color-mix(in srgb, var(--roadmap-tone) 72%, white);
+  font-size: 11px;
+  text-align: left;
+}
+
+.roadmap-month-event b {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-empty-cta {
+  align-self: center;
+  border: 1px solid rgba(154, 168, 255, 0.32);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  padding: 9px 13px;
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.roadmap-list-card {
+  --roadmap-tone: var(--accent);
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 76px 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--roadmap-tone);
+  border-radius: 13px;
+  background: rgba(15, 18, 30, 0.62);
+  padding: 12px 14px;
+}
+
+.roadmap-list-card time {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: var(--muted);
+  text-align: center;
+}
+
+.roadmap-list-card time b {
+  font-family: Sora, Inter, sans-serif;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.roadmap-list-card time span {
+  margin-top: 4px;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.roadmap-list-platform {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: rgba(7, 8, 13, 0.4);
+  font-size: 20px;
+}
+
+.roadmap-list-card > div {
+  min-width: 0;
+}
+
+.roadmap-list-card small {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.roadmap-list-card h3 {
+  margin: 3px 0 0;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-list-card p {
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-list-card label,
+.roadmap-day-modal-list label {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.roadmap-list-card input,
+.roadmap-day-modal-list input {
+  border: 1px solid var(--border-2);
+  border-radius: 9px;
+  outline: 0;
+  background: rgba(7, 8, 13, 0.55);
+  padding: 7px 9px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.roadmap-list-card input:focus,
+.roadmap-day-modal-list input:focus {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.roadmap-list-empty {
+  min-height: 360px;
+}
+
+.roadmap-day-modal {
+  width: min(720px, 94vw);
+  max-height: 86vh;
+  overflow: auto;
+  border: 1px solid var(--border-2);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #171a2a, #10121d);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.58);
+  padding: 20px;
+}
+
+.roadmap-day-modal > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.roadmap-day-modal h2 {
+  margin: 4px 0 0;
+  font-family: Sora, Inter, sans-serif;
+  font-size: 22px;
+}
+
+.roadmap-day-modal-list {
+  display: flex;
+  margin-top: 16px;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.roadmap-day-modal-list article {
+  --roadmap-tone: var(--accent);
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--roadmap-tone);
+  border-radius: 12px;
+  background: rgba(7, 8, 13, 0.35);
+  padding: 12px;
+}
+
+.roadmap-day-modal-list article > span {
+  font-size: 22px;
+  text-align: center;
+}
+
+.roadmap-day-modal-list article > div {
+  min-width: 0;
+}
+
+.roadmap-day-modal-list h3 {
+  margin: 3px 0 0;
+  font-size: 14px;
+}
+
+.roadmap-day-modal-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+@media (max-width: 1200px) {
+  .roadmap-calendar-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .roadmap-legend {
+    min-width: 0;
+    align-self: stretch;
+    flex-flow: row wrap;
+  }
+
+  .roadmap-legend button {
+    min-width: 130px;
+  }
+}
+
+@media (max-width: 980px) {
+  .recommendation-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-year-grid {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(230px, auto));
+  }
+
+  .roadmap-list-card {
+    grid-template-columns: 62px 38px minmax(0, 1fr);
+  }
+
+  .roadmap-list-card label {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 800px) {
+  .roadmap-calendar-shell {
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+
+  .roadmap-month-calendar {
+    min-width: 680px;
+  }
+
+  .roadmap-year-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .roadmap-controls {
+    grid-template-columns: 1fr auto;
+  }
+
+  .roadmap-scale-toggle {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .roadmap-display-toggle {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .roadmap-period-navigation {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .reco-controlbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reco-status-tabs {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reco-status-tabs button {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+    padding: 7px 3px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .reco-status-tabs button span,
+  .reco-status-tabs button b {
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  .reco-refresh-button {
+    width: 100%;
+  }
+
+  .reco-platform-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reco-platform-tabs button {
+    justify-content: center;
+  }
+
+  .recommendation-platform-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-year-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-mini-month {
+    min-height: 260px;
+  }
+
+  .roadmap-list-card {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .roadmap-list-platform {
+    display: none;
+  }
+
+  .roadmap-list-card label {
+    grid-column: 1 / -1;
+  }
+
+  .roadmap-day-modal-list article {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .roadmap-day-modal-list label {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .reco-quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .reco-action {
+    width: 100%;
+  }
+}

@@ -169,13 +169,12 @@ const NAV: Array<{
 }> = [
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
-  { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
-  { id: "planning", emoji: "🗓️", label: "Planning", group: "Pilotage" },
+  { id: "ideas", emoji: "💡", label: "Recommandations", group: "Pilotage" },
+  { id: "planning", emoji: "🗓️", label: "Roadmap", group: "Pilotage" },
 ];
 
 const EDITORIAL_WORKFLOW_STORAGE_KEY = "lofi-social-radar:editorial-workflow:v2";
 const POSTS_PAGE_SIZE = 48;
-const IDEAS_PAGE_SIZE = 10;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
 const DEFAULT_FORMAT_FILTER: Record<Platform, SocialFormatFilter> = {
   youtube: "short",
@@ -512,10 +511,11 @@ export function SocialOS({
   const editorialWorkflowMutationRef = useRef(false);
   const [ideaPlatformFilter, setIdeaPlatformFilter] = useState<IdeaPlatformFilter>("all");
   const [ideaStatusFilter, setIdeaStatusFilter] = useState<IdeaStatusFilter>("pending");
-  const [visibleIdeaCount, setVisibleIdeaCount] = useState(IDEAS_PAGE_SIZE);
+  const [activeRecommendation, setActiveRecommendation] = useState<LearnedIdea | null>(null);
   const [activeDetailsPost, setActiveDetailsPost] = useState<SocialPost | null>(null);
   const [activeInlineVideoId, setActiveInlineVideoId] = useState<string | null>(null);
   const closeActiveDetails = useCallback(() => setActiveDetailsPost(null), []);
+  const closeActiveRecommendation = useCallback(() => setActiveRecommendation(null), []);
   const toggleInlineVideo = useCallback((post: SocialPost) => {
     const postId = `${post.platform}:${post.external_post_id}`;
     setActiveInlineVideoId((current) => current === postId ? null : postId);
@@ -618,7 +618,7 @@ export function SocialOS({
           );
         } else {
           setView("ideas");
-          setToast(`Idées recalculées sur ${workspace?.posts.length ?? 0} contenus publics`);
+          setToast(`Recommandations recalculées sur ${workspace?.posts.length ?? 0} contenus publics`);
         }
         setMobileOpen(false);
         return;
@@ -750,7 +750,7 @@ export function SocialOS({
         return false;
       }
       const decision = editorialWorkflow.feedback[idea.id]?.decision;
-      if (ideaStatusFilter === "pending") return !decision;
+      if (ideaStatusFilter === "pending") return !decision || decision === "rework";
       if (ideaStatusFilter !== "all") return decision === ideaStatusFilter;
       return true;
     }),
@@ -770,7 +770,7 @@ export function SocialOS({
     for (const idea of learnedIdeas) counts[idea.primaryPlatform] += 1;
     return counts;
   }, [learnedIdeas]);
-  const visibleIdeas = filteredIdeas.slice(0, visibleIdeaCount);
+  const visibleIdeas = filteredIdeas;
   const activeDetailsAnalysis = useMemo(() => {
     if (!activeDetailsPost) return null;
     if (activeDetailsPost.editorial_analysis) {
@@ -1207,136 +1207,120 @@ export function SocialOS({
         ) : null}
 
         {workspace && view === "ideas" ? (
-          <div className="view-stack editorial-ideas-view">
-            <div className="ideas-summary">
-              <span className="ideas-summary-icon" aria-hidden="true">💡</span>
-              <div>
-                <span className="section-kicker">Banque d’idées personnalisée</span>
-                <h3>{ideaPlan.ideas.length} idées classées par potentiel</h3>
-                <p>
-                  Le classement apprend de chaque idée acceptée, retravaillée ou refusée.
-                </p>
-              </div>
-              <span className="official-assets-pill">🔒 Assets officiels uniquement</span>
-            </div>
+          <div className="recommendations-view">
+            <header className="recommendations-heading">
+              <h2>Recommandations</h2>
+            </header>
 
-            <div className="idea-workflow-kpis" aria-label="État des idées">
-              <button type="button" onClick={() => setIdeaStatusFilter("pending")}>
-                <span>⏳ À décider</span><b>{ideaDecisionCounts.pending}</b>
-              </button>
-              <button type="button" onClick={() => setIdeaStatusFilter("produce")}>
-                <span>✅ Acceptées</span><b>{ideaDecisionCounts.produce}</b>
-              </button>
-              <button type="button" onClick={() => setIdeaStatusFilter("rework")}>
-                <span>🛠️ À retravailler</span><b>{ideaDecisionCounts.rework}</b>
-              </button>
-              <button type="button" onClick={() => setView("planning")}>
-                <span>🗓️ Planifiées</span><b>{editorialWorkflow.schedule.length}</b>
-              </button>
-            </div>
-
-            <div className="idea-filter-panel">
-              <div className="idea-platform-tabs" aria-label="Filtrer les idées par plateforme">
+            <div className="reco-controlbar">
+              <div className="reco-status-tabs" role="tablist" aria-label="Statut des recommandations">
                 <button
-                  className={ideaPlatformFilter === "all" ? "active" : ""}
+                  className={ideaStatusFilter === "pending" || ideaStatusFilter === "rework" ? "active pending" : "pending"}
                   type="button"
-                  onClick={() => setIdeaPlatformFilter("all")}
+                  role="tab"
+                  aria-selected={ideaStatusFilter === "pending" || ideaStatusFilter === "rework"}
+                  onClick={() => setIdeaStatusFilter("pending")}
                 >
-                  ✨ Toutes <b>{learnedIdeas.length}</b>
+                  <span>🟡 À valider</span><b>{ideaDecisionCounts.pending + ideaDecisionCounts.rework}</b>
                 </button>
-                {PLATFORM_ORDER.map((key) => (
-                  <button
-                    className={ideaPlatformFilter === key ? "active" : ""}
-                    type="button"
-                    onClick={() => setIdeaPlatformFilter(key)}
-                    key={key}
-                  >
-                    {PLATFORM_META[key].emoji} {PLATFORM_META[key].label} <b>{ideaPlatformCounts[key]}</b>
-                  </button>
-                ))}
+                <button
+                  className={ideaStatusFilter === "produce" ? "active validated" : "validated"}
+                  type="button"
+                  role="tab"
+                  aria-selected={ideaStatusFilter === "produce"}
+                  onClick={() => setIdeaStatusFilter("produce")}
+                >
+                  <span>✓ Validées</span><b>{ideaDecisionCounts.produce}</b>
+                </button>
+                <button
+                  className={ideaStatusFilter === "discard" ? "active refused" : "refused"}
+                  type="button"
+                  role="tab"
+                  aria-selected={ideaStatusFilter === "discard"}
+                  onClick={() => setIdeaStatusFilter("discard")}
+                >
+                  <span>✕ Refusées</span><b>{ideaDecisionCounts.discard}</b>
+                </button>
               </div>
-              <div className="idea-status-tabs" aria-label="Filtrer les idées par décision">
-                {([
-                  ["all", "Toutes"],
-                  ["pending", "⏳ À décider"],
-                  ["produce", "✅ Acceptées"],
-                  ["rework", "🛠️ À retravailler"],
-                  ["discard", "✕ Refusées"],
-                ] as Array<[IdeaStatusFilter, string]>).map(([key, label]) => (
-                  <button
-                    className={ideaStatusFilter === key ? "active" : ""}
-                    type="button"
-                    onClick={() => setIdeaStatusFilter(key)}
-                    key={key}
-                  >
-                    {label}
-                  </button>
-                ))}
-                {editorialWorkflowSyncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
-              </div>
+              <button
+                className="reco-refresh-button"
+                type="button"
+                disabled={scanning}
+                onClick={() => {
+                  setIdeaPlatformFilter("all");
+                  setIdeaStatusFilter("pending");
+                  void runScan();
+                }}
+              >
+                ↻ Nouvelles idées
+              </button>
+            </div>
+
+            <div className="reco-platform-tabs" aria-label="Filtrer les recommandations par plateforme">
+              <button
+                className={ideaPlatformFilter === "all" ? "active" : ""}
+                type="button"
+                onClick={() => setIdeaPlatformFilter("all")}
+              >
+                Toutes <b>{learnedIdeas.length}</b>
+              </button>
+              {PLATFORM_ORDER.map((key) => (
+                <button
+                  className={`tone-${PLATFORM_META[key].tone} ${ideaPlatformFilter === key ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setIdeaPlatformFilter(key)}
+                  key={key}
+                >
+                  {PLATFORM_META[key].emoji} {PLATFORM_META[key].label} <b>{ideaPlatformCounts[key]}</b>
+                </button>
+              ))}
+              {editorialWorkflowSyncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
             </div>
 
             {historyLoading || !editorialWorkflowReady ? (
               <HistoryLoadingState
                 loadedPlatformCount={loadedPlatformCount}
-                label="Génération des idées à partir de l’historique complet"
+                label="Génération des recommandations à partir de l’historique complet"
               />
             ) : visibleIdeas.length ? (
-              <>
-                <div className="editorial-ideas-list compact">
-                  {visibleIdeas.map((idea) => (
-                  <EditorialIdeaCard
+              <div className="reco-grid">
+                {visibleIdeas.map((idea) => (
+                  <RecommendationCard
                     idea={idea}
                     decision={editorialWorkflow.feedback[idea.id]?.decision}
                     disabled={editorialWorkflowSyncing}
                     onDecision={setIdeaDecision}
+                    onInspect={setActiveRecommendation}
                     key={idea.id}
                   />
-                  ))}
-                </div>
-                {visibleIdeaCount < filteredIdeas.length ? (
-                  <button
-                    className="button secondary ideas-load-more"
-                    type="button"
-                    onClick={() => setVisibleIdeaCount((count) => count + IDEAS_PAGE_SIZE)}
-                  >
-                    Afficher 10 idées de plus · {filteredIdeas.length - visibleIdeaCount} restantes
-                  </button>
-                ) : null}
-              </>
+                ))}
+              </div>
             ) : (
-              <div className="empty-state">
+              <div className="empty-state reco-empty-state">
                 <span>🧭</span>
-                <h3>Aucune idée dans ce filtre</h3>
-                <p>Change de plateforme ou affiche un autre état de décision.</p>
+                <h3>Aucune recommandation dans ce filtre</h3>
+                <p>Change de plateforme ou affiche un autre état.</p>
                 <button
                   className="button secondary"
                   type="button"
                   onClick={() => {
                     setIdeaPlatformFilter("all");
-                    setIdeaStatusFilter("all");
+                    setIdeaStatusFilter("pending");
                   }}
                 >
-                  Voir les 50 idées
+                  Voir les recommandations à valider
                 </button>
               </div>
             )}
-
-            {!historyLoading ? (
-              <div className="ideas-method-note">
-                <span>🧭</span>
-                <p>Le potentiel sert à prioriser les tests, pas à promettre une performance. {ideaPlan.caveats[2]}</p>
-              </div>
-            ) : null}
           </div>
         ) : null}
 
         {workspace && view === "planning" ? (
-          <PlanningBoard
+          <RoadmapBoard
             schedule={editorialWorkflow.schedule}
             syncing={editorialWorkflowSyncing}
             onReschedule={rescheduleIdea}
-            onOpenIdeas={() => {
+            onOpenRecommendations={() => {
               setIdeaStatusFilter("pending");
               setView("ideas");
             }}
@@ -1652,6 +1636,10 @@ export function SocialOS({
         editorialAnalysis={activeDetailsAnalysis}
         onClose={closeActiveDetails}
       />
+      <RecommendationDetailsModal
+        idea={activeRecommendation}
+        onClose={closeActiveRecommendation}
+      />
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
@@ -1683,265 +1671,645 @@ function HistoryLoadingState({
   );
 }
 
-function EditorialIdeaCard({
+function recommendationTier(score: number) {
+  if (score >= 80) return "S";
+  if (score >= 65) return "A";
+  return "B";
+}
+
+function RecommendationCard({
   idea,
   decision,
   disabled,
   onDecision,
+  onInspect,
 }: {
   idea: LearnedIdea;
   decision?: IdeaDecision;
   disabled: boolean;
   onDecision: (idea: SocialIdea, decision: IdeaDecision) => void;
+  onInspect: (idea: LearnedIdea) => void;
 }) {
-  const decisionLabel =
-    decision === "produce"
-      ? "À produire"
-      : decision === "rework"
-        ? "À retravailler"
-        : decision === "discard"
-          ? "Écartée"
-          : "À décider";
   const primaryMeta = PLATFORM_META[idea.primaryPlatform];
   const primaryAdaptation = idea.platformAdaptations[idea.primaryPlatform];
+  const tier = recommendationTier(idea.learnedPotentialScore);
 
   return (
-    <article className={`editorial-idea-card decision-${decision ?? "none"}`}>
-      <header className="editorial-idea-head">
-        <div className="editorial-idea-main">
-          <div className="editorial-idea-meta">
-            <span>{primaryMeta.emoji} {primaryMeta.label} · #{idea.platformRank}</span>
-            <span>{primaryAdaptation.format}</span>
-            <span className={`idea-decision-status status-${decision ?? "none"}`}>
-              {decisionLabel}
-            </span>
-          </div>
+    <article className={`reco-card tone-${primaryMeta.tone} decision-${decision ?? "pending"}`}>
+      <button
+        className="reco-card-main"
+        type="button"
+        onClick={() => onInspect(idea)}
+        aria-label={`Voir le détail de la recommandation ${idea.title}`}
+      >
+        <header className="reco-card-head">
+          <span
+            className={`reco-tier tier-${tier.toLowerCase()}`}
+            title={`${idea.learnedPotentialScore}/100 de potentiel`}
+            aria-label={`Tier ${tier}, potentiel ${idea.learnedPotentialScore} sur 100`}
+          >
+            {tier}
+          </span>
           <h3>{idea.title}</h3>
-          <p className="editorial-idea-hook">« {idea.hook} »</p>
-          <div className="compact-idea-evidence" aria-label="Posts sources">
-            {idea.seedPosts.slice(0, 2).map((seed) => (
-              <a
-                href={seed.url}
-                target="_blank"
-                rel="noreferrer"
-                title={seed.label}
-                key={`${seed.platform}:${seed.externalId}`}
-              >
-                {PLATFORM_META[seed.platform].emoji} Référence #{seed.platformRank ?? "—"}
-              </a>
-            ))}
-          </div>
+        </header>
+        <div className="reco-tags">
+          <span className={`platform-tag tone-${primaryMeta.tone}`}>
+            {primaryMeta.emoji} {primaryMeta.label}
+          </span>
+          <span title={primaryAdaptation.format}>{primaryAdaptation.format}</span>
         </div>
-        <div className={`idea-confidence-score confidence-${idea.confidence}`} title={idea.learningExplanation}>
-          <b>{idea.learnedPotentialScore}</b>
-          <small>/100</small>
-          <span>potentiel</span>
-        </div>
-      </header>
+        <p className="reco-description">{idea.observedSignal.summary}</p>
+        <p className="reco-hook">« {idea.hook} »</p>
+        <span className="reco-more">Voir pourquoi elle a du potentiel →</span>
+      </button>
 
-      <div className="editorial-idea-actions-row">
-        <details className="editorial-idea-details">
-          <summary>＋ Plus d’informations</summary>
-          <div className="editorial-idea-expanded">
-            <div className="editorial-signal-box">
-              <span>📡 Pourquoi elle a du potentiel</span>
-              <p>{idea.observedSignal.summary}</p>
-              <small>{idea.learningExplanation}</small>
-              <div className="idea-seeds" aria-label="Posts sources">
-                {idea.seedPosts.map((seed) => (
-                  <a
-                    href={seed.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={seed.label}
-                    key={`${seed.platform}:${seed.externalId}`}
-                  >
-                    {PLATFORM_META[seed.platform].emoji} {PLATFORM_META[seed.platform].label}
-                    <b>post source</b>
-                    <span>↗</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="idea-concept-grid">
-              <div className="idea-concept-block">
-                <span>🎬 Format proposé</span>
-                <p>{idea.proposedFormat}</p>
-              </div>
-              <div className="idea-concept-block hook-block">
-                <span>🪝 Hook</span>
-                <p>« {idea.hook} »</p>
-              </div>
-            </div>
-
-            <div className="idea-platforms">
-              <span className="idea-section-label">Déclinaisons possibles</span>
-              <div className="idea-platform-grid">
-                {(["youtube", "instagram", "tiktok", "x"] as Platform[]).map((platform) => {
-                  const adaptation = idea.platformAdaptations[platform];
-                  return (
-                    <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
-                      <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
-                      <strong>{adaptation.format}</strong>
-                      <p>{adaptation.execution}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="idea-confidence-note">
-              <span>🧪</span>
-              <p>{idea.confidenceRationale}</p>
-            </div>
-          </div>
-        </details>
-        <div className="editorial-decision-actions" aria-label="Décider et entraîner le classement">
-          <button
-            className="decision-button produce"
-            type="button"
-            disabled={disabled}
-            aria-pressed={decision === "produce"}
-            onClick={() => void onDecision(idea, "produce")}
-          >
-            ✅ Accepter + planifier
-          </button>
-          <button
-            className="decision-button rework"
-            type="button"
-            disabled={disabled}
-            aria-pressed={decision === "rework"}
-            onClick={() => void onDecision(idea, "rework")}
-          >
-            🛠️ Retravailler
-          </button>
-          <button
-            className="decision-button discard"
-            type="button"
-            disabled={disabled}
-            aria-pressed={decision === "discard"}
-            onClick={() => void onDecision(idea, "discard")}
-          >
-            ✕ Refuser
-          </button>
-        </div>
-      </div>
+      <footer className="reco-quick-actions" aria-label="Décider et entraîner le classement">
+        <button
+          className="reco-action edit"
+          type="button"
+          disabled={disabled}
+          aria-pressed={decision === "rework"}
+          onClick={() => void onDecision(idea, "rework")}
+        >
+          ✎ Modifier
+        </button>
+        <button
+          className="reco-action refuse"
+          type="button"
+          disabled={disabled}
+          aria-pressed={decision === "discard"}
+          onClick={() => void onDecision(idea, "discard")}
+        >
+          ✕ Refuser
+        </button>
+        <button
+          className="reco-action validate"
+          type="button"
+          disabled={disabled}
+          aria-pressed={decision === "produce"}
+          onClick={() => void onDecision(idea, "produce")}
+        >
+          ✓ Valider
+        </button>
+      </footer>
     </article>
   );
 }
 
-function PlanningBoard({
+function RecommendationDetailsModal({
+  idea,
+  onClose,
+}: {
+  idea: LearnedIdea | null;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLElement>(null);
+  const isOpen = Boolean(idea);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        modalRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1) ?? first;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [isOpen, onClose]);
+
+  if (!idea) return null;
+  const primaryMeta = PLATFORM_META[idea.primaryPlatform];
+  const tier = recommendationTier(idea.learnedPotentialScore);
+
+  return (
+    <div
+      className="post-details-backdrop"
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className={`post-details-modal recommendation-details-modal tone-${primaryMeta.tone}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="recommendation-details-title"
+        ref={modalRef}
+      >
+        <header>
+          <div>
+            <span>{primaryMeta.emoji} Recommandation {primaryMeta.label} · Tier {tier}</span>
+            <h2 id="recommendation-details-title">{idea.title}</h2>
+            <small className="details-theme-label">{idea.learnedPotentialScore}/100 de potentiel · #{idea.platformRank} sur {primaryMeta.label}</small>
+          </div>
+          <button
+            className="post-details-close"
+            type="button"
+            onClick={onClose}
+            ref={closeButtonRef}
+            aria-label="Fermer la recommandation"
+          >
+            ✕
+          </button>
+        </header>
+
+        <div className="recommendation-detail-grid">
+          <section className="recommendation-detail-panel featured">
+            <span className="section-kicker">📡 Pourquoi elle a du potentiel</span>
+            <p>{idea.observedSignal.summary}</p>
+            <small>{idea.learningExplanation}</small>
+          </section>
+          <section className="recommendation-detail-panel">
+            <span className="section-kicker">🎬 Format proposé</span>
+            <p>{idea.proposedFormat}</p>
+          </section>
+          <section className="recommendation-detail-panel">
+            <span className="section-kicker">🪝 Hook</span>
+            <p>« {idea.hook} »</p>
+          </section>
+        </div>
+
+        <section className="recommendation-detail-section">
+          <span className="section-kicker">Posts sources</span>
+          <div className="recommendation-source-links">
+            {idea.seedPosts.map((seed) => (
+              <a href={seed.url} target="_blank" rel="noreferrer" key={`${seed.platform}:${seed.externalId}`}>
+                <span>{PLATFORM_META[seed.platform].emoji}</span>
+                <b>{PLATFORM_META[seed.platform].label}</b>
+                <small>Post #{seed.platformRank ?? "—"}</small>
+                <strong>↗</strong>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="recommendation-detail-section">
+          <span className="section-kicker">Déclinaisons possibles</span>
+          <div className="idea-platform-grid recommendation-platform-grid">
+            {PLATFORM_ORDER.map((platform) => {
+              const adaptation = idea.platformAdaptations[platform];
+              return (
+                <div className={`idea-platform-card tone-${PLATFORM_META[platform].tone}`} key={platform}>
+                  <b>{PLATFORM_META[platform].emoji} {PLATFORM_META[platform].label}</b>
+                  <strong>{adaptation.format}</strong>
+                  <p>{adaptation.execution}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="recommendation-caveat">
+          <span>🧪</span>
+          <p>{idea.confidenceRationale}</p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+type RoadmapScale = "month" | "year";
+type RoadmapDisplayMode = "list" | "calendar";
+
+const ROADMAP_WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
+
+function roadmapCalendarCells(year: number, month: number) {
+  const first = new Date(Date.UTC(year, month, 1));
+  const leadingDays = (first.getUTCDay() + 6) % 7;
+  return Array.from({ length: 42 }, (_, index) =>
+    new Date(Date.UTC(year, month, index - leadingDays + 1)),
+  );
+}
+
+function roadmapDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function roadmapMonthLabel(year: number, month: number) {
+  return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" })
+    .format(new Date(Date.UTC(year, month, 1)));
+}
+
+function RoadmapBoard({
   schedule,
   syncing,
   onReschedule,
-  onOpenIdeas,
+  onOpenRecommendations,
 }: {
   schedule: ScheduledIdea[];
   syncing: boolean;
   onReschedule: (ideaId: string, scheduledFor: string) => void;
-  onOpenIdeas: () => void;
+  onOpenRecommendations: () => void;
 }) {
-  const today = new Date();
-  const start = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
-  const days = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(start);
-    date.setUTCDate(date.getUTCDate() + index);
-    return date.toISOString().slice(0, 10);
-  });
+  const now = new Date();
+  const [scale, setScale] = useState<RoadmapScale>("year");
+  const [displayMode, setDisplayMode] = useState<RoadmapDisplayMode>("calendar");
+  const [cursorYear, setCursorYear] = useState(now.getFullYear());
+  const [cursorMonth, setCursorMonth] = useState(now.getMonth());
+  const [platformFilter, setPlatformFilter] = useState<IdeaPlatformFilter>("all");
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const closeSelectedDay = useCallback(() => setSelectedDay(null), []);
   const sortedSchedule = [...schedule].sort((left, right) =>
     left.scheduledFor.localeCompare(right.scheduledFor) || left.platform.localeCompare(right.platform),
   );
+  const filteredSchedule = sortedSchedule.filter((item) => {
+    if (platformFilter !== "all" && item.platform !== platformFilter) return false;
+    const yearMatches = Number(item.scheduledFor.slice(0, 4)) === cursorYear;
+    if (!yearMatches) return false;
+    return scale === "year" || Number(item.scheduledFor.slice(5, 7)) - 1 === cursorMonth;
+  });
+  const scheduleByDate = new Map<string, ScheduledIdea[]>();
+  for (const item of filteredSchedule) {
+    const existing = scheduleByDate.get(item.scheduledFor) ?? [];
+    existing.push(item);
+    scheduleByDate.set(item.scheduledFor, existing);
+  }
+  const selectedItems = selectedDay
+    ? sortedSchedule.filter((item) =>
+        item.scheduledFor === selectedDay
+        && (platformFilter === "all" || item.platform === platformFilter),
+      )
+    : [];
+  const periodLabel = scale === "year"
+    ? String(cursorYear)
+    : roadmapMonthLabel(cursorYear, cursorMonth);
+
+  const movePeriod = (direction: -1 | 1) => {
+    if (scale === "year") {
+      setCursorYear((year) => year + direction);
+      return;
+    }
+    const next = new Date(Date.UTC(cursorYear, cursorMonth + direction, 1));
+    setCursorYear(next.getUTCFullYear());
+    setCursorMonth(next.getUTCMonth());
+  };
 
   return (
-    <div className="view-stack editorial-planning-view">
-      <div className="planning-hero">
-        <div>
-          <span className="section-kicker">🗓️ Planning éditorial automatique</span>
-          <h2>{schedule.length} publication{schedule.length > 1 ? "s" : ""} planifiée{schedule.length > 1 ? "s" : ""}</h2>
-          <p>Chaque idée acceptée prend le prochain créneau libre de sa plateforme. Tu peux déplacer la date directement ici.</p>
+    <div className="roadmap-view">
+      <header className="roadmap-heading">
+        <h2>Roadmap</h2>
+        {syncing ? <span className="workflow-syncing">Synchronisation…</span> : null}
+      </header>
+
+      <div className="roadmap-controls">
+        <div className="roadmap-scale-toggle" aria-label="Période de la roadmap">
+          <button className={scale === "month" ? "active" : ""} type="button" onClick={() => setScale("month")}>Mois</button>
+          <button className={scale === "year" ? "active" : ""} type="button" onClick={() => setScale("year")}>Année</button>
         </div>
-        <button className="button primary" type="button" onClick={onOpenIdeas}>
-          💡 Choisir une autre idée
-        </button>
+        <div className="roadmap-period-navigation">
+          <button type="button" aria-label="Période précédente" onClick={() => movePeriod(-1)}>‹</button>
+          <strong>{periodLabel}</strong>
+          <button type="button" aria-label="Période suivante" onClick={() => movePeriod(1)}>›</button>
+        </div>
+        <div className="roadmap-display-toggle" aria-label="Affichage de la roadmap">
+          <button className={displayMode === "list" ? "active" : ""} type="button" aria-label="Liste" onClick={() => setDisplayMode("list")}>☰</button>
+          <button className={displayMode === "calendar" ? "active" : ""} type="button" aria-label="Calendrier" onClick={() => setDisplayMode("calendar")}>▣</button>
+        </div>
       </div>
 
-      {syncing ? <div className="planning-sync-state">Synchronisation du planning…</div> : null}
-
-      {schedule.length ? (
-        <>
-          <section className="planning-week-panel">
-            <div className="panel-head">
-              <div>
-                <span className="section-kicker">Cette semaine</span>
-                <h3>Les prochains créneaux</h3>
-              </div>
-            </div>
-            <div className="planning-week-grid">
-              {days.map((day) => {
-                const items = sortedSchedule.filter((item) => item.scheduledFor === day);
-                const date = new Date(`${day}T12:00:00.000Z`);
-                return (
-                  <div className={`planning-day ${items.length ? "has-items" : ""}`} key={day}>
-                    <header>
-                      <span>{new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(date)}</span>
-                      <b>{new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" }).format(date)}</b>
-                    </header>
-                    <div className="planning-day-items">
-                      {items.map((item) => (
-                        <div className={`planning-mini-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
-                          <span>{PLATFORM_META[item.platform].emoji} {PLATFORM_META[item.platform].short}</span>
-                          <b>{item.title}</b>
-                        </div>
-                      ))}
-                      {!items.length ? <small>Libre</small> : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="planning-agenda-panel">
-            <div className="panel-head">
-              <div>
-                <span className="section-kicker">Agenda complet</span>
-                <h3>Toutes les idées acceptées</h3>
-              </div>
-            </div>
-            <div className="planning-agenda-list">
-              {sortedSchedule.map((item) => (
-                <article className={`planning-agenda-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
-                  <span className="planning-platform-icon" aria-hidden="true">{PLATFORM_META[item.platform].emoji}</span>
-                  <div>
-                    <span>{PLATFORM_META[item.platform].label} · {item.format}</span>
-                    <h4>{item.title}</h4>
-                    <p>« {item.hook} »</p>
-                  </div>
-                  <label>
-                    Date
-                    <input
-                      type="date"
-                      disabled={syncing}
-                      value={item.scheduledFor}
-                      onChange={(event) => onReschedule(item.ideaId, event.target.value)}
-                    />
-                  </label>
-                </article>
+      {displayMode === "list" ? (
+        <RoadmapList
+          items={filteredSchedule}
+          syncing={syncing}
+          onReschedule={onReschedule}
+          onOpenRecommendations={onOpenRecommendations}
+        />
+      ) : (
+        <div className="roadmap-calendar-shell">
+          {scale === "year" ? (
+            <div className="roadmap-year-grid">
+              {Array.from({ length: 12 }, (_, month) => (
+                <RoadmapMiniMonth
+                  year={cursorYear}
+                  month={month}
+                  scheduleByDate={scheduleByDate}
+                  onSelectDay={setSelectedDay}
+                  key={`${cursorYear}-${month}`}
+                />
               ))}
             </div>
-          </section>
-        </>
-      ) : (
-        <div className="empty-state planning-empty-state">
-          <span>🗓️</span>
-          <h3>Le planning est prêt</h3>
-          <p>Accepte une idée : elle sera placée automatiquement au prochain créneau libre.</p>
-          <button className="button primary" type="button" onClick={onOpenIdeas}>
-            Voir les 50 idées
-          </button>
+          ) : (
+            <RoadmapMonth
+              year={cursorYear}
+              month={cursorMonth}
+              scheduleByDate={scheduleByDate}
+              onSelectDay={setSelectedDay}
+            />
+          )}
+          <RoadmapLegend
+            schedule={schedule}
+            activePlatform={platformFilter}
+            onChange={setPlatformFilter}
+          />
         </div>
       )}
+
+      {!schedule.length ? (
+        <button className="roadmap-empty-cta" type="button" onClick={onOpenRecommendations}>
+          💡 Valider une recommandation pour remplir la roadmap
+        </button>
+      ) : null}
+
+      <RoadmapDayModal
+        date={selectedDay}
+        items={selectedItems}
+        syncing={syncing}
+        onReschedule={(ideaId, scheduledFor) => {
+          onReschedule(ideaId, scheduledFor);
+          closeSelectedDay();
+        }}
+        onClose={closeSelectedDay}
+      />
+    </div>
+  );
+}
+
+function RoadmapMiniMonth({
+  year,
+  month,
+  scheduleByDate,
+  onSelectDay,
+}: {
+  year: number;
+  month: number;
+  scheduleByDate: Map<string, ScheduledIdea[]>;
+  onSelectDay: (date: string) => void;
+}) {
+  return (
+    <section className="roadmap-mini-month">
+      <h3>{new Intl.DateTimeFormat("fr-FR", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month, 1)))}</h3>
+      <div className="roadmap-weekdays" aria-hidden="true">
+        {ROADMAP_WEEKDAYS.map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}
+      </div>
+      <div className="roadmap-mini-days">
+        {roadmapCalendarCells(year, month).map((date) => {
+          const key = roadmapDateKey(date);
+          const outside = date.getUTCMonth() !== month;
+          const items = outside ? [] : (scheduleByDate.get(key) ?? []);
+          const primary = items[0];
+          return items.length ? (
+            <button
+              className={`roadmap-mini-event tone-${PLATFORM_META[primary.platform].tone} ${items.length > 1 ? "multiple" : ""}`}
+              type="button"
+              title={items.map((item) => item.title).join(" · ")}
+              aria-label={`${date.getUTCDate()} ${roadmapMonthLabel(year, month)}, ${items.length} publication${items.length > 1 ? "s" : ""}`}
+              onClick={() => onSelectDay(key)}
+              key={key}
+            >
+              {date.getUTCDate()}
+              {items.length > 1 ? <small>{items.length}</small> : null}
+            </button>
+          ) : (
+            <span className={outside ? "outside" : ""} key={key}>{date.getUTCDate()}</span>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RoadmapMonth({
+  year,
+  month,
+  scheduleByDate,
+  onSelectDay,
+}: {
+  year: number;
+  month: number;
+  scheduleByDate: Map<string, ScheduledIdea[]>;
+  onSelectDay: (date: string) => void;
+}) {
+  return (
+    <section className="roadmap-month-calendar">
+      <div className="roadmap-month-weekdays" aria-hidden="true">
+        {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map((day) => <span key={day}>{day}</span>)}
+      </div>
+      <div className="roadmap-month-days">
+        {roadmapCalendarCells(year, month).map((date) => {
+          const key = roadmapDateKey(date);
+          const outside = date.getUTCMonth() !== month;
+          const items = outside ? [] : (scheduleByDate.get(key) ?? []);
+          return (
+            <div className={`roadmap-month-day ${outside ? "outside" : ""} ${items.length ? "has-events" : ""}`} key={key}>
+              <span className="roadmap-month-day-number">{date.getUTCDate()}</span>
+              <div className="roadmap-month-events">
+                {items.map((item) => (
+                  <button
+                    className={`roadmap-month-event tone-${PLATFORM_META[item.platform].tone}`}
+                    type="button"
+                    title={item.title}
+                    onClick={() => onSelectDay(key)}
+                    key={item.id}
+                  >
+                    <span>{PLATFORM_META[item.platform].emoji}</span>
+                    <b>{item.title}</b>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RoadmapLegend({
+  schedule,
+  activePlatform,
+  onChange,
+}: {
+  schedule: ScheduledIdea[];
+  activePlatform: IdeaPlatformFilter;
+  onChange: (platform: IdeaPlatformFilter) => void;
+}) {
+  return (
+    <aside className="roadmap-legend" aria-label="Légende et filtre des plateformes">
+      <button className={activePlatform === "all" ? "active" : ""} type="button" onClick={() => onChange("all")}>
+        <span className="legend-all">×</span><b>Toutes</b><small>{schedule.length}</small>
+      </button>
+      {PLATFORM_ORDER.map((platform) => {
+        const meta = PLATFORM_META[platform];
+        const count = schedule.filter((item) => item.platform === platform).length;
+        return (
+          <button
+            className={`${activePlatform === platform ? "active" : ""} tone-${meta.tone}`}
+            type="button"
+            onClick={() => onChange(platform)}
+            key={platform}
+          >
+            <span>{meta.emoji}</span><b>{meta.label}</b><small>{count}</small>
+          </button>
+        );
+      })}
+    </aside>
+  );
+}
+
+function RoadmapList({
+  items,
+  syncing,
+  onReschedule,
+  onOpenRecommendations,
+}: {
+  items: ScheduledIdea[];
+  syncing: boolean;
+  onReschedule: (ideaId: string, scheduledFor: string) => void;
+  onOpenRecommendations: () => void;
+}) {
+  if (!items.length) {
+    return (
+      <div className="empty-state roadmap-list-empty">
+        <span>🗓️</span>
+        <h3>Aucune publication sur cette période</h3>
+        <p>Valide une recommandation ou change de période.</p>
+        <button className="button primary" type="button" onClick={onOpenRecommendations}>Voir les recommandations</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="roadmap-list">
+      {items.map((item) => (
+        <article className={`roadmap-list-card tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
+          <time dateTime={item.scheduledFor}>
+            <b>{item.scheduledFor.slice(8, 10)}</b>
+            <span>{new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.scheduledFor}T12:00:00.000Z`))}</span>
+          </time>
+          <span className="roadmap-list-platform" aria-hidden="true">{PLATFORM_META[item.platform].emoji}</span>
+          <div>
+            <small>{PLATFORM_META[item.platform].label} · {item.format}</small>
+            <h3>{item.title}</h3>
+            <p>« {item.hook} »</p>
+          </div>
+          <label>
+            Modifier la date
+            <input
+              type="date"
+              disabled={syncing}
+              value={item.scheduledFor}
+              onChange={(event) => onReschedule(item.ideaId, event.target.value)}
+            />
+          </label>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function RoadmapDayModal({
+  date,
+  items,
+  syncing,
+  onReschedule,
+  onClose,
+}: {
+  date: string | null;
+  items: ScheduledIdea[];
+  syncing: boolean;
+  onReschedule: (ideaId: string, scheduledFor: string) => void;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLElement>(null);
+  const isOpen = Boolean(date && items.length);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        modalRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])') ?? [],
+      ).filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1) ?? first;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [isOpen, onClose]);
+
+  if (!date || !items.length) return null;
+  return (
+    <div className="post-details-backdrop" onPointerDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section className="roadmap-day-modal" role="dialog" aria-modal="true" aria-labelledby="roadmap-day-title" ref={modalRef}>
+        <header>
+          <div>
+            <span className="section-kicker">🗓️ Publication{items.length > 1 ? "s" : ""} planifiée{items.length > 1 ? "s" : ""}</span>
+            <h2 id="roadmap-day-title">{formatCardPublishedDate(`${date}T12:00:00.000Z`)}</h2>
+          </div>
+          <button className="post-details-close" type="button" onClick={onClose} ref={closeButtonRef} aria-label="Fermer">✕</button>
+        </header>
+        <div className="roadmap-day-modal-list">
+          {items.map((item) => (
+            <article className={`tone-${PLATFORM_META[item.platform].tone}`} key={item.id}>
+              <span>{PLATFORM_META[item.platform].emoji}</span>
+              <div>
+                <small>{PLATFORM_META[item.platform].label} · {item.format}</small>
+                <h3>{item.title}</h3>
+                <p>« {item.hook} »</p>
+              </div>
+              <label>
+                Modifier la date
+                <input
+                  type="date"
+                  disabled={syncing}
+                  value={item.scheduledFor}
+                  onChange={(event) => onReschedule(item.ideaId, event.target.value)}
+                />
+              </label>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
