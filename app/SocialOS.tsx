@@ -742,6 +742,10 @@ export function SocialOS({
     () => applyPreferenceLearning(ideaPlan.ideas, editorialWorkflow.feedback),
     [editorialWorkflow.feedback, ideaPlan.ideas],
   );
+  const ideaRankById = useMemo(
+    () => new Map(learnedIdeas.map((idea, index) => [idea.id, index + 1])),
+    [learnedIdeas],
+  );
   const filteredIdeas = useMemo(
     () => learnedIdeas.filter((idea) => {
       const decision = editorialWorkflow.feedback[idea.id]?.decision;
@@ -1257,6 +1261,7 @@ export function SocialOS({
                 {visibleIdeas.map((idea) => (
                   <RecommendationCard
                     idea={idea}
+                    rank={ideaRankById.get(idea.id) ?? 1}
                     decision={editorialWorkflow.feedback[idea.id]?.decision}
                     disabled={editorialWorkflowSyncing}
                     onDecision={setIdeaDecision}
@@ -1607,6 +1612,7 @@ export function SocialOS({
       />
       <RecommendationDetailsModal
         idea={activeRecommendation}
+        rank={activeRecommendation ? ideaRankById.get(activeRecommendation.id) ?? 1 : null}
         onClose={closeActiveRecommendation}
       />
       {toast ? <div className="toast">✅ {toast}</div> : null}
@@ -1647,23 +1653,43 @@ function recommendationTier(score: number) {
 }
 
 function recommendationDisplayTitle(value: string) {
-  return value
-    .replace("Un même moment, quatre exécutions natives", "Un même moment, une publication commune")
-    .replace(/\bun Short\b/giu, "une vidéo")
-    .replace(/\bdu Reel\b/giu, "du contenu")
-    .replace(/\bLe Reel\b/giu, "Le contenu")
-    .replace(/\bLe sondage\b/giu, "La question")
-    .replace(/\bthread\b/giu, "série");
+  return value;
+}
+
+type RecommendationSeed = SocialIdea["seedPosts"][number];
+
+function recommendationContentIcon(contentType: SocialIdea["contentType"]) {
+  if (contentType === "Vidéo courte") return "🎬";
+  if (contentType === "Visuel statique") return "🖼️";
+  if (contentType === "Carrousel") return "📚";
+  if (contentType === "Question visuelle") return "💬";
+  return "✍️";
+}
+
+function recommendationSeedMetrics(seed: RecommendationSeed) {
+  return [
+    seed.views !== null ? `▶ ${formatNumber(seed.views)} vues` : null,
+    seed.likes !== null ? `❤️ ${formatNumber(seed.likes)} likes` : null,
+    seed.comments !== null ? `💬 ${formatNumber(seed.comments)}` : null,
+  ].filter((value): value is string => Boolean(value));
+}
+
+function recommendationSeedRank(seed: RecommendationSeed) {
+  return seed.cohortRank === 1
+    ? `n°1 sur ${seed.cohortSize} dans son format`
+    : `n°${seed.cohortRank} sur ${seed.cohortSize} dans son format`;
 }
 
 function RecommendationCard({
   idea,
+  rank,
   decision,
   disabled,
   onDecision,
   onInspect,
 }: {
   idea: LearnedIdea;
+  rank: number;
   decision?: IdeaDecision;
   disabled: boolean;
   onDecision: (idea: SocialIdea, decision: IdeaDecision) => void;
@@ -1680,18 +1706,39 @@ function RecommendationCard({
         aria-label={`Voir le détail de la recommandation ${recommendationDisplayTitle(idea.title)}`}
       >
         <header className="reco-card-head">
+          <span className="reco-rank">N° {rank}</span>
           <span
-            className={`reco-tier tier-${tier.toLowerCase()}`}
-            title={`${idea.learnedPotentialScore}/100 de potentiel`}
-            aria-label={`Tier ${tier}, potentiel ${idea.learnedPotentialScore} sur 100`}
+            className={`reco-score tier-${tier.toLowerCase()}`}
+            aria-label={`Potentiel ${idea.learnedPotentialScore} sur 100`}
           >
-            {tier}
+            🔥 {idea.learnedPotentialScore}/100
           </span>
-          <h3>{recommendationDisplayTitle(idea.title)}</h3>
         </header>
-        <p className="reco-description">{idea.observedSignal.summary}</p>
-        <p className="reco-hook">« {idea.hook} »</p>
-        <span className="reco-more">Voir pourquoi elle a du potentiel →</span>
+        <h3>{recommendationDisplayTitle(idea.title)}</h3>
+        <div className="reco-tags">
+          <span>{recommendationContentIcon(idea.contentType)} {idea.contentType}</span>
+          <span>🧬 {idea.patternLabel}</span>
+        </div>
+
+        <div className="reco-copy-block">
+          <span>💡 L’idée</span>
+          <p>{idea.proposedFormat}</p>
+        </div>
+        <div className="reco-copy-block hook">
+          <span>📝 Texte prêt à poster</span>
+          <p>« {idea.hook} »</p>
+        </div>
+
+        {idea.seedPosts[0] ? (
+          <div className="reco-proof-preview">
+            <span>🔥 Inspiré de vos succès</span>
+            <b>« {idea.seedPosts[0].label} »</b>
+            <small>
+              {recommendationSeedMetrics(idea.seedPosts[0]).slice(0, 2).join(" · ")} · {recommendationSeedRank(idea.seedPosts[0])}
+            </small>
+          </div>
+        ) : null}
+        <span className="reco-more">Voir la fiche →</span>
       </button>
 
       <footer className="reco-quick-actions" aria-label="Décider et entraîner le classement">
@@ -1729,9 +1776,11 @@ function RecommendationCard({
 
 function RecommendationDetailsModal({
   idea,
+  rank,
   onClose,
 }: {
   idea: LearnedIdea | null;
+  rank: number | null;
   onClose: () => void;
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -1776,7 +1825,6 @@ function RecommendationDetailsModal({
   }, [isOpen, onClose]);
 
   if (!idea) return null;
-  const tier = recommendationTier(idea.learnedPotentialScore);
 
   return (
     <div
@@ -1794,9 +1842,9 @@ function RecommendationDetailsModal({
       >
         <header>
           <div>
-            <span>💡 Recommandation · Tier {tier}</span>
+            <span>💡 Idée #{rank ?? 1} · {recommendationContentIcon(idea.contentType)} {idea.contentType}</span>
             <h2 id="recommendation-details-title">{recommendationDisplayTitle(idea.title)}</h2>
-            <small className="details-theme-label">{idea.learnedPotentialScore}/100 de potentiel</small>
+            <small className="details-theme-label">🔥 Potentiel {idea.learnedPotentialScore}/100 · {idea.proofLabel}</small>
           </div>
           <button
             className="post-details-close"
@@ -1809,47 +1857,78 @@ function RecommendationDetailsModal({
           </button>
         </header>
 
-        <div className="recommendation-detail-grid">
+        <div className="recommendation-detail-grid clear-idea-grid">
           <section className="recommendation-detail-panel featured">
-            <span className="section-kicker">📡 Pourquoi elle a du potentiel</span>
-            <p>{idea.observedSignal.summary}</p>
-            <small>{idea.learningExplanation}</small>
-          </section>
-          <section className="recommendation-detail-panel">
-            <span className="section-kicker">🎬 Format proposé</span>
+            <span className="section-kicker">💡 L’idée</span>
             <p>{idea.proposedFormat}</p>
           </section>
           <section className="recommendation-detail-panel">
-            <span className="section-kicker">🪝 Hook</span>
+            <span className="section-kicker">📝 Texte prêt à poster</span>
             <p>« {idea.hook} »</p>
           </section>
         </div>
 
         <section className="recommendation-detail-section">
-          <span className="section-kicker">Posts sources</span>
+          <span className="section-kicker">🎬 Ce qu’on produit</span>
+          <div className="recommendation-production-brief">
+            <b>{recommendationContentIcon(idea.contentType)} {idea.contentType}</b>
+            <p>{idea.proposedFormat}</p>
+          </div>
+        </section>
+
+        <section className="recommendation-detail-section">
+          <span className="section-kicker">🔥 Pourquoi ça peut marcher chez nous</span>
+          <div className="recommendation-history-proof">
+            <p>{idea.whyItWorked}</p>
+            <strong>{idea.observedSignal.summary}</strong>
+            {idea.comparisonInsight ? <small>{idea.comparisonInsight}</small> : null}
+          </div>
+        </section>
+
+        <section className="recommendation-detail-section">
+          <span className="section-kicker">🏆 Les posts qui le prouvent</span>
           <div className="recommendation-source-links">
             {idea.seedPosts.map((seed, index) => (
-              <a href={seed.url} target="_blank" rel="noreferrer" key={`${seed.platform}:${seed.externalId}`}>
-                <span>🔗</span>
-                <b>Source {index + 1}</b>
-                <small>Voir le post d’origine</small>
-                <strong>↗</strong>
+              <a
+                href={seed.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Ouvrir le post preuve ${index + 1}`}
+                key={`${seed.platform}:${seed.externalId}`}
+              >
+                {seed.thumbnailUrl ? (
+                  <img src={seed.thumbnailUrl} alt="" loading="lazy" />
+                ) : (
+                  <span className="recommendation-source-fallback">🏆</span>
+                )}
+                <div>
+                  <b>« {seed.label} »</b>
+                  <small>{recommendationSeedMetrics(seed).join(" · ")}</small>
+                  <small>{recommendationSeedRank(seed)}{seed.publishedAt ? ` · ${formatCardPublishedDate(seed.publishedAt)}` : ""}</small>
+                </div>
+                <strong>Ouvrir ↗</strong>
               </a>
             ))}
           </div>
         </section>
 
         <section className="recommendation-detail-section">
-          <span className="section-kicker">Exécution commune</span>
-          <div className="recommendation-common-execution">
-            <b>Une seule création</b>
-            <p>Le même visuel, le même montage et le même texte sont publiés partout, sans déclinaison par réseau.</p>
+          <span className="section-kicker">🧬 Ce qu’on reprend / ce qu’on change</span>
+          <div className="recommendation-mechanic-grid">
+            <article>
+              <b>Ce qu’on reprend</b>
+              <p>{idea.borrowedMechanic}</p>
+            </article>
+            <article>
+              <b>Ce qu’on change</b>
+              <p>{idea.novelty}</p>
+            </article>
           </div>
         </section>
 
         <div className="recommendation-caveat">
           <span>🧪</span>
-          <p>{idea.confidenceRationale}</p>
+          <p>Cette idée reprend une mécanique déjà performante chez Lofi Girl, mais reste une nouvelle variation à tester. Aucun visuel ni aucune musique générés par IA.</p>
         </div>
       </section>
     </div>
