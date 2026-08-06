@@ -3344,7 +3344,10 @@ a {
 }
 
 .social-post-card {
+  display: flex;
+  height: 100%;
   min-width: 0;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -3648,6 +3651,14 @@ a {
   white-space: nowrap;
 }
 
+.social-post-card.poll-card .post-text-content {
+  min-height: 3.04em;
+}
+
+.social-post-card.poll-card .poll-choice-list {
+  grid-template-rows: repeat(5, 36px);
+}
+
 .post-text-content a {
   display: -webkit-box;
   overflow: hidden;
@@ -3861,7 +3872,7 @@ a {
 
 .social-post-card footer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-columns: max-content minmax(0, 1fr);
   grid-template-areas:
     "metrics metrics"
     "date actions";
@@ -3877,20 +3888,26 @@ a {
 
 .post-published-date {
   grid-area: date;
-  min-width: 0;
+  min-width: max-content;
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   min-height: 32px;
   border: 1px solid rgba(154, 168, 255, 0.16);
   border-radius: 9px;
   background: rgba(154, 168, 255, 0.065);
-  padding: 4px 8px;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  padding: 4px 12px 4px 10px;
   color: #cbd1f4;
   font-family: Sora, Inter, sans-serif;
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.035em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .post-card-actions {
@@ -3969,7 +3986,7 @@ a {
 }
 
 .social-post-card.compact {
-  display: block;
+  display: flex;
 }
 
 .source-notice {
@@ -4243,7 +4260,7 @@ a {
   }
 
   .social-post-card.compact {
-    display: block;
+    display: flex;
   }
 
   .source-kpis {
@@ -4264,7 +4281,7 @@ a {
   }
 
   .social-post-card footer {
-    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-columns: max-content minmax(0, 1fr);
   }
 
   .post-card-actions {

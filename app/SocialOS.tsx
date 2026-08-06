@@ -1759,7 +1759,7 @@ function PostCard({
 
   return (
     <article
-      className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"}`}
+      className={`social-post-card ${compact ? "compact" : ""} ${hasMediaPreview ? "has-media" : "text-only"} ${choices.length ? "poll-card" : ""}`}
     >
       {hasMediaPreview ? (
         <PostMediaPreview

@@ -101,6 +101,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, />\s*Tous\s*</);
   assert.match(component, /categoryFilters\(topPlatform\)\.map/);
   assert.match(component, /category-results/);
+  assert.match(component, /choices\.length \? "poll-card" : ""/);
   assert.doesNotMatch(component, /Historique visible chargé jusqu’au dernier lot/);
   assert.match(component, /TIKTOK_THUMBNAIL_CACHE/);
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
@@ -133,6 +134,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.inline-video-frame/);
   assert.match(styles, /\.post-details-modal/);
+  assert.match(styles, /\.social-post-card\s*\{[\s\S]*?display:\s*flex;[\s\S]*?height:\s*100%;[\s\S]*?flex-direction:\s*column;/);
+  assert.match(styles, /\.social-post-card\.poll-card \.poll-choice-list\s*\{[\s\S]*?grid-template-rows:\s*repeat\(5, 36px\)/);
+  assert.match(styles, /\.social-post-card footer\s*\{[\s\S]*?grid-template-columns:\s*max-content minmax\(0, 1fr\);/);
+  assert.match(styles, /\.post-published-date\s*\{[\s\S]*?min-width:\s*max-content;[\s\S]*?justify-self:\s*start;[\s\S]*?width:\s*max-content;[\s\S]*?padding:\s*4px 12px 4px 10px;[\s\S]*?white-space:\s*nowrap;/);
+  assert.match(styles, /@media[\s\S]*?\.social-post-card\.compact\s*\{\s*display:\s*flex;[\s\S]*?\.social-post-card footer\s*\{\s*grid-template-columns:\s*max-content minmax\(0, 1fr\);/);
   assert.match(styles, /platform-youtube[\s\S]*?scale\(1\.8\)/);
   const explicitFontSizes = [...styles.matchAll(/font-size:\s*([0-9.]+)px/g)].map(
     (match) => Number(match[1]),
