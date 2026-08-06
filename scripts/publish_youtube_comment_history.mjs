@@ -41,6 +41,7 @@ if (!Array.isArray(history.comments)) {
 }
 
 const observedAt = validDate(history.extractedAt) ?? snapshot.generatedAt;
+const publishedAt = new Date().toISOString();
 const metricResults = {
   ...(publicMetrics.results ?? {}),
   ...(privateMetrics.results ?? {}),
@@ -69,19 +70,23 @@ youtubeCoverage.scope = `${youtubeShortCount} Shorts + ${youtubeCommunityCount} 
 youtubeCoverage.itemCount = youtube.length;
 youtubeCoverage.oldestPublishedAt = youtubeDates.at(0) ?? null;
 youtubeCoverage.newestPublishedAt = youtubeDates.at(-1) ?? null;
-youtubeCoverage.limitations = [
+youtubeCoverage.limitations = [...new Set([
   ...(youtubeCoverage.limitations ?? []).filter(
-    (item) => !/commentaires publiés par le compte.*ne sont pas énumérables/i.test(item),
+    (item) =>
+      !/commentaires publiés par le compte.*ne sont pas énumérables/i.test(item) &&
+      item !== "Les commentaires publiés par Lofi Girl proviennent de l’export My Activity autorisé du propriétaire du compte et pointent chacun vers leur page YouTube publique." &&
+      item !== "Les likes et réponses sont affichés uniquement lorsqu’ils ont été observés directement sur la page du commentaire ; les autres métriques restent nulles.",
   ),
   "Les commentaires publiés par Lofi Girl proviennent de l’export My Activity autorisé du propriétaire du compte et pointent chacun vers leur page YouTube publique.",
   "Les likes et réponses sont affichés uniquement lorsqu’ils ont été observés directement sur la page du commentaire ; les autres métriques restent nulles.",
-];
+])];
 
+snapshot.generatedAt = publishedAt;
 summary.totalPostCount = snapshot.posts.length;
 summary.platformCounts.youtube = youtube.length;
 summary.formatCounts.youtube.comment = youtubeCommentCount;
 summary.coverage = snapshot.coverage;
-summary.generatedAt = snapshot.generatedAt;
+summary.generatedAt = publishedAt;
 
 await Promise.all([
   writeJson(snapshotPath, snapshot),

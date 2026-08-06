@@ -86,6 +86,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(previewEntry, /key=\{`\$\{workspace\.generatedAt\}:\$\{workspace\.posts\.length\}`\}/);
   assert.match(previewEntry, /public-history-summary\.json/);
   assert.match(previewEntry, /public-history-\$\{platform\}\.json/);
+  assert.match(previewEntry, /publicHistorySummary\.totalPostCount/);
+  assert.match(previewEntry, /publicHistorySummary\.formatCounts/);
   assert.match(previewEntry, /cache: "force-cache"/);
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);

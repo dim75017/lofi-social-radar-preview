@@ -32,7 +32,9 @@ const initialWorkspace = mergeWorkspaceWithPublicHistory(
   },
 );
 const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
-const snapshotVersion = encodeURIComponent(publicHistorySummary.generatedAt);
+const snapshotVersion = encodeURIComponent(
+  `${publicHistorySummary.generatedAt}:${publicHistorySummary.totalPostCount}:${JSON.stringify(publicHistorySummary.formatCounts)}`,
+);
 
 function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);
