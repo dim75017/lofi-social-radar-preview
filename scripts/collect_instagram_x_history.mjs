@@ -8,6 +8,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
+import {
+  assertInstagramProfileListing,
+  preserveCertifiedInstagramCoverage,
+} from "./instagram-public-profile-guard.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const HISTORY_PATH = resolve(ROOT, "data/public-history.json");
@@ -192,10 +196,17 @@ async function collectInstagram(context, existing) {
 }
 
 function replaceCoverage(snapshot, platform, itemCount, scope, limitations) {
+  const previousCoverage = Array.isArray(snapshot.coverage)
+    ? snapshot.coverage.find((item) => item?.platform === platform)
+    : null;
   const coverage = Array.isArray(snapshot.coverage) ? snapshot.coverage.filter((item) => item?.platform !== platform) : [];
   const platformPosts = snapshot.posts.filter((post) => post.platform === platform && post.publishedAt);
   const dates = platformPosts.map((post) => post.publishedAt).sort();
-  coverage.push({ platform, accountUrl: platform === "x" ? "https://x.com/lofigirl" : "https://www.instagram.com/lofigirl/", scope, status: "partial-public-profile", itemCount, oldestPublishedAt: dates[0] ?? null, newestPublishedAt: dates.at(-1) ?? null, limitations });
+  let nextCoverage = { platform, accountUrl: platform === "x" ? "https://x.com/lofigirl" : "https://www.instagram.com/lofigirl/", scope, status: "partial-public-profile", itemCount, oldestPublishedAt: dates[0] ?? null, newestPublishedAt: dates.at(-1) ?? null, limitations };
+  if (platform === "instagram") {
+    nextCoverage = preserveCertifiedInstagramCoverage(previousCoverage, nextCoverage);
+  }
+  coverage.push(nextCoverage);
   snapshot.coverage = coverage;
 }
 
@@ -216,6 +227,7 @@ try {
   }
   if (TARGET === "all" || TARGET === "instagram") {
     const instagram = await collectInstagram(context, byKey);
+    assertInstagramProfileListing({ listed: instagram.listed, snapshot });
     for (const post of instagram.posts) byKey.set(`instagram:${post.externalId}`, mergePost(byKey.get(`instagram:${post.externalId}`), post));
     snapshot.posts = [...byKey.values()];
     replaceCoverage(snapshot, "instagram", snapshot.posts.filter((post) => post.platform === "instagram").length, "historique public du profil", [instagram.pending < instagram.listed ? `Backfill progressif : ${instagram.pending}/${instagram.listed} fiches accessibles dans ce lot.` : "Le profil public n’a pas exposé de publication supplémentaire dans ce lot."]);

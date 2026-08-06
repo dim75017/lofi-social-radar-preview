@@ -21,6 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Validate fail-closed Instagram guard
+        run: |
+          node --check scripts/instagram-public-profile-guard.mjs
+          node --test tests/instagram-public-profile-guard.test.mjs
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
       - run: node scripts/collect_instagram_x_history.mjs
