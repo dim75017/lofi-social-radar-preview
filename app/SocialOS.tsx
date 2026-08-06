@@ -159,29 +159,6 @@ const NAV: Array<{
   { id: "ideas", emoji: "💡", label: "Idées à produire", group: "Pilotage" },
 ];
 
-const VIEW_COPY: Record<View, { title: string; subtitle: string }> = {
-  overview: {
-    title: "Command Center",
-    subtitle: "Ce qui fonctionne vraiment sur les comptes Lofi Girl.",
-  },
-  top: {
-    title: "Meilleurs posts",
-    subtitle: "Les formats qui ont le mieux fonctionné, plateforme par plateforme.",
-  },
-  ideas: {
-    title: "Idées à produire",
-    subtitle: "Des concepts testables dérivés des signaux qui ressortent vraiment.",
-  },
-  all: {
-    title: "Bibliothèque par catégorie",
-    subtitle: "Une plateforme et un format à la fois, sans mélanger les catégories.",
-  },
-  sources: {
-    title: "Sources officielles",
-    subtitle: "Couverture, fraîcheur et limites visibles pour chaque réseau.",
-  },
-};
-
 const IDEA_DECISIONS_STORAGE_KEY = "lofi-social-radar:idea-decisions:v1";
 const POSTS_PAGE_SIZE = 48;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
@@ -913,29 +890,6 @@ export function SocialOS({
       </aside>
 
       <main className="main">
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">Social & Community Intelligence OS</span>
-            <h2>
-              {NAV.find((item) => item.id === view)?.emoji} {VIEW_COPY[view].title}
-              <span className="top-pill">{previewMode ? "Public V2" : "Live V2"}</span>
-            </h2>
-            <p>{VIEW_COPY[view].subtitle}</p>
-          </div>
-          <div className="top-actions">
-            <span className="demo-pill live-pill">
-              ● {previewMode ? "Snapshot public interactif" : "Données publiques réelles"}
-            </span>
-            <button className="button primary" type="button" disabled={scanning} onClick={() => void runScan()}>
-              {scanning
-                ? "⏳ Scan en cours"
-                : previewMode
-                  ? "💡 Générer les idées"
-                  : "🔄 Scanner maintenant"}
-            </button>
-          </div>
-        </header>
-
         {error ? (
           <div className="error-banner" role="alert">
             <span>⚠️</span>

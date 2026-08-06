@@ -36,7 +36,7 @@ test("server-renders the live Social Radar shell", async () => {
   assert.match(html, /Command Center/);
   assert.match(html, /Meilleurs posts/);
   assert.match(html, /id="top-platform-subnav"/);
-  assert.match(html, /Données publiques réelles/);
+  assert.doesNotMatch(html, /Données publiques réelles|Snapshot public interactif|Générer les idées/);
   assert.match(html, /Instagram, X, TikTok et YouTube/);
   assert.doesNotMatch(html, /<iframe\b/i);
   assert.doesNotMatch(html, /🧪 Démo|Données de démonstration|codex-preview|react-loading-skeleton/i);
@@ -98,6 +98,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /hasMediaPreview \?/);
   assert.match(component, /text-only/);
   assert.doesNotMatch(component, /Lire ici|post-play-button/);
+  assert.doesNotMatch(component, /Social & Community Intelligence OS|Snapshot public interactif|Générer les idées|VIEW_COPY/);
   assert.doesNotMatch(component, />\s*Tous\s*</);
   assert.match(component, /categoryFilters\(topPlatform\)\.map/);
   assert.match(component, /category-results/);
