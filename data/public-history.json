@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T11:53:42.330Z",
+  "generatedAt": "2026-08-07T08:32:59.389Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -51,9 +51,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5130,
+      "itemCount": 5132,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-06T08:20:49.000Z",
+      "newestPublishedAt": "2026-08-06T18:02:22.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -74,12 +74,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2085078974145659390",
-          "startedAt": "2026-08-06T11:53:40.191Z",
-          "completedAt": "2026-08-06T11:53:42.330Z",
-          "apiRowsRead": 9,
-          "rowsInCheckpoint": 5130,
-          "importedAt": "2026-08-06T11:53:42.330Z"
+          "sinceId": "2085279915356967348",
+          "startedAt": "2026-08-07T08:32:57.431Z",
+          "completedAt": "2026-08-07T08:32:59.389Z",
+          "apiRowsRead": 3,
+          "rowsInCheckpoint": 5132,
+          "importedAt": "2026-08-07T08:32:59.389Z"
         }
       }
     },
@@ -118,6 +118,102 @@
     }
   ],
   "posts": [
+    {
+      "platform": "x",
+      "externalId": "2085426267747197171",
+      "url": "https://x.com/lofigirl/status/2085426267747197171",
+      "title": "see you in a month 👋 https://t.co/hTM5VuyLHN",
+      "text": "see you in a month 👋 https://t.co/hTM5VuyLHN",
+      "format": "static",
+      "thumbnailUrl": "https://pbs.twimg.com/media/HPDsBaFWcAA0O5R.jpg",
+      "publishedAt": "2026-08-06T18:02:22.000Z",
+      "views": 6546,
+      "likes": 124,
+      "comments": 2,
+      "shares": 7,
+      "saves": 6,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-07T08:32:57.720Z",
+        "lastObservedAt": "2026-08-07T08:32:57.720Z",
+        "publicMetrics": {
+          "bookmark_count": 6,
+          "impression_count": 6546,
+          "like_count": 124,
+          "quote_count": 0,
+          "reply_count": 2,
+          "retweet_count": 7
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "3_2085426136398327808",
+            "type": "photo",
+            "url": "https://pbs.twimg.com/media/HPDsBaFWcAA0O5R.jpg",
+            "previewImageUrl": null,
+            "width": 1080,
+            "height": 1350,
+            "durationMs": null,
+            "altText": null,
+            "publicMetrics": null
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-07T08:32:57.720Z",
+            "views": 6546,
+            "likes": 124,
+            "comments": 2,
+            "shares": 7,
+            "saves": 6,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2085380947306860939",
+      "url": "https://x.com/lofigirl/status/2085380947306860939",
+      "title": "doing your best in your own way? elite behavior.",
+      "text": "doing your best in your own way? elite behavior.",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-06T15:02:16.000Z",
+      "views": 7167,
+      "likes": 33,
+      "comments": 2,
+      "shares": 3,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-07T08:32:57.720Z",
+        "lastObservedAt": "2026-08-07T08:32:59.389Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 7167,
+          "like_count": 33,
+          "quote_count": 0,
+          "reply_count": 2,
+          "retweet_count": 3
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-07T08:32:59.389Z",
+            "views": 7167,
+            "likes": 33,
+            "comments": 2,
+            "shares": 3,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
     {
       "platform": "x",
       "externalId": "2085279915356967348",
