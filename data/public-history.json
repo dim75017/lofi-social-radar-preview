@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T06:25:25.690Z",
+  "generatedAt": "2026-08-09T06:31:53.867Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -51,9 +51,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5140,
+      "itemCount": 5142,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-07T16:03:17.000Z",
+      "newestPublishedAt": "2026-08-08T15:02:09.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -74,12 +74,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2085426267747197171",
-          "startedAt": "2026-08-08T06:25:23.655Z",
-          "completedAt": "2026-08-08T06:25:25.690Z",
-          "apiRowsRead": 9,
-          "rowsInCheckpoint": 5140,
-          "importedAt": "2026-08-08T06:25:25.690Z"
+          "sinceId": "2085758688749363275",
+          "startedAt": "2026-08-09T06:31:51.884Z",
+          "completedAt": "2026-08-09T06:31:53.867Z",
+          "apiRowsRead": 3,
+          "rowsInCheckpoint": 5142,
+          "importedAt": "2026-08-09T06:31:53.867Z"
         }
       }
     },
@@ -118,6 +118,102 @@
     }
   ],
   "posts": [
+    {
+      "platform": "x",
+      "externalId": "2086105692407005229",
+      "url": "https://x.com/lofigirl/status/2086105692407005229",
+      "title": "pocky represents like 90% of my feed but yeah, happy cat day ig https://t.co/9KEqod7lKN",
+      "text": "pocky represents like 90% of my feed but yeah, happy cat day ig https://t.co/9KEqod7lKN",
+      "format": "static",
+      "thumbnailUrl": "https://pbs.twimg.com/media/HPNV9JeXYAAuGsq.jpg",
+      "publishedAt": "2026-08-08T15:02:09.000Z",
+      "views": 6727,
+      "likes": 54,
+      "comments": 1,
+      "shares": 1,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-09T06:31:52.098Z",
+        "lastObservedAt": "2026-08-09T06:31:52.098Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 6727,
+          "like_count": 54,
+          "quote_count": 0,
+          "reply_count": 1,
+          "retweet_count": 1
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "3_2086105561406332928",
+            "type": "photo",
+            "url": "https://pbs.twimg.com/media/HPNV9JeXYAAuGsq.jpg",
+            "previewImageUrl": null,
+            "width": 1080,
+            "height": 1350,
+            "durationMs": null,
+            "altText": null,
+            "publicMetrics": null
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-09T06:31:52.098Z",
+            "views": 6727,
+            "likes": 54,
+            "comments": 1,
+            "shares": 1,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2086060252454134044",
+      "url": "https://x.com/lofigirl/status/2086060252454134044",
+      "title": "meow.",
+      "text": "meow.",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-08T12:01:35.000Z",
+      "views": 7305,
+      "likes": 53,
+      "comments": 5,
+      "shares": 2,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-09T06:31:52.098Z",
+        "lastObservedAt": "2026-08-09T06:31:53.867Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 7305,
+          "like_count": 53,
+          "quote_count": 0,
+          "reply_count": 5,
+          "retweet_count": 2
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-09T06:31:53.867Z",
+            "views": 7305,
+            "likes": 53,
+            "comments": 5,
+            "shares": 2,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
     {
       "platform": "x",
       "externalId": "2085758688749363275",
