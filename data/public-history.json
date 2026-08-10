@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-09T06:31:53.867Z",
+  "generatedAt": "2026-08-10T09:01:40.864Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -51,9 +51,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5142,
+      "itemCount": 5143,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-08T15:02:09.000Z",
+      "newestPublishedAt": "2026-08-09T15:31:08.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -74,12 +74,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2085758688749363275",
-          "startedAt": "2026-08-09T06:31:51.884Z",
-          "completedAt": "2026-08-09T06:31:53.867Z",
-          "apiRowsRead": 3,
-          "rowsInCheckpoint": 5142,
-          "importedAt": "2026-08-09T06:31:53.867Z"
+          "sinceId": "2086105692407005229",
+          "startedAt": "2026-08-10T09:01:38.814Z",
+          "completedAt": "2026-08-10T09:01:40.864Z",
+          "apiRowsRead": 2,
+          "rowsInCheckpoint": 5143,
+          "importedAt": "2026-08-10T09:01:40.864Z"
         }
       }
     },
@@ -118,6 +118,71 @@
     }
   ],
   "posts": [
+    {
+      "platform": "x",
+      "externalId": "2086475371919139247",
+      "url": "https://x.com/lofigirl/status/2086475371919139247",
+      "title": "sometimes all you need is a big ol’ scream and biting your human to reset 🙀 https://t.co/Aq100d8ME5",
+      "text": "sometimes all you need is a big ol’ scream and biting your human to reset 🙀 https://t.co/Aq100d8ME5",
+      "format": "static",
+      "thumbnailUrl": "https://pbs.twimg.com/media/HPSmKFZXkAACRls.jpg",
+      "publishedAt": "2026-08-09T15:31:08.000Z",
+      "views": 7143,
+      "likes": 82,
+      "comments": 0,
+      "shares": 4,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-10T09:01:39.097Z",
+        "lastObservedAt": "2026-08-10T09:01:40.864Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 7143,
+          "like_count": 82,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 4
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "3_2086475219556864000",
+            "type": "photo",
+            "url": "https://pbs.twimg.com/media/HPSmKFZXkAACRls.jpg",
+            "previewImageUrl": null,
+            "width": 1080,
+            "height": 1350,
+            "durationMs": null,
+            "altText": null,
+            "publicMetrics": null
+          },
+          {
+            "mediaKey": "3_2086475352612753408",
+            "type": "photo",
+            "url": "https://pbs.twimg.com/media/HPSmR1EXUAAIrDk.jpg",
+            "previewImageUrl": null,
+            "width": 1080,
+            "height": 1350,
+            "durationMs": null,
+            "altText": null,
+            "publicMetrics": null
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-10T09:01:40.864Z",
+            "views": 7143,
+            "likes": 82,
+            "comments": 0,
+            "shares": 4,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
     {
       "platform": "x",
       "externalId": "2086105692407005229",
