@@ -54,6 +54,7 @@ import {
   type SocialTrendFeed,
   type TrendLifecycle,
   type TrendPlatform,
+  type TrendReferencePost,
   type TrendTone,
 } from "../lib/social-trends";
 
@@ -1767,8 +1768,7 @@ function TrendFeedView({
           <span className="section-kicker">Veille créative Lofi Girl</span>
           <h2>🔥 Trends à adapter maintenant</h2>
           <p>
-            Les formats qui prennent de la vitesse et qui peuvent devenir un vrai post Lofi Girl,
-            avec les preuves observées et trois textes prêts à tester.
+            Un post de référence par trend, puis l’adaptation Lofi Girl et trois textes prêts à tester.
           </p>
         </div>
         {snapshotDate ? (
@@ -1831,19 +1831,11 @@ function TrendFeedView({
           </div>
         </div>
       ) : feed && visibleTrends.length ? (
-        <>
-          <div className="trend-feed-context">
-            <p>
-              <b>{visibleTrends.length}</b> tendance{visibleTrends.length > 1 ? "s" : ""} dans ce filtre.
-              Les scores servent à les classer, pas à promettre une performance.
-            </p>
-          </div>
-          <div className="trend-grid">
-            {visibleTrends.map((trend, index) => (
-              <TrendFeedCard trend={trend} rank={index + 1} key={trend.id} />
-            ))}
-          </div>
-        </>
+        <div className="trend-grid">
+          {visibleTrends.map((trend, index) => (
+            <TrendFeedCard trend={trend} rank={index + 1} key={trend.id} />
+          ))}
+        </div>
       ) : feed ? (
         <div className="empty-state trend-feed-empty">
           <span>🧭</span>
@@ -1874,6 +1866,9 @@ function TrendFeedCard({ trend, rank }: { trend: SocialTrend; rank: number }) {
     trend.proposals.find((candidate) => candidate.tone === activeTone) ?? trend.proposals[0];
   const latestObservation = latestTrendObservation(trend);
   const score = trendPriorityScore(trend);
+  const referenceMetrics = trend.referencePost
+    ? trendReferenceMetrics(trend.referencePost)
+    : [];
 
   const copyProposal = async () => {
     if (!proposal) return;
@@ -1882,142 +1877,264 @@ function TrendFeedCard({ trend, rank }: { trend: SocialTrend; rank: number }) {
   };
 
   return (
-    <article className={`trend-card tone-${lifecycle.tone}`}>
+    <article className={`trend-reference-card tone-${lifecycle.tone}`}>
       <div className="trend-card-top">
         <span className="trend-rank">#{rank}</span>
         <span className={`status-badge tone-${lifecycle.tone}`}>
           {lifecycle.emoji} {lifecycle.label}
         </span>
-        <span className="trend-priority-score" aria-label={`Score de priorité ${score} sur 100`}>
+        <span className="trend-priority-score" aria-label={`Potentiel ${score} sur 100`}>
           {score}<small>/100</small>
         </span>
       </div>
 
-      <div className="trend-card-title">
-        <div className="trend-platform-list" aria-label="Plateformes concernées">
-          {trend.platforms.map((platform) => (
-            <span key={platform}>{trendPlatformEmoji(platform)} {trendPlatformLabel(platform)}</span>
-          ))}
-        </div>
-        <h3>{trend.title}</h3>
-        <p className="trend-summary">{trend.summary}</p>
-      </div>
+      <div className="trend-reference-layout">
+        <TrendReferenceMedia trend={trend} />
 
-      <div className="trend-tags" aria-label="Mots-clés observés">
-        <span>{trendTypeLabel(trend.type)}</span>
-        {trend.keywords.map((keyword) => <span key={keyword}>#{keyword.replace(/^#/, "")}</span>)}
-      </div>
-
-      <section className="trend-explanation">
-        <span>🧩 Ce qui se répète</span>
-        <p>{trend.mechanic}</p>
-      </section>
-
-      <section className="trend-lofi-fit">
-        <span aria-hidden="true">🎧</span>
-        <div>
-          <b>Pourquoi c’est pertinent pour Lofi Girl</b>
-          <p>{trend.whyLofi}</p>
-        </div>
-      </section>
-
-      <div className="trend-actionability">
-        <div>
-          <span>⏱️ Bon moment</span>
-          <p>{trend.timing}</p>
-        </div>
-        <div>
-          <span>🎬 À produire</span>
-          <p>{trend.production}</p>
-        </div>
-      </div>
-
-      <section className="trend-proof-section">
-        <header>
-          <div>
-            <span className="section-kicker">Preuves observées</span>
-            <h4>🔎 D’où vient le signal</h4>
-          </div>
-          {latestObservation ? (
-            <small>Dernier relevé {formatCardPublishedDate(latestObservation.observedAt)}</small>
-          ) : null}
-        </header>
-        <ul className="trend-proof-list">
-          {trend.observations.map((observation) => {
-            const observationMetrics = trendObservationMetrics(observation);
-            return (
-              <li key={observation.id}>
+        <div className="trend-reference-main">
+          {trend.referencePost ? (
+            <header className="trend-reference-author">
+              <div>
+                <span>{trendPlatformEmoji(trend.referencePost.platform)}</span>
                 <div>
-                  <span className="trend-proof-platform">
-                    {trendPlatformEmoji(observation.platform)} {trendPlatformLabel(observation.platform)}
-                  </span>
-                  <span className="trend-proof-window">{observation.windowLabel}</span>
-                  <span className={`trend-proof-exactness exactness-${observation.exactness}`}>
-                    {trendObservationEvidenceLabel(observation.exactness)}
-                  </span>
+                  <b>{trend.referencePost.author ?? "Créateur non documenté"}</b>
+                  <small>{trend.referencePost.selectionLabel}</small>
                 </div>
-                <p>{observation.signal}</p>
-                {observationMetrics.length ? (
-                  <div className="trend-proof-metrics">
-                    {observationMetrics.map((metric) => <span key={metric}>{metric}</span>)}
-                  </div>
-                ) : null}
-                <a href={observation.sourceUrl} target="_blank" rel="noreferrer">
-                  {observation.sourceLabel} ↗
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+              </div>
+              {trend.referencePost.publishedAt ? (
+                <time dateTime={trend.referencePost.publishedAt}>
+                  {formatCardPublishedDate(trend.referencePost.publishedAt)}
+                </time>
+              ) : null}
+            </header>
+          ) : (
+            <span className="trend-reference-source-label">🔎 Source du signal</span>
+          )}
 
-      {proposal ? (
-        <section className="trend-proposal-section">
-          <header>
-            <span className="section-kicker">3 textes prêts à tester</span>
-            <h4>✍️ Proposition Lofi Girl</h4>
-          </header>
-          <div className="trend-tone-tabs" role="tablist" aria-label={`Tons proposés pour ${trend.title}`}>
-            {trend.proposals.map((candidate) => {
-              const tone = TREND_TONE_META[candidate.tone];
-              const isActive = activeTone === candidate.tone;
-              return (
-                <button
-                  className={isActive ? "active" : ""}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`trend-copy-${trend.id}`}
-                  onClick={() => {
-                    setActiveTone(candidate.tone);
-                    setCopyState("idle");
-                  }}
-                  key={candidate.tone}
-                >
-                  {tone.emoji} {candidate.label || tone.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="trend-proposal-panel" id={`trend-copy-${trend.id}`} role="tabpanel">
-            <span>{TREND_TONE_META[proposal.tone].emoji} Ton {TREND_TONE_META[proposal.tone].label}</span>
-            <h5>{proposal.title}</h5>
-            <p>{proposal.concept}</p>
-            <blockquote>{proposal.copy}</blockquote>
-            <button className="trend-copy-button" type="button" onClick={() => void copyProposal()}>
-              {copyState === "copied"
-                ? "✓ Texte copié"
-                : copyState === "error"
-                  ? "Copie impossible"
-                  : "📋 Copier le texte"}
-            </button>
-          </div>
-        </section>
-      ) : null}
+          {referenceMetrics.length ? (
+            <div className="trend-reference-metrics" aria-label="Performances du post de référence">
+              {referenceMetrics.map((metric) => <span key={metric}>{metric}</span>)}
+            </div>
+          ) : null}
 
-      <p className="trend-caveat">ℹ️ {trend.caveat}</p>
+          <div className="trend-card-title">
+            <h3>{trend.title}</h3>
+            <p className="trend-summary">{trend.summary}</p>
+          </div>
+
+          {proposal ? (
+            <section className="trend-lofi-adaptation" aria-label="Adaptation Lofi Girl proposée">
+              <span>🎧 Adaptation Lofi Girl</span>
+              <h4>{proposal.title}</h4>
+              <p>{proposal.concept}</p>
+              <div className="trend-tone-tabs" role="group" aria-label={`Choisir un ton pour ${trend.title}`}>
+                {trend.proposals.map((candidate) => {
+                  const tone = TREND_TONE_META[candidate.tone];
+                  const isActive = activeTone === candidate.tone;
+                  return (
+                    <button
+                      className={isActive ? "active" : ""}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => {
+                        setActiveTone(candidate.tone);
+                        setCopyState("idle");
+                      }}
+                      key={candidate.tone}
+                    >
+                      {tone.emoji} {candidate.label || tone.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <blockquote>{proposal.copy}</blockquote>
+              <button className="trend-copy-button" type="button" onClick={() => void copyProposal()}>
+                {copyState === "copied"
+                  ? "✓ Texte copié"
+                  : copyState === "error"
+                    ? "Copie impossible"
+                    : "📋 Copier le texte"}
+              </button>
+            </section>
+          ) : null}
+        </div>
+      </div>
+
+      <details className="trend-details-disclosure">
+        <summary>💡 Pourquoi cette trend + preuves</summary>
+        <div className="trend-details-content">
+          <div className="trend-detail-grid">
+            <section>
+              <span>🧩 Ce qui se répète</span>
+              <p>{trend.mechanic}</p>
+            </section>
+            <section>
+              <span>🎧 Pourquoi Lofi Girl</span>
+              <p>{trend.whyLofi}</p>
+            </section>
+            <section>
+              <span>⏱️ Bon moment</span>
+              <p>{trend.timing}</p>
+            </section>
+            <section>
+              <span>🎬 À produire</span>
+              <p>{trend.production}</p>
+            </section>
+          </div>
+
+          <div className="trend-tags" aria-label="Mots-clés observés">
+            <span>{trendTypeLabel(trend.type)}</span>
+            {trend.keywords.map((keyword) => <span key={keyword}>#{keyword.replace(/^#/, "")}</span>)}
+          </div>
+
+          <section className="trend-proof-section">
+            <header>
+              <div>
+                <span className="section-kicker">Preuves observées</span>
+                <h4>🔎 D’où vient le signal</h4>
+              </div>
+              {latestObservation ? (
+                <small>Dernier relevé {formatCardPublishedDate(latestObservation.observedAt)}</small>
+              ) : null}
+            </header>
+            <ul className="trend-proof-list">
+              {trend.observations.map((observation) => {
+                const observationMetrics = trendObservationMetrics(observation);
+                return (
+                  <li key={observation.id}>
+                    <div>
+                      <span className="trend-proof-platform">
+                        {trendPlatformEmoji(observation.platform)} {trendPlatformLabel(observation.platform)}
+                      </span>
+                      <span className="trend-proof-window">{observation.windowLabel}</span>
+                      <span className={`trend-proof-exactness exactness-${observation.exactness}`}>
+                        {trendObservationEvidenceLabel(observation.exactness)}
+                      </span>
+                    </div>
+                    <p>{observation.signal}</p>
+                    {observationMetrics.length ? (
+                      <div className="trend-proof-metrics">
+                        {observationMetrics.map((metric) => <span key={metric}>{metric}</span>)}
+                      </div>
+                    ) : null}
+                    <a href={observation.sourceUrl} target="_blank" rel="noreferrer">
+                      {observation.sourceLabel} ↗
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <p className="trend-caveat">ℹ️ {trend.caveat}</p>
+        </div>
+      </details>
     </article>
   );
+}
+
+function TrendReferenceMedia({ trend }: { trend: SocialTrend }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const referencePost = trend.referencePost;
+  const embedUrl = referencePost ? trendReferenceEmbedUrl(referencePost) : null;
+  const latestObservation = latestTrendObservation(trend);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node || !referencePost || !embedUrl || shouldLoad) return;
+    if (typeof IntersectionObserver === "undefined") {
+      const fallbackTimer = globalThis.setTimeout(() => setShouldLoad(true), 0);
+      return () => globalThis.clearTimeout(fallbackTimer);
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: "360px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [embedUrl, referencePost, shouldLoad]);
+
+  if (!referencePost) {
+    return (
+      <a
+        className="trend-reference-visual trend-reference-fallback"
+        href={latestObservation?.sourceUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span>{trendPlatformEmoji(latestObservation?.platform ?? trend.platforms[0] ?? "instagram")}</span>
+        <b>{trend.title}</b>
+        <small>Ouvrir la source qui documente cette trend ↗</small>
+      </a>
+    );
+  }
+
+  return (
+    <div
+      className={`trend-reference-visual platform-${referencePost.platform}`}
+      ref={containerRef}
+    >
+      {shouldLoad && embedUrl ? (
+        <iframe
+          src={embedUrl}
+          title={`Post de référence pour ${trend.title}`}
+          loading="lazy"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      ) : referencePost.thumbnailUrl ? (
+        <img
+          src={referencePost.thumbnailUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div className="trend-reference-loader" aria-hidden="true">
+          <span>{trendPlatformEmoji(referencePost.platform)}</span>
+          <b>Chargement du post de référence</b>
+        </div>
+      )}
+      <a href={referencePost.url} target="_blank" rel="noreferrer">
+        Voir le post original ↗
+      </a>
+    </div>
+  );
+}
+
+function trendReferenceEmbedUrl(referencePost: TrendReferencePost) {
+  try {
+    const url = new URL(referencePost.url);
+    const path = url.pathname.replace(/\/+$/, "");
+    if (referencePost.platform === "instagram") {
+      const match = path.match(/^\/(p|reel)\/([^/]+)$/i);
+      return match ? `https://www.instagram.com/${match[1]}/${match[2]}/embed/` : null;
+    }
+    if (referencePost.platform === "tiktok") {
+      const match = path.match(/^\/@[^/]+\/video\/(\d{12,24})$/i);
+      return match
+        ? `https://www.tiktok.com/player/v1/${match[1]}?autoplay=0&controls=1&description=0&music_info=0&rel=0`
+        : null;
+    }
+    if (referencePost.platform === "youtube") {
+      const match = path.match(/^\/shorts\/([A-Za-z0-9_-]{11})$/i);
+      return match
+        ? `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=0&playsinline=1&rel=0`
+        : null;
+    }
+    const match = path.match(/^\/[^/]+\/status\/(\d+)$/i);
+    return match
+      ? `https://platform.twitter.com/embed/Tweet.html?id=${match[1]}&theme=dark&dnt=true`
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function trendPlatformLabel(platform: TrendPlatform) {
@@ -2039,6 +2156,20 @@ function trendTypeLabel(type: SocialTrend["type"]) {
     moment: "Moment culturel",
   };
   return labels[type];
+}
+
+function trendReferenceMetrics(referencePost: TrendReferencePost) {
+  return [
+    referencePost.metrics.views !== null
+      ? `▶️ ${formatNumber(referencePost.metrics.views)} vues`
+      : null,
+    referencePost.metrics.likes !== null
+      ? `❤️ ${formatNumber(referencePost.metrics.likes)}`
+      : null,
+    referencePost.metrics.comments !== null
+      ? `💬 ${formatNumber(referencePost.metrics.comments)}`
+      : null,
+  ].filter((metric): metric is string => metric !== null);
 }
 
 function trendObservationMetrics(observation: SocialTrend["observations"][number]) {

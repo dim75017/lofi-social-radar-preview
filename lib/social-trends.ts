@@ -26,6 +26,27 @@ export type TrendProposal = {
   copy: string;
 };
 
+export type TrendReferencePost = {
+  platform: TrendPlatform;
+  author: string | null;
+  caption: string;
+  url: string;
+  mediaType: "image" | "video" | "text" | "unknown";
+  thumbnailUrl: string | null;
+  publishedAt: string | null;
+  capturedAt: string;
+  selectionLabel: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  exactness: TrendObservation["exactness"];
+  metrics: {
+    views: number | null;
+    likes: number | null;
+    comments: number | null;
+    shares: number | null;
+  };
+};
+
 export type SocialTrend = {
   id: string;
   title: string;
@@ -43,12 +64,13 @@ export type SocialTrend = {
   timing: string;
   production: string;
   caveat: string;
+  referencePost: TrendReferencePost | null;
   observations: TrendObservation[];
   proposals: TrendProposal[];
 };
 
 export type SocialTrendFeed = {
-  version: 1;
+  version: 2;
   capturedAt: string;
   market: string;
   methodology: string;
@@ -111,7 +133,11 @@ export function filterSocialTrends(
   );
 }
 
-export function assertSocialTrendFeed(value: SocialTrendFeed) {
+export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
+  if (!value || typeof value !== "object") {
+    throw new Error("Snapshot Trends invalide.");
+  }
+  const feed = value as SocialTrendFeed;
   const isText = (candidate: unknown): candidate is string =>
     typeof candidate === "string" && candidate.trim().length > 0;
   const isScore = (candidate: unknown): candidate is number =>
@@ -123,7 +149,7 @@ export function assertSocialTrendFeed(value: SocialTrendFeed) {
     if (!isText(candidate)) return false;
     try {
       const url = new URL(candidate);
-      return url.protocol === "https:" || url.protocol === "http:";
+      return url.protocol === "https:";
     } catch {
       return false;
     }
@@ -144,20 +170,56 @@ export function assertSocialTrendFeed(value: SocialTrendFeed) {
     "platform-estimate",
     "editorial-observation",
   ]);
+  const validMediaTypes = new Set<TrendReferencePost["mediaType"]>([
+    "image",
+    "video",
+    "text",
+    "unknown",
+  ]);
+  const isNullableMetric = (candidate: unknown) =>
+    candidate === null ||
+    (typeof candidate === "number" && Number.isFinite(candidate) && candidate >= 0);
+  const isReferenceUrlForPlatform = (candidate: string, platform: TrendPlatform) => {
+    try {
+      const url = new URL(candidate);
+      const host = url.hostname.toLowerCase();
+      const path = url.pathname.replace(/\/+$/, "");
+      if (url.protocol !== "https:") return false;
+      if (platform === "instagram") {
+        return (host === "instagram.com" || host.endsWith(".instagram.com")) &&
+          /^\/(?:p|reel)\/[^/]+$/i.test(path);
+      }
+      if (platform === "tiktok") {
+        return (host === "tiktok.com" || host.endsWith(".tiktok.com")) &&
+          /^\/@[^/]+\/video\/\d{12,24}$/i.test(path);
+      }
+      if (platform === "youtube") {
+        return (host === "youtube.com" || host.endsWith(".youtube.com")) &&
+          /^\/shorts\/[A-Za-z0-9_-]{11}$/i.test(path);
+      }
+      return (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) &&
+        /^\/[^/]+\/status\/\d+$/i.test(path);
+    } catch {
+      return false;
+    }
+  };
 
   if (
-    value?.version !== 1 ||
-    !isText(value.capturedAt) ||
-    !Number.isFinite(Date.parse(value.capturedAt)) ||
-    !isText(value.market) ||
-    !isText(value.methodology) ||
-    !Array.isArray(value.trends)
+    feed?.version !== 2 ||
+    !isText(feed.capturedAt) ||
+    !Number.isFinite(Date.parse(feed.capturedAt)) ||
+    !isText(feed.market) ||
+    !isText(feed.methodology) ||
+    !Array.isArray(feed.trends)
   ) {
     throw new Error("Snapshot Trends invalide.");
   }
   const ids = new Set<string>();
   const observationIds = new Set<string>();
-  for (const trend of value.trends) {
+  for (const trend of feed.trends) {
+    if (!trend || typeof trend !== "object") {
+      throw new Error("Trend incomplète ou invalide.");
+    }
     if (!trend.id || ids.has(trend.id)) throw new Error(`Trend dupliquée : ${trend.id}`);
     ids.add(trend.id);
     if (
@@ -178,9 +240,44 @@ export function assertSocialTrendFeed(value: SocialTrendFeed) {
       !isText(trend.whyLofi) ||
       !isText(trend.timing) ||
       !isText(trend.production) ||
-      !isText(trend.caveat)
+      !isText(trend.caveat) ||
+      !Object.prototype.hasOwnProperty.call(trend, "referencePost")
     ) {
       throw new Error(`Trend incomplète ou invalide : ${trend.id}`);
+    }
+    const referencePost = trend.referencePost;
+    if (referencePost !== null) {
+      if (!referencePost || typeof referencePost !== "object") {
+        throw new Error(`Post de référence invalide : ${trend.id}`);
+      }
+      const metrics = referencePost.metrics;
+      if (
+        !validPlatforms.has(referencePost.platform) ||
+        !trend.platforms.includes(referencePost.platform) ||
+        (referencePost.author !== null && !isText(referencePost.author)) ||
+        !isText(referencePost.caption) ||
+        !isReferenceUrlForPlatform(referencePost.url, referencePost.platform) ||
+        !validMediaTypes.has(referencePost.mediaType) ||
+        (referencePost.thumbnailUrl !== null && !isWebUrl(referencePost.thumbnailUrl)) ||
+        (referencePost.publishedAt !== null &&
+          (!isText(referencePost.publishedAt) || !Number.isFinite(Date.parse(referencePost.publishedAt)))) ||
+        !isText(referencePost.capturedAt) ||
+        !Number.isFinite(Date.parse(referencePost.capturedAt)) ||
+        Date.parse(referencePost.capturedAt) > Date.parse(feed.capturedAt) ||
+        !isText(referencePost.selectionLabel) ||
+        !isText(referencePost.sourceLabel) ||
+        !isWebUrl(referencePost.sourceUrl) ||
+        !validExactness.has(referencePost.exactness) ||
+        !metrics ||
+        !isNullableMetric(metrics.views) ||
+        !isNullableMetric(metrics.likes) ||
+        !isNullableMetric(metrics.comments) ||
+        !isNullableMetric(metrics.shares) ||
+        (referencePost.exactness === "editorial-observation" &&
+          [metrics.views, metrics.likes, metrics.comments, metrics.shares].some((metric) => metric !== null))
+      ) {
+        throw new Error(`Post de référence invalide : ${trend.id}`);
+      }
     }
     if (!Array.isArray(trend.observations) || !trend.observations.length) {
       throw new Error(`Trend sans source : ${trend.id}`);
@@ -224,7 +321,7 @@ export function assertSocialTrendFeed(value: SocialTrendFeed) {
       }
     }
   }
-  return value;
+  return feed;
 }
 
 export function latestTrendObservation(trend: SocialTrend) {

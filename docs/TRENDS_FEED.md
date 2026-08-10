@@ -1,6 +1,6 @@
 # Feed Trends
 
-Le feed public est un snapshot horodaté dans `data/trends/feed.json`. Il rassemble uniquement des signaux observés et conserve, pour chaque trend, la plateforme, la source, l’URL et la date du relevé. Une métrique absente reste `null` ; elle ne vaut jamais zéro.
+Le feed public v2 est un snapshot horodaté dans `data/trends/feed.json`. Il rassemble uniquement des signaux observés et conserve, pour chaque trend, la plateforme, la source, l’URL et la date du relevé. Une métrique absente reste `null` ; elle ne vaut jamais zéro.
 
 ## Niveaux de preuve
 
@@ -10,6 +10,23 @@ Le feed public est un snapshot horodaté dans `data/trends/feed.json`. Il rassem
 - Les scores de momentum et de pertinence sont des classements internes dérivés de ces observations. Ils ne constituent ni une audience mesurée, ni une prédiction de viralité.
 
 Une trend sans observation sourcée est refusée. La maquette embarque le dernier snapshot validé, puis tente une actualisation directe depuis le dépôt source avec `cache: no-store`. Une panne réseau ne remplace jamais ce fallback par un feed vide.
+
+## Posts de référence v2
+
+Chaque trend possède un champ `referencePost`. Il contient soit un post public directement vérifiable sur la plateforme, soit `null` quand aucun exemple suffisamment fiable n’a été trouvé. Le snapshot actuel contient **16 références réelles et 2 absences honnêtes** : `eclipse-perseides-12-aout` et `heatwave-tatooine` restent à `null` au lieu de transformer un article éditorial en publication sociale.
+
+Une référence comprend :
+
+- la plateforme, l’auteur quand il est public, la légende et l’URL canonique du post ;
+- le type de média, une miniature HTTPS facultative et la date de publication lorsqu’elle est disponible ;
+- la date de capture, le motif de sélection, la source et son niveau de preuve ;
+- les vues, likes, commentaires et partages, chacun sous forme de nombre positif ou `null`.
+
+L’URL doit correspondre à la plateforme déclarée : post ou Reel Instagram, vidéo TikTok canonique, YouTube Short, ou statut X. La plateforme doit aussi faire partie des plateformes déclarées par la trend. Une référence illustre le mécanisme ; elle ne prouve pas, à elle seule, que le format est globalement en tendance.
+
+Les métriques suivent les mêmes règles de preuve que les observations. Une `editorial-observation` ne peut porter aucune métrique numérique. Une `platform-estimate` conserve les valeurs arrondies rapportées par le tracker et ne doit pas être présentée comme un compteur exact. La date de capture ne peut pas être postérieure au snapshot.
+
+Dans cette v2, les miniatures acceptées sont des URLs HTTPS distantes. Aucun média lourd, vidéo locale ou image encodée en base64 n’est embarqué dans le JSON public ; cela garde le fallback et le chargement GitHub Pages légers. Une future prise en charge de fichiers locaux devra ajouter une copie d’assets dédiée et une résolution compatible avec le sous-répertoire Pages.
 
 ## Limites des plateformes
 

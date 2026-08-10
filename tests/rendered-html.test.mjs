@@ -133,6 +133,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /metric_history/);
   assert.match(component, /label: "Trends"/);
   assert.match(component, /TrendFeedView/);
+  assert.match(component, /TrendReferenceMedia/);
+  assert.match(component, /trend-reference-card/);
+  assert.match(component, /Pourquoi cette trend \+ preuves/);
+  assert.match(component, /loading="lazy"/);
+  assert.match(component, /Voir le post original/);
   assert.match(component, /hasMediaPreview \?/);
   assert.match(component, /text-only/);
   assert.doesNotMatch(component, /Lire ici|post-play-button/);
@@ -146,7 +151,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
   assert.match(component, /sharedTikTokPreviewObserver/);
   assert.match(component, /IntersectionObserver/);
-  assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 1);
+  assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 2);
   assert.match(component, /role="dialog"/);
   assert.match(component, /event\.key !== "Tab"/);
   const postCard = component.slice(
@@ -178,6 +183,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.reco-card-main\s*>\s*h3\s*\{[\s\S]*?font-size:\s*18px/);
   assert.match(styles, /\.reco-proof-preview\s*\{/);
   assert.match(styles, /\.trend-feed-view\s*\{/);
+  assert.match(styles, /\.trend-reference-layout\s*\{[\s\S]*?grid-template-columns:/);
+  assert.match(styles, /\.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*4\s*\/\s*5/);
+  assert.match(styles, /\.trend-details-disclosure\s*\{/);
   assert.match(styles, /\.recommendation-source-links a > img/);
   assert.match(styles, /\.recommendation-mechanic-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.reco-quick-actions\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);

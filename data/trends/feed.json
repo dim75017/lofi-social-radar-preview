@@ -1,8 +1,8 @@
 {
-  "version": 1,
+  "version": 2,
   "capturedAt": "2026-08-10T12:00:00+02:00",
   "market": "France · signaux francophones et internationaux adaptables",
-  "methodology": "Classement éditorial au 10/08/2026 : fraîcheur du signal, dynamique observée, compatibilité Lofi Girl, saturation et solidité des sources. Une métrique absente reste nulle.",
+  "methodology": "Classement éditorial au 10/08/2026 : fraîcheur du signal, dynamique observée, compatibilité Lofi Girl, saturation et solidité des sources. Un post natif vérifié illustre la trend quand son URL et ses compteurs publics sont disponibles ; sinon la source du signal reste clairement indiquée. Une métrique absente reste nulle.",
   "trends": [
     {
       "id": "shakira-at-the-computer",
@@ -21,6 +21,21 @@
       "timing": "À produire immédiatement, idéalement sous 48 heures.",
       "production": "Recréer la scène avec l’illustration officielle Lofi Girl, sans réutiliser la photo originale.",
       "caveat": "Reprendre le mécanisme, pas l’image de Shakira ni une photographie protégée.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@shakira",
+        "caption": "Publication originale de Shakira ayant déclenché le mème.",
+        "url": "https://www.instagram.com/p/DbodqXOKa0E/",
+        "mediaType": "image",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-04T21:05:29.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Post d’origine · le mème est parti d’ici",
+        "sourceLabel": "Instagram · compteurs publics",
+        "sourceUrl": "https://www.instagram.com/p/DbodqXOKa0E/",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":918000,"comments":13000,"shares":null}
+      },
       "observations": [
         {"id":"shakira-x-20260805","platform":"x","sourceLabel":"Know Your Meme · relevé du 05/08","sourceUrl":"https://knowyourmeme.com/memes/shakira-on-the-computer","observedAt":"2026-08-05T12:00:00Z","windowLabel":"24 h après recréation","signal":"Le comparatif a dépassé 4,5 M de vues sur X ; la recréation Instagram dépassait 950 k likes en un jour.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -47,6 +62,7 @@
       "timing": "Préparer aujourd’hui pour publication le 11 ou le 12 août.",
       "production": "Animation officielle courte : bureau, lunettes adaptées, transition vers les étoiles.",
       "caveat": "Montrer une observation sûre et rappeler de ne jamais regarder le Soleil sans protection homologuée.",
+      "referencePost": null,
       "observations": [
         {"id":"eclipse-france-20260809","platform":"x","sourceLabel":"Le Monde · 09/08/2026","sourceUrl":"https://www.lemonde.fr/en/economy/article/2026/08/09/shortages-of-solar-eclipse-viewing-glasses-expected-in-france_6756309_19.html","observedAt":"2026-08-09T12:00:00Z","windowLabel":"J-3","signal":"Accélération des ventes et risque de pénurie de lunettes en France avant l’éclipse du 12 août.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"},
         {"id":"perseides-france-20260807","platform":"instagram","sourceLabel":"Le Monde · 07/08/2026","sourceUrl":"https://www.lemonde.fr/en/science/article/2026/08/07/night-of-the-stars-everything-to-know-about-the-2026-edition_6756241_10.html","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Semaine du pic","signal":"Le pic des Perséides est annoncé dans la nuit du 12 au 13 août.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
@@ -74,6 +90,21 @@
       "timing": "Fenêtre août-septembre ; commencer maintenant avec un angle très humain.",
       "production": "Montage court avec assets officiels : avant/après du bureau et premier timer.",
       "caveat": "Éviter le simple desk setup générique ; garder une chute ou une micro-histoire.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@geenalillian",
+        "caption": "Exemple récent consacré au back-to-school reset.",
+        "url": "https://www.tiktok.com/@geenalillian/video/7671719241669774622",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-08T17:48:48.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple récent · 80,4 k likes",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@geenalillian/video/7671719241669774622",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":80400,"comments":199,"shares":2018}
+      },
       "observations": [
         {"id":"tiktok-backtoschool-fr-20260810","platform":"tiktok","sourceLabel":"TikTok Creative Center France · #backtoschool","sourceUrl":"https://ads.tiktok.com/creative/creativeCenter/trends/hashtag?countryCode=FR&period=7&region=FR","observedAt":"2026-08-10T10:00:00+02:00","windowLabel":"Capture du 10/08 · 7 jours · Éducation","signal":"#backtoschool est n°1 du filtre Éducation en France : 785 publications et 14,5 M de vues affichées.","rank":1,"posts":785,"views":14500000,"uses":null,"exactness":"platform-estimate"}
       ],
@@ -100,6 +131,21 @@
       "timing": "À tester cette semaine, puis décliner pendant la rentrée.",
       "production": "Gros plans dessinés à la main à partir d’assets officiels, avec vraie fiche préparée par l’équipe.",
       "caveat": "Ne pas promettre une méthode miracle ; privilégier une astuce concrète.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@koka.notes",
+        "caption": "Exemple Studytok très engagé remonté par la page publique du tag.",
+        "url": "https://www.tiktok.com/@koka.notes/video/7642040156093992225",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-05-20T18:18:48.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple Studytok très engagé",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@koka.notes/video/7642040156093992225",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":33600,"comments":178,"shares":395}
+      },
       "observations": [
         {"id":"tiktok-notes-fr-20260810","platform":"tiktok","sourceLabel":"TikTok Creative Center France · #notes","sourceUrl":"https://ads.tiktok.com/creative/creativeCenter/trends/hashtag?countryCode=FR&period=7&region=FR","observedAt":"2026-08-10T10:00:00+02:00","windowLabel":"Capture du 10/08 · 7 jours · Éducation","signal":"#notes est n°2 du filtre Éducation en France : 564 publications et 1,9 M de vues affichées.","rank":2,"posts":564,"views":1900000,"uses":null,"exactness":"platform-estimate"}
       ],
@@ -126,6 +172,21 @@
       "timing": "Dès maintenant, avant la saturation de fin août.",
       "production": "Checklist illustrée ou courte animation officielle réutilisable sur tous les réseaux.",
       "caveat": "Garder le texte principal compréhensible aussi hors de France.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@elisyalby",
+        "caption": "Exemple récent visible pour #rentreescolaire lors de la capture.",
+        "url": "https://www.tiktok.com/@elisyalby/video/7671794317962251552",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-08T22:40:09.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple récent #rentreescolaire",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@elisyalby/video/7671794317962251552",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":20600,"comments":571,"shares":813}
+      },
       "observations": [
         {"id":"tiktok-rentree-fr-20260810","platform":"tiktok","sourceLabel":"TikTok Creative Center France · #rentreescolaire","sourceUrl":"https://ads.tiktok.com/creative/creativeCenter/trends/hashtag?countryCode=FR&period=7&region=FR","observedAt":"2026-08-10T10:00:00+02:00","windowLabel":"Capture du 10/08 · 7 jours · Éducation","signal":"#rentreescolaire est n°3 du filtre Éducation : 514 publications et 5,2 M de vues affichées.","rank":3,"posts":514,"views":5200000,"uses":null,"exactness":"platform-estimate"}
       ],
@@ -152,6 +213,21 @@
       "timing": "À produire sous trois jours.",
       "production": "Rejouer la mécanique avec voix enregistrée par l’équipe et animation officielle.",
       "caveat": "Ne pas reprendre mot pour mot un extrait audio protégé ; enregistrer une version originale.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@h2t.alt",
+        "caption": "Exemple majeur de propagation documenté par Know Your Meme.",
+        "url": "https://www.tiktok.com/@h2t.alt/video/7666194022913887501",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-24T20:28:08.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple majeur · 4,2 M vues documentées",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@h2t.alt/video/7666194022913887501",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":739000,"comments":8086,"shares":153200}
+      },
       "observations": [
         {"id":"here-bro-20260805","platform":"tiktok","sourceLabel":"Know Your Meme · 05/08/2026","sourceUrl":"https://knowyourmeme.com/memes/just-say-here-bro","observedAt":"2026-08-05T12:00:00Z","windowLabel":"24–27 juillet","signal":"Plusieurs vidéos de référence ont atteint environ 4,2 M, 1,5 M et 1,1 M de vues.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -178,6 +254,21 @@
       "timing": "Encore exploitable, mais uniquement avec un twist fort et une production rapide.",
       "production": "Animation 100 % issue des assets officiels ; versions miniatures de Lofi Girl et du chat.",
       "caveat": "Vérifier la disponibilité du son sur chaque compte ; une composition Lofi Girl peut reprendre le rythme visuel.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@mushuuno",
+        "caption": "Publication d’origine identifiée par l’historique du format.",
+        "url": "https://www.tiktok.com/@mushuuno/video/7649860709261544736",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-06-10T20:06:32.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Post d’origine du format",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@mushuuno/video/7649860709261544736",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":350100,"comments":2206,"shares":31700}
+      },
       "observations": [
         {"id":"twins-carousel-20260728","platform":"youtube","sourceLabel":"AniJam Shorts Trends · 28/07/2026","sourceUrl":"https://www.anijam.ai/blog/youtube-shorts-trends/","observedAt":"2026-07-28T12:00:00Z","windowLabel":"Fin juillet","signal":"Le format est encore signalé actif sur YouTube Shorts après une diffusion massive sur TikTok.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"},
         {"id":"twins-carousel-kym-20260701","platform":"tiktok","sourceLabel":"Know Your Meme · 01/07/2026","sourceUrl":"https://trending.knowyourmeme.com/editorials/guides/what-is-the-twins-at-the-carousel-trend-the-massive-animation-meme-set-to-kikuos-song-explained","observedAt":"2026-07-01T12:00:00Z","windowLabel":"Début juillet","signal":"Le tracker décrit des dizaines de milliers d’utilisations TikTok.","rank":null,"posts":null,"views":null,"uses":30000,"exactness":"platform-estimate"}
@@ -205,6 +296,21 @@
       "timing": "Publier cette semaine.",
       "production": "Typographie claire sur animation officielle courte ; prévoir une version avec son Lofi Girl.",
       "caveat": "Revérifier le son dans la bibliothèque commerciale avant publication.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@marlon3lg",
+        "caption": "Plus forte vue visible dans la grille publique de l’audio lors de la capture.",
+        "url": "https://www.instagram.com/reel/DbKrHAtB3VI/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-24T07:11:53.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Top visible de l’audio · 5,2 M vues",
+        "sourceLabel": "Instagram · grille publique de l’audio",
+        "sourceUrl": "https://www.instagram.com/reel/DbKrHAtB3VI/",
+        "exactness": "platform-estimate",
+        "metrics": {"views":5200000,"likes":314000,"comments":2126,"shares":null}
+      },
       "observations": [
         {"id":"freaked-out-20260731","platform":"instagram","sourceLabel":"SocialPilot · snapshot fin juillet","sourceUrl":"https://www.socialpilot.co/blog/instagram-reels-trends","observedAt":"2026-07-31T12:00:00Z","windowLabel":"Fin juillet","signal":"Environ 173 k Reels et statut encore indiqué comme rising.","rank":null,"posts":null,"views":null,"uses":173000,"exactness":"platform-estimate"}
       ],
@@ -231,6 +337,21 @@
       "timing": "Très fraîche : prototyper maintenant.",
       "production": "Même cadrage avant/après, assets officiels et transition nette au mouvement du casque.",
       "caveat": "Le volume public n’est pas disponible : traiter comme signal frais à tester, pas comme certitude massive.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@batchfiftytwo",
+        "caption": "Exemple éditorial explicitement associé au format par Later.",
+        "url": "https://www.instagram.com/reel/Da5lieLo_N5/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-17T16:04:57.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple exact cité par Later",
+        "sourceLabel": "Instagram · compteurs publics",
+        "sourceUrl": "https://www.instagram.com/reel/Da5lieLo_N5/",
+        "exactness": "exact",
+        "metrics": {"views":null,"likes":4201,"comments":16,"shares":null}
+      },
       "observations": [
         {"id":"on-off-later-20260807","platform":"instagram","sourceLabel":"Later Instagram Trends · 07/08/2026","sourceUrl":"https://later.com/blog/instagram-reels-trends/","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Repéré le 07/08","signal":"Transition on–off signalée parmi les formats Reels émergents.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -257,6 +378,21 @@
       "timing": "À tester dans les prochains jours.",
       "production": "Split-screen simple avec deux attitudes dessinées par l’équipe officielle.",
       "caveat": "Le signal vient d’un tracker éditorial ; observer la réaction du premier test avant série.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@juttaleerdam",
+        "caption": "Exemple pertinent et fortement engagé visible sur la page publique de l’audio.",
+        "url": "https://www.tiktok.com/@juttaleerdam/video/7501392027473464598",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2025-05-06T17:52:14.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple fortement engagé de l’audio",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@juttaleerdam/video/7501392027473464598",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":206800,"comments":264,"shares":845}
+      },
       "observations": [
         {"id":"two-personalities-20260807","platform":"tiktok","sourceLabel":"Later TikTok Trends · 07/08/2026","sourceUrl":"https://later.com/blog/tiktok-trends/","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Repéré le 07/08","signal":"Format contradictoire “two personalities” repéré parmi les tendances TikTok fraîches.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -283,6 +419,7 @@
       "timing": "Publier pendant le pic de chaleur, pas après.",
       "production": "Illustration officielle avec effets de chaleur et accessoires estivaux, sans éléments de franchise reconnaissables.",
       "caveat": "Éviter logos, personnages et musique Star Wars ; la comparaison doit rester générique.",
+      "referencePost": null,
       "observations": [
         {"id":"canicule-france-20260808","platform":"x","sourceLabel":"Le Monde · 08/08/2026","sourceUrl":"https://www.lemonde.fr/en/environment/article/2026/08/08/heatwave-expected-to-intensify-in-the-coming-days-as-france-faces-one-of-its-longest-ever-recorded_6756276_114.html","observedAt":"2026-08-08T12:00:00Z","windowLabel":"Week-end du 8–10 août","signal":"La France entre dans une nouvelle intensification de la canicule, avec 35–40 °C annoncés.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -309,6 +446,21 @@
       "timing": "À adapter rapidement tant que les edits progressent.",
       "production": "Animation originale d’un exercice ou d’un projet ; aucun extrait du stream.",
       "caveat": "Ne pas reprendre l’image de Speed ; revérifier les droits du son Persona 5 ou utiliser un beat original.",
+      "referencePost": {
+        "platform": "youtube",
+        "author": "@IShowSpeed",
+        "caption": "Vidéo source du moment viral, confirmée par les métadonnées YouTube.",
+        "url": "https://www.youtube.com/shorts/hOoL8p8vFgs",
+        "mediaType": "video",
+        "thumbnailUrl": "https://i.ytimg.com/vi/hOoL8p8vFgs/maxresdefault.jpg",
+        "publishedAt": "2026-08-03T00:06:04.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Vidéo source du moment viral",
+        "sourceLabel": "YouTube · métadonnées publiques",
+        "sourceUrl": "https://www.youtube.com/watch?v=hOoL8p8vFgs",
+        "exactness": "exact",
+        "metrics": {"views":5636298,"likes":153019,"comments":null,"shares":null}
+      },
       "observations": [
         {"id":"speed-coming-20260806","platform":"youtube","sourceLabel":"Know Your Meme · 06/08/2026","sourceUrl":"https://knowyourmeme.com/memes/ishowspeed-youll-never-see-it-coming","observedAt":"2026-08-06T12:00:00Z","windowLabel":"Cinq jours après le stream","signal":"La vidéo source dépassait 5,4 M de vues et 149 k likes ; des edits TikTok dépassaient 120 k likes.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -335,6 +487,21 @@
       "timing": "À tester cette semaine.",
       "production": "Même plan avant/après, couleur restaurée avec les assets officiels de la marque.",
       "caveat": "Vérifier Mambo No. 5 dans la bibliothèque commerciale ou synchroniser la transition sur un morceau Lofi Girl.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@piccolocafes",
+        "caption": "Exemple exact utilisé par Later pour illustrer la tendance.",
+        "url": "https://www.instagram.com/reel/DbKzFeKInvb/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-24T08:22:12.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple exact cité par Later",
+        "sourceLabel": "Instagram · compteurs publics",
+        "sourceUrl": "https://www.instagram.com/reel/DbKzFeKInvb/",
+        "exactness": "exact",
+        "metrics": {"views":null,"likes":50,"comments":1,"shares":null}
+      },
       "observations": [
         {"id":"more-color-20260731","platform":"instagram","sourceLabel":"Later Instagram Trends · 31/07/2026","sourceUrl":"https://later.com/blog/instagram-reels-trends/","observedAt":"2026-07-31T12:00:00Z","windowLabel":"Fin juillet","signal":"Le format noir-et-blanc vers couleur est signalé parmi les tendances Reels actives.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -361,6 +528,21 @@
       "timing": "Fenêtre encore ouverte, à condition de publier vite.",
       "production": "Micro-récit original avec animation humaine officielle et éventuelle musique maison.",
       "caveat": "Utiliser le titre seulement s’il est autorisé sur le compte ; sinon conserver le mécanisme avec un morceau Lofi Girl.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@craevx_",
+        "caption": "Plus forte vue visible dans la grille publique de l’audio lors de la capture.",
+        "url": "https://www.instagram.com/reel/DbKkjyBiRVo/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-24T06:17:35.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Top visible de l’audio · 1,3 M vues",
+        "sourceLabel": "Instagram · grille publique de l’audio",
+        "sourceUrl": "https://www.instagram.com/reel/DbKkjyBiRVo/",
+        "exactness": "platform-estimate",
+        "metrics": {"views":1300000,"likes":161000,"comments":215,"shares":null}
+      },
       "observations": [
         {"id":"less-lover-20260731","platform":"instagram","sourceLabel":"SocialPilot · snapshot fin juillet","sourceUrl":"https://www.socialpilot.co/blog/instagram-reels-trends","observedAt":"2026-07-31T12:00:00Z","windowLabel":"Fin juillet","signal":"Environ 33 k Reels et statut encore indiqué comme rising.","rank":null,"posts":null,"views":null,"uses":33000,"exactness":"platform-estimate"}
       ],
@@ -387,6 +569,21 @@
       "timing": "À prototyper sous quelques jours.",
       "production": "Montage d’assets officiels existants, rythmé mais lisible, avec voix originale si nécessaire.",
       "caveat": "Le volume public n’est pas confirmé ; faire un premier test court.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@nemzzz_",
+        "caption": "Publication du créateur de l’audio portant la phrase de la trend.",
+        "url": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-08T12:00:46.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Post du créateur de l’audio",
+        "sourceLabel": "TikTok · compteurs publics",
+        "sourceUrl": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":59800,"comments":449,"shares":1608}
+      },
       "observations": [
         {"id":"ghosting-20260807","platform":"tiktok","sourceLabel":"Later TikTok Trends · 07/08/2026","sourceUrl":"https://later.com/blog/tiktok-trends/","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Repéré le 07/08","signal":"Montage “I’ve been ghosting you” repéré parmi les tendances TikTok fraîches.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -413,6 +610,21 @@
       "timing": "Format très frais, à tenter rapidement.",
       "production": "Animation officielle image par image ; chaise transformée en ascenseur, train ou trappe.",
       "caveat": "Vérifier les droits de Beat It ou synchroniser l’illusion sur un morceau original.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@buuzandcroissant",
+        "caption": "Exemple exact retenu par Later pour illustrer le format.",
+        "url": "https://www.instagram.com/reel/DbnfgfkI5uV/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-04T11:49:01.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Exemple exact cité par Later",
+        "sourceLabel": "Instagram · compteurs publics",
+        "sourceUrl": "https://www.instagram.com/reel/DbnfgfkI5uV/",
+        "exactness": "exact",
+        "metrics": {"views":null,"likes":616,"comments":5,"shares":null}
+      },
       "observations": [
         {"id":"couch-acting-20260807","platform":"instagram","sourceLabel":"Later Instagram Trends · 07/08/2026","sourceUrl":"https://later.com/blog/instagram-reels-trends/","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Repéré le 07/08","signal":"Le challenge de jeu corporel avec canapé est signalé comme fraîchement arrivé sur Instagram.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -439,6 +651,21 @@
       "timing": "À tester rapidement pendant la phase émergente.",
       "production": "Courte animation officielle centrée sur les expressions et les deux objets échangés.",
       "caveat": "Signal frais sans volume public confirmé ; ne pas en faire une série avant le premier résultat.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@itskacylee",
+        "caption": "Exemple Later dont la performance publique dépasse nettement les autres exemples vérifiés.",
+        "url": "https://www.instagram.com/reel/DbjhcHjOZ8U/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-08-02T22:48:28.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Meilleur exemple vérifié · 58 k likes",
+        "sourceLabel": "Instagram · compteurs publics",
+        "sourceUrl": "https://www.instagram.com/reel/DbjhcHjOZ8U/",
+        "exactness": "platform-estimate",
+        "metrics": {"views":null,"likes":58000,"comments":82,"shares":641}
+      },
       "observations": [
         {"id":"meal-swap-20260807","platform":"instagram","sourceLabel":"Later Instagram Trends · 07/08/2026","sourceUrl":"https://later.com/blog/instagram-reels-trends/","observedAt":"2026-08-07T12:00:00Z","windowLabel":"Repéré le 07/08","signal":"Le format Meal Swap est signalé parmi les tendances Reels émergentes.","rank":null,"posts":null,"views":null,"uses":null,"exactness":"editorial-observation"}
       ],
@@ -465,6 +692,21 @@
       "timing": "Seulement si le twist est prêt aujourd’hui ; sinon garder la mécanique pour un son maison.",
       "production": "Liste très courte sur animation officielle, avec détails propres à l’univers Lofi Girl.",
       "caveat": "Le son est mature et peut être protégé : vérifier les droits et éviter une simple copie de liste.",
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@laurabeverlin",
+        "caption": "Plus forte vue observable dans la grille publique de l’audio lors de la capture.",
+        "url": "https://www.instagram.com/reel/DaqECOGRUWe/",
+        "mediaType": "video",
+        "thumbnailUrl": null,
+        "publishedAt": "2026-07-11T15:16:11.000Z",
+        "capturedAt": "2026-08-10T12:00:00+02:00",
+        "selectionLabel": "Top visible de l’audio · 817 k vues",
+        "sourceLabel": "Instagram · grille publique de l’audio",
+        "sourceUrl": "https://www.instagram.com/reel/DaqECOGRUWe/",
+        "exactness": "platform-estimate",
+        "metrics": {"views":817000,"likes":34000,"comments":744,"shares":null}
+      },
       "observations": [
         {"id":"hallelujah-20260731","platform":"instagram","sourceLabel":"SocialPilot · snapshot fin juillet","sourceUrl":"https://www.socialpilot.co/blog/instagram-reels-trends","observedAt":"2026-07-31T12:00:00Z","windowLabel":"Fin juillet","signal":"Environ 552 k Reels et statut indiqué comme peak.","rank":null,"posts":null,"views":null,"uses":552000,"exactness":"platform-estimate"}
       ],
