@@ -1768,7 +1768,7 @@ function TrendFeedView({
           <span className="section-kicker">Veille créative Lofi Girl</span>
           <h2>🔥 Trends à adapter maintenant</h2>
           <p>
-            Un post de référence par trend, puis l’adaptation Lofi Girl et trois textes prêts à tester.
+            Un feed de trends illustré par un post qui performe, avec l’adaptation Lofi Girl à côté.
           </p>
         </div>
         {snapshotDate ? (
@@ -1925,36 +1925,46 @@ function TrendFeedCard({ trend, rank }: { trend: SocialTrend; rank: number }) {
           {proposal ? (
             <section className="trend-lofi-adaptation" aria-label="Adaptation Lofi Girl proposée">
               <span>🎧 Adaptation Lofi Girl</span>
-              <h4>{proposal.title}</h4>
-              <p>{proposal.concept}</p>
-              <div className="trend-tone-tabs" role="group" aria-label={`Choisir un ton pour ${trend.title}`}>
-                {trend.proposals.map((candidate) => {
-                  const tone = TREND_TONE_META[candidate.tone];
-                  const isActive = activeTone === candidate.tone;
-                  return (
-                    <button
-                      className={isActive ? "active" : ""}
-                      type="button"
-                      aria-pressed={isActive}
-                      onClick={() => {
-                        setActiveTone(candidate.tone);
-                        setCopyState("idle");
-                      }}
-                      key={candidate.tone}
-                    >
-                      {tone.emoji} {candidate.label || tone.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <blockquote>{proposal.copy}</blockquote>
-              <button className="trend-copy-button" type="button" onClick={() => void copyProposal()}>
-                {copyState === "copied"
-                  ? "✓ Texte copié"
-                  : copyState === "error"
-                    ? "Copie impossible"
-                    : "📋 Copier le texte"}
-              </button>
+              <h4>{trend.proposals[0]?.title ?? proposal.title}</h4>
+              <p>{trend.proposals[0]?.concept ?? proposal.concept}</p>
+              <details className="trend-copy-disclosure">
+                <summary>✍️ Voir les 3 textes proposés</summary>
+                <div className="trend-copy-disclosure-content">
+                  <div className="trend-tone-tabs" role="group" aria-label={`Choisir un ton pour ${trend.title}`}>
+                    {trend.proposals.map((candidate) => {
+                      const tone = TREND_TONE_META[candidate.tone];
+                      const isActive = activeTone === candidate.tone;
+                      return (
+                        <button
+                          className={isActive ? "active" : ""}
+                          type="button"
+                          aria-pressed={isActive}
+                          onClick={() => {
+                            setActiveTone(candidate.tone);
+                            setCopyState("idle");
+                          }}
+                          key={candidate.tone}
+                        >
+                          {tone.emoji} {candidate.label || tone.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <blockquote>{proposal.copy}</blockquote>
+                  <button
+                    className="trend-copy-button"
+                    type="button"
+                    aria-live="polite"
+                    onClick={() => void copyProposal()}
+                  >
+                    {copyState === "copied"
+                      ? "✓ Texte copié"
+                      : copyState === "error"
+                        ? "Copie impossible"
+                        : "📋 Copier le texte"}
+                  </button>
+                </div>
+              </details>
             </section>
           ) : null}
         </div>
