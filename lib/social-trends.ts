@@ -87,6 +87,7 @@ const CONFIDENCE_WEIGHT: Record<TrendConfidence, number> = {
 export const TREND_PRIORITY_THRESHOLD = 90;
 export const MIN_TREND_VIDEO_LIKES = 50_000;
 export const MAX_TREND_VIDEO_DURATION_SECONDS = 30;
+export const MIN_ACTIONABLE_TREND_LOFI_FIT = 85;
 
 export function hasValidTrendReferenceDuration(referencePost: TrendReferencePost) {
   if (referencePost.mediaType !== "video") {
@@ -111,6 +112,13 @@ export function isQualifiedTrendReferencePost(
   );
 }
 
+export function isActionableSocialTrend(trend: SocialTrend) {
+  return (
+    trend.lofiFitScore >= MIN_ACTIONABLE_TREND_LOFI_FIT &&
+    isQualifiedTrendReferencePost(trend.referencePost)
+  );
+}
+
 export function trendPriorityScore(trend: SocialTrend) {
   const saturationPenalty = Math.max(0, trend.saturationRisk - 55) * 0.16;
   return Math.max(
@@ -118,8 +126,8 @@ export function trendPriorityScore(trend: SocialTrend) {
     Math.min(
       99,
       Math.round(
-        trend.lofiFitScore * 0.5 +
-          trend.momentumScore * 0.35 +
+        trend.lofiFitScore * 0.65 +
+          trend.momentumScore * 0.2 +
           CONFIDENCE_WEIGHT[trend.confidence] * 0.15 -
           saturationPenalty,
       ),

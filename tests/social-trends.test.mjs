@@ -4,8 +4,10 @@ import test from "node:test";
 import {
   assertSocialTrendFeed,
   filterSocialTrends,
+  isActionableSocialTrend,
   isQualifiedTrendReferencePost,
   MAX_TREND_VIDEO_DURATION_SECONDS,
+  MIN_ACTIONABLE_TREND_LOFI_FIT,
   MIN_TREND_VIDEO_LIKES,
   rankSocialTrends,
   TREND_PRIORITY_THRESHOLD,
@@ -158,6 +160,62 @@ test("the current snapshot is complete, sourced and honest about missing metrics
     ),
     "missing public metrics must stay null instead of being invented",
   );
+});
+
+test("the actionable feed keeps only strong, qualified Lofi Girl executions", () => {
+  const actionable = feed.trends.filter(isActionableSocialTrend);
+  assert.ok(actionable.length >= 25, "the feed must expose at least 25 actionable trends");
+  assert.ok(
+    actionable.every((trend) => trend.lofiFitScore >= MIN_ACTIONABLE_TREND_LOFI_FIT),
+    "every actionable trend must clear the Lofi-fit threshold",
+  );
+  assert.ok(
+    actionable.every((trend) => isQualifiedTrendReferencePost(trend.referencePost)),
+    "every actionable trend must keep a qualified reference post",
+  );
+
+  for (const rejectedId of [
+    "pain-oh-no-spain",
+    "choosin-texas-western-reveal",
+    "ss26-editorial-transition",
+    "dracula-jennie-remix",
+    "eurosummer-micro-montage",
+    "is-it-cake-or-fake",
+  ]) {
+    const trend = feed.trends.find((candidate) => candidate.id === rejectedId);
+    assert.ok(trend, `${rejectedId} must remain auditable in the snapshot`);
+    assert.equal(isActionableSocialTrend(trend), false, rejectedId);
+  }
+
+  for (const actionableId of [
+    "broken-rules-temptation",
+    "different-lives-split",
+    "suspect-hidden-plain-sight",
+    "pocketful-sunshine-mood-flip",
+    "phones-eras-study-desk",
+    "she-outplayed-him-study-cat",
+    "fun-at-first-exam-week",
+  ]) {
+    const trend = feed.trends.find((candidate) => candidate.id === actionableId);
+    assert.ok(trend, `${actionableId} must be present in the actionable feed`);
+    assert.equal(isActionableSocialTrend(trend), true, actionableId);
+  }
+});
+
+test("the actionable Lofi-fit threshold changes exactly between 84 and 85", () => {
+  assert.equal(MIN_ACTIONABLE_TREND_LOFI_FIT, 85);
+  const qualified = feed.trends.find((trend) =>
+    isQualifiedTrendReferencePost(trend.referencePost),
+  );
+  assert.ok(qualified, "the fixture must contain a qualified trend reference");
+
+  const belowThreshold = structuredClone(qualified);
+  belowThreshold.lofiFitScore = 84;
+  assert.equal(isActionableSocialTrend(belowThreshold), false);
+
+  const atThreshold = structuredClone(qualified);
+  atThreshold.lofiFitScore = 85;
+  assert.equal(isActionableSocialTrend(atThreshold), true);
 });
 
 test("runtime validation rejects an unknown lifecycle and an unverifiable source", () => {

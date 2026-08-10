@@ -48,7 +48,7 @@ import {
 import {
   assertSocialTrendFeed,
   filterSocialTrends,
-  isQualifiedTrendReferencePost,
+  isActionableSocialTrend,
   latestTrendObservation,
   trendPriorityScore,
   type SocialTrend,
@@ -1003,7 +1003,7 @@ export function SocialOS({
     if (id === "top") return totalPostCount;
     if (id === "trends") {
       return trendFeed
-        ? trendFeed.trends.filter((trend) => isQualifiedTrendReferencePost(trend.referencePost)).length
+        ? trendFeed.trends.filter(isActionableSocialTrend).length
         : undefined;
     }
     if (id === "ideas") return ideaPlan.ideas.length;
@@ -1757,20 +1757,17 @@ function TrendFeedView({
   const [platformFilter, setPlatformFilter] = useState<TrendPlatformFilter>("all");
   const [stageFilter, setStageFilter] = useState<TrendStageFilter>("all");
   const [activeTrend, setActiveTrend] = useState<SocialTrend | null>(null);
-  const qualifiedTrends = useMemo(
-    () =>
-      (feed?.trends ?? []).filter((trend) =>
-        isQualifiedTrendReferencePost(trend.referencePost),
-      ),
+  const actionableTrends = useMemo(
+    () => (feed?.trends ?? []).filter(isActionableSocialTrend),
     [feed?.trends],
   );
   const visibleTrends = useMemo(
     () =>
-      filterSocialTrends(qualifiedTrends, {
+      filterSocialTrends(actionableTrends, {
         platform: platformFilter,
         lifecycle: stageFilter,
       }),
-    [platformFilter, qualifiedTrends, stageFilter],
+    [actionableTrends, platformFilter, stageFilter],
   );
   const snapshotDate = formatCardPublishedDate(feed?.capturedAt);
 
@@ -1778,14 +1775,14 @@ function TrendFeedView({
     <div className="trend-feed-view">
       <header className="trend-feed-heading">
         <div>
-          <span className="section-kicker">Veille créative Lofi Girl</span>
-          <h2>🔥 Trends à adapter maintenant</h2>
+          <span className="section-kicker">Sélection éditoriale Lofi Girl</span>
+          <h2>🔥 Trends vraiment exploitables</h2>
           <p>
-            Un feed visuel de posts qui performent. Chaque exemple vidéo affiché dépasse 50 000 likes et dure moins de 30 secondes.
+            Chaque carte montre le post Lofi Girl concret à produire : étude, procrastination, examens, routine ou chat. Les adaptations forcées sont exclues.
           </p>
         </div>
         {snapshotDate ? (
-          <span className="trend-snapshot-pill">Snapshot {snapshotDate} · ❤️ 50K+ · ⏱️ &lt;30 s</span>
+          <span className="trend-snapshot-pill">Snapshot {snapshotDate} · 🎯 Lofi fit 85+ · ❤️ 50K+ · ⏱️ &lt;30 s</span>
         ) : null}
       </header>
 
@@ -1895,6 +1892,7 @@ function TrendFeedCard({
   if (!referencePost) return null;
   const publishedDate = formatCardPublishedDate(referencePost.publishedAt);
   const footerMetrics = trendReferenceFooterMetrics(referencePost);
+  const lofiExecution = trend.proposals[0]?.concept ?? trend.whyLofi;
 
   return (
     <article className={`social-post-card trend-reference-card has-media tone-${lifecycle.tone}`}>
@@ -1910,9 +1908,15 @@ function TrendFeedCard({
         </div>
         <div className="post-card-title">
           <div className="post-media-caption">
+            <span className="trend-card-source-title">🎯 À produire · trend {trend.title}</span>
             <h3>
-              <a href={referencePost.url} target="_blank" rel="noreferrer">
-                {trend.title}
+              <a
+                href={referencePost.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Voir l’exemple original de la trend ${trend.title}`}
+              >
+                {lofiExecution}
               </a>
             </h3>
           </div>
@@ -1946,10 +1950,55 @@ function TrendReferenceMedia({ trend, rank }: { trend: SocialTrend; rank: number
   const [shouldLoad, setShouldLoad] = useState(false);
   const referencePost = trend.referencePost;
   const embedUrl = referencePost ? trendReferenceEmbedUrl(referencePost) : null;
+  const tiktokExternalId = referencePost?.platform === "tiktok"
+    ? referencePost.url.match(/\/video\/(\d{12,24})/i)?.[1] ?? null
+    : null;
+  const tiktokOEmbedUrl = referencePost?.platform === "tiktok"
+    ? `https://www.tiktok.com/oembed?url=${encodeURIComponent(referencePost.url)}`
+    : null;
+  const cachedTikTokThumbnail = tiktokExternalId
+    ? getCachedTikTokThumbnail(tiktokExternalId)
+    : null;
+  const [thumbnail, setThumbnail] = useState<string | null>(
+    referencePost?.thumbnailUrl ?? cachedTikTokThumbnail,
+  );
+
+  useEffect(() => {
+    if (
+      referencePost?.platform !== "tiktok" ||
+      !tiktokExternalId ||
+      !tiktokOEmbedUrl ||
+      thumbnail
+    ) return;
+    let cancelled = false;
+    const loadThumbnail = () => {
+      void requestTikTokThumbnail(tiktokExternalId, tiktokOEmbedUrl).then((url) => {
+        if (!cancelled && url) setThumbnail(url);
+      });
+    };
+    const target = containerRef.current;
+    const stopObserving = target
+      ? observeTikTokPreview(target, loadThumbnail)
+      : (() => {
+          loadThumbnail();
+          return () => undefined;
+        })();
+    return () => {
+      cancelled = true;
+      stopObserving();
+    };
+  }, [referencePost?.platform, thumbnail, tiktokExternalId, tiktokOEmbedUrl]);
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node || !referencePost || !embedUrl || shouldLoad) return;
+    if (
+      !node ||
+      !referencePost ||
+      !embedUrl ||
+      shouldLoad ||
+      referencePost.platform === "youtube" ||
+      referencePost.platform === "tiktok"
+    ) return;
     if (typeof IntersectionObserver === "undefined") {
       const fallbackTimer = globalThis.setTimeout(() => setShouldLoad(true), 0);
       return () => globalThis.clearTimeout(fallbackTimer);
@@ -1987,11 +2036,20 @@ function TrendReferenceMedia({ trend, rank }: { trend: SocialTrend; rank: number
           className="post-visual-trigger"
           type="button"
           onClick={() => embedUrl ? setShouldLoad(true) : undefined}
-          disabled={!embedUrl && !referencePost.thumbnailUrl}
+          disabled={!embedUrl && !thumbnail}
           aria-label={`Lire le post de référence pour « ${trend.title} »`}
         >
-          {referencePost.thumbnailUrl ? (
-            <img src={referencePost.thumbnailUrl} alt="" loading="lazy" decoding="async" />
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onError={() => {
+                if (tiktokExternalId) TIKTOK_THUMBNAIL_CACHE.delete(tiktokExternalId);
+                setThumbnail(null);
+              }}
+            />
           ) : (
             <span className="post-preview-placeholder" aria-hidden="true">
               <b>{trendPlatformEmoji(referencePost.platform)}</b>

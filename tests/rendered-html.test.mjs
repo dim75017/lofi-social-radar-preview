@@ -136,7 +136,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /TrendReferenceMedia/);
   assert.match(component, /TrendDetailsModal/);
   assert.match(component, /trend-reference-card/);
-  assert.match(component, /Chaque exemple vidéo affiché dépasse 50 000 likes et dure moins de 30 secondes/);
+  assert.match(component, /Trends vraiment exploitables/);
+  assert.match(component, /isActionableSocialTrend/);
+  assert.match(component, /trend-card-source-title/);
+  assert.match(component, /À produire/);
   assert.match(component, /trend-duration-badge/);
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(component, /loading="lazy"/);
@@ -188,6 +191,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.trend-feed-view\s*\{/);
   assert.match(styles, /\.trend-shorts-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(260px,\s*1fr\)\)/);
   assert.match(styles, /\.trend-shorts-grid \.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
+  assert.match(styles, /\.trend-card-source-title\s*\{/);
+  assert.match(styles, /\.trend-feed-heading\s*\{/);
   assert.match(styles, /\.trend-duration-badge\s*\{/);
   assert.match(styles, /\.trend-details-modal\s*\{/);
   assert.match(styles, /\.recommendation-source-links a > img/);

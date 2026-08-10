@@ -6309,6 +6309,25 @@ a {
   min-height: 2.8em;
 }
 
+.trend-card-body .post-card-title {
+  min-height: 76px;
+}
+
+.trend-card-source-title {
+  display: block;
+  min-height: 1.2em;
+  margin-bottom: 6px;
+  overflow: hidden;
+  color: #f4c878;
+  font-size: 11px;
+  font-weight: 860;
+  letter-spacing: 0.045em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .trend-details-modal {
   width: min(100%, 980px);
 }
