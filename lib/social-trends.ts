@@ -32,6 +32,7 @@ export type TrendReferencePost = {
   caption: string;
   url: string;
   mediaType: "image" | "video" | "text" | "unknown";
+  durationSeconds: number | null;
   thumbnailUrl: string | null;
   publishedAt: string | null;
   capturedAt: string;
@@ -70,7 +71,7 @@ export type SocialTrend = {
 };
 
 export type SocialTrendFeed = {
-  version: 2;
+  version: 3;
   capturedAt: string;
   market: string;
   methodology: string;
@@ -84,6 +85,31 @@ const CONFIDENCE_WEIGHT: Record<TrendConfidence, number> = {
 };
 
 export const TREND_PRIORITY_THRESHOLD = 90;
+export const MIN_TREND_VIDEO_LIKES = 50_000;
+export const MAX_TREND_VIDEO_DURATION_SECONDS = 30;
+
+export function hasValidTrendReferenceDuration(referencePost: TrendReferencePost) {
+  if (referencePost.mediaType !== "video") {
+    return referencePost.durationSeconds === null;
+  }
+  return (
+    referencePost.durationSeconds !== null &&
+    Number.isFinite(referencePost.durationSeconds) &&
+    referencePost.durationSeconds > 0 &&
+    referencePost.durationSeconds < MAX_TREND_VIDEO_DURATION_SECONDS
+  );
+}
+
+export function isQualifiedTrendReferencePost(
+  referencePost: TrendReferencePost | null,
+) {
+  if (!referencePost || !hasValidTrendReferenceDuration(referencePost)) return false;
+  if (referencePost.mediaType !== "video") return true;
+  return (
+    referencePost.metrics.likes !== null &&
+    referencePost.metrics.likes >= MIN_TREND_VIDEO_LIKES
+  );
+}
 
 export function trendPriorityScore(trend: SocialTrend) {
   const saturationPenalty = Math.max(0, trend.saturationRisk - 55) * 0.16;
@@ -205,7 +231,7 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
   };
 
   if (
-    feed?.version !== 2 ||
+    feed?.version !== 3 ||
     !isText(feed.capturedAt) ||
     !Number.isFinite(Date.parse(feed.capturedAt)) ||
     !isText(feed.market) ||
@@ -258,6 +284,7 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
         !isText(referencePost.caption) ||
         !isReferenceUrlForPlatform(referencePost.url, referencePost.platform) ||
         !validMediaTypes.has(referencePost.mediaType) ||
+        !hasValidTrendReferenceDuration(referencePost) ||
         (referencePost.thumbnailUrl !== null && !isWebUrl(referencePost.thumbnailUrl)) ||
         (referencePost.publishedAt !== null &&
           (!isText(referencePost.publishedAt) || !Number.isFinite(Date.parse(referencePost.publishedAt)))) ||
@@ -273,6 +300,8 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
         !isNullableMetric(metrics.likes) ||
         !isNullableMetric(metrics.comments) ||
         !isNullableMetric(metrics.shares) ||
+        (referencePost.mediaType === "video" &&
+          (metrics.likes === null || metrics.likes < MIN_TREND_VIDEO_LIKES)) ||
         (referencePost.exactness === "editorial-observation" &&
           [metrics.views, metrics.likes, metrics.comments, metrics.shares].some((metric) => metric !== null))
       ) {

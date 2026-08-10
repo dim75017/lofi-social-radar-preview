@@ -134,8 +134,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /label: "Trends"/);
   assert.match(component, /TrendFeedView/);
   assert.match(component, /TrendReferenceMedia/);
+  assert.match(component, /TrendDetailsModal/);
   assert.match(component, /trend-reference-card/);
-  assert.match(component, /Pourquoi cette trend \+ preuves/);
+  assert.match(component, /Chaque exemple vidéo affiché dépasse 50 000 likes et dure moins de 30 secondes/);
+  assert.match(component, /trend-duration-badge/);
+  assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(component, /loading="lazy"/);
   assert.match(component, /Voir le post original/);
   assert.match(component, /hasMediaPreview \?/);
@@ -183,9 +186,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.reco-card-main\s*>\s*h3\s*\{[\s\S]*?font-size:\s*18px/);
   assert.match(styles, /\.reco-proof-preview\s*\{/);
   assert.match(styles, /\.trend-feed-view\s*\{/);
-  assert.match(styles, /\.trend-reference-layout\s*\{[\s\S]*?grid-template-columns:/);
-  assert.match(styles, /\.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*4\s*\/\s*5/);
-  assert.match(styles, /\.trend-details-disclosure\s*\{/);
+  assert.match(styles, /\.trend-shorts-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(260px,\s*1fr\)\)/);
+  assert.match(styles, /\.trend-shorts-grid \.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
+  assert.match(styles, /\.trend-duration-badge\s*\{/);
+  assert.match(styles, /\.trend-details-modal\s*\{/);
   assert.match(styles, /\.recommendation-source-links a > img/);
   assert.match(styles, /\.recommendation-mechanic-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.reco-quick-actions\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);

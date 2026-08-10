@@ -6214,6 +6214,180 @@ a {
   }
 }
 
+/* Trends reuse the exact visual rhythm of the YouTube Shorts cards. */
+.trend-shorts-grid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: stretch;
+}
+
+.trend-shorts-grid .trend-reference-card {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 0;
+  contain-intrinsic-size: 0 520px;
+}
+
+.trend-shorts-grid .trend-reference-visual {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  max-height: none;
+  aspect-ratio: 1 / 1;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+}
+
+.trend-shorts-grid .trend-reference-visual iframe {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #090b12;
+}
+
+.trend-shorts-grid .trend-reference-visual.platform-instagram iframe {
+  background: #fff;
+}
+
+.trend-duration-badge {
+  position: absolute;
+  z-index: 5;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(6, 9, 18, 0.84);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.trend-card-body {
+  gap: 11px;
+}
+
+.trend-card-meta-line {
+  display: flex;
+  min-height: 31px;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trend-card-meta-line > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-card-meta-line .status-badge {
+  min-height: 29px;
+  flex: none;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+
+.trend-card-body .post-card-title h3 {
+  min-height: 2.8em;
+}
+
+.trend-details-modal {
+  width: min(100%, 980px);
+}
+
+.post-details-modal.trend-details-modal.tone-green {
+  --modal-rgb: 74, 222, 128;
+}
+
+.post-details-modal.trend-details-modal.tone-amber {
+  --modal-rgb: 251, 191, 36;
+}
+
+.post-details-modal.trend-details-modal.tone-indigo {
+  --modal-rgb: 154, 168, 255;
+}
+
+.trend-original-link {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  margin-top: 11px;
+  border: 1px solid rgba(var(--modal-rgb), 0.34);
+  border-radius: 10px;
+  background: rgba(var(--modal-rgb), 0.08);
+  padding: 7px 10px;
+  color: rgb(var(--modal-rgb));
+  font-size: var(--fs-meta);
+  font-weight: 820;
+  text-decoration: none;
+}
+
+.trend-original-link:hover,
+.trend-original-link:focus-visible {
+  border-color: rgba(var(--modal-rgb), 0.62);
+  color: #fff;
+  outline: none;
+}
+
+.trend-details-modal .trend-lofi-adaptation,
+.trend-details-modal .trend-modal-copy-section,
+.trend-details-modal .trend-detail-grid,
+.trend-details-modal .trend-tags,
+.trend-details-modal .trend-proof-section,
+.trend-details-modal .trend-caveat {
+  margin-top: 12px;
+}
+
+.trend-modal-copy-section {
+  display: grid;
+  gap: 11px;
+  border: 1px solid rgba(154, 168, 255, 0.2);
+  border-radius: 14px;
+  background: rgba(7, 8, 13, 0.38);
+  padding: 14px;
+}
+
+.trend-modal-copy-section blockquote {
+  margin: 0;
+  border-left: 3px solid rgba(154, 168, 255, 0.52);
+  padding: 4px 0 4px 12px;
+  color: var(--text);
+  font-family: Sora, Inter, sans-serif;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+.trend-details-modal .trend-proof-section {
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: rgba(7, 8, 13, 0.34);
+  padding: 14px;
+}
+
+@media (max-width: 640px) {
+  .trend-shorts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Editorial idea engine */
 
 .progressive-pagination {

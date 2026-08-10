@@ -4,6 +4,9 @@ import test from "node:test";
 import {
   assertSocialTrendFeed,
   filterSocialTrends,
+  isQualifiedTrendReferencePost,
+  MAX_TREND_VIDEO_DURATION_SECONDS,
+  MIN_TREND_VIDEO_LIKES,
   rankSocialTrends,
   TREND_PRIORITY_THRESHOLD,
   trendPriorityScore,
@@ -12,11 +15,6 @@ import {
 const feed = JSON.parse(
   await readFile(new URL("../data/trends/feed.json", import.meta.url), "utf8"),
 );
-
-const NULL_REFERENCE_TRENDS = new Set([
-  "eclipse-perseides-12-aout",
-  "heatwave-tatooine",
-]);
 
 function referenceUrlMatchesPlatform(referencePost) {
   const url = new URL(referencePost.url);
@@ -45,21 +43,35 @@ function cloneWithFirstReferencePost() {
   return { snapshot, trend, referencePost: trend.referencePost };
 }
 
+function cloneWithFirstVideoReferencePost() {
+  const snapshot = structuredClone(feed);
+  const trend = snapshot.trends.find(
+    (candidate) => candidate.referencePost?.mediaType === "video",
+  );
+  assert.ok(trend?.referencePost, "the fixture must contain a video reference post");
+  return { snapshot, trend, referencePost: trend.referencePost };
+}
+
+function cloneWithFirstNonVideoReferencePost() {
+  const snapshot = structuredClone(feed);
+  const trend = snapshot.trends.find(
+    (candidate) => candidate.referencePost && candidate.referencePost.mediaType !== "video",
+  );
+  assert.ok(trend?.referencePost, "the fixture must contain a non-video reference post");
+  return { snapshot, trend, referencePost: trend.referencePost };
+}
+
 test("the current snapshot is complete, sourced and honest about missing metrics", () => {
   assert.equal(assertSocialTrendFeed(feed), feed);
-  assert.equal(feed.version, 2);
+  assert.equal(feed.version, 3);
   assert.ok(Date.parse(feed.capturedAt) >= Date.parse("2026-08-10T00:00:00+02:00"));
-  assert.ok(feed.trends.length >= 12);
+  assert.ok(feed.trends.length >= 30);
   assert.equal(new Set(feed.trends.map((trend) => trend.id)).size, feed.trends.length);
 
   const trendsWithReference = feed.trends.filter((trend) => trend.referencePost !== null);
   const trendsWithoutReference = feed.trends.filter((trend) => trend.referencePost === null);
-  assert.equal(trendsWithReference.length, 16);
-  assert.equal(trendsWithoutReference.length, 2);
-  assert.deepEqual(
-    new Set(trendsWithoutReference.map((trend) => trend.id)),
-    NULL_REFERENCE_TRENDS,
-  );
+  assert.ok(trendsWithReference.length > 18);
+  assert.ok(trendsWithoutReference.length >= 2);
 
   for (const trend of feed.trends) {
     assert.ok(trend.observations.length >= 1, trend.id);
@@ -81,16 +93,11 @@ test("the current snapshot is complete, sourced and honest about missing metrics
     );
 
     if (trend.referencePost === null) {
-      assert.ok(
-        trend.observations.every(
-          (observation) => observation.exactness === "editorial-observation",
-        ),
-        `${trend.id} must stay null until a direct platform post is sourced`,
-      );
       continue;
     }
 
     const referencePost = trend.referencePost;
+    assert.equal(isQualifiedTrendReferencePost(referencePost), true, trend.id);
     assert.ok(trend.platforms.includes(referencePost.platform), trend.id);
     assert.ok(referenceUrlMatchesPlatform(referencePost), trend.id);
     assert.equal(new URL(referencePost.url).protocol, "https:", trend.id);
@@ -112,12 +119,37 @@ test("the current snapshot is complete, sourced and honest about missing metrics
         trend.id,
       );
     }
+    if (referencePost.mediaType === "video") {
+      assert.ok(
+        referencePost.metrics.likes >= MIN_TREND_VIDEO_LIKES,
+        `${trend.id} must clear the public video-like threshold`,
+      );
+      assert.ok(
+        referencePost.durationSeconds > 0 &&
+          referencePost.durationSeconds < MAX_TREND_VIDEO_DURATION_SECONDS,
+        `${trend.id} must be a verified video under 30 seconds`,
+      );
+    } else {
+      assert.equal(referencePost.durationSeconds, null, trend.id);
+    }
     if (referencePost.exactness === "editorial-observation") {
       assert.ok(
         Object.values(referencePost.metrics).every((metric) => metric === null),
         trend.id,
       );
     }
+  }
+
+  assert.equal(
+    feed.trends.find((trend) => trend.id === "matrix-verity-edit")?.referencePost?.durationSeconds,
+    13,
+  );
+  for (const excludedId of [
+    "back-to-school-study-reset",
+    "youll-never-see-it-coming",
+    "not-a-relaxing-environment",
+  ]) {
+    assert.equal(feed.trends.find((trend) => trend.id === excludedId)?.referencePost, null);
   }
 
   assert.ok(
@@ -181,6 +213,42 @@ test("reference posts reject negative or editorially inferred metrics", () => {
   };
   assert.throws(
     () => assertSocialTrendFeed(editorialMetric.snapshot),
+    /Post de référence invalide/i,
+  );
+});
+
+test("video references enforce 50,000 likes and a verified duration under 30 seconds", () => {
+  const belowThreshold = cloneWithFirstVideoReferencePost();
+  belowThreshold.referencePost.metrics.likes = MIN_TREND_VIDEO_LIKES - 1;
+  assert.throws(
+    () => assertSocialTrendFeed(belowThreshold.snapshot),
+    /Post de référence invalide/i,
+  );
+
+  const missingLikes = cloneWithFirstVideoReferencePost();
+  missingLikes.referencePost.metrics.likes = null;
+  assert.throws(
+    () => assertSocialTrendFeed(missingLikes.snapshot),
+    /Post de référence invalide/i,
+  );
+
+  for (const invalidDuration of [null, 0, 30, 30.001, Number.POSITIVE_INFINITY]) {
+    const invalid = cloneWithFirstVideoReferencePost();
+    invalid.referencePost.durationSeconds = invalidDuration;
+    assert.throws(
+      () => assertSocialTrendFeed(invalid.snapshot),
+      /Post de référence invalide/i,
+    );
+  }
+
+  const justBelowLimit = cloneWithFirstVideoReferencePost();
+  justBelowLimit.referencePost.durationSeconds = 29.999;
+  assert.equal(assertSocialTrendFeed(justBelowLimit.snapshot), justBelowLimit.snapshot);
+
+  const durationOnImage = cloneWithFirstNonVideoReferencePost();
+  durationOnImage.referencePost.durationSeconds = 12;
+  assert.throws(
+    () => assertSocialTrendFeed(durationOnImage.snapshot),
     /Post de référence invalide/i,
   );
 });
