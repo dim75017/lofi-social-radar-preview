@@ -2,6 +2,7 @@ export type TrendPlatform = "instagram" | "tiktok" | "youtube" | "x";
 export type TrendLifecycle = "new" | "rising" | "peaking" | "steady" | "watch";
 export type TrendConfidence = "high" | "medium" | "watch";
 export type TrendTone = "complice" | "cozy" | "absurde";
+export type TrendCharacter = "lofi-girl" | "lofi-boy";
 
 export type TrendObservation = {
   id: string;
@@ -51,6 +52,8 @@ export type TrendReferencePost = {
 export type SocialTrend = {
   id: string;
   title: string;
+  character: TrendCharacter;
+  territory: string;
   type: "hashtag" | "sound" | "spoken-audio" | "meme-template" | "format" | "moment";
   summary: string;
   mechanic: string;
@@ -71,7 +74,7 @@ export type SocialTrend = {
 };
 
 export type SocialTrendFeed = {
-  version: 3;
+  version: 4;
   capturedAt: string;
   market: string;
   methodology: string;
@@ -151,13 +154,16 @@ export function filterSocialTrends(
   options: {
     platform?: TrendPlatform | "all";
     lifecycle?: TrendLifecycle | "all" | "priority";
+    character?: TrendCharacter | "all";
   } = {},
 ) {
   const platform = options.platform ?? "all";
   const lifecycle = options.lifecycle ?? "all";
+  const character = options.character ?? "all";
   return rankSocialTrends(
     trends.filter((trend) => {
       if (platform !== "all" && !trend.platforms.includes(platform)) return false;
+      if (character !== "all" && trend.character !== character) return false;
       if (lifecycle === "priority") {
         return trendPriorityScore(trend) >= TREND_PRIORITY_THRESHOLD;
       }
@@ -189,6 +195,7 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     }
   };
   const validPlatforms = new Set<TrendPlatform>(["instagram", "tiktok", "youtube", "x"]);
+  const validCharacters = new Set<TrendCharacter>(["lofi-girl", "lofi-boy"]);
   const validLifecycles = new Set<TrendLifecycle>(["new", "rising", "peaking", "steady", "watch"]);
   const validConfidences = new Set<TrendConfidence>(["high", "medium", "watch"]);
   const validTypes = new Set<SocialTrend["type"]>([
@@ -239,7 +246,7 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
   };
 
   if (
-    feed?.version !== 3 ||
+    feed?.version !== 4 ||
     !isText(feed.capturedAt) ||
     !Number.isFinite(Date.parse(feed.capturedAt)) ||
     !isText(feed.market) ||
@@ -258,6 +265,8 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     ids.add(trend.id);
     if (
       !isText(trend.title) ||
+      !validCharacters.has(trend.character) ||
+      !isText(trend.territory) ||
       !validTypes.has(trend.type) ||
       !isText(trend.summary) ||
       !isText(trend.mechanic) ||

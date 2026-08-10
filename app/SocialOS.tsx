@@ -53,6 +53,7 @@ import {
   trendPriorityScore,
   type SocialTrend,
   type SocialTrendFeed,
+  type TrendCharacter,
   type TrendLifecycle,
   type TrendPlatform,
   type TrendReferencePost,
@@ -64,7 +65,7 @@ type View = "overview" | "top" | "trends" | "ideas" | "planning" | "all" | "sour
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 type TrendPlatformFilter = TrendPlatform | "all";
-type TrendStageFilter = TrendLifecycle | "priority" | "all";
+type TrendCharacterFilter = TrendCharacter | "all";
 
 type MetricSnapshot = {
   captured_at: string;
@@ -210,19 +211,23 @@ const TREND_PLATFORM_FILTERS: Array<{
   { key: "x", emoji: "𝕏", label: "X" },
 ];
 
-const TREND_STAGE_FILTERS: Array<{
-  key: TrendStageFilter;
+const TREND_CHARACTER_FILTERS: Array<{
+  key: TrendCharacterFilter;
   emoji: string;
   label: string;
 }> = [
-  { key: "priority", emoji: "🎯", label: "Prioritaires" },
-  { key: "new", emoji: "🌱", label: "Émergentes" },
-  { key: "rising", emoji: "📈", label: "En hausse" },
-  { key: "peaking", emoji: "🔥", label: "Très actives" },
-  { key: "steady", emoji: "🌊", label: "Installées" },
-  { key: "watch", emoji: "👀", label: "À surveiller" },
-  { key: "all", emoji: "🗂️", label: "Toutes" },
+  { key: "all", emoji: "🌐", label: "Tout l’univers" },
+  { key: "lofi-girl", emoji: "🎧", label: "Lofi Girl" },
+  { key: "lofi-boy", emoji: "🎮", label: "Lofi Boy" },
 ];
+
+const TREND_CHARACTER_META: Record<
+  TrendCharacter,
+  { emoji: string; label: string; detailLabel: string }
+> = {
+  "lofi-girl": { emoji: "🎧", label: "Lofi Girl", detailLabel: "Lofi Girl" },
+  "lofi-boy": { emoji: "🎮", label: "Lofi Boy", detailLabel: "Lofi Boy / Synthwave Boy" },
+};
 
 const TREND_LIFECYCLE_META: Record<
   TrendLifecycle,
@@ -1755,7 +1760,7 @@ function TrendFeedView({
   error: string;
 }) {
   const [platformFilter, setPlatformFilter] = useState<TrendPlatformFilter>("all");
-  const [stageFilter, setStageFilter] = useState<TrendStageFilter>("all");
+  const [characterFilter, setCharacterFilter] = useState<TrendCharacterFilter>("all");
   const [activeTrend, setActiveTrend] = useState<SocialTrend | null>(null);
   const actionableTrends = useMemo(
     () => (feed?.trends ?? []).filter(isActionableSocialTrend),
@@ -1765,9 +1770,9 @@ function TrendFeedView({
     () =>
       filterSocialTrends(actionableTrends, {
         platform: platformFilter,
-        lifecycle: stageFilter,
+        character: characterFilter,
       }),
-    [actionableTrends, platformFilter, stageFilter],
+    [actionableTrends, characterFilter, platformFilter],
   );
   const snapshotDate = formatCardPublishedDate(feed?.capturedAt);
 
@@ -1775,14 +1780,14 @@ function TrendFeedView({
     <div className="trend-feed-view">
       <header className="trend-feed-heading">
         <div>
-          <span className="section-kicker">Sélection éditoriale Lofi Girl</span>
+          <span className="section-kicker">Sélection Lofi Girl + Lofi Boy</span>
           <h2>🔥 Trends vraiment exploitables</h2>
           <p>
-            Chaque carte montre le post Lofi Girl concret à produire : étude, procrastination, examens, routine ou chat. Les adaptations forcées sont exclues.
+            Chaque carte montre un post concret à produire dans le bon univers : étude et quotidien pour Lofi Girl ; gaming, culture geek, introversion et cinéma pour Lofi Boy.
           </p>
         </div>
         {snapshotDate ? (
-          <span className="trend-snapshot-pill">Snapshot {snapshotDate} · 🎯 Lofi fit 85+ · ❤️ 50K+ · ⏱️ &lt;30 s</span>
+          <span className="trend-snapshot-pill">Snapshot {snapshotDate} · 🎯 Fit univers 85+ · ❤️ 50K+ · ⏱️ &lt;30 s</span>
         ) : null}
       </header>
 
@@ -1804,14 +1809,14 @@ function TrendFeedView({
           </div>
         </div>
         <div className="trend-filter-group">
-          <span>Stade</span>
-          <div className="trend-filter-tabs" role="group" aria-label="Filtrer par stade">
-            {TREND_STAGE_FILTERS.map((option) => (
+          <span>Univers</span>
+          <div className="trend-filter-tabs" role="group" aria-label="Filtrer par univers">
+            {TREND_CHARACTER_FILTERS.map((option) => (
               <button
-                className={stageFilter === option.key ? "active" : ""}
+                className={characterFilter === option.key ? "active" : ""}
                 type="button"
-                aria-pressed={stageFilter === option.key}
-                onClick={() => setStageFilter(option.key)}
+                aria-pressed={characterFilter === option.key}
+                onClick={() => setCharacterFilter(option.key)}
                 key={option.key}
               >
                 {option.emoji} {option.label}
@@ -1855,13 +1860,13 @@ function TrendFeedView({
         <div className="empty-state trend-feed-empty">
           <span>🧭</span>
           <h3>Aucune tendance dans ce filtre</h3>
-          <p>Élargis le stade ou affiche toutes les plateformes.</p>
+          <p>Essaie un autre univers ou affiche toutes les plateformes.</p>
           <button
             className="button secondary"
             type="button"
             onClick={() => {
               setPlatformFilter("all");
-              setStageFilter("all");
+              setCharacterFilter("all");
             }}
           >
             Voir toutes les tendances
@@ -1888,6 +1893,7 @@ function TrendFeedCard({
   onOpenDetails: (trend: SocialTrend) => void;
 }) {
   const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
+  const character = TREND_CHARACTER_META[trend.character];
   const referencePost = trend.referencePost;
   if (!referencePost) return null;
   const publishedDate = formatCardPublishedDate(referencePost.publishedAt);
@@ -1908,7 +1914,7 @@ function TrendFeedCard({
         </div>
         <div className="post-card-title">
           <div className="post-media-caption">
-            <span className="trend-card-source-title">🎯 À produire · trend {trend.title}</span>
+            <span className="trend-card-source-title">{character.emoji} {character.label} · {trend.territory}</span>
             <h3>
               <a
                 href={referencePost.url}
@@ -2122,6 +2128,7 @@ function TrendDetailsModal({
   if (!trend?.referencePost) return null;
   const referencePost = trend.referencePost;
   const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
+  const character = TREND_CHARACTER_META[trend.character];
   const latestObservation = latestTrendObservation(trend);
   const proposal =
     trend.proposals.find((candidate) => candidate.tone === activeTone) ?? trend.proposals[0];
@@ -2151,7 +2158,7 @@ function TrendDetailsModal({
           <div>
             <span>{trendPlatformEmoji(referencePost.platform)} Fiche trend · {lifecycle.emoji} {lifecycle.label}</span>
             <h2 id={titleId}>{trend.title}</h2>
-            <small className="details-theme-label">Potentiel Lofi Girl {trendPriorityScore(trend)}/100</small>
+            <small className="details-theme-label">{character.emoji} {character.detailLabel} · potentiel {trendPriorityScore(trend)}/100</small>
           </div>
           <button
             className="post-details-close"
@@ -2189,7 +2196,7 @@ function TrendDetailsModal({
           <div>
             <span>Potentiel</span>
             <b>{trendPriorityScore(trend)}/100</b>
-            <small>Momentum, fit Lofi Girl et saturation</small>
+            <small>Momentum, fit avec l’univers Lofi et saturation</small>
           </div>
           <div>
             <span>Stade</span>
@@ -2203,8 +2210,8 @@ function TrendDetailsModal({
           </div>
         </div>
 
-        <section className="trend-lofi-adaptation" aria-label="Adaptation Lofi Girl proposée">
-          <span>🎧 Adaptation Lofi Girl</span>
+        <section className="trend-lofi-adaptation" aria-label={`Adaptation ${character.detailLabel} proposée`}>
+          <span>{character.emoji} Adaptation {character.detailLabel}</span>
           <h4>{proposal?.title}</h4>
           <p>{proposal?.concept}</p>
         </section>
@@ -2244,7 +2251,7 @@ function TrendDetailsModal({
 
         <div className="trend-detail-grid">
           <section><span>🧩 Ce qui se répète</span><p>{trend.mechanic}</p></section>
-          <section><span>🎧 Pourquoi Lofi Girl</span><p>{trend.whyLofi}</p></section>
+          <section><span>{character.emoji} Pourquoi {character.detailLabel}</span><p>{trend.whyLofi}</p></section>
           <section><span>⏱️ Bon moment</span><p>{trend.timing}</p></section>
           <section><span>🎬 À produire</span><p>{trend.production}</p></section>
         </div>
@@ -2384,7 +2391,7 @@ function trendObservationEvidenceLabel(
   exactness: SocialTrend["observations"][number]["exactness"],
 ) {
   if (exactness === "exact") return "Mesure plateforme";
-  if (exactness === "platform-estimate") return "Estimation du tracker";
+  if (exactness === "platform-estimate") return "Compteur public arrondi";
   return "Signal éditorial sourcé";
 }
 

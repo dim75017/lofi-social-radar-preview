@@ -139,7 +139,15 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /Trends vraiment exploitables/);
   assert.match(component, /isActionableSocialTrend/);
   assert.match(component, /trend-card-source-title/);
-  assert.match(component, /À produire/);
+  assert.match(component, /TREND_CHARACTER_FILTERS/);
+  assert.match(component, /TREND_CHARACTER_META/);
+  assert.match(component, /characterFilter/);
+  assert.match(component, /aria-label="Filtrer par univers"/);
+  assert.match(component, /label: "Lofi Girl"/);
+  assert.match(component, /label: "Lofi Boy"/);
+  assert.match(component, /Lofi Boy \/ Synthwave Boy/);
+  assert.match(component, /character\.emoji.*character\.label.*trend\.territory/);
+  assert.doesNotMatch(component, /Potentiel Lofi Girl|Adaptation Lofi Girl|Pourquoi Lofi Girl/);
   assert.match(component, /trend-duration-badge/);
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(component, /loading="lazy"/);

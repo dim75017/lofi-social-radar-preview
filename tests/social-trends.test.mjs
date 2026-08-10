@@ -65,7 +65,7 @@ function cloneWithFirstNonVideoReferencePost() {
 
 test("the current snapshot is complete, sourced and honest about missing metrics", () => {
   assert.equal(assertSocialTrendFeed(feed), feed);
-  assert.equal(feed.version, 3);
+  assert.equal(feed.version, 4);
   assert.ok(Date.parse(feed.capturedAt) >= Date.parse("2026-08-10T00:00:00+02:00"));
   assert.ok(feed.trends.length >= 30);
   assert.equal(new Set(feed.trends.map((trend) => trend.id)).size, feed.trends.length);
@@ -76,6 +76,8 @@ test("the current snapshot is complete, sourced and honest about missing metrics
   assert.ok(trendsWithoutReference.length >= 2);
 
   for (const trend of feed.trends) {
+    assert.ok(["lofi-girl", "lofi-boy"].includes(trend.character), trend.id);
+    assert.ok(trend.territory.trim().length > 0, trend.id);
     assert.ok(trend.observations.length >= 1, trend.id);
     assert.deepEqual(
       new Set(trend.proposals.map((proposal) => proposal.tone)),
@@ -162,7 +164,7 @@ test("the current snapshot is complete, sourced and honest about missing metrics
   );
 });
 
-test("the actionable feed keeps only strong, qualified Lofi Girl executions", () => {
+test("the actionable feed keeps only strong, qualified Lofi-universe executions", () => {
   const actionable = feed.trends.filter(isActionableSocialTrend);
   assert.ok(actionable.length >= 25, "the feed must expose at least 25 actionable trends");
   assert.ok(
@@ -195,11 +197,30 @@ test("the actionable feed keeps only strong, qualified Lofi Girl executions", ()
     "phones-eras-study-desk",
     "she-outplayed-him-study-cat",
     "fun-at-first-exam-week",
+    "backrooms-stay-in-character-lofi-boy",
+    "obsession-nice-date-lofi-boy",
+    "gaming-setup-night-reveal",
+    "social-battery-solo-mode",
+    "discord-eh-les-copains",
+    "explaining-game-lore",
+    "video-game-main-menu",
+    "choose-your-lofi-character",
   ]) {
     const trend = feed.trends.find((candidate) => candidate.id === actionableId);
     assert.ok(trend, `${actionableId} must be present in the actionable feed`);
     assert.equal(isActionableSocialTrend(trend), true, actionableId);
   }
+
+  const lofiBoyTrends = actionable.filter((trend) => trend.character === "lofi-boy");
+  assert.ok(lofiBoyTrends.length >= 8, "the feed must expose a real Lofi Boy selection");
+  assert.ok(
+    lofiBoyTrends.some((trend) => trend.territory.toLowerCase().includes("introversion")),
+    "Lofi Boy must cover introversion",
+  );
+  assert.ok(
+    lofiBoyTrends.some((trend) => trend.territory.toLowerCase().includes("cinéma")),
+    "Lofi Boy must cover recent film culture",
+  );
 });
 
 test("the actionable Lofi-fit threshold changes exactly between 84 and 85", () => {
@@ -228,6 +249,14 @@ test("runtime validation rejects an unknown lifecycle and an unverifiable source
   const invalidSource = structuredClone(feed);
   invalidSource.trends[0].observations[0].sourceUrl = "not-a-source";
   assert.throws(() => assertSocialTrendFeed(invalidSource), /observation invalide/i);
+
+  const invalidCharacter = structuredClone(feed);
+  invalidCharacter.trends[0].character = "lofi-cat";
+  assert.throws(() => assertSocialTrendFeed(invalidCharacter), /invalide/i);
+
+  const missingTerritory = structuredClone(feed);
+  missingTerritory.trends[0].territory = "";
+  assert.throws(() => assertSocialTrendFeed(missingTerritory), /invalide/i);
 });
 
 test("reference posts reject a foreign domain, an incoherent platform and a future capture", () => {
@@ -311,7 +340,7 @@ test("video references enforce 50,000 likes and a verified duration under 30 sec
   );
 });
 
-test("ranking and feed filters surface the strongest Lofi Girl opportunities", () => {
+test("ranking and feed filters surface the strongest opportunities by platform and universe", () => {
   const ranked = rankSocialTrends(feed.trends);
   assert.ok(trendPriorityScore(ranked[0]) >= trendPriorityScore(ranked.at(-1)));
   assert.ok(ranked.every((trend) => trendPriorityScore(trend) >= 0));
@@ -319,6 +348,10 @@ test("ranking and feed filters surface the strongest Lofi Girl opportunities", (
   const instagram = filterSocialTrends(feed.trends, { platform: "instagram" });
   assert.ok(instagram.length > 0);
   assert.ok(instagram.every((trend) => trend.platforms.includes("instagram")));
+
+  const lofiBoy = filterSocialTrends(feed.trends, { character: "lofi-boy" });
+  assert.ok(lofiBoy.length >= 8);
+  assert.ok(lofiBoy.every((trend) => trend.character === "lofi-boy"));
 
   const priorities = filterSocialTrends(feed.trends, { lifecycle: "priority" });
   assert.ok(priorities.length > 0);
