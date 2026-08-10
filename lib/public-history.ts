@@ -109,7 +109,7 @@ export type PublicWorkspacePayload = {
   accounts: PublicWorkspaceAccount[];
   posts: PublicWorkspacePost[];
   scans: unknown[];
-  analysis: ReturnType<typeof buildSocialAnalysis> | null;
+  analysis: ReturnType<typeof buildSocialAnalysisFromRanked> | null;
   historyCoverage: HistoryCoverage[];
 };
 

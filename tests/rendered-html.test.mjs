@@ -121,6 +121,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /publicHistorySummary\.totalPostCount/);
   assert.match(previewEntry, /publicHistorySummary\.formatCounts/);
   assert.match(previewEntry, /cache: "force-cache"/);
+  assert.match(previewEntry, /RAW_TREND_FEED_URL/);
+  assert.match(previewEntry, /initialTrendFeed=\{trendFeed\}/);
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);
@@ -129,6 +131,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /Plus d’informations/);
   assert.match(component, /Mesure au lancement/);
   assert.match(component, /metric_history/);
+  assert.match(component, /label: "Trends"/);
+  assert.match(component, /TrendFeedView/);
   assert.match(component, /hasMediaPreview \?/);
   assert.match(component, /text-only/);
   assert.doesNotMatch(component, /Lire ici|post-play-button/);
@@ -173,6 +177,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.reco-card\s*\{[\s\S]*?content-visibility:\s*auto/);
   assert.match(styles, /\.reco-card-main\s*>\s*h3\s*\{[\s\S]*?font-size:\s*18px/);
   assert.match(styles, /\.reco-proof-preview\s*\{/);
+  assert.match(styles, /\.trend-feed-view\s*\{/);
   assert.match(styles, /\.recommendation-source-links a > img/);
   assert.match(styles, /\.recommendation-mechanic-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.reco-quick-actions\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
@@ -180,7 +185,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.roadmap-calendar-shell\.platform-neutral\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(styles, /\.roadmap-month-days\s*\{[\s\S]*?grid-template-columns:\s*repeat\(7,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.social-post-card\s*\{[\s\S]*?display:\s*flex;[\s\S]*?height:\s*100%;[\s\S]*?flex-direction:\s*column;/);
-  assert.match(styles, /\.social-post-card\.poll-card \.poll-choice-list\s*\{[\s\S]*?grid-template-rows:\s*repeat\(5, 36px\)/);
+  assert.match(styles, /\.social-post-card\.poll-card \.poll-choice-list\s*\{[\s\S]*?grid-auto-rows:\s*minmax\(36px, auto\)/);
+  assert.match(styles, /\.poll-choice-list li\s*\{[\s\S]*?overflow-wrap:\s*anywhere;[\s\S]*?white-space:\s*normal/);
+  assert.doesNotMatch(styles, /\.social-post-card\.poll-card \.poll-choice-list\s*\{[\s\S]*?grid-template-rows:\s*repeat\(5, 36px\)/);
   assert.match(styles, /\.social-post-card footer\s*\{[\s\S]*?grid-template-columns:\s*max-content minmax\(0, 1fr\);/);
   assert.match(styles, /\.post-published-date\s*\{[\s\S]*?min-width:\s*max-content;[\s\S]*?justify-self:\s*start;[\s\S]*?width:\s*max-content;[\s\S]*?padding:\s*4px 12px 4px 10px;[\s\S]*?white-space:\s*nowrap;/);
   assert.match(styles, /@media[\s\S]*?\.social-post-card\.compact\s*\{\s*display:\s*flex;[\s\S]*?\.social-post-card footer\s*\{\s*grid-template-columns:\s*max-content minmax\(0, 1fr\);/);

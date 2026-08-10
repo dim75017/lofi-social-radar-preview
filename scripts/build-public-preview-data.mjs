@@ -1,14 +1,16 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertSocialTrendFeed } from "../lib/social-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "work", "pages-dist", "data");
 const platforms = ["youtube", "instagram", "tiktok", "x"];
 
-const [snapshot, summary] = await Promise.all([
+const [snapshot, summary, trendFeed] = await Promise.all([
   readJson(resolve(root, "data", "public-history.json")),
   readJson(resolve(root, "data", "public-history-summary.json")),
+  readJson(resolve(root, "data", "trends", "feed.json")),
 ]);
 
 if (snapshot.generatedAt !== summary.generatedAt) {
@@ -17,10 +19,13 @@ if (snapshot.generatedAt !== summary.generatedAt) {
 if (snapshot.posts.length !== summary.totalPostCount) {
   throw new Error("Le total du résumé public ne correspond pas à l’historique.");
 }
+assertSocialTrendFeed(trendFeed);
 
 await mkdir(output, { recursive: true });
+await mkdir(resolve(output, "trends"), { recursive: true });
 await writeJson(resolve(output, "public-history-summary.json"), summary);
 await writeJson(resolve(output, "public-history.json"), snapshot);
+await writeJson(resolve(output, "trends", "feed.json"), trendFeed);
 
 for (const platform of platforms) {
   const posts = snapshot.posts.filter((post) => post.platform === platform);

@@ -45,11 +45,24 @@ import {
   editorialPostKey,
   type EditorialWhy,
 } from "../lib/social-editorial-analysis";
+import {
+  assertSocialTrendFeed,
+  filterSocialTrends,
+  latestTrendObservation,
+  trendPriorityScore,
+  type SocialTrend,
+  type SocialTrendFeed,
+  type TrendLifecycle,
+  type TrendPlatform,
+  type TrendTone,
+} from "../lib/social-trends";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
-type View = "overview" | "top" | "ideas" | "planning" | "all" | "sources";
+type View = "overview" | "top" | "trends" | "ideas" | "planning" | "all" | "sources";
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
+type TrendPlatformFilter = TrendPlatform | "all";
+type TrendStageFilter = TrendLifecycle | "priority" | "all";
 
 type MetricSnapshot = {
   captured_at: string;
@@ -168,6 +181,7 @@ const NAV: Array<{
 }> = [
   { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
+  { id: "trends", emoji: "🔥", label: "Trends", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Recommandations", group: "Pilotage" },
   { id: "planning", emoji: "🗓️", label: "Roadmap", group: "Pilotage" },
 ];
@@ -180,6 +194,49 @@ const DEFAULT_FORMAT_FILTER: Record<Platform, SocialFormatFilter> = {
   instagram: "reel",
   tiktok: "video",
   x: "static",
+};
+
+const TREND_PLATFORM_FILTERS: Array<{
+  key: TrendPlatformFilter;
+  emoji: string;
+  label: string;
+}> = [
+  { key: "all", emoji: "🌐", label: "Tous" },
+  { key: "instagram", emoji: "📸", label: "Instagram" },
+  { key: "tiktok", emoji: "🎵", label: "TikTok" },
+  { key: "youtube", emoji: "▶️", label: "YouTube Shorts" },
+  { key: "x", emoji: "𝕏", label: "X" },
+];
+
+const TREND_STAGE_FILTERS: Array<{
+  key: TrendStageFilter;
+  emoji: string;
+  label: string;
+}> = [
+  { key: "priority", emoji: "🎯", label: "Prioritaires" },
+  { key: "new", emoji: "🌱", label: "Émergentes" },
+  { key: "rising", emoji: "📈", label: "En hausse" },
+  { key: "peaking", emoji: "🔥", label: "Très actives" },
+  { key: "steady", emoji: "🌊", label: "Installées" },
+  { key: "watch", emoji: "👀", label: "À surveiller" },
+  { key: "all", emoji: "🗂️", label: "Toutes" },
+];
+
+const TREND_LIFECYCLE_META: Record<
+  TrendLifecycle,
+  { emoji: string; label: string; tone: string }
+> = {
+  new: { emoji: "🌱", label: "Émergente", tone: "green" },
+  rising: { emoji: "📈", label: "En hausse", tone: "green" },
+  peaking: { emoji: "🔥", label: "Très active", tone: "amber" },
+  steady: { emoji: "🌊", label: "Installée", tone: "indigo" },
+  watch: { emoji: "👀", label: "À surveiller", tone: "amber" },
+};
+
+const TREND_TONE_META: Record<TrendTone, { emoji: string; label: string }> = {
+  complice: { emoji: "🤝", label: "Complice" },
+  cozy: { emoji: "☕", label: "Cozy" },
+  absurde: { emoji: "🌀", label: "Absurde" },
 };
 
 function categoryFilters(platform: Platform) {
@@ -475,6 +532,7 @@ function formatCardPublishedDate(value: string | null | undefined): string | nul
 
 export function SocialOS({
   initialWorkspace = null,
+  initialTrendFeed = null,
   previewMode = false,
   publicCounts,
   publicFormatCounts,
@@ -482,6 +540,7 @@ export function SocialOS({
   historyError = "",
 }: {
   initialWorkspace?: WorkspacePayload | null;
+  initialTrendFeed?: SocialTrendFeed | null;
   previewMode?: boolean;
   publicCounts?: Partial<Record<Platform, number>>;
   publicFormatCounts?: Partial<Record<Platform, Record<string, number>>>;
@@ -490,6 +549,9 @@ export function SocialOS({
 }) {
   const [loadedWorkspace, setLoadedWorkspace] = useState<WorkspacePayload | null>(initialWorkspace);
   const workspace = previewMode ? initialWorkspace : loadedWorkspace;
+  const [trendFeed, setTrendFeed] = useState<SocialTrendFeed | null>(initialTrendFeed);
+  const [trendsLoading, setTrendsLoading] = useState(!previewMode && !initialTrendFeed);
+  const [trendsError, setTrendsError] = useState("");
   const [view, setView] = useState<View>("overview");
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("short");
@@ -545,6 +607,54 @@ export function SocialOS({
     }, 0);
     return () => window.clearTimeout(timeout);
   }, [initialWorkspace, loadWorkspace, previewMode]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setTrendFeed(initialTrendFeed);
+      if (initialTrendFeed || previewMode) {
+        setTrendsLoading(false);
+        setTrendsError("");
+      }
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [initialTrendFeed, previewMode]);
+
+  useEffect(() => {
+    if (previewMode) return;
+    const controller = new AbortController();
+    let active = true;
+
+    const loadTrendFeed = async () => {
+      setTrendsLoading(true);
+      setTrendsError("");
+      try {
+        const response = await fetch("/api/trends", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as SocialTrendFeed & { error?: string };
+        if (!response.ok) {
+          throw new Error(payload.error || "Les tendances ne sont pas disponibles pour le moment.");
+        }
+        if (active) setTrendFeed(assertSocialTrendFeed(payload));
+      } catch (loadError) {
+        if (!active || controller.signal.aborted) return;
+        setTrendsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Les tendances ne sont pas disponibles pour le moment.",
+        );
+      } finally {
+        if (active) setTrendsLoading(false);
+      }
+    };
+
+    void loadTrendFeed();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [previewMode]);
 
   useEffect(() => {
     if (!toast) return;
@@ -889,6 +999,7 @@ export function SocialOS({
 
   const navCount = (id: View) => {
     if (id === "top") return totalPostCount;
+    if (id === "trends") return trendFeed ? trendFeed.trends.length : undefined;
     if (id === "ideas") return ideaPlan.ideas.length;
     if (id === "planning") return editorialWorkflow.schedule.length;
     if (id === "all") return totalPostCount;
@@ -1198,6 +1309,14 @@ export function SocialOS({
               </div>
             </section>
           </div>
+        ) : null}
+
+        {view === "trends" ? (
+          <TrendFeedView
+            feed={trendFeed}
+            loading={trendsLoading}
+            error={trendsError}
+          />
         ) : null}
 
         {workspace && view === "ideas" ? (
@@ -1618,6 +1737,343 @@ export function SocialOS({
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
+}
+
+function TrendFeedView({
+  feed,
+  loading,
+  error,
+}: {
+  feed: SocialTrendFeed | null;
+  loading: boolean;
+  error: string;
+}) {
+  const [platformFilter, setPlatformFilter] = useState<TrendPlatformFilter>("all");
+  const [stageFilter, setStageFilter] = useState<TrendStageFilter>("priority");
+  const visibleTrends = useMemo(
+    () =>
+      filterSocialTrends(feed?.trends ?? [], {
+        platform: platformFilter,
+        lifecycle: stageFilter,
+      }),
+    [feed?.trends, platformFilter, stageFilter],
+  );
+  const snapshotDate = formatCardPublishedDate(feed?.capturedAt);
+
+  return (
+    <div className="trend-feed-view">
+      <header className="trend-feed-heading">
+        <div>
+          <span className="section-kicker">Veille créative Lofi Girl</span>
+          <h2>🔥 Trends à adapter maintenant</h2>
+          <p>
+            Les formats qui prennent de la vitesse et qui peuvent devenir un vrai post Lofi Girl,
+            avec les preuves observées et trois textes prêts à tester.
+          </p>
+        </div>
+        {snapshotDate ? (
+          <span className="trend-snapshot-pill">Snapshot {snapshotDate}</span>
+        ) : null}
+      </header>
+
+      <div className="trend-feed-controls" aria-label="Filtres des tendances">
+        <div className="trend-filter-group">
+          <span>Plateforme</span>
+          <div className="trend-filter-tabs" role="group" aria-label="Filtrer par plateforme">
+            {TREND_PLATFORM_FILTERS.map((option) => (
+              <button
+                className={platformFilter === option.key ? "active" : ""}
+                type="button"
+                aria-pressed={platformFilter === option.key}
+                onClick={() => setPlatformFilter(option.key)}
+                key={option.key}
+              >
+                {option.emoji} {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="trend-filter-group">
+          <span>Stade</span>
+          <div className="trend-filter-tabs" role="group" aria-label="Filtrer par stade">
+            {TREND_STAGE_FILTERS.map((option) => (
+              <button
+                className={stageFilter === option.key ? "active" : ""}
+                type="button"
+                aria-pressed={stageFilter === option.key}
+                onClick={() => setStageFilter(option.key)}
+                key={option.key}
+              >
+                {option.emoji} {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {error ? (
+        <div className="trend-feed-notice" role="status">
+          <span aria-hidden="true">⚠️</span>
+          <p>
+            {feed
+              ? "La dernière mise à jour n’a pas pu être chargée. Le snapshot ci-dessous reste disponible."
+              : error}
+          </p>
+        </div>
+      ) : null}
+
+      {loading && !feed ? (
+        <div className="trend-feed-loading" role="status">
+          <span aria-hidden="true">⏳</span>
+          <div>
+            <b>Préparation du snapshot Trends</b>
+            <p>Les signaux et leurs sources sont en cours de chargement.</p>
+          </div>
+        </div>
+      ) : feed && visibleTrends.length ? (
+        <>
+          <div className="trend-feed-context">
+            <p>
+              <b>{visibleTrends.length}</b> tendance{visibleTrends.length > 1 ? "s" : ""} dans ce filtre.
+              Les scores servent à les classer, pas à promettre une performance.
+            </p>
+          </div>
+          <div className="trend-grid">
+            {visibleTrends.map((trend, index) => (
+              <TrendFeedCard trend={trend} rank={index + 1} key={trend.id} />
+            ))}
+          </div>
+        </>
+      ) : feed ? (
+        <div className="empty-state trend-feed-empty">
+          <span>🧭</span>
+          <h3>Aucune tendance dans ce filtre</h3>
+          <p>Élargis le stade ou affiche toutes les plateformes.</p>
+          <button
+            className="button secondary"
+            type="button"
+            onClick={() => {
+              setPlatformFilter("all");
+              setStageFilter("all");
+            }}
+          >
+            Voir toutes les tendances
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function TrendFeedCard({ trend, rank }: { trend: SocialTrend; rank: number }) {
+  const firstTone = trend.proposals[0]?.tone ?? "complice";
+  const [activeTone, setActiveTone] = useState<TrendTone>(firstTone);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
+  const proposal =
+    trend.proposals.find((candidate) => candidate.tone === activeTone) ?? trend.proposals[0];
+  const latestObservation = latestTrendObservation(trend);
+  const score = trendPriorityScore(trend);
+
+  const copyProposal = async () => {
+    if (!proposal) return;
+    const copied = await copyText(proposal.copy);
+    setCopyState(copied ? "copied" : "error");
+  };
+
+  return (
+    <article className={`trend-card tone-${lifecycle.tone}`}>
+      <div className="trend-card-top">
+        <span className="trend-rank">#{rank}</span>
+        <span className={`status-badge tone-${lifecycle.tone}`}>
+          {lifecycle.emoji} {lifecycle.label}
+        </span>
+        <span className="trend-priority-score" aria-label={`Score de priorité ${score} sur 100`}>
+          {score}<small>/100</small>
+        </span>
+      </div>
+
+      <div className="trend-card-title">
+        <div className="trend-platform-list" aria-label="Plateformes concernées">
+          {trend.platforms.map((platform) => (
+            <span key={platform}>{trendPlatformEmoji(platform)} {trendPlatformLabel(platform)}</span>
+          ))}
+        </div>
+        <h3>{trend.title}</h3>
+        <p className="trend-summary">{trend.summary}</p>
+      </div>
+
+      <div className="trend-tags" aria-label="Mots-clés observés">
+        <span>{trendTypeLabel(trend.type)}</span>
+        {trend.keywords.map((keyword) => <span key={keyword}>#{keyword.replace(/^#/, "")}</span>)}
+      </div>
+
+      <section className="trend-explanation">
+        <span>🧩 Ce qui se répète</span>
+        <p>{trend.mechanic}</p>
+      </section>
+
+      <section className="trend-lofi-fit">
+        <span aria-hidden="true">🎧</span>
+        <div>
+          <b>Pourquoi c’est pertinent pour Lofi Girl</b>
+          <p>{trend.whyLofi}</p>
+        </div>
+      </section>
+
+      <div className="trend-actionability">
+        <div>
+          <span>⏱️ Bon moment</span>
+          <p>{trend.timing}</p>
+        </div>
+        <div>
+          <span>🎬 À produire</span>
+          <p>{trend.production}</p>
+        </div>
+      </div>
+
+      <section className="trend-proof-section">
+        <header>
+          <div>
+            <span className="section-kicker">Preuves observées</span>
+            <h4>🔎 D’où vient le signal</h4>
+          </div>
+          {latestObservation ? (
+            <small>Dernier relevé {formatCardPublishedDate(latestObservation.observedAt)}</small>
+          ) : null}
+        </header>
+        <ul className="trend-proof-list">
+          {trend.observations.map((observation) => {
+            const observationMetrics = trendObservationMetrics(observation);
+            return (
+              <li key={observation.id}>
+                <div>
+                  <span className="trend-proof-platform">
+                    {trendPlatformEmoji(observation.platform)} {trendPlatformLabel(observation.platform)}
+                  </span>
+                  <span className="trend-proof-window">{observation.windowLabel}</span>
+                  <span className={`trend-proof-exactness exactness-${observation.exactness}`}>
+                    {trendObservationEvidenceLabel(observation.exactness)}
+                  </span>
+                </div>
+                <p>{observation.signal}</p>
+                {observationMetrics.length ? (
+                  <div className="trend-proof-metrics">
+                    {observationMetrics.map((metric) => <span key={metric}>{metric}</span>)}
+                  </div>
+                ) : null}
+                <a href={observation.sourceUrl} target="_blank" rel="noreferrer">
+                  {observation.sourceLabel} ↗
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {proposal ? (
+        <section className="trend-proposal-section">
+          <header>
+            <span className="section-kicker">3 textes prêts à tester</span>
+            <h4>✍️ Proposition Lofi Girl</h4>
+          </header>
+          <div className="trend-tone-tabs" role="tablist" aria-label={`Tons proposés pour ${trend.title}`}>
+            {trend.proposals.map((candidate) => {
+              const tone = TREND_TONE_META[candidate.tone];
+              const isActive = activeTone === candidate.tone;
+              return (
+                <button
+                  className={isActive ? "active" : ""}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`trend-copy-${trend.id}`}
+                  onClick={() => {
+                    setActiveTone(candidate.tone);
+                    setCopyState("idle");
+                  }}
+                  key={candidate.tone}
+                >
+                  {tone.emoji} {candidate.label || tone.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="trend-proposal-panel" id={`trend-copy-${trend.id}`} role="tabpanel">
+            <span>{TREND_TONE_META[proposal.tone].emoji} Ton {TREND_TONE_META[proposal.tone].label}</span>
+            <h5>{proposal.title}</h5>
+            <p>{proposal.concept}</p>
+            <blockquote>{proposal.copy}</blockquote>
+            <button className="trend-copy-button" type="button" onClick={() => void copyProposal()}>
+              {copyState === "copied"
+                ? "✓ Texte copié"
+                : copyState === "error"
+                  ? "Copie impossible"
+                  : "📋 Copier le texte"}
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      <p className="trend-caveat">ℹ️ {trend.caveat}</p>
+    </article>
+  );
+}
+
+function trendPlatformLabel(platform: TrendPlatform) {
+  if (platform === "youtube") return "YouTube Shorts";
+  return PLATFORM_META[platform].label;
+}
+
+function trendPlatformEmoji(platform: TrendPlatform) {
+  return PLATFORM_META[platform].emoji;
+}
+
+function trendTypeLabel(type: SocialTrend["type"]) {
+  const labels: Record<SocialTrend["type"], string> = {
+    hashtag: "Hashtag",
+    sound: "Son",
+    "spoken-audio": "Audio parlé",
+    "meme-template": "Mème",
+    format: "Format",
+    moment: "Moment culturel",
+  };
+  return labels[type];
+}
+
+function trendObservationMetrics(observation: SocialTrend["observations"][number]) {
+  return [
+    observation.rank !== null ? `Rang #${formatNumber(observation.rank)}` : null,
+    observation.posts !== null ? `${formatNumber(observation.posts)} posts` : null,
+    observation.views !== null ? `${formatNumber(observation.views)} vues` : null,
+    observation.uses !== null ? `${formatNumber(observation.uses)} utilisations` : null,
+  ].filter((metric): metric is string => metric !== null);
+}
+
+function trendObservationEvidenceLabel(
+  exactness: SocialTrend["observations"][number]["exactness"],
+) {
+  if (exactness === "exact") return "Mesure plateforme";
+  if (exactness === "platform-estimate") return "Estimation du tracker";
+  return "Signal éditorial sourcé";
+}
+
+async function copyText(value: string) {
+  try {
+    await navigator.clipboard.writeText(value);
+    return true;
+  } catch {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    return copied;
+  }
 }
 
 function HistoryLoadingState({
@@ -2426,24 +2882,14 @@ function PostCard({
   const postCopy = post.text || post.title || "Publication sans légende";
   const choices = post.format === "community_poll" ? pollChoices(post) : [];
   const publishedDate = formatCardPublishedDate(post.published_at);
-  const textLinkRef = useRef<HTMLAnchorElement>(null);
   const [isTextExpanded, setIsTextExpanded] = useState(false);
-  const [isTextOverflowing, setIsTextOverflowing] = useState(false);
+  const canExpandText =
+    postCopy.length > (hasMediaPreview ? 70 : 120) ||
+    postCopy.split(/\r?\n/).length > 2;
   const footerMetrics = [
     post.views !== null ? { icon: metricEmoji("views", post.platform), label: "vues", value: post.views } : null,
     post.likes !== null ? { icon: metricEmoji("likes", post.platform), label: "likes", value: post.likes } : null,
   ].filter(Boolean) as Array<{ icon: string; label: string; value: number }>;
-
-  useEffect(() => {
-    if (hasMediaPreview || isTextExpanded) return;
-    const element = textLinkRef.current;
-    if (!element) return;
-    const updateOverflow = () => setIsTextOverflowing(element.scrollHeight > element.clientHeight + 1);
-    updateOverflow();
-    const observer = new ResizeObserver(updateOverflow);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [hasMediaPreview, isTextExpanded, postCopy]);
 
   return (
     <article
@@ -2467,24 +2913,38 @@ function PostCard({
         <div className="post-card-title">
           <div>
             {hasMediaPreview ? (
-              <h3>
-                <a href={post.url} target="_blank" rel="noreferrer">
-                  {post.title || post.text || "Publication sans légende"}
-                </a>
-              </h3>
-            ) : (
-              <div className={`post-text-content ${isTextExpanded ? "is-expanded" : ""}`}>
-                <a ref={textLinkRef} href={post.url} target="_blank" rel="noreferrer">
-                  {postCopy}
-                </a>
-                {isTextOverflowing ? (
+              <div className={`post-media-caption ${isTextExpanded ? "is-expanded" : ""}`}>
+                <h3>
+                  <a href={post.url} target="_blank" rel="noreferrer">
+                    {postCopy}
+                  </a>
+                </h3>
+                {canExpandText ? (
                   <button
                     className="post-text-expand"
                     type="button"
                     aria-expanded={isTextExpanded}
+                    aria-label={isTextExpanded ? "Réduire la légende" : "Voir toute la légende"}
                     onClick={() => setIsTextExpanded((value) => !value)}
                   >
-                    {isTextExpanded ? "Réduire" : "…"}
+                    {isTextExpanded ? "Voir moins" : "… Voir plus"}
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <div className={`post-text-content ${isTextExpanded ? "is-expanded" : ""}`}>
+                <a href={post.url} target="_blank" rel="noreferrer">
+                  {postCopy}
+                </a>
+                {canExpandText ? (
+                  <button
+                    className="post-text-expand"
+                    type="button"
+                    aria-expanded={isTextExpanded}
+                    aria-label={isTextExpanded ? "Réduire le texte" : "Voir tout le texte"}
+                    onClick={() => setIsTextExpanded((value) => !value)}
+                  >
+                    {isTextExpanded ? "Voir moins" : "… Voir plus"}
                   </button>
                 ) : null}
               </div>
