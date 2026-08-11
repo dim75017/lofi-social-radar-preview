@@ -55,6 +55,20 @@ export type AudioTrendUsageObservation = {
   exactness: AudioTrendExactness;
 };
 
+export type AudioTrendReuseEvidencePost = {
+  platform: AudioTrendPlatform;
+  author: string;
+  url: string;
+  capturedAt: string;
+};
+
+export type AudioTrendReuseEvidence = {
+  verifiedAt: string;
+  minimumDistinctCreators: number;
+  summary: string;
+  posts: AudioTrendReuseEvidencePost[];
+};
+
 export type AudioTrend = {
   id: string;
   platform: AudioTrendPlatform;
@@ -70,6 +84,7 @@ export type AudioTrend = {
   };
   referenceVideo: AudioTrendReferenceVideo;
   usageObservations: AudioTrendUsageObservation[];
+  reuseEvidence: AudioTrendReuseEvidence;
   lofiFitScore: number;
   lofiAngle: string;
   lofiFitRationale: string;
@@ -109,6 +124,7 @@ export type AudioTrendGrowth = {
 };
 
 export const AUDIO_TREND_REFRESH_CADENCE_HOURS = 24;
+export const MIN_PUBLISHABLE_AUDIO_TRENDS = 50;
 
 const HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
 const INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS = HOUR_IN_MILLISECONDS;
@@ -559,6 +575,78 @@ function assertUsageObservation(
   return timestamp;
 }
 
+function assertReuseEvidence(
+  value: unknown,
+  trend: Pick<AudioTrend, "id" | "platform">,
+  feedCapturedTimestamp: number,
+) {
+  if (!isObject(value)) {
+    throw new Error(`Preuve de réutilisation audio invalide : ${trend.id}`);
+  }
+  assertOnlyKeys(value, [
+    "verifiedAt",
+    "minimumDistinctCreators",
+    "summary",
+    "posts",
+  ], `la preuve de réutilisation ${trend.id}`);
+  const evidence = value as AudioTrendReuseEvidence;
+  const verifiedTimestamp = isTimestamp(evidence.verifiedAt)
+    ? Date.parse(evidence.verifiedAt)
+    : Number.NaN;
+  if (
+    !Number.isFinite(verifiedTimestamp) ||
+    verifiedTimestamp > feedCapturedTimestamp ||
+    !Number.isSafeInteger(evidence.minimumDistinctCreators) ||
+    evidence.minimumDistinctCreators < 3 ||
+    !isText(evidence.summary) ||
+    !Array.isArray(evidence.posts) ||
+    evidence.posts.length < evidence.minimumDistinctCreators
+  ) {
+    throw new Error(`Preuve de réutilisation audio invalide : ${trend.id}`);
+  }
+
+  const authors = new Set<string>();
+  const urls = new Set<string>();
+  for (const postValue of evidence.posts) {
+    if (!isObject(postValue)) {
+      throw new Error(`Preuve de réutilisation audio invalide : ${trend.id}`);
+    }
+    assertOnlyKeys(postValue, [
+      "platform",
+      "author",
+      "url",
+      "capturedAt",
+    ], `la publication de réutilisation ${trend.id}`);
+    const post = postValue as AudioTrendReuseEvidencePost;
+    const capturedTimestamp = isTimestamp(post.capturedAt)
+      ? Date.parse(post.capturedAt)
+      : Number.NaN;
+    if (
+      post.platform !== trend.platform ||
+      !isText(post.author) ||
+      !isNativeAudioReferenceVideoUrl(post.url, trend.platform) ||
+      !Number.isFinite(capturedTimestamp) ||
+      capturedTimestamp > verifiedTimestamp ||
+      capturedTimestamp > feedCapturedTimestamp
+    ) {
+      throw new Error(`Preuve de réutilisation audio invalide : ${trend.id}`);
+    }
+    const authorIdentity = post.author.trim().replace(/^@/u, "").toLocaleLowerCase("en");
+    const urlIdentity = canonicalUrl(post.url);
+    if (authors.has(authorIdentity) || urls.has(urlIdentity)) {
+      throw new Error(`Preuve de réutilisation audio dupliquée : ${trend.id}`);
+    }
+    authors.add(authorIdentity);
+    urls.add(urlIdentity);
+  }
+  if (
+    authors.size < evidence.minimumDistinctCreators ||
+    urls.size < evidence.minimumDistinctCreators
+  ) {
+    throw new Error(`Preuve multi-créateurs insuffisante : ${trend.id}`);
+  }
+}
+
 export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
   if (!isObject(value)) {
     throw new Error("Snapshot Audio Trends invalide.");
@@ -592,6 +680,11 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
     !Array.isArray(feed.trends)
   ) {
     throw new Error("Snapshot Audio Trends invalide.");
+  }
+  if (feed.trends.length < MIN_PUBLISHABLE_AUDIO_TRENDS) {
+    throw new Error(
+      `Snapshot Audio Trends incomplet : au moins ${MIN_PUBLISHABLE_AUDIO_TRENDS} tendances distinctes sont requises.`,
+    );
   }
 
   const sourceCheckIds = new Set<string>();
@@ -639,6 +732,7 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
 
   const trendIds = new Set<string>();
   const nativeAudioUrls = new Set<string>();
+  const referenceVideoUrls = new Set<string>();
   for (const trendValue of feed.trends) {
     if (!isObject(trendValue)) {
       throw new Error("Trend audio invalide.");
@@ -653,6 +747,7 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
       "source",
       "referenceVideo",
       "usageObservations",
+      "reuseEvidence",
       "lofiFitScore",
       "lofiAngle",
       "lofiFitRationale",
@@ -757,6 +852,12 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
     }
 
     assertReferenceVideo(trend.referenceVideo, trend, capturedTimestamp);
+    const referenceIdentity = `${trend.platform}:${canonicalUrl(trend.referenceVideo.url)}`;
+    if (referenceVideoUrls.has(referenceIdentity)) {
+      throw new Error(`Vidéo de référence audio dupliquée : ${trend.referenceVideo.url}`);
+    }
+    referenceVideoUrls.add(referenceIdentity);
+    assertReuseEvidence(trend.reuseEvidence, trend, capturedTimestamp);
     let previousObservationTimestamp = Number.NEGATIVE_INFINITY;
     for (const observation of trend.usageObservations) {
       previousObservationTimestamp = assertUsageObservation(
@@ -766,6 +867,16 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
         previousObservationTimestamp,
       );
     }
+  }
+
+  if (
+    trendIds.size < MIN_PUBLISHABLE_AUDIO_TRENDS ||
+    nativeAudioUrls.size < MIN_PUBLISHABLE_AUDIO_TRENDS ||
+    referenceVideoUrls.size < MIN_PUBLISHABLE_AUDIO_TRENDS
+  ) {
+    throw new Error(
+      `Snapshot Audio Trends incomplet : ${MIN_PUBLISHABLE_AUDIO_TRENDS} identités, audios et références distincts sont requis.`,
+    );
   }
 
   return feed;

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  MIN_PUBLISHABLE_AUDIO_TRENDS,
   assertAudioTrendFeed,
   deriveAudioTrendGrowth,
   isOfficialAudioTrendThumbnailUrl,
@@ -84,11 +85,45 @@ function validTrend() {
         exactness: "exact",
       },
     ],
+    reuseEvidence: {
+      verifiedAt: "2026-08-11T11:00:00.000Z",
+      minimumDistinctCreators: 3,
+      summary: "Le même audio a été vérifié dans trois Reels publiés par trois créateurs distincts.",
+      posts: [
+        { platform: "instagram", author: "@quietcreator", url: "https://www.instagram.com/reel/AbCdEfGhIjK/", capturedAt: "2026-08-11T11:00:00.000Z" },
+        { platform: "instagram", author: "@libraryfriend", url: "https://www.instagram.com/reel/LmNoPqRsTuV/", capturedAt: "2026-08-11T11:00:00.000Z" },
+        { platform: "instagram", author: "@nightreader", url: "https://www.instagram.com/reel/WxYz0123456/", capturedAt: "2026-08-11T11:00:00.000Z" },
+      ],
+    },
     lofiFitScore: 94,
     lofiAngle: "Lofi Girl coupe sa musique une seconde pour identifier le chuchotement impossible au fond de la bibliothèque.",
     lofiFitRationale: "Le dialogue court se transpose naturellement dans une scène de bibliothèque avec Lofi Girl.",
     proposals: validProposals(),
   };
+}
+
+function paddingTrend(index) {
+  const trend = validTrend();
+  const suffix = String(index).padStart(4, "0");
+  const audioId = String(9_000_000_000_000_000 + index);
+  trend.id = `padding-audio-trend-${suffix}`;
+  trend.audioUrl = `https://www.instagram.com/reels/audio/${audioId}/`;
+  trend.source.url = trend.audioUrl;
+  trend.referenceVideo.url = `https://www.instagram.com/reel/PadRef${suffix}/`;
+  trend.referenceVideo.sourceUrl = trend.referenceVideo.url;
+  trend.usageObservations = trend.usageObservations.map((observation, observationIndex) => ({
+    ...observation,
+    sourceUrl: observationIndex === 0
+      ? trend.audioUrl
+      : `${trend.audioUrl}?locale=fr_FR`,
+  }));
+  trend.reuseEvidence.posts = ["a", "b", "c"].map((letter) => ({
+    platform: "instagram",
+    author: `@padding-${suffix}-${letter}`,
+    url: `https://www.instagram.com/reel/Pad${suffix}${letter}/`,
+    capturedAt: "2026-08-11T11:00:00.000Z",
+  }));
+  return trend;
 }
 
 function feedWith(...trends) {
@@ -101,7 +136,13 @@ function feedWith(...trends) {
     label: "Instagram Reels · pages audio natives",
     sourceUrl: "https://www.instagram.com/reels/",
   };
-  feed.trends = trends;
+  feed.trends = [
+    ...trends,
+    ...Array.from(
+      { length: Math.max(0, MIN_PUBLISHABLE_AUDIO_TRENDS - trends.length) },
+      (_, index) => paddingTrend(index + 1),
+    ),
+  ];
   return feed;
 }
 
@@ -109,13 +150,13 @@ test("the published feed contains sourced audio signals without invented growth"
   assert.equal(assertAudioTrendFeed(bootstrapFeed), bootstrapFeed);
   assert.equal(bootstrapFeed.version, 1);
   assert.equal(bootstrapFeed.cadenceHours, 24);
-  assert.equal(bootstrapFeed.trends.length, 16);
-  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 8);
+  assert.equal(bootstrapFeed.trends.length, MIN_PUBLISHABLE_AUDIO_TRENDS);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 42);
   assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
   assert.ok(bootstrapFeed.trends.every((trend) => trend.lofiAngle.length > 0));
   assert.equal(
     bootstrapFeed.trends.reduce((total, trend) => total + trend.proposals.length, 0),
-    112,
+    350,
   );
   for (const trend of bootstrapFeed.trends) {
     assert.equal(trend.proposals.length, 7, trend.id);
@@ -127,6 +168,11 @@ test("the published feed contains sourced audio signals without invented growth"
       trend.proposals.filter((proposal) => proposal.character === "lofi-girl").length >= 6,
       trend.id,
     );
+    assert.ok(trend.reuseEvidence.minimumDistinctCreators >= 3, trend.id);
+    assert.ok(new Set(
+      trend.reuseEvidence.posts.map((post) => post.author.replace(/^@/u, "").toLowerCase()),
+    ).size >= 3, trend.id);
+    assert.ok(new Set(trend.reuseEvidence.posts.map((post) => post.url)).size >= 3, trend.id);
   }
   assert.ok(bootstrapFeed.trends.every((trend) => !("growth" in trend)));
   assert.deepEqual(
@@ -157,6 +203,16 @@ test("the published feed contains sourced audio signals without invented growth"
   assert.equal(
     bootstrapFeed.trends.filter((trend) => deriveAudioTrendGrowth(trend.usageObservations)).length,
     3,
+  );
+});
+
+test("the publishable inventory accepts 50 distinct trends and rejects 49", () => {
+  assert.equal(assertAudioTrendFeed(bootstrapFeed), bootstrapFeed);
+  const incomplete = structuredClone(bootstrapFeed);
+  incomplete.trends = incomplete.trends.slice(0, MIN_PUBLISHABLE_AUDIO_TRENDS - 1);
+  assert.throws(
+    () => assertAudioTrendFeed(incomplete),
+    /au moins 50 tendances distinctes/i,
   );
 });
 
@@ -213,6 +269,14 @@ test("rank and rankWindow can preserve Creative Center evidence without a usage 
   trend.referenceVideo.sourceUrl = trend.referenceVideo.url;
   trend.referenceVideo.thumbnailUrl =
     "https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/7412345678901234567.jpeg";
+  trend.reuseEvidence.posts = ["deskcreator", "studyfriend", "nightreader"].map(
+    (author, index) => ({
+      platform: "tiktok",
+      author: `@${author}`,
+      url: `https://www.tiktok.com/@${author}/video/74123456789012345${67 + index}`,
+      capturedAt: "2026-08-11T11:00:00.000Z",
+    }),
+  );
   trend.usageObservations = [{
     capturedAt: "2026-08-11T11:00:00.000Z",
     uses: null,

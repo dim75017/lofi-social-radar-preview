@@ -11,6 +11,7 @@ import {
   MAX_TREND_VIDEO_DURATION_SECONDS,
   MIN_ACTIONABLE_TREND_LOFI_FIT,
   MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS,
   MIN_PUBLISHABLE_VIDEO_PROPOSALS,
   MIN_PUBLISHABLE_LOFI_GIRL_SHARE,
   MIN_TREND_DISTINCT_CREATORS,
@@ -279,6 +280,16 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     (total, trend) => total + trend.proposals.length,
     0,
   );
+  assert.ok(videoTrends.length >= MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS);
+  assert.equal(new Set(videoTrends.map((trend) => trend.id)).size, videoTrends.length);
+  assert.equal(
+    new Set(videoTrends.map((trend) => trend.trendKey.trim().toLocaleLowerCase("fr"))).size,
+    videoTrends.length,
+  );
+  assert.equal(
+    new Set(videoTrends.map((trend) => trend.referencePost.url)).size,
+    videoTrends.length,
+  );
   assert.ok(videoTrends.every((trend) => trend.proposals.length === 3));
   assert.ok(videoProposalCount >= MIN_PUBLISHABLE_VIDEO_PROPOSALS);
 
@@ -473,21 +484,50 @@ test("the publishable contract requires a fresh daily run and 50 verified trends
     () => assertPublishableSocialTrendFeed(tooSmall, { now: shortlyAfterCapture(tooSmall) }),
     /50 trends/i,
   );
+
+  const tooFewVideos = structuredClone(feed);
+  const downgradedVideo = tooFewVideos.trends.find(
+    (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
+  );
+  assert.ok(downgradedVideo?.referencePost);
+  downgradedVideo.referencePost.mediaType = "image";
+  downgradedVideo.referencePost.durationSeconds = null;
+  syncRefreshCounts(tooFewVideos);
+  const remainingVideos = tooFewVideos.trends.filter(
+    (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
+  );
+  assert.equal(
+    remainingVideos.length,
+    MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS - 1,
+  );
+  assert.ok(
+    remainingVideos.reduce((total, trend) => total + trend.proposals.length, 0) >=
+      MIN_PUBLISHABLE_VIDEO_PROPOSALS,
+    "the regression fixture must still clear the old proposal-only guard",
+  );
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(tooFewVideos, {
+      now: shortlyAfterCapture(tooFewVideos),
+    }),
+    /50 trends vidéo/i,
+  );
 });
 
-test("the top 50 is Girl-first while keeping real priority scores unchanged", () => {
-  const actionable = feed.trends.filter(isActionableSocialTrend);
+test("the top 50 videos are Girl-first while keeping real priority scores unchanged", () => {
+  const actionable = feed.trends.filter(
+    (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
+  );
   const scoresBefore = new Map(
     actionable.map((trend) => [trend.id, trendPriorityScore(trend)]),
   );
   const selected = selectGirlFirstSocialTrends(
     actionable,
-    MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+    MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS,
   );
   const girls = selected.filter((trend) => trend.character === "lofi-girl");
   const boys = selected.filter((trend) => trend.character === "lofi-boy");
 
-  assert.equal(selected.length, MIN_PUBLISHABLE_ACTIONABLE_TRENDS);
+  assert.equal(selected.length, MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS);
   assert.ok(girls.length / selected.length >= MIN_PUBLISHABLE_LOFI_GIRL_SHARE);
   assert.equal(selected[0].character, "lofi-girl");
   if (boys.length > 0) {

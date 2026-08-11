@@ -1964,21 +1964,28 @@ function TrendFeedView({
     ),
     [feed?.trends],
   );
-  const proposalCount = useMemo(
-    () => actionableTrends.reduce((total, trend) => total + trend.proposals.length, 0),
+  const selectedVideoTrends = useMemo(
+    () => selectGirlFirstSocialTrends(
+      actionableTrends.filter((trend) => trend.referencePost?.mediaType === "video"),
+      50,
+    ),
     [actionableTrends],
+  );
+  const proposalCount = useMemo(
+    () => selectedVideoTrends.reduce((total, trend) => total + trend.proposals.length, 0),
+    [selectedVideoTrends],
   );
   const visibleTrends = useMemo(
     () => {
-      const filtered = filterSocialTrends(actionableTrends, {
+      if (platformFilter === "all" && characterFilter === "all") {
+        return selectedVideoTrends;
+      }
+      return filterSocialTrends(selectedVideoTrends, {
         platform: platformFilter,
         character: characterFilter,
       });
-      return characterFilter === "all"
-        ? selectGirlFirstSocialTrends(filtered, filtered.length)
-        : filtered;
     },
-    [actionableTrends, characterFilter, platformFilter],
+    [characterFilter, platformFilter, selectedVideoTrends],
   );
   const refreshDate = formatTrendRefreshDate(feed?.refresh.lastSuccessfulAt);
 
@@ -2010,7 +2017,7 @@ function TrendFeedView({
         </div>
         {feed && refreshDate ? (
           <span className={`trend-snapshot-pill ${refreshIsLate ? "is-late" : ""}`}>
-            {refreshIsLate ? "⚠️" : "✅"} {proposalCount} propositions · {actionableTrends.length} trends vidéo · {refreshDate}
+            {refreshIsLate ? "⚠️" : "✅"} {selectedVideoTrends.length} trends vidéo distinctes · {proposalCount} adaptations · {refreshDate}
           </span>
         ) : null}
       </header>

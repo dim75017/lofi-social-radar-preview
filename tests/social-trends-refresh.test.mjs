@@ -13,6 +13,7 @@ import {
 import {
   assertPublishableSocialTrendFeed,
   isActionableSocialTrend,
+  MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS,
   TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS,
 } from "../lib/social-trends.ts";
 
@@ -103,6 +104,21 @@ test("a real parsed-source run refreshes metadata without altering native metric
   assert.ok(result.feed.refresh.counts.matchedSignals > 0);
   assert.ok(result.feed.refresh.counts.actionable >= 50);
   assert.ok(result.feed.refresh.counts.lofiGirl >= 40);
+  const actionableVideos = result.feed.trends.filter(
+    (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
+  );
+  assert.ok(actionableVideos.length >= MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS);
+  assert.equal(new Set(actionableVideos.map((trend) => trend.id)).size, actionableVideos.length);
+  assert.equal(
+    new Set(
+      actionableVideos.map((trend) => trend.trendKey.trim().toLocaleLowerCase("fr")),
+    ).size,
+    actionableVideos.length,
+  );
+  assert.equal(
+    new Set(actionableVideos.map((trend) => trend.referencePost.url)).size,
+    actionableVideos.length,
+  );
   assert.deepEqual(
     result.feed.trends.map((trend) => trend.referencePost),
     originalReferences,

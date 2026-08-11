@@ -62,26 +62,13 @@ export function AudioTrendFeedView({
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
   const visibleTrends = useMemo(() => {
+    const freshnessCutoff = Date.parse(feed?.capturedAt ?? "") -
+      Math.max(feed?.cadenceHours ?? 24, 24) * 2 * 60 * 60 * 1_000;
     return [...(feed?.trends ?? [])]
       .filter((trend) => platformFilter === "all" || trend.platform === platformFilter)
       .filter((trend) => typeFilter === "all" || trend.type === typeFilter)
-      .sort((left, right) => {
-        const leftGrowth = deriveAudioTrendGrowth(left.usageObservations);
-        const rightGrowth = deriveAudioTrendGrowth(right.usageObservations);
-        if (leftGrowth && !rightGrowth) return -1;
-        if (!leftGrowth && rightGrowth) return 1;
-        if (leftGrowth && rightGrowth && rightGrowth.usesPerDay !== leftGrowth.usesPerDay) {
-          return rightGrowth.usesPerDay - leftGrowth.usesPerDay;
-        }
-        const usesDelta = latestUses(right) - latestUses(left);
-        if (usesDelta !== 0) return usesDelta;
-        return right.lofiFitScore - left.lofiFitScore;
-      });
-  }, [feed?.trends, platformFilter, typeFilter]);
-  const proposalCount = useMemo(
-    () => (feed?.trends ?? []).reduce((total, trend) => total + trend.proposals.length, 0),
-    [feed?.trends],
-  );
+      .sort((left, right) => compareAudioTrends(left, right, freshnessCutoff));
+  }, [feed?.cadenceHours, feed?.capturedAt, feed?.trends, platformFilter, typeFilter]);
   const refreshedAt = feed ? formatRefreshDate(feed.capturedAt) : null;
 
   return (
@@ -97,7 +84,7 @@ export function AudioTrendFeedView({
         </div>
         {feed && refreshedAt ? (
           <span className="trend-snapshot-pill">
-            {proposalCount} propositions · {feed.trends.length} audios · Actualisé {refreshedAt}
+            {feed.trends.length} audios distincts · Actualisé {refreshedAt}
           </span>
         ) : null}
       </header>
@@ -212,7 +199,11 @@ function AudioTrendCard({
   onClose: () => void;
   feedCapturedAt: string;
 }) {
-  const growth = deriveAudioTrendGrowth(trend.usageObservations);
+  const derivedGrowth = deriveAudioTrendGrowth(trend.usageObservations);
+  const growthFreshnessCutoff = Date.parse(feedCapturedAt) - 48 * 60 * 60 * 1_000;
+  const growth = derivedGrowth && Date.parse(derivedGrowth.toCapturedAt) >= growthFreshnessCutoff
+    ? derivedGrowth
+    : null;
   const uses = latestUses(trend);
   const rankSignal = latestRank(trend);
   const instagramPreviewUrl = trend.platform === "instagram"
@@ -337,19 +328,89 @@ function AudioTrendCard({
 }
 
 function latestUses(trend: AudioTrend) {
-  const observation = [...trend.usageObservations]
-    .reverse()
-    .find((candidate) => candidate.uses !== null);
+  const observation = latestUsageObservation(trend);
   return observation?.uses ?? -1;
 }
 
 function latestRank(trend: AudioTrend) {
-  const observation = [...trend.usageObservations]
-    .reverse()
-    .find((candidate) => candidate.rank !== null && candidate.rankWindow);
+  const observation = latestVerifiedObservation(
+    trend,
+    (candidate) => candidate.rank !== null && Boolean(candidate.rankWindow),
+  );
   return observation?.rank && observation.rankWindow
-    ? { rank: observation.rank, window: observation.rankWindow }
+    ? { rank: observation.rank, window: observation.rankWindow, capturedAt: observation.capturedAt }
     : null;
+}
+
+function latestUsageObservation(trend: AudioTrend) {
+  return latestVerifiedObservation(trend, (candidate) => candidate.uses !== null);
+}
+
+function latestVerifiedObservation(
+  trend: AudioTrend,
+  predicate: (observation: AudioTrend["usageObservations"][number]) => boolean,
+) {
+  return [...trend.usageObservations]
+    .filter(predicate)
+    .sort((left, right) => Date.parse(right.capturedAt) - Date.parse(left.capturedAt))[0] ?? null;
+}
+
+function compareAudioTrends(left: AudioTrend, right: AudioTrend, freshnessCutoff: number) {
+  const leftSignal = audioTrendSortSignal(left, freshnessCutoff);
+  const rightSignal = audioTrendSortSignal(right, freshnessCutoff);
+
+  if (leftSignal.recentGrowth !== rightSignal.recentGrowth) {
+    return leftSignal.recentGrowth ? -1 : 1;
+  }
+  if (leftSignal.recentGrowth && rightSignal.recentGrowth) {
+    const paceDelta = rightSignal.growthUsesPerDay - leftSignal.growthUsesPerDay;
+    if (paceDelta !== 0) return paceDelta;
+  }
+  if (leftSignal.currentRank !== null || rightSignal.currentRank !== null) {
+    if (leftSignal.currentRank === null) return 1;
+    if (rightSignal.currentRank === null) return -1;
+    if (leftSignal.currentRank !== rightSignal.currentRank) {
+      return leftSignal.currentRank - rightSignal.currentRank;
+    }
+  }
+  if (leftSignal.currentUses !== rightSignal.currentUses) {
+    return rightSignal.currentUses - leftSignal.currentUses;
+  }
+  if (leftSignal.freshnessTimestamp !== rightSignal.freshnessTimestamp) {
+    return rightSignal.freshnessTimestamp - leftSignal.freshnessTimestamp;
+  }
+  if (right.lofiFitScore !== left.lofiFitScore) {
+    return right.lofiFitScore - left.lofiFitScore;
+  }
+  return left.title.localeCompare(right.title, "fr");
+}
+
+function audioTrendSortSignal(trend: AudioTrend, freshnessCutoff: number) {
+  const growth = deriveAudioTrendGrowth(trend.usageObservations);
+  const rank = latestRank(trend);
+  const usage = latestUsageObservation(trend);
+  const latestObservationTimestamp = Math.max(
+    ...trend.usageObservations.map((observation) => Date.parse(observation.capturedAt)),
+  );
+  const recentGrowth = Boolean(
+    growth && growth.usesPerDay > 0 && Date.parse(growth.toCapturedAt) >= freshnessCutoff,
+  );
+  const currentRank = rank && Date.parse(rank.capturedAt) >= freshnessCutoff
+    ? rank.rank
+    : null;
+  const currentUses = usage && Date.parse(usage.capturedAt) >= freshnessCutoff
+    ? usage.uses ?? -1
+    : -1;
+
+  return {
+    recentGrowth,
+    growthUsesPerDay: recentGrowth && growth ? growth.usesPerDay : 0,
+    currentRank,
+    currentUses,
+    freshnessTimestamp: Number.isFinite(latestObservationTimestamp)
+      ? latestObservationTimestamp
+      : 0,
+  };
 }
 
 function formatCompact(value: number) {

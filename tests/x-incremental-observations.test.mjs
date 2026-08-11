@@ -126,8 +126,27 @@ async function runImporter(history, progress) {
   const directory = await mkdtemp(resolve(tmpdir(), "x-incremental-import-"));
   const historyPath = resolve(directory, "history.json");
   const progressPath = resolve(directory, "progress.json");
+  const summaryPath = resolve(directory, "summary.json");
+  const xPosts = history.posts.filter((post) => post.platform === "x");
+  const publicSummary = {
+    generatedAt: history.generatedAt,
+    totalPostCount: history.posts.length,
+    platformCounts: { youtube: 0, instagram: 0, tiktok: 0, x: xPosts.length },
+    formatCounts: {
+      youtube: { short: 0, community: 0, poll: 0, text: 0, comment: 0 },
+      instagram: { reel: 0, static: 0, comment: 0 },
+      tiktok: { video: 0, comment: 0 },
+      x: {
+        static: xPosts.filter((post) => post.format === "static").length,
+        video: xPosts.filter((post) => post.format === "video").length,
+        text: xPosts.filter((post) => post.format === "text").length,
+      },
+    },
+    coverage: history.coverage,
+  };
   await writeFile(historyPath, `${JSON.stringify(history, null, 2)}\n`, "utf8");
   await writeFile(progressPath, `${JSON.stringify(progress, null, 2)}\n`, "utf8");
+  await writeFile(summaryPath, `${JSON.stringify(publicSummary, null, 2)}\n`, "utf8");
   const before = await readFile(historyPath, "utf8");
   const result = spawnSync(process.execPath, [IMPORTER], {
     cwd: ROOT,
@@ -135,6 +154,7 @@ async function runImporter(history, progress) {
     env: {
       ...process.env,
       PUBLIC_HISTORY_PATH: historyPath,
+      PUBLIC_HISTORY_SUMMARY_PATH: summaryPath,
       X_PROGRESS_PATH: progressPath,
     },
   });

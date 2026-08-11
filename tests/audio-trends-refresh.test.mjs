@@ -3,10 +3,12 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  AUDIO_REFRESH_MIN_DISTINCT_TRENDS,
   buildAudioTrendRefresh,
   collectInstagramSignedPlayback,
   collectTikTokThumbnail,
   evaluateAudioRefreshCoverage,
+  evaluateAudioRefreshInventory,
   extractInstagramSignedPlaybackCandidates,
   instagramPlaybackExpiresAt,
   mapWithConcurrency,
@@ -102,6 +104,18 @@ function thumbnailProbeResponse({ contentType = "image/jpeg", status = 206 } = {
       "content-range": "bytes 0-9/1000",
     },
   });
+}
+
+function inventoryFixture(count) {
+  return {
+    trends: Array.from({ length: count }, (_, index) => ({
+      id: `audio-trend-${index + 1}`,
+      audioUrl: `https://www.tiktok.com/music/audio-${10_000_000 + index}`,
+      referenceVideo: {
+        url: `https://www.tiktok.com/@creator-${index + 1}/video/${7_000_000_000_000_000_000n + BigInt(index)}`,
+      },
+    })),
+  };
 }
 
 test("native audio counters are tied to the requested platform identity", () => {
@@ -243,24 +257,59 @@ test("TikTok thumbnail collection rejects mismatched identities, providers and n
 });
 
 test("publishing requires broad coverage on every tracked provider", () => {
-  assert.equal(requiredProviderMatches(8), 6);
+  const instagramChecked = 8;
+  const tiktokChecked = 42;
+  assert.equal(requiredProviderMatches(instagramChecked), 6);
+  assert.equal(requiredProviderMatches(tiktokChecked), 30);
   const oneMatch = evaluateAudioRefreshCoverage([
-    { platform: "instagram", checked: 8, matched: 1 },
-    { platform: "tiktok", checked: 8, matched: 0 },
+    { platform: "instagram", checked: instagramChecked, matched: 1 },
+    { platform: "tiktok", checked: tiktokChecked, matched: 0 },
   ]);
   assert.equal(oneMatch.publishable, false);
-  assert.equal(oneMatch.requiredTotal, 12);
+  assert.equal(oneMatch.requiredTotal, 38);
 
   const missingProvider = evaluateAudioRefreshCoverage([
-    { platform: "instagram", checked: 8, matched: 8 },
+    { platform: "instagram", checked: instagramChecked, matched: instagramChecked },
   ]);
   assert.equal(missingProvider.publishable, false);
 
   const broadCoverage = evaluateAudioRefreshCoverage([
-    { platform: "instagram", checked: 8, matched: 6 },
-    { platform: "tiktok", checked: 8, matched: 6 },
+    { platform: "instagram", checked: instagramChecked, matched: 6 },
+    { platform: "tiktok", checked: tiktokChecked, matched: 32 },
   ]);
   assert.equal(broadCoverage.publishable, true);
+});
+
+test("publication inventory accepts 50 distinct audio trends and rejects 49", () => {
+  const complete = evaluateAudioRefreshInventory(
+    inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS),
+  );
+  assert.equal(complete.totalTrends, 50);
+  assert.equal(complete.distinctTrendIds, 50);
+  assert.equal(complete.distinctAudioUrls, 50);
+  assert.equal(complete.distinctReferenceUrls, 50);
+  assert.equal(complete.publishable, true);
+
+  const incomplete = evaluateAudioRefreshInventory(
+    inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1),
+  );
+  assert.equal(incomplete.totalTrends, 49);
+  assert.equal(incomplete.publishable, false);
+});
+
+test("publication inventory fails closed on duplicate audio or reference URLs", () => {
+  const duplicateAudio = inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS);
+  duplicateAudio.trends.at(-1).audioUrl = duplicateAudio.trends[0].audioUrl;
+  const audioResult = evaluateAudioRefreshInventory(duplicateAudio);
+  assert.equal(audioResult.distinctAudioUrls, AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1);
+  assert.equal(audioResult.publishable, false);
+
+  const duplicateReference = inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS);
+  duplicateReference.trends.at(-1).referenceVideo.url =
+    duplicateReference.trends[0].referenceVideo.url;
+  const referenceResult = evaluateAudioRefreshInventory(duplicateReference);
+  assert.equal(referenceResult.distinctReferenceUrls, AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1);
+  assert.equal(referenceResult.publishable, false);
 });
 
 test("the scanner never exceeds its configured concurrency", async () => {
@@ -373,7 +422,10 @@ test("all fresh Instagram playbacks can publish degraded without rewriting faile
   assert.equal(result.status.coverage.counterPublishable, false);
   assert.equal(result.status.coverage.instagramPlaybackMatched, instagramTrends.length);
   assert.equal(result.status.coverage.instagramPlaybackComplete, true);
-  assert.equal(result.status.coverage.tiktokThumbnailMatched, 8);
+  assert.equal(
+    result.status.coverage.tiktokThumbnailMatched,
+    feed.trends.filter((trend) => trend.platform === "tiktok").length,
+  );
   assert.equal(result.status.coverage.tiktokThumbnailComplete, true);
   assert.deepEqual(
     result.feed.trends.map((trend) => trend.usageObservations),
@@ -459,18 +511,36 @@ test("publication fails closed when even one TikTok thumbnail is missing", async
   }
 
   assert.ok(failure instanceof Error);
-  assert.match(failure.message, /miniature TikTok insuffisante: 7\/8/i);
+  assert.match(
+    failure.message,
+    new RegExp(
+      `miniature TikTok insuffisante: ${tiktokTrends.length - 1}\\/${tiktokTrends.length}`,
+      "i",
+    ),
+  );
   assert.equal(failure.refreshStatus.status, "failed");
   assert.equal(failure.refreshStatus.coverage.counterPublishable, true);
   assert.equal(failure.refreshStatus.coverage.instagramPlaybackComplete, true);
   assert.equal(failure.refreshStatus.coverage.tiktokThumbnailMatched, tiktokTrends.length - 1);
-  assert.equal(failure.refreshStatus.coverage.tiktokThumbnailCoverage, 7 / 8);
+  assert.equal(
+    failure.refreshStatus.coverage.tiktokThumbnailCoverage,
+    (tiktokTrends.length - 1) / tiktokTrends.length,
+  );
   assert.equal(failure.refreshStatus.coverage.tiktokThumbnailComplete, false);
   assert.equal(failure.refreshStatus.coverage.thumbnailPublishable, false);
   const tiktokProvider = failure.refreshStatus.providers.find((provider) => provider.platform === "tiktok");
   assert.equal(tiktokProvider.thumbnailMatched, tiktokTrends.length - 1);
-  assert.equal(tiktokProvider.thumbnailCoverage, 7 / 8);
-  assert.match(tiktokProvider.errors.join(" "), /miniatures insuffisante: 7\/8/i);
+  assert.equal(
+    tiktokProvider.thumbnailCoverage,
+    (tiktokTrends.length - 1) / tiktokTrends.length,
+  );
+  assert.match(
+    tiktokProvider.errors.join(" "),
+    new RegExp(
+      `miniatures insuffisante: ${tiktokTrends.length - 1}\\/${tiktokTrends.length}`,
+      "i",
+    ),
+  );
   assert.equal(failure.refreshStatus.published, false);
   assert.deepEqual(feed, original);
 });

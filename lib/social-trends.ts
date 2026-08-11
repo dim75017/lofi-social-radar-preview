@@ -146,6 +146,7 @@ export const TREND_PUBLISH_MAX_AGE_HOURS = 26;
 export const TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS = 72;
 export const TREND_STEADY_MAX_VERIFICATION_AGE_HOURS = 14 * 24;
 export const MIN_PUBLISHABLE_ACTIONABLE_TRENDS = 50;
+export const MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS = 50;
 export const MIN_PUBLISHABLE_VIDEO_PROPOSALS = 100;
 export const MIN_PUBLISHABLE_LOFI_GIRL_SHARE = 0.8;
 export const MIN_TREND_DISTINCT_CREATORS = 3;
@@ -822,8 +823,15 @@ export function assertPublishableSocialTrendFeed(
       `Au moins ${MIN_PUBLISHABLE_ACTIONABLE_TRENDS} trends exploitables sont requises.`,
     );
   }
-  const videoProposalCount = actionable
-    .filter((trend) => trend.referencePost?.mediaType === "video")
+  const actionableVideos = actionable.filter(
+    (trend) => trend.referencePost?.mediaType === "video",
+  );
+  if (actionableVideos.length < MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS) {
+    throw new Error(
+      `Au moins ${MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS} trends vidéo exploitables et distinctes sont requises.`,
+    );
+  }
+  const videoProposalCount = actionableVideos
     .reduce((total, trend) => total + trend.proposals.length, 0);
   if (videoProposalCount < MIN_PUBLISHABLE_VIDEO_PROPOSALS) {
     throw new Error(
@@ -873,14 +881,14 @@ export function assertPublishableSocialTrendFeed(
   }
 
   const topTrends = selectGirlFirstSocialTrends(
-    actionable,
-    MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+    actionableVideos,
+    MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS,
   );
   const lofiGirlCount = topTrends.filter(
     (trend) => trend.character === "lofi-girl",
   ).length;
   if (
-    topTrends.length !== MIN_PUBLISHABLE_ACTIONABLE_TRENDS ||
+    topTrends.length !== MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS ||
     lofiGirlCount / topTrends.length < MIN_PUBLISHABLE_LOFI_GIRL_SHARE
   ) {
     throw new Error("Le top 50 Trends doit contenir au moins 80 % de Lofi Girl.");

@@ -303,7 +303,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /isActionableSocialTrend/);
   assert.match(component, /selectGirlFirstSocialTrends/);
   assert.match(component, /referencePost\?\.mediaType === "video"/);
-  assert.match(component, /\{proposalCount\} propositions/);
+  assert.match(
+    component,
+    /selectGirlFirstSocialTrends\([\s\S]*actionableTrends\.filter\(\(trend\) => trend\.referencePost\?\.mediaType === "video"\)[\s\S]*50/,
+  );
+  assert.match(component, /platformFilter === "all" && characterFilter === "all"/);
+  assert.match(component, /return selectedVideoTrends/);
+  assert.match(component, /\{selectedVideoTrends\.length\} trends vid.o distinctes/);
+  assert.match(component, /\{proposalCount\} adaptations/);
   assert.match(component, /trend\.proposals\.map/);
   assert.match(component, /trend-proposal-tabs/);
   assert.match(component, /dailyRotationIndex/);
@@ -321,7 +328,15 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(audioTrendView, /<h2>Trends audio<\/h2>/);
   assert.match(audioTrendView, /deriveAudioTrendGrowth/);
-  assert.match(audioTrendView, /\{proposalCount\} propositions/);
+  assert.match(audioTrendView, /\{feed\.trends\.length\} audios distincts/);
+  assert.doesNotMatch(audioTrendView, /proposalCount/);
+  assert.match(audioTrendView, /compareAudioTrends\(left, right, freshnessCutoff\)/);
+  assert.match(audioTrendView, /recentGrowth/);
+  assert.match(audioTrendView, /currentRank/);
+  assert.match(audioTrendView, /currentUses/);
+  assert.match(audioTrendView, /freshnessTimestamp/);
+  assert.match(audioTrendView, /growthFreshnessCutoff/);
+  assert.match(audioTrendView, /Date\.parse\(derivedGrowth\.toCapturedAt\) >= growthFreshnessCutoff/);
   assert.match(audioTrendView, /trend\.proposals\.map/);
   assert.match(audioTrendView, /audio-proposal-tabs/);
   assert.match(audioTrendView, /dailyRotationIndex/);
@@ -374,9 +389,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(audioTrendModel, /usageObservations/);
   assert.match(audioTrendModel, /same canonical source/i);
   const parsedAudioTrendFeed = JSON.parse(audioTrendFeed);
-  assert.equal(parsedAudioTrendFeed.trends.length, 16);
-  assert.equal(parsedAudioTrendFeed.trends.filter((trend) => trend.platform === "tiktok").length, 8);
-  assert.equal(parsedAudioTrendFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
+  assert.ok(parsedAudioTrendFeed.trends.length >= 50);
+  assert.equal(
+    new Set(parsedAudioTrendFeed.trends.map((trend) => trend.id)).size,
+    parsedAudioTrendFeed.trends.length,
+  );
   assert.match(component, /loading="lazy"/);
   assert.match(component, /Voir le post original/);
   assert.match(component, /hasMediaPreview \?/);

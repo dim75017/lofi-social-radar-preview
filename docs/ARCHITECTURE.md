@@ -22,7 +22,7 @@ Le premier écran ne part plus de tendances fictives. Il interroge Instagram, X,
 - `scan_runs` : tentative par source, durée, résultat, compteurs et erreur éventuelle.
 - `data/comment-opportunities/feed.json` : file publique de vidéos à commenter, URLs natives, relevés métriques sourcés, score éditorial et trois réactions courtes par vidéo. Une valeur absente reste `null` et le statut « Accélère » exige au moins deux observations comparables.
 - `data/audience-history.json` : relevés horodatés des followers des quatre comptes, précision de chaque compteur et taux d’engagement dérivé. Les jalons historiques et relevés quotidiens sont conservés sans interpolation.
-- `data/audio-trends/feed.json` : watchlist quotidienne de sons Instagram et TikTok, page audio native, vidéo de référence, compteur d’utilisations et angle Lofi Girl. La croissance est toujours dérivée de deux relevés comparables ; un seul compteur affiche seulement « suivi démarré ».
+- `data/audio-trends/feed.json` : watchlist d’au moins 50 sons distincts, actuellement structurée pour 42 TikTok et 8 Instagram. Chaque entrée conserve sa page audio native, une vidéo de référence distincte et son angle Lofi Girl. Le refresh tourne deux fois par jour et publie uniquement si les 50 identités, les 50 URLs audio, les 50 vidéos de référence, toutes les miniatures TikTok et toutes les lectures Instagram sont vérifiées. Un compteur public indisponible reste inchangé : la croissance est toujours dérivée de deux relevés comparables et n’est jamais inventée.
 
 Les anciennes tables `trends`, `ideas`, `briefs` et `decision_events` restent disponibles pour la phase d’idéation, mais aucune donnée de démonstration n’est plus injectée ou affichée.
 

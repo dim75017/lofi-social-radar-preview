@@ -16,7 +16,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,12 +26,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Refresh public audio counters
+      - name: Refresh the 50-audio public catalog
         id: scan
         continue-on-error: true
         run: npm run audio-trends:refresh
 
-      - name: Validate the published feed
+      - name: Validate inventory, provenance and refreshed assets
         id: validation
         if: steps.scan.outcome == 'success'
         continue-on-error: true

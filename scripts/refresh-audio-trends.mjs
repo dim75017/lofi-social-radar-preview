@@ -27,6 +27,39 @@ export const AUDIO_REFRESH_TIMEOUT_MS = 12_000;
 export const AUDIO_REFRESH_MIN_PROVIDER_MATCHES = 2;
 export const AUDIO_REFRESH_MIN_PROVIDER_COVERAGE = 0.7;
 export const AUDIO_REFRESH_MIN_TOTAL_COVERAGE = 0.75;
+export const AUDIO_REFRESH_MIN_DISTINCT_TRENDS = 50;
+
+export function evaluateAudioRefreshInventory(feed) {
+  const trends = Array.isArray(feed?.trends) ? feed.trends : [];
+  const trendIds = new Set();
+  const audioUrls = new Set();
+  const referenceUrls = new Set();
+
+  for (const trend of trends) {
+    if (typeof trend?.id === "string" && trend.id.trim().length > 0) {
+      trendIds.add(trend.id.trim());
+    }
+    const audioUrl = canonicalInventoryUrl(trend?.audioUrl);
+    if (audioUrl) audioUrls.add(audioUrl);
+    const referenceUrl = canonicalInventoryUrl(trend?.referenceVideo?.url);
+    if (referenceUrl) referenceUrls.add(referenceUrl);
+  }
+
+  const inventory = {
+    requiredDistinctTrends: AUDIO_REFRESH_MIN_DISTINCT_TRENDS,
+    totalTrends: trends.length,
+    distinctTrendIds: trendIds.size,
+    distinctAudioUrls: audioUrls.size,
+    distinctReferenceUrls: referenceUrls.size,
+  };
+  return {
+    ...inventory,
+    publishable: inventory.totalTrends >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
+      inventory.distinctTrendIds >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
+      inventory.distinctAudioUrls >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
+      inventory.distinctReferenceUrls >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS,
+  };
+}
 
 export async function buildAudioTrendRefresh({
   feed,
@@ -37,6 +70,25 @@ export async function buildAudioTrendRefresh({
 }) {
   if (!Number.isFinite(Date.parse(now))) throw new Error("Horodatage de refresh audio invalide.");
   const current = assertAudioTrendFeed(structuredClone(feed));
+  const inventory = evaluateAudioRefreshInventory(current);
+  if (!inventory.publishable) {
+    const status = {
+      version: 1,
+      attemptedAt: now,
+      status: "failed",
+      published: false,
+      inventory,
+      coverage: emptyAudioRefreshCoverage(false),
+      providers: [],
+    };
+    const error = new Error(
+      `Inventaire Audio Trends insuffisant: ${inventory.distinctTrendIds} trends, ` +
+      `${inventory.distinctAudioUrls} audios et ${inventory.distinctReferenceUrls} references distinctes; ` +
+      `minimum ${inventory.requiredDistinctTrends}.`,
+    );
+    error.refreshStatus = status;
+    throw error;
+  }
   const next = structuredClone(current);
   const jobs = next.trends.filter((trend) => TRACKED_PLATFORMS.includes(trend.platform));
   const checks = await mapWithConcurrency(jobs, concurrency, (trend) =>
@@ -113,6 +165,7 @@ export async function buildAudioTrendRefresh({
     tiktokThumbnailComplete;
   const coverage = {
     ...baseCoverage,
+    catalogPublishable: inventory.publishable,
     instagramPlaybackChecked: instagramPlaybackChecks.length,
     instagramPlaybackMatched,
     instagramPlaybackComplete,
@@ -124,7 +177,7 @@ export async function buildAudioTrendRefresh({
     tiktokThumbnailComplete,
     thumbnailPublishable: tiktokThumbnailComplete,
     counterPublishable: baseCoverage.publishable,
-    publishable: successfulPublication || degradedPublication,
+    publishable: inventory.publishable && (successfulPublication || degradedPublication),
   };
   const status = {
     version: 1,
@@ -135,6 +188,7 @@ export async function buildAudioTrendRefresh({
         ? "degraded"
         : "failed",
     published: coverage.publishable,
+    inventory,
     coverage,
     providers: providerResults,
   };
@@ -791,6 +845,44 @@ export function evaluateAudioRefreshCoverage(providerResults) {
   };
 }
 
+function canonicalInventoryUrl(candidate) {
+  if (typeof candidate !== "string" || candidate.trim().length === 0) return null;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "https:") return null;
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    url.hash = "";
+    url.hostname = url.hostname.toLowerCase();
+    url.pathname = url.pathname.replace(/\/+$/u, "");
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function emptyAudioRefreshCoverage(catalogPublishable) {
+  return {
+    totalChecked: 0,
+    totalMatched: 0,
+    requiredTotal: AUDIO_REFRESH_MIN_PROVIDER_MATCHES,
+    ratio: 0,
+    providersPassed: false,
+    catalogPublishable,
+    instagramPlaybackChecked: 0,
+    instagramPlaybackMatched: 0,
+    instagramPlaybackComplete: false,
+    tiktokThumbnailChecked: 0,
+    tiktokThumbnailMatched: 0,
+    tiktokThumbnailCoverage: 0,
+    tiktokThumbnailComplete: false,
+    thumbnailPublishable: false,
+    counterPublishable: false,
+    publishable: false,
+  };
+}
+
 export async function mapWithConcurrency(items, concurrency, mapper) {
   const requestedConcurrency = Number.isFinite(concurrency) ? Math.floor(concurrency) : 1;
   const safeConcurrency = Math.max(1, Math.min(items.length || 1, requestedConcurrency));
@@ -880,23 +972,8 @@ async function main() {
       attemptedAt,
       status: "failed",
       published: false,
-      coverage: {
-        totalChecked: 0,
-        totalMatched: 0,
-        requiredTotal: AUDIO_REFRESH_MIN_PROVIDER_MATCHES,
-        ratio: 0,
-        providersPassed: false,
-        instagramPlaybackChecked: 0,
-        instagramPlaybackMatched: 0,
-        instagramPlaybackComplete: false,
-        tiktokThumbnailChecked: 0,
-        tiktokThumbnailMatched: 0,
-        tiktokThumbnailCoverage: 0,
-        tiktokThumbnailComplete: false,
-        thumbnailPublishable: false,
-        counterPublishable: false,
-        publishable: false,
-      },
+      inventory: evaluateAudioRefreshInventory(feed),
+      coverage: emptyAudioRefreshCoverage(false),
       providers: [],
     };
     await writeJsonAtomic(statusPath, failedStatus);
