@@ -143,6 +143,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, /Couverture maintenant|Analyse éditoriale|Posts à retenir|Comparaisons honnêtes/);
   assert.match(component, /label: "Tous les posts"/);
   assert.match(component, /label: "Posts recommandés"/);
+  const recommendationNavSource = component.slice(
+    component.indexOf("const RECOMMENDATION_NAV"),
+    component.indexOf("const EDITORIAL_WORKFLOW_STORAGE_KEY"),
+  );
+  assert.match(
+    recommendationNavSource,
+    /id: "trends"[\s\S]*?id: "ideas"[\s\S]*?id: "comments"/,
+  );
   assert.match(component, /posts-platform-subnav/);
   assert.match(component, /recommendations-subnav/);
   assert.match(component, /aria-expanded=\{navSection \? isExpanded : undefined\}/);

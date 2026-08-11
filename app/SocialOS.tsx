@@ -209,9 +209,9 @@ const RECOMMENDATION_NAV: Array<{
   emoji: string;
   label: string;
 }> = [
+  { id: "trends", emoji: "🔥", label: "Trends" },
   { id: "ideas", emoji: "📝", label: "Posts recommandés" },
   { id: "comments", emoji: "💬", label: "Commentaires" },
-  { id: "trends", emoji: "🔥", label: "Trends" },
 ];
 
 const EDITORIAL_WORKFLOW_STORAGE_KEY = "lofi-social-radar:editorial-workflow:v2";
