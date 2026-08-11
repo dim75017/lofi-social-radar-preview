@@ -2,17 +2,19 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertAudienceHistory } from "../lib/audience-metrics.ts";
+import { assertCommentOpportunityFeed } from "../lib/comment-opportunities.ts";
 import { assertSocialTrendFeed } from "../lib/social-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "work", "pages-dist", "data");
 const platforms = ["youtube", "instagram", "tiktok", "x"];
 
-const [snapshot, summary, trendFeed, audienceHistory] = await Promise.all([
+const [snapshot, summary, trendFeed, audienceHistory, commentOpportunityFeed] = await Promise.all([
   readJson(resolve(root, "data", "public-history.json")),
   readJson(resolve(root, "data", "public-history-summary.json")),
   readJson(resolve(root, "data", "trends", "feed.json")),
   readJson(resolve(root, "data", "audience-history.json")),
+  readJson(resolve(root, "data", "comment-opportunities", "feed.json")),
 ]);
 
 if (snapshot.generatedAt !== summary.generatedAt) {
@@ -23,13 +25,16 @@ if (snapshot.posts.length !== summary.totalPostCount) {
 }
 assertSocialTrendFeed(trendFeed);
 assertAudienceHistory(audienceHistory);
+assertCommentOpportunityFeed(commentOpportunityFeed);
 
 await mkdir(output, { recursive: true });
 await mkdir(resolve(output, "trends"), { recursive: true });
+await mkdir(resolve(output, "comment-opportunities"), { recursive: true });
 await writeJson(resolve(output, "public-history-summary.json"), summary);
 await writeJson(resolve(output, "public-history.json"), snapshot);
 await writeJson(resolve(output, "audience-history.json"), audienceHistory);
 await writeJson(resolve(output, "trends", "feed.json"), trendFeed);
+await writeJson(resolve(output, "comment-opportunities", "feed.json"), commentOpportunityFeed);
 
 for (const platform of platforms) {
   const posts = snapshot.posts.filter((post) => post.platform === platform);

@@ -3,12 +3,17 @@ import { createRoot } from "react-dom/client";
 import { SocialOS, type WorkspacePayload } from "../app/SocialOS";
 import "../app/globals.css";
 import audienceHistoryJson from "../data/audience-history.json";
+import commentOpportunityFeedJson from "../data/comment-opportunities/feed.json";
 import publicHistorySummaryJson from "../data/public-history-summary.json";
 import trendFeedJson from "../data/trends/feed.json";
 import {
   assertAudienceHistory,
   type AudienceHistory,
 } from "../lib/audience-metrics";
+import {
+  assertCommentOpportunityFeed,
+  type CommentOpportunityFeed,
+} from "../lib/comment-opportunities";
 import {
   mergeWorkspaceWithPublicHistory,
   type PublicHistorySnapshot,
@@ -33,9 +38,13 @@ const fallbackTrendFeed = assertSocialTrendFeed(
 const fallbackAudienceHistory = assertAudienceHistory(
   audienceHistoryJson as AudienceHistory,
 );
+const fallbackCommentOpportunityFeed = assertCommentOpportunityFeed(
+  commentOpportunityFeedJson as CommentOpportunityFeed,
+);
 const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
 const RAW_TREND_FEED_URL = `${dataBaseUrl}/trends/feed.json`;
 const RAW_AUDIENCE_HISTORY_URL = `${dataBaseUrl}/audience-history.json`;
+const RAW_COMMENT_OPPORTUNITIES_URL = `${dataBaseUrl}/comment-opportunities/feed.json`;
 const emptySnapshot: PublicHistorySnapshot = {
   generatedAt: publicHistorySummary.generatedAt,
   coverage: publicHistorySummary.coverage,
@@ -58,6 +67,7 @@ function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [trendFeed, setTrendFeed] = useState(fallbackTrendFeed);
   const [audienceHistory, setAudienceHistory] = useState(fallbackAudienceHistory);
+  const [commentOpportunityFeed, setCommentOpportunityFeed] = useState(fallbackCommentOpportunityFeed);
   const [pendingPlatforms, setPendingPlatforms] = useState<SocialPlatform[]>([
     ...PLATFORM_ORDER,
   ]);
@@ -164,6 +174,55 @@ function PublicPreview() {
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
+
+    const refreshCommentOpportunities = () => {
+      void fetch(`${RAW_COMMENT_OPPORTUNITIES_URL}?v=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Actualisation Commentaires impossible (${response.status}).`);
+          }
+          return assertCommentOpportunityFeed(
+            (await response.json()) as CommentOpportunityFeed,
+          );
+        })
+        .then((snapshot) => {
+          if (!active) return;
+          const incomingAt = Date.parse(snapshot.capturedAt);
+          if (!Number.isFinite(incomingAt)) return;
+          setCommentOpportunityFeed((current) => {
+            const currentAt = Date.parse(current.capturedAt);
+            return !Number.isFinite(currentAt) || incomingAt >= currentAt
+              ? snapshot
+              : current;
+          });
+        })
+        .catch(() => {
+          // Le dernier snapshot vérifié reste visible hors ligne.
+        });
+    };
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") refreshCommentOpportunities();
+    };
+
+    refreshCommentOpportunities();
+    const hourlyRefresh = window.setInterval(refreshCommentOpportunities, 60 * 60 * 1_000);
+    document.addEventListener("visibilitychange", refreshOnReturn);
+
+    return () => {
+      active = false;
+      window.clearInterval(hourlyRefresh);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
     const snapshots = new Map<SocialPlatform, PublicHistorySnapshot>();
 
     const publishLoadedSnapshots = () => {
@@ -238,6 +297,7 @@ function PublicPreview() {
     <SocialOS
       initialWorkspace={workspace as WorkspacePayload}
       initialTrendFeed={trendFeed}
+      initialCommentOpportunityFeed={commentOpportunityFeed}
       initialAudienceHistory={audienceHistory}
       previewMode
       publicCounts={publicHistorySummary.platformCounts}

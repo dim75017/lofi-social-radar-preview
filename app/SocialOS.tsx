@@ -69,9 +69,14 @@ import {
   type TrendReferencePost,
   type TrendTone,
 } from "../lib/social-trends";
+import {
+  assertCommentOpportunityFeed,
+  type CommentOpportunityFeed,
+} from "../lib/comment-opportunities";
+import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
-type View = "overview" | "top" | "trends" | "ideas" | "planning" | "all" | "sources";
+type View = "overview" | "top" | "comments" | "trends" | "ideas" | "planning" | "all" | "sources";
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 type TrendPlatformFilter = TrendPlatform | "all";
@@ -194,6 +199,7 @@ const NAV: Array<{
 }> = [
   { id: "overview", emoji: "📊", label: "Tableau de bord", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
+  { id: "comments", emoji: "💬", label: "Commentaires", group: "Pilotage" },
   { id: "trends", emoji: "🔥", label: "Trends", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Recommandations", group: "Pilotage" },
   { id: "planning", emoji: "🗓️", label: "Roadmap", group: "Pilotage" },
@@ -517,6 +523,7 @@ function formatTrendRefreshDate(value: string | null | undefined): string | null
 export function SocialOS({
   initialWorkspace = null,
   initialTrendFeed = null,
+  initialCommentOpportunityFeed = null,
   initialAudienceHistory = null,
   previewMode = false,
   publicCounts,
@@ -526,6 +533,7 @@ export function SocialOS({
 }: {
   initialWorkspace?: WorkspacePayload | null;
   initialTrendFeed?: SocialTrendFeed | null;
+  initialCommentOpportunityFeed?: CommentOpportunityFeed | null;
   initialAudienceHistory?: AudienceHistory | null;
   previewMode?: boolean;
   publicCounts?: Partial<Record<Platform, number>>;
@@ -538,6 +546,9 @@ export function SocialOS({
   const [trendFeed, setTrendFeed] = useState<SocialTrendFeed | null>(initialTrendFeed);
   const [trendsLoading, setTrendsLoading] = useState(!previewMode && !initialTrendFeed);
   const [trendsError, setTrendsError] = useState("");
+  const [commentOpportunityFeed, setCommentOpportunityFeed] = useState<CommentOpportunityFeed | null>(initialCommentOpportunityFeed);
+  const [commentsLoading, setCommentsLoading] = useState(!previewMode && !initialCommentOpportunityFeed);
+  const [commentsError, setCommentsError] = useState("");
   const [view, setView] = useState<View>("overview");
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("short");
@@ -606,6 +617,17 @@ export function SocialOS({
   }, [initialTrendFeed, previewMode]);
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setCommentOpportunityFeed(initialCommentOpportunityFeed);
+      if (initialCommentOpportunityFeed || previewMode) {
+        setCommentsLoading(false);
+        setCommentsError("");
+      }
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [initialCommentOpportunityFeed, previewMode]);
+
+  useEffect(() => {
     if (previewMode) return;
     const controller = new AbortController();
     let active = true;
@@ -636,6 +658,43 @@ export function SocialOS({
     };
 
     void loadTrendFeed();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [previewMode]);
+
+  useEffect(() => {
+    if (previewMode) return;
+    const controller = new AbortController();
+    let active = true;
+
+    const loadCommentOpportunities = async () => {
+      setCommentsLoading(true);
+      setCommentsError("");
+      try {
+        const response = await fetch("/api/comment-opportunities", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as CommentOpportunityFeed & { error?: string };
+        if (!response.ok) {
+          throw new Error(payload.error || "Les opportunités de commentaires ne sont pas disponibles pour le moment.");
+        }
+        if (active) setCommentOpportunityFeed(assertCommentOpportunityFeed(payload));
+      } catch (loadError) {
+        if (!active || controller.signal.aborted) return;
+        setCommentsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Les opportunités de commentaires ne sont pas disponibles pour le moment.",
+        );
+      } finally {
+        if (active) setCommentsLoading(false);
+      }
+    };
+
+    void loadCommentOpportunities();
     return () => {
       active = false;
       controller.abort();
@@ -982,6 +1041,7 @@ export function SocialOS({
 
   const navCount = (id: View) => {
     if (id === "top") return totalPostCount;
+    if (id === "comments") return commentOpportunityFeed?.opportunities.length;
     if (id === "trends") {
       return trendFeed
         ? trendFeed.trends.filter(isActionableSocialTrend).length
@@ -1169,6 +1229,14 @@ export function SocialOS({
 
         {workspace && view === "overview" ? (
           <AudienceDashboard history={initialAudienceHistory} />
+        ) : null}
+
+        {view === "comments" ? (
+          <CommentOpportunitiesView
+            feed={commentOpportunityFeed}
+            loading={commentsLoading}
+            error={commentsError}
+          />
         ) : null}
 
         {view === "trends" ? (

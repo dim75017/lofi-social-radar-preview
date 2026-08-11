@@ -20,6 +20,7 @@ Le premier écran ne part plus de tendances fictives. Il interroge Instagram, X,
 - `social_posts` : contenu normalisé, format, date, miniature, dernières métriques, score et explication.
 - `post_metric_snapshots` : relevés successifs immuables des vues et interactions.
 - `scan_runs` : tentative par source, durée, résultat, compteurs et erreur éventuelle.
+- `data/comment-opportunities/feed.json` : file publique de vidéos à commenter, URLs natives, relevés métriques sourcés, score éditorial et trois réactions courtes par vidéo. Une valeur absente reste `null` et le statut « Accélère » exige au moins deux observations comparables.
 - `data/audience-history.json` : relevés horodatés des followers des quatre comptes, précision de chaque compteur et taux d’engagement dérivé. Les jalons historiques et relevés quotidiens sont conservés sans interpolation.
 
 Les anciennes tables `trends`, `ideas`, `briefs` et `decision_events` restent disponibles pour la phase d’idéation, mais aucune donnée de démonstration n’est plus injectée ou affichée.
@@ -46,6 +47,12 @@ Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. S
 ## Analyse éditoriale
 
 Le moteur rapproche les accroches normalisées afin de repérer le même créatif sur plusieurs plateformes. Les enseignements restent descriptifs : type de contenu dominant dans le top, réseau porteur, écart entre déclinaisons et taille de l’échantillon. Aucune causalité n’est inventée.
+
+## Veille de commentaires
+
+La file « Commentaires » est séparée du feed Trends : elle classe des posts individuels sur lesquels une intervention rapide peut créer de la notoriété. Le classement combine fraîcheur, adéquation à l’univers Lofi et potentiel de réaction ; il ne compare jamais directement les volumes bruts de plateformes différentes. Les commentaires proposés doivent viser un détail précis de la vidéo, tenir en une seule idée, éviter liens, hashtags, appels à l’action et autopromotion, et rester hors des sujets sensibles.
+
+La veille est programmée toutes les six heures. La preview embarque le dernier snapshot validé puis recharge son fichier `data/comment-opportunities/feed.json` au démarrage, chaque heure et au retour sur l’onglet. Les boutons « Fait » et « Passer » ne stockent qu’un état local au navigateur. Copier ou ouvrir un post ne déclenche aucune publication : la décision et l’envoi restent humains.
 
 ## Suite
 

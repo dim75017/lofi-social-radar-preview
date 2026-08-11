@@ -35,6 +35,7 @@ test("server-renders the live Social Radar shell", async () => {
   assert.match(html, /<title>Lofi Social Radar<\/title>/i);
   assert.match(html, /Tableau de bord/);
   assert.match(html, /Meilleurs posts/);
+  assert.match(html, /Commentaires/);
   assert.match(html, /Recommandations/);
   assert.match(html, /Roadmap/);
   assert.match(html, /id="top-platform-subnav"/);
@@ -64,6 +65,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     instagramLogo,
     tiktokLogo,
     xLogo,
+    commentOpportunities,
+    commentOpportunityModel,
+    commentOpportunityFeed,
   ] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -83,6 +87,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../public/platforms/instagram.svg", import.meta.url), "utf8"),
     readFile(new URL("../public/platforms/tiktok.svg", import.meta.url), "utf8"),
     readFile(new URL("../public/platforms/x.svg", import.meta.url), "utf8"),
+    readFile(new URL("../app/CommentOpportunitiesView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/comment-opportunities.ts", import.meta.url), "utf8"),
+    readFile(new URL("../data/comment-opportunities/feed.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -98,6 +105,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(scanner, /tiktok\.com/);
   assert.match(scanner, /x\.com/);
   assert.match(component, /label: "Tableau de bord"/);
+  assert.match(component, /label: "Commentaires"/);
+  assert.match(component, /initialCommentOpportunityFeed/);
+  assert.match(component, /CommentOpportunitiesView/);
   assert.match(component, /Total followers/);
   assert.match(component, /Évolution des followers/);
   assert.match(component, /Taux d’engagement/);
@@ -184,6 +194,13 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(previewEntry, /raw\.githubusercontent\.com/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
+  assert.match(previewEntry, /RAW_COMMENT_OPPORTUNITIES_URL/);
+  assert.match(previewEntry, /initialCommentOpportunityFeed=\{commentOpportunityFeed\}/);
+  assert.match(
+    previewEntry,
+    /RAW_COMMENT_OPPORTUNITIES_URL = `\$\{dataBaseUrl\}\/comment-opportunities\/feed\.json`/,
+  );
+  assert.match(previewEntry, /window\.setInterval\(refreshCommentOpportunities, 60 \* 60 \* 1_000\)/);
   assert.match(audienceMetrics, /mean\(likes\+comments\)\/followers\*100/);
   assert.match(
     audienceMetrics,
@@ -287,6 +304,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.audience-period-tabs\s*\{/);
   assert.match(styles, /\.audience-platform-logo\s*\{/);
   assert.match(styles, /\.audience-platform-logo img\s*\{/);
+  assert.match(styles, /\.comment-opportunity-grid \.comment-opportunity-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
+  assert.match(styles, /\.comment-suggestion\s*\{/);
+  assert.match(styles, /\.comment-copy-button\s*\{/);
   assert.match(styles, /\.reco-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(min\(380px,\s*100%\),\s*1fr\)\)/);
   assert.match(styles, /\.reco-card\s*\{[\s\S]*?content-visibility:\s*auto/);
   assert.match(styles, /\.reco-card-main\s*>\s*h3\s*\{[\s\S]*?font-size:\s*18px/);
@@ -331,4 +351,28 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(publicHistory, /isInScopeSocialPost/);
   assert.match(publicHistory, /seuls les Shorts et posts Communauté sont inclus/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+
+  assert.match(commentOpportunities, /Commentaires à poster maintenant/);
+  assert.match(commentOpportunities, /Drôle/);
+  assert.match(commentOpportunities, /Smart/);
+  assert.match(commentOpportunities, /Complice/);
+  assert.match(commentOpportunities, /Copier le commentaire/);
+  assert.match(commentOpportunities, /À relire/);
+  assert.match(commentOpportunities, /Ouvrir ↗/);
+  assert.match(commentOpportunities, /✓ Fait/);
+  assert.match(commentOpportunities, /Passer/);
+  assert.match(commentOpportunities, /lofi-social-radar:comment-opportunity-statuses:v1/);
+  assert.match(commentOpportunities, /platforms\/\$\{opportunity\.platform\}\.svg/);
+  assert.doesNotMatch(commentOpportunities, /new IntersectionObserver/);
+  assert.doesNotMatch(commentOpportunities, /fetch\([^)]*(?:comment|reply)|postComment|publishComment/i);
+  assert.match(commentOpportunityModel, /hasCommentOpportunityAccelerationEvidence/);
+  assert.match(commentOpportunityModel, /comments\.length !== 3/);
+  assert.match(commentOpportunityModel, /tones\.size !== VALID_TONES\.size/);
+  const commentSnapshot = JSON.parse(commentOpportunityFeed);
+  assert.equal(commentSnapshot.version, 1);
+  assert.ok(commentSnapshot.opportunities.length >= 20);
+  assert.deepEqual(
+    [...new Set(commentSnapshot.opportunities.map((item) => item.platform))].sort(),
+    ["instagram", "tiktok", "x", "youtube"],
+  );
 });
