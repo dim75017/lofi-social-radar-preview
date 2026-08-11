@@ -125,6 +125,8 @@ export type AudioTrendGrowth = {
 
 export const AUDIO_TREND_REFRESH_CADENCE_HOURS = 24;
 export const MIN_PUBLISHABLE_AUDIO_TRENDS = 50;
+export const MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES = 50_000;
+export const MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS = 30;
 
 const HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
 const INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS = HOUR_IN_MILLISECONDS;
@@ -160,6 +162,25 @@ const VALID_PROPOSAL_TONES = new Set<AudioTrendProposalTone>([
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+/**
+ * Audio cards are publishable only when their native reference is itself a
+ * proven short-form hit. Missing public metrics or duration fail closed.
+ */
+export function isPublishableAudioTrendReferenceVideo(value: unknown) {
+  if (!isObject(value) || !isObject(value.metrics)) return false;
+  const likes = value.metrics.likes;
+  const durationSeconds = value.durationSeconds;
+  return (
+    typeof likes === "number" &&
+    Number.isSafeInteger(likes) &&
+    likes >= MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES &&
+    typeof durationSeconds === "number" &&
+    Number.isFinite(durationSeconds) &&
+    durationSeconds > 0 &&
+    durationSeconds < MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS
+  );
 }
 
 function isText(value: unknown): value is string {
@@ -493,6 +514,26 @@ function assertReferenceVideo(
       throw new Error(`Métriques audio inventées : ${trend.id}`);
     }
     assertMetrics(reference.metrics, trend.id);
+  }
+  if (
+    reference.metrics === null ||
+    reference.metrics.likes === null ||
+    reference.metrics.likes < MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES
+  ) {
+    throw new Error(
+      `Reference video for ${trend.id} is not publishable: ` +
+      `at least ${MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES} public likes are required.`,
+    );
+  }
+  if (
+    reference.durationSeconds === null ||
+    reference.durationSeconds <= 0 ||
+    reference.durationSeconds >= MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS
+  ) {
+    throw new Error(
+      `Reference video for ${trend.id} is not publishable: duration must be ` +
+      `strictly greater than 0 and below ${MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS} seconds.`,
+    );
   }
 
   const playbackFields = [

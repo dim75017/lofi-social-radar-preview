@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "capturedAt": "2026-08-11T17:45:03.215Z",
-  "nextRefreshAt": "2026-08-12T17:45:03.215Z",
+  "capturedAt": "2026-08-11T18:31:14.325Z",
+  "nextRefreshAt": "2026-08-12T18:31:14.325Z",
   "cadenceHours": 24,
-  "methodology": "Sélection de 50 audios natifs pertinents pour Lofi Girl, chacun démontré par au moins trois créateurs et trois publications natives distinctes. Les volumes viennent uniquement des pages audio publiques ; les compteurs abrégés restent signalés comme estimations et les volumes indisponibles restent vides. La croissance n'est calculée qu'avec deux relevés comparables du même compteur natif.",
+  "methodology": "Sélection de 50 audios natifs pertinents pour Lofi Girl, chacun démontré par au moins trois créateurs et trois publications natives distinctes. Les volumes viennent uniquement des pages audio publiques ; les compteurs abrégés restent signalés comme estimations et les volumes indisponibles restent vides. Pour YouTube Shorts, la page audio native prouve les reprises mais n’expose pas de compteur global comparable. La croissance n’est calculée qu’avec deux relevés comparables du même compteur natif.",
   "sourceChecks": [
     {
       "id": "instagram-audio-public",
@@ -25,7 +25,7 @@
       "id": "youtube-audio-limited",
       "platform": "youtube",
       "status": "limited",
-      "checkedAt": "2026-08-11T17:45:03.215Z",
+      "checkedAt": "2026-08-11T18:31:14.325Z",
       "label": "YouTube Shorts · aucun compteur global d'utilisations comparable exposé publiquement",
       "sourceUrl": "https://www.youtube.com/shorts/"
     }
@@ -953,136 +953,133 @@
       }
     },
     {
-      "id": "everything-hallelujah",
-      "platform": "instagram",
-      "type": "music",
-      "title": "EVERYTHING HALLELUJAH",
-      "author": "Audio Instagram",
-      "audioUrl": "https://www.instagram.com/reels/audio/4216755795268858/",
+      "id": "youtube-phones-eras-study-desk",
+      "platform": "youtube",
+      "type": "original",
+      "title": "Le bureau à travers les époques",
+      "author": "Ryan HD",
+      "audioUrl": "https://www.youtube.com/source/yaDcdlYhW-A/shorts",
       "source": {
-        "capturedAt": "2026-08-11T14:10:00.000Z",
-        "label": "Instagram · page audio publique",
-        "url": "https://www.instagram.com/reels/audio/4216755795268858/",
-        "exactness": "platform-estimate"
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "label": "YouTube Shorts · page audio native et reprises publiques",
+        "url": "https://www.youtube.com/source/yaDcdlYhW-A/shorts",
+        "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "Auteur du Reel",
-        "caption": "Exemple fortement repris visible dans la grille publique de l'audio.",
-        "url": "https://www.instagram.com/reel/DbieVLOsbLT/",
-        "thumbnailUrl": null,
-        "durationSeconds": null,
-        "publishedAt": null,
-        "capturedAt": "2026-08-11T14:10:00.000Z",
-        "sourceLabel": "Instagram · grille publique de l'audio",
-        "sourceUrl": "https://www.instagram.com/reel/DbieVLOsbLT/",
-        "exactness": "platform-estimate",
+        "author": "Ryan HD",
+        "caption": "Phones In 2000 vs 2010 vs 2020 vs 2030.",
+        "url": "https://www.youtube.com/shorts/yaDcdlYhW-A",
+        "thumbnailUrl": "https://i.ytimg.com/vi/yaDcdlYhW-A/hqdefault.jpg",
+        "durationSeconds": 15,
+        "publishedAt": "2026-06-27T10:30:37-07:00",
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "YouTube Shorts · métadonnées publiques vérifiées",
+        "sourceUrl": "https://www.youtube.com/shorts/yaDcdlYhW-A",
+        "exactness": "exact",
         "metrics": {
-          "views": 58300,
-          "likes": null,
+          "views": 81180078,
+          "likes": 1584915,
           "comments": null,
           "shares": null
-        },
-        "playbackUrl": "https://scontent-cdg4-1.cdninstagram.com/o1/v/t2/f2/m86/AQNjP8U0nzrj0uWEaSxbXDRrAQ0RCF-jp6upMcinnc0tvFn3XGA96xdn3gEfOAgfp6yG15bRPzKWZYgrctjsSbG9XxDplibnY6zmchw.mp4?_nc_cat=111&_nc_sid=5e9851&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_ohc=kx5IwckOPzQQ7kNvwG6Gnhs&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTQyNDI1MzExMjg3MDc0OCwiYXNzZXRfYWdlX2RheXMiOjksInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo4LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=4c5386ca338b44cf&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9CMzRCOERCQ0ZEMUYxQkQwNkU5ODJDN0I4QjIyRDBBNV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzExNDI4MTZEREEwQjZDQTY4QkQwRDAxOUM4QTU0RkE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACa4nefNuNaHBRUCKAJDMywXQCFqfvnbItEYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=OB9Jr2D4GGzzFuSlnI1Eiw&_nc_ss=7f689&_nc_zt=28&oh=00_AQHvxwq_2rImOsxOe8kTsgP9YQ0CiDn70aC_8L4cw3TDUw&oe=6A7D2BB4",
-        "playbackCapturedAt": "2026-08-11T17:45:03.215Z",
-        "playbackExpiresAt": "2026-08-13T02:28:04.000Z"
+        }
       },
       "usageObservations": [
         {
-          "capturedAt": "2026-07-31T12:00:00.000Z",
-          "uses": 552000,
+          "capturedAt": "2026-08-11T18:31:14.325Z",
+          "uses": null,
           "rank": null,
           "rankWindow": null,
-          "sourceLabel": "SocialPilot · relevé de la page audio fin juillet",
-          "sourceUrl": "https://www.instagram.com/reels/audio/4216755795268858/",
-          "exactness": "platform-estimate"
+          "sourceLabel": "YouTube Shorts · page audio native ; compteur global indisponible",
+          "sourceUrl": "https://www.youtube.com/source/yaDcdlYhW-A/shorts",
+          "exactness": "unavailable"
         }
       ],
-      "lofiFitScore": 97,
-      "lofiAngle": "Faire gagner un « hallelujah » à quatre micro-victoires : café chaud, Wi-Fi revenu, devoir envoyé, chat hors du clavier.",
-      "lofiFitRationale": "Les petites victoires chaleureuses sont immédiatement communautaires et permettent quatre gags visuels très courts dans la chambre.",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T18:31:14.325Z",
+        "minimumDistinctCreators": 3,
+        "summary": "La page audio native YouTube affiche douze reprises ; la référence et deux Shorts de créateurs distincts sont conservés comme preuve minimale.",
+        "posts": [
+          {
+            "platform": "youtube",
+            "author": "Ryan HD",
+            "url": "https://www.youtube.com/shorts/yaDcdlYhW-A",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Notyourabhi😉",
+            "url": "https://www.youtube.com/shorts/aYrDtOwQNPk",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "ReesePuffs_Gaming",
+            "url": "https://www.youtube.com/shorts/HKExoP4HBSo",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          }
+        ]
+      },
+      "lofiFitScore": 88,
+      "lofiAngle": "Garder le même cadrage du bureau et faire évoluer les outils d’étude par décennie, tandis que Lofi Girl et le chat restent les repères constants.",
+      "lofiFitRationale": "Le bureau iconique rend chaque époque lisible en une seconde ; la permanence des personnages apporte une chute immédiatement reconnaissable à la marque.",
       "proposals": [
         {
-          "id": "four-hallelujahs",
-          "title": "Quatre petits hallelujahs",
-          "concept": "Chaque « hallelujah » célèbre une micro-victoire de Lofi Girl : café encore chaud, Wi-Fi revenu, paragraphe terminé, devoir envoyé avant minuit.",
-          "copy": "Tiny wins. Full choir. Hallelujah. ✨",
-          "character": "lofi-girl",
-          "tone": "cozy"
-        },
-        {
-          "id": "wrong-file-hallelujah",
-          "title": "Le faux hallelujah",
-          "concept": "Lofi Girl envoie son devoir et lève les bras sur le refrain; cut immédiat sur « FINAL_def_vraiment_final_3 » encore ouvert et son sourire disparaît.",
-          "copy": "Hallelu— wait, which file did I submit?",
+          "id": "phones-deadline-decades",
+          "title": "La deadline traverse les décennies",
+          "concept": "Quatre cuts 2000, 2010, 2020, 2030 : les outils changent mais Lofi Girl reste bloquée sur la première phrase du même devoir.",
+          "copy": "La technologie avance. Mon introduction, beaucoup moins.",
           "character": "lofi-girl",
           "tone": "funny"
         },
         {
-          "id": "micro-win-board",
-          "title": "Donner un refrain aux petites victoires",
-          "concept": "Une checklist se coche sur chaque impact de EVERYTHING HALLELUJAH : ouvrir le cours, lire une page, écrire cinq lignes, sauvegarder.",
-          "copy": "Progress gets louder when you count the small steps.",
+          "id": "phones-ritual-stays",
+          "title": "Le rituel ne bouge pas",
+          "concept": "Livres, laptop puis hologramme se remplacent au rythme du son ; la lampe chaude, la boisson et le casque restent exactement au même endroit.",
+          "copy": "New tools, same little ritual before I begin.",
           "character": "lofi-girl",
-          "tone": "smart"
+          "tone": "cozy"
         },
         {
-          "id": "choir-of-objects",
-          "title": "Le bureau chante victoire",
-          "concept": "À chaque hallelujah, lampe, tasse, plante puis fenêtre s'illuminent comme un chœur autour de Lofi Girl qui termine sa dernière phrase.",
-          "copy": "When the whole room celebrates the submit button.",
-          "character": "lofi-girl",
-          "tone": "cinematic"
-        },
-        {
-          "id": "wifi-returned",
-          "title": "Le Wi-Fi revient",
-          "concept": "Le symbole hors-ligne tourne pendant toute l'intro; il repasse au vert sur le premier hallelujah et Lofi Girl célèbre plus fort qu'après avoir fini son cours.",
-          "copy": "The most spiritual moment of deadline week.",
-          "character": "lofi-girl",
-          "tone": "relatable"
-        },
-        {
-          "id": "cat-off-keyboard",
-          "title": "Hallelujah, le chat bouge",
-          "concept": "Lofi Girl tente doucement de déplacer le chat du clavier trois fois; il se lève enfin au refrain, puis se recouche exactement sur le cahier.",
-          "copy": "A miracle occurred. Briefly. 🐈",
+          "id": "phones-cat-upgrade",
+          "title": "Le seul vrai upgrade",
+          "concept": "À chaque époque, le chat obtient un couchage plus futuriste jusqu’à finir sur un clavier holographique qui bloque encore les révisions.",
+          "copy": "2030 technology. Same cat-shaped obstacle.",
           "character": "lofi-girl",
           "tone": "cat"
         },
         {
-          "id": "rare-drop-hallelujah",
-          "title": "Le drop légendaire",
-          "concept": "Lofi Boy ouvre un coffre après une longue quête; chaque objet banal tombe en silence, puis l'item recherché déclenche le chœur EVERYTHING HALLELUJAH.",
-          "copy": "After 87 attempts: HALLELUJAH 🎮",
+          "id": "phones-notification-eras",
+          "title": "Les notifications ont changé",
+          "concept": "Chaque cut fait entendre et apparaître une notification d’époque différente ; Lofi Girl retourne son appareil face cachée à chaque fois.",
+          "copy": "Different decade, same urge to check one more notification.",
+          "character": "lofi-girl",
+          "tone": "relatable"
+        },
+        {
+          "id": "phones-focus-not-tools",
+          "title": "Le focus n’est pas un gadget",
+          "concept": "Le setup devient toujours plus sophistiqué, puis le dernier plan retire tout sauf un cahier, un crayon et le minuteur de Lofi Girl.",
+          "copy": "The best study upgrade was removing the distractions.",
+          "character": "lofi-girl",
+          "tone": "smart"
+        },
+        {
+          "id": "phones-future-room",
+          "title": "La chambre de 2030",
+          "concept": "Le décor passe du papier au numérique puis à un bureau flottant, avec la fenêtre et la ville qui évoluent en parallèle sur chaque accent audio.",
+          "copy": "See you in 2030. Same window, bigger dreams.",
+          "character": "lofi-girl",
+          "tone": "cinematic"
+        },
+        {
+          "id": "phones-boy-console-decades",
+          "title": "Quatre générations de sauvegardes",
+          "concept": "Lofi Boy traverse quatre générations de consoles au même bureau ; le dernier écran révèle qu’il recharge toujours la même partie nocturne.",
+          "copy": "The graphics changed. The comfort save did not.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
-      ],
-      "reuseEvidence": {
-        "verifiedAt": "2026-08-11T17:29:34.000Z",
-        "minimumDistinctCreators": 3,
-        "summary": "La page audio Instagram publique affiche des reprises distinctes chez @gamze_kgln, @studio_sundara, @capucinegoalard.",
-        "posts": [
-          {
-            "platform": "instagram",
-            "author": "@gamze_kgln",
-            "url": "https://www.instagram.com/reel/DbieVLOsbLT/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "instagram",
-            "author": "@studio_sundara",
-            "url": "https://www.instagram.com/reel/DbDxRvbOZho/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "instagram",
-            "author": "@capucinegoalard",
-            "url": "https://www.instagram.com/reel/DbBtSf_Mu2Q/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "young-and-beautiful",
@@ -1358,136 +1355,133 @@
       }
     },
     {
-      "id": "sweetly",
-      "platform": "instagram",
-      "type": "music",
-      "title": "Sweetly",
-      "author": "Audio Instagram",
-      "audioUrl": "https://www.instagram.com/reels/audio/1741362503149150/",
+      "id": "youtube-cat-outplayed-focus",
+      "platform": "youtube",
+      "type": "original",
+      "title": "Le chat croyait avoir gagné",
+      "author": "Kind Otter",
+      "audioUrl": "https://www.youtube.com/source/MexTmo_3naU/shorts",
       "source": {
-        "capturedAt": "2026-08-11T14:10:00.000Z",
-        "label": "Instagram · page audio publique",
-        "url": "https://www.instagram.com/reels/audio/1741362503149150/",
-        "exactness": "platform-estimate"
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "label": "YouTube Shorts · page audio native et reprises publiques",
+        "url": "https://www.youtube.com/source/MexTmo_3naU/shorts",
+        "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "Auteur du Reel",
-        "caption": "Exemple fortement repris visible dans la grille publique de l'audio.",
-        "url": "https://www.instagram.com/reel/DbXp_8hNHRf/",
-        "thumbnailUrl": null,
-        "durationSeconds": null,
-        "publishedAt": null,
-        "capturedAt": "2026-08-11T14:10:00.000Z",
-        "sourceLabel": "Instagram · grille publique de l'audio",
-        "sourceUrl": "https://www.instagram.com/reel/DbXp_8hNHRf/",
-        "exactness": "platform-estimate",
+        "author": "Kind Otter",
+        "caption": "She outplayed him 🤫❤️",
+        "url": "https://www.youtube.com/shorts/MexTmo_3naU",
+        "thumbnailUrl": "https://i.ytimg.com/vi/MexTmo_3naU/hqdefault.jpg",
+        "durationSeconds": 24,
+        "publishedAt": "2026-07-10T11:09:21-07:00",
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "YouTube Shorts · métadonnées publiques vérifiées",
+        "sourceUrl": "https://www.youtube.com/shorts/MexTmo_3naU",
+        "exactness": "exact",
         "metrics": {
-          "views": 332000,
-          "likes": null,
+          "views": 73760397,
+          "likes": 1503451,
           "comments": null,
           "shares": null
-        },
-        "playbackUrl": "https://scontent-cdg6-1.cdninstagram.com/o1/v/t2/f2/m86/AQMBgVeVeRynzyHw_nsF64m1y6QtADae9-QAAu_bNR9wzNivhRwUAo12H53SnH4x5atBcNCXOKmV-Jj0Ztb9jsKH1MNO6kYCxpDGKdc.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_ohc=4JA-CwGet0YQ7kNvwFtJOtA&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MjEwMzc5MDQ4MDE3MDU2MiwiYXNzZXRfYWdlX2RheXMiOjEzLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=f4f497bf2afe84b&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC83QTQ3NEMyNkRDMTI1RDAzOTM5RDA2MzQ1NERCQURCNF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzdENERENDdEQzREMDkzNEY4QjBDQTRFRTI3NzNBMTgwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaE-YTE3Ni8BxUCKAJDMywXQBmZmZmZmZoYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=ZdHpda-nJm2AvxV6reYmzw&_nc_ss=7f689&_nc_zt=28&oh=00_AQGLuWwEcclbXwmNzt94YLWutCVEiSJLtP1IGIotfyhkFw&oe=6A7D3848",
-        "playbackCapturedAt": "2026-08-11T17:45:03.215Z",
-        "playbackExpiresAt": "2026-08-13T03:21:44.000Z"
+        }
       },
       "usageObservations": [
         {
-          "capturedAt": "2026-07-31T12:00:00.000Z",
-          "uses": 99000,
+          "capturedAt": "2026-08-11T18:31:14.325Z",
+          "uses": null,
           "rank": null,
           "rankWindow": null,
-          "sourceLabel": "SocialPilot · relevé de la page audio fin juillet",
-          "sourceUrl": "https://www.instagram.com/reels/audio/1741362503149150/",
-          "exactness": "platform-estimate"
+          "sourceLabel": "YouTube Shorts · page audio native ; compteur global indisponible",
+          "sourceUrl": "https://www.youtube.com/source/MexTmo_3naU/shorts",
+          "exactness": "unavailable"
         }
       ],
-      "lofiFitScore": 95,
-      "lofiAngle": "Construire une journée d'étude en quatre gestes doux : lampe, thé, carnet, puis le chat qui vient dormir sur le bureau.",
-      "lofiFitRationale": "Le rythme doux convient naturellement aux routines cozy et permet un montage esthétique produit uniquement avec les assets officiels.",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T18:31:14.325Z",
+        "minimumDistinctCreators": 3,
+        "summary": "La page audio native YouTube affiche trois reprises ; la référence et deux Shorts de créateurs distincts sont conservés comme preuve minimale.",
+        "posts": [
+          {
+            "platform": "youtube",
+            "author": "Kind Otter",
+            "url": "https://www.youtube.com/shorts/MexTmo_3naU",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Runkin Ko",
+            "url": "https://www.youtube.com/shorts/NTQ9JUnSFLs",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Gojol_le6",
+            "url": "https://www.youtube.com/shorts/pYH67pylbOs",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
+          }
+        ]
+      },
+      "lofiFitScore": 96,
+      "lofiAngle": "Mettre en scène trois sabotages du chat, puis révéler que Lofi Girl avait préparé un leurre et peut reprendre sa session sans rompre le ton cozy.",
+      "lofiFitRationale": "La relation malicieuse entre Lofi Girl et son chat porte naturellement le retournement, sans dialogue ni personnage supplémentaire.",
       "proposals": [
         {
-          "id": "sweetly-four-steps",
-          "title": "Une journée en quatre gestes",
-          "concept": "Chaque phrase de Sweetly déclenche un geste doux de Lofi Girl : allumer la lampe, verser le thé, ouvrir le carnet, poser le casque.",
-          "copy": "A soft routine for a loud week ☕",
-          "character": "lofi-girl",
-          "tone": "cozy"
-        },
-        {
-          "id": "sweet-aesthetic-fail",
-          "title": "La routine douce, version réelle",
-          "concept": "Le montage Sweetly montre thé versé, carnet ouvert, plaid installé; au dernier beat Lofi Girl s'assoit sur le crayon oublié et casse tout le calme.",
-          "copy": "Soft life. Sharp pencil.",
+          "id": "outplayed-decoy-pencil",
+          "title": "Le faux stylo",
+          "concept": "Le chat pousse trois fois le stylo vers le bord ; au dernier cut, Lofi Girl révèle le vrai stylo déjà caché derrière son cahier.",
+          "copy": "He planned the interruption. I planned the decoy.",
           "character": "lofi-girl",
           "tone": "funny"
         },
         {
-          "id": "gentle-start-sequence",
-          "title": "Réduire le démarrage à quatre actions",
-          "concept": "Sweetly rythme une méthode sans friction : eau prête, téléphone loin, objectif écrit, minuteur 25:00; aucun plan décoratif supplémentaire.",
-          "copy": "Make starting feel smaller than avoiding it.",
+          "id": "outplayed-decoy-notebook",
+          "title": "Le cahier leurre",
+          "concept": "Le chat s’installe fièrement sur le cahier ouvert ; Lofi Girl fait glisser hors champ un second carnet déjà rempli.",
+          "copy": "My study partner only blocked the draft.",
           "character": "lofi-girl",
           "tone": "smart"
         },
         {
-          "id": "morning-to-night",
-          "title": "Du matin à la nuit en un bureau",
-          "concept": "Sans bouger la caméra, Sweetly accompagne quatre changements de lumière autour de Lofi Girl, du premier rayon au reflet nocturne sur la fenêtre.",
-          "copy": "One desk, one day, a hundred quiet moments.",
-          "character": "lofi-girl",
-          "tone": "cinematic"
-        },
-        {
-          "id": "routine-before-work",
-          "title": "Faire toute la routine sauf travailler",
-          "concept": "Lofi Girl réussit chaque geste esthétique sur Sweetly; quand tout est enfin parfait, le minuteur indique que sa pause commence déjà.",
-          "copy": "The setup was productive. I was not.",
-          "character": "lofi-girl",
-          "tone": "relatable"
-        },
-        {
-          "id": "cat-final-step",
-          "title": "La cinquième étape imprévue",
-          "concept": "Après lampe, thé, carnet et casque, le chat arrive sur la dernière note de Sweetly et se roule exactement au centre de la page.",
-          "copy": "Final step: accept that the desk belongs to him. 🐈",
+          "id": "outplayed-pomodoro",
+          "title": "Pomodoro détourné",
+          "concept": "Le chat arrête le minuteur à chaque sonnerie, mais Lofi Girl retourne l’écran : il déclenchait en réalité sa pause câlin.",
+          "copy": "He thought he stopped the timer. He scheduled the cuddle break.",
           "character": "lofi-girl",
           "tone": "cat"
         },
         {
-          "id": "cozy-loadout",
-          "title": "Le loadout de concentration",
-          "concept": "Lofi Boy équipe casque, boisson, playlist et bloc-notes comme des objets d'inventaire sur chaque phrase de Sweetly, puis sélectionne « Start focus quest ».",
-          "copy": "Cozy loadout equipped. Quest accepted. 🎮",
+          "id": "outplayed-headphones",
+          "title": "Le casque de secours",
+          "concept": "Après deux tentatives pour débrancher le casque, le chat découvre que Lofi Girl écoute déjà la playlist avec une seconde paire sans fil.",
+          "copy": "Plan B was already playing.",
+          "character": "lofi-girl",
+          "tone": "relatable"
+        },
+        {
+          "id": "outplayed-snack-bluff",
+          "title": "La diversion parfaite",
+          "concept": "Lofi Girl laisse un snack vide comme appât ; pendant que le chat enquête, elle termine calmement la dernière ligne.",
+          "copy": "One empty packet bought me one finished paragraph.",
+          "character": "lofi-girl",
+          "tone": "funny"
+        },
+        {
+          "id": "outplayed-window-seat",
+          "title": "La place près de la fenêtre",
+          "concept": "Le chat vole la chaise au premier cut ; le dernier plan révèle un coussin chauffé préparé sur le rebord et le bureau redevient paisible.",
+          "copy": "Everyone got their favourite spot in the end.",
+          "character": "lofi-girl",
+          "tone": "cozy"
+        },
+        {
+          "id": "outplayed-controller",
+          "title": "La manette fantôme",
+          "concept": "Lofi Boy laisse une manette déchargée au chat, puis reprend discrètement sa partie avec la vraie sur le beat final.",
+          "copy": "The co-op sabotage needed one more controller.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
-      ],
-      "reuseEvidence": {
-        "verifiedAt": "2026-08-11T17:29:34.000Z",
-        "minimumDistinctCreators": 3,
-        "summary": "La page audio Instagram publique affiche des reprises distinctes chez @khloevx, @lecoindespatissiers, @sy_b.official.",
-        "posts": [
-          {
-            "platform": "instagram",
-            "author": "@khloevx",
-            "url": "https://www.instagram.com/reel/DbXp_8hNHRf/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "instagram",
-            "author": "@lecoindespatissiers",
-            "url": "https://www.instagram.com/reel/Dbc9jbUtcad/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "instagram",
-            "author": "@sy_b.official",
-            "url": "https://www.instagram.com/reel/DbJQic3BJEo/",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "sirens-cinematic-tension",
@@ -2130,35 +2124,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "two-personalities-401003-headphones",
-        "title": "Le casque tranche le débat",
-        "concept": "Plan fixe en split-screen : la version « sortir » attrape le manteau, la version « rester » ouvre le cahier ; le casque glisse au centre sur l’accent et les deux images fusionnent en session collective en ligne.",
-        "copy": "Plan A: go out. Plan B: stay in. Playlist: yes.",
+        {
+          "id": "two-personalities-401003-headphones",
+          "title": "Le casque tranche le débat",
+          "concept": "Plan fixe en split-screen : la version « sortir » attrape le manteau, la version « rester » ouvre le cahier ; le casque glisse au centre sur l’accent et les deux images fusionnent en session collective en ligne.",
+          "copy": "Plan A: go out. Plan B: stay in. Playlist: yes.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "two-personalities-401003-cat",
-        "title": "Vote décisif à quatre pattes",
-        "concept": "Les deux Lofi Girl déposent chacune leur option sur le bureau ; le chat pose calmement sa patte sur « soirée à la maison », puis s’installe sur le manteau pour verrouiller le résultat.",
-        "copy": "Democracy lasted exactly one paw.",
+        {
+          "id": "two-personalities-401003-cat",
+          "title": "Vote décisif à quatre pattes",
+          "concept": "Les deux Lofi Girl déposent chacune leur option sur le bureau ; le chat pose calmement sa patte sur « soirée à la maison », puis s’installe sur le manteau pour verrouiller le résultat.",
+          "copy": "Democracy lasted exactly one paw.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "two-personalities-401003-night",
-        "title": "Deux soirées, un même cadre",
-        "concept": "Même composition répétée deux fois : néons et foule derrière la fenêtre à gauche, pluie et lampe chaude à droite ; le raccord final montre Lofi Girl heureuse dans les deux versions.",
-        "copy": "Extrovert for an hour. Introvert for the encore.",
+        {
+          "id": "two-personalities-401003-night",
+          "title": "Deux soirées, un même cadre",
+          "concept": "Même composition répétée deux fois : néons et foule derrière la fenêtre à gauche, pluie et lampe chaude à droite ; le raccord final montre Lofi Girl heureuse dans les deux versions.",
+          "copy": "Extrovert for an hour. Introvert for the encore.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "two-personalities-401003-boy",
-        "title": "Pause sociale ou dernière partie",
-        "concept": "Lofi Boy hésite entre rejoindre ses amis et relancer une partie ; les deux avatars argumentent dans une interface de dialogue jusqu’à ce que le minuteur « daily quest » choisisse pour lui.",
-        "copy": "Tonight’s hardest boss: choosing a plan.",
+        {
+          "id": "two-personalities-401003-boy",
+          "title": "Pause sociale ou dernière partie",
+          "concept": "Lofi Boy hésite entre rejoindre ses amis et relancer une partie ; les deux avatars argumentent dans une interface de dialogue jusqu’à ce que le minuteur « daily quest » choisisse pour lui.",
+          "copy": "Tonight’s hardest boss: choosing a plan.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2259,35 +2253,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "kumar-method-634509-headphones",
-        "title": "Le pitch deck du Pomodoro",
-        "concept": "Trois cuts rouges présentent « objectif : chapitre 4 », « levier : 25 minutes » et « projection : diplôme » ; Lofi Girl clique sur le minuteur avec le sérieux d’une annonce aux investisseurs.",
-        "copy": "Our Q3 strategy is one uninterrupted Pomodoro.",
+        {
+          "id": "kumar-method-634509-headphones",
+          "title": "Le pitch deck du Pomodoro",
+          "concept": "Trois cuts rouges présentent « objectif : chapitre 4 », « levier : 25 minutes » et « projection : diplôme » ; Lofi Girl clique sur le minuteur avec le sérieux d’une annonce aux investisseurs.",
+          "copy": "Our Q3 strategy is one uninterrupted Pomodoro.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "kumar-method-634509-cat",
-        "title": "CFO du goûter",
-        "concept": "Le chat, cravate miniature, tamponne « REFUSÉ » sur le budget biscuits ; Lofi Girl retourne le graphique et révèle que 87 % des dépenses viennent de ses propres friandises.",
-        "copy": "The board has concerns. Mostly about snack allocation.",
+        {
+          "id": "kumar-method-634509-cat",
+          "title": "CFO du goûter",
+          "concept": "Le chat, cravate miniature, tamponne « REFUSÉ » sur le budget biscuits ; Lofi Girl retourne le graphique et révèle que 87 % des dépenses viennent de ses propres friandises.",
+          "copy": "The board has concerns. Mostly about snack allocation.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "kumar-method-634509-night",
-        "title": "Opération chapitre trois",
-        "concept": "Sous une lampe unique, chaque accent déclenche un insert de dossier rouge, une ligne de planning et un gros plan sur le stylo ; le dernier plan révèle seulement trois cases cochées, filmées comme une victoire industrielle.",
-        "copy": "Small plan. Extremely serious lighting.",
+        {
+          "id": "kumar-method-634509-night",
+          "title": "Opération chapitre trois",
+          "concept": "Sous une lampe unique, chaque accent déclenche un insert de dossier rouge, une ligne de planning et un gros plan sur le stylo ; le dernier plan révèle seulement trois cases cochées, filmées comme une victoire industrielle.",
+          "copy": "Small plan. Extremely serious lighting.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "kumar-method-634509-boy",
-        "title": "Plan de conquête du classement",
-        "concept": "Lofi Boy expose devant son setup une stratégie de boss en cinq flèches ; au lancement du combat, il ferme le tableau et active simplement le mode entraînement.",
-        "copy": "The master plan had one step: stop button-mashing.",
+        {
+          "id": "kumar-method-634509-boy",
+          "title": "Plan de conquête du classement",
+          "concept": "Lofi Boy expose devant son setup une stratégie de boss en cinq flèches ; au lancement du combat, il ferme le tableau et active simplement le mode entraînement.",
+          "copy": "The master plan had one step: stop button-mashing.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2388,35 +2382,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "not-very-nonchalant-633631-headphones",
-        "title": "La minute anti-cool",
-        "concept": "Lofi Girl lit « devoir envoyé » en restant immobile deux secondes, puis la basse libère une célébration sans retenue : chaise qui tourne, bras levés et pluie de post-it.",
-        "copy": "Submitted at 23:58. Nonchalance officially cancelled.",
+        {
+          "id": "not-very-nonchalant-633631-headphones",
+          "title": "La minute anti-cool",
+          "concept": "Lofi Girl lit « devoir envoyé » en restant immobile deux secondes, puis la basse libère une célébration sans retenue : chaise qui tourne, bras levés et pluie de post-it.",
+          "copy": "Submitted at 23:58. Nonchalance officially cancelled.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "not-very-nonchalant-633631-cat",
-        "title": "Le chat célèbre avant elle",
-        "concept": "Elle essaie de garder un visage neutre devant sa bonne note ; le chat déclenche une mini-banderole depuis l’étagère et l’oblige à sourire sur la chute.",
-        "copy": "I was going to play it cool. Management disagreed.",
+        {
+          "id": "not-very-nonchalant-633631-cat",
+          "title": "Le chat célèbre avant elle",
+          "concept": "Elle essaie de garder un visage neutre devant sa bonne note ; le chat déclenche une mini-banderole depuis l’étagère et l’oblige à sourire sur la chute.",
+          "copy": "I was going to play it cool. Management disagreed.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "not-very-nonchalant-633631-night",
-        "title": "Victoire à 23 h 58",
-        "concept": "Horloge et barre d’upload occupent tout le cadre ; quand la validation apparaît, la lumière froide passe au doré et Lofi Girl danse encore assise, stylo à la main.",
-        "copy": "Tiny win, full-volume joy.",
+        {
+          "id": "not-very-nonchalant-633631-night",
+          "title": "Victoire à 23 h 58",
+          "concept": "Horloge et barre d’upload occupent tout le cadre ; quand la validation apparaît, la lumière froide passe au doré et Lofi Girl danse encore assise, stylo à la main.",
+          "copy": "Tiny win, full-volume joy.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "not-very-nonchalant-633631-boy",
-        "title": "Achievement sans poker face",
-        "concept": "Lofi Boy débloque un trophée rare, tente le regard impassible demandé par le format, puis saute hors champ quand le son refuse toute retenue.",
-        "copy": "Achievement unlocked: visibly delighted.",
+        {
+          "id": "not-very-nonchalant-633631-boy",
+          "title": "Achievement sans poker face",
+          "concept": "Lofi Boy débloque un trophée rare, tente le regard impassible demandé par le format, puis saute hors champ quand le son refuse toute retenue.",
+          "copy": "Achievement unlocked: visibly delighted.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2517,35 +2511,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "netflix-documentary-confessional-426113-headphones",
-        "title": "Le témoin du fichier final",
-        "concept": "Interview face caméra : Lofi Girl raconte la disparition de « final_v7 » ; deux reconstitutions montrent le bureau à 02:14 puis le fichier retrouvé dans Téléchargements.",
-        "copy": "We thought the file was gone. It had simply changed folders.",
+        {
+          "id": "netflix-documentary-confessional-426113-headphones",
+          "title": "Le témoin du fichier final",
+          "concept": "Interview face caméra : Lofi Girl raconte la disparition de « final_v7 » ; deux reconstitutions montrent le bureau à 02:14 puis le fichier retrouvé dans Téléchargements.",
+          "copy": "We thought the file was gone. It had simply changed folders.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "netflix-documentary-confessional-426113-cat",
-        "title": "Principal suspect : le chat",
-        "concept": "Une voix off présente les preuves — une touche arrachée, une patte sur le trackpad, un historique fermé — avant que le chat traverse l’interview comme s’il possédait les lieux.",
-        "copy": "The suspect declined to comment and requested dinner.",
+        {
+          "id": "netflix-documentary-confessional-426113-cat",
+          "title": "Principal suspect : le chat",
+          "concept": "Une voix off présente les preuves — une touche arrachée, une patte sur le trackpad, un historique fermé — avant que le chat traverse l’interview comme s’il possédait les lieux.",
+          "copy": "The suspect declined to comment and requested dinner.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "netflix-documentary-confessional-426113-night",
-        "title": "Documentaire d’une nuit blanche",
-        "concept": "Alternance précise entre confessionnal sobre, timecodes et plans macro du café qui refroidit ; le générique tombe au moment où la première phrase est enfin écrite.",
-        "copy": "One desk. One deadline. No reliable witnesses.",
+        {
+          "id": "netflix-documentary-confessional-426113-night",
+          "title": "Documentaire d’une nuit blanche",
+          "concept": "Alternance précise entre confessionnal sobre, timecodes et plans macro du café qui refroidit ; le générique tombe au moment où la première phrase est enfin écrite.",
+          "copy": "One desk. One deadline. No reliable witnesses.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "netflix-documentary-confessional-426113-boy",
-        "title": "Making-of du rage quit",
-        "concept": "Lofi Boy reconstitue très sérieusement la partie qui l’a fait quitter ; chaque version devient plus héroïque jusqu’à ce qu’une capture révèle qu’il est tombé dans le tutoriel.",
-        "copy": "Based on a true and deeply avoidable defeat.",
+        {
+          "id": "netflix-documentary-confessional-426113-boy",
+          "title": "Making-of du rage quit",
+          "concept": "Lofi Boy reconstitue très sérieusement la partie qui l’a fait quitter ; chaque version devient plus héroïque jusqu’à ce qu’une capture révèle qu’il est tombé dans le tutoriel.",
+          "copy": "Based on a true and deeply avoidable defeat.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2646,35 +2640,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "pain-oh-no-spain-150304-headphones",
-        "title": "Zoom arrière vers l’Espagne",
-        "concept": "Commencer sur les yeux fatigués et le mot « pain » au-dessus du cahier ; au jeu de mots, dézoomer d’un seul mouvement vers balcon, soleil et petite pile de devoirs arrivée dans la valise.",
-        "copy": "The homework found me in Spain. Impressive commitment.",
+        {
+          "id": "pain-oh-no-spain-150304-headphones",
+          "title": "Zoom arrière vers l’Espagne",
+          "concept": "Commencer sur les yeux fatigués et le mot « pain » au-dessus du cahier ; au jeu de mots, dézoomer d’un seul mouvement vers balcon, soleil et petite pile de devoirs arrivée dans la valise.",
+          "copy": "The homework found me in Spain. Impressive commitment.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "pain-oh-no-spain-150304-cat",
-        "title": "Passeport confisqué",
-        "concept": "Lofi Girl cherche son passeport pendant le reveal ; le plan large montre le chat couché dessus, très satisfait d’avoir transformé les vacances en staycation.",
-        "copy": "Spain was approved. The cat appealed.",
+        {
+          "id": "pain-oh-no-spain-150304-cat",
+          "title": "Passeport confisqué",
+          "concept": "Lofi Girl cherche son passeport pendant le reveal ; le plan large montre le chat couché dessus, très satisfait d’avoir transformé les vacances en staycation.",
+          "copy": "Spain was approved. The cat appealed.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "pain-oh-no-spain-150304-night",
-        "title": "De la douleur au coucher de soleil",
-        "concept": "Le gros plan bleuté de la deadline s’ouvre progressivement sur un ciel orange ; le stylo reprend exactement quand le soleil touche l’horizon.",
-        "copy": "Same page, softer horizon.",
+        {
+          "id": "pain-oh-no-spain-150304-night",
+          "title": "De la douleur au coucher de soleil",
+          "concept": "Le gros plan bleuté de la deadline s’ouvre progressivement sur un ciel orange ; le stylo reprend exactement quand le soleil touche l’horizon.",
+          "copy": "Same page, softer horizon.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "pain-oh-no-spain-150304-boy",
-        "title": "Pain, Spain, puis respawn",
-        "concept": "Après un game over, Lofi Boy prononce « pain » ; le cut « Spain » révèle son setup portable sur une terrasse, puis un nouveau game over ruine immédiatement la carte postale.",
-        "copy": "Changed countries. Kept the skill issue.",
+        {
+          "id": "pain-oh-no-spain-150304-boy",
+          "title": "Pain, Spain, puis respawn",
+          "concept": "Après un game over, Lofi Boy prononce « pain » ; le cut « Spain » révèle son setup portable sur une terrasse, puis un nouveau game over ruine immédiatement la carte postale.",
+          "copy": "Changed countries. Kept the skill issue.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2775,35 +2769,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "bangladesh-absurd-complaint-228638-headphones",
-        "title": "Checklist impossible en cinq cuts",
-        "concept": "Superposer successivement « bon stylo », « café exact », « silence total », « météo parfaite » et « examen annulé » ; le bouton START reste visible et jamais pressé jusqu’au regard caméra final.",
-        "copy": "My focus requirements have exceeded the available universe.",
+        {
+          "id": "bangladesh-absurd-complaint-228638-headphones",
+          "title": "Checklist impossible en cinq cuts",
+          "concept": "Superposer successivement « bon stylo », « café exact », « silence total », « météo parfaite » et « examen annulé » ; le bouton START reste visible et jamais pressé jusqu’au regard caméra final.",
+          "copy": "My focus requirements have exceeded the available universe.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "bangladesh-absurd-complaint-228638-cat",
-        "title": "Dernière condition : son accord",
-        "concept": "Après six demandes extravagantes, Lofi Girl tend le contrat au chat ; il refuse de tamponner la page puis réclame une boîte de thon comme clause additionnelle.",
-        "copy": "The setup is ready. Legal still needs one snack.",
+        {
+          "id": "bangladesh-absurd-complaint-228638-cat",
+          "title": "Dernière condition : son accord",
+          "concept": "Après six demandes extravagantes, Lofi Girl tend le contrat au chat ; il refuse de tamponner la page puis réclame une boîte de thon comme clause additionnelle.",
+          "copy": "The setup is ready. Legal still needs one snack.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "bangladesh-absurd-complaint-228638-night",
-        "title": "Le bureau parfait, zéro place",
-        "concept": "Chaque nouvelle condition matérialise un objet dans le même cadre nocturne, jusqu’à ensevelir le cahier ; seule la lampe reste visible sur le dernier accent.",
-        "copy": "Everything is prepared except the part where I begin.",
+        {
+          "id": "bangladesh-absurd-complaint-228638-night",
+          "title": "Le bureau parfait, zéro place",
+          "concept": "Chaque nouvelle condition matérialise un objet dans le même cadre nocturne, jusqu’à ensevelir le cahier ; seule la lampe reste visible sur le dernier accent.",
+          "copy": "Everything is prepared except the part where I begin.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "bangladesh-absurd-complaint-228638-boy",
-        "title": "Pré-requis de quête absurdes",
-        "concept": "Une interface RPG demande à Lofi Boy une boisson légendaire, 100 % de batterie, la bonne météo et trois amis connectés ; la dernière ligne révèle « objet manquant : motivation ».",
-        "copy": "Quest locked: motivation item not found.",
+        {
+          "id": "bangladesh-absurd-complaint-228638-boy",
+          "title": "Pré-requis de quête absurdes",
+          "concept": "Une interface RPG demande à Lofi Boy une boisson légendaire, 100 % de batterie, la bonne météo et trois amis connectés ; la dernière ligne révèle « objet manquant : motivation ».",
+          "copy": "Quest locked: motivation item not found.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -2904,35 +2898,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "choosin-texas-western-reveal-201425-headphones",
-        "title": "Playlist country, bureau western",
-        "concept": "Filmer le clic sur « Country focus », garder la pose identique puis remplacer en quatre beats la lampe, le mug, la fenêtre et le crayon par leurs versions western.",
-        "copy": "One playlist change and my desk grew a frontier.",
+        {
+          "id": "choosin-texas-western-reveal-201425-headphones",
+          "title": "Playlist country, bureau western",
+          "concept": "Filmer le clic sur « Country focus », garder la pose identique puis remplacer en quatre beats la lampe, le mug, la fenêtre et le crayon par leurs versions western.",
+          "copy": "One playlist change and my desk grew a frontier.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "choosin-texas-western-reveal-201425-cat",
-        "title": "Le shérif du bureau",
-        "concept": "Le chat apparaît avec un minuscule chapeau, pousse les deux playlists hors cadre et pose sa patte sur « saloon ambience » avant le reveal.",
-        "copy": "This town was apparently only big enough for his playlist.",
+        {
+          "id": "choosin-texas-western-reveal-201425-cat",
+          "title": "Le shérif du bureau",
+          "concept": "Le chat apparaît avec un minuscule chapeau, pousse les deux playlists hors cadre et pose sa patte sur « saloon ambience » avant le reveal.",
+          "copy": "This town was apparently only big enough for his playlist.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "choosin-texas-western-reveal-201425-night",
-        "title": "Du néon au grand ciel",
-        "concept": "Un travelling lent conserve Lofi Girl au centre tandis que le violet nocturne devient bois ambré et ciel immense ; le geste d’écriture ne s’interrompt jamais.",
-        "copy": "Same focus, wider sky.",
+        {
+          "id": "choosin-texas-western-reveal-201425-night",
+          "title": "Du néon au grand ciel",
+          "concept": "Un travelling lent conserve Lofi Girl au centre tandis que le violet nocturne devient bois ambré et ciel immense ; le geste d’écriture ne s’interrompt jamais.",
+          "copy": "Same focus, wider sky.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "choosin-texas-western-reveal-201425-boy",
-        "title": "Choisir sa map de focus",
-        "concept": "Lofi Boy navigue entre « Neon City » et « Texas Sunset » comme dans un écran de sélection ; le refrain charge la seconde map autour de son setup.",
-        "copy": "New study map loaded: dust, dusk and one deadline.",
+        {
+          "id": "choosin-texas-western-reveal-201425-boy",
+          "title": "Choisir sa map de focus",
+          "concept": "Lofi Boy navigue entre « Neon City » et « Texas Sunset » comme dans un écran de sélection ; le refrain charge la seconde map autour de son setup.",
+          "copy": "New study map loaded: dust, dusk and one deadline.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3033,35 +3027,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "u-me-love-timeline-896336-headphones",
-        "title": "Huit ans en huit pages",
-        "concept": "Huit raccords sur une page tournée affichent chacun une année et un jalon réel ; la dernière page devient une note manuscrite adressée directement à la communauté.",
-        "copy": "Different year, same place to meet.",
+        {
+          "id": "u-me-love-timeline-896336-headphones",
+          "title": "Huit ans en huit pages",
+          "concept": "Huit raccords sur une page tournée affichent chacun une année et un jalon réel ; la dernière page devient une note manuscrite adressée directement à la communauté.",
+          "copy": "Different year, same place to meet.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "u-me-love-timeline-896336-cat",
-        "title": "La constante de l’archive",
-        "concept": "À chaque extrait daté, le chat bloque exactement le même coin du clavier ; un montage final aligne ses huit interruptions comme une chronologie parallèle.",
-        "copy": "The room evolved. His workflow did not.",
+        {
+          "id": "u-me-love-timeline-896336-cat",
+          "title": "La constante de l’archive",
+          "concept": "À chaque extrait daté, le chat bloque exactement le même coin du clavier ; un montage final aligne ses huit interruptions comme une chronologie parallèle.",
+          "copy": "The room evolved. His workflow did not.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "u-me-love-timeline-896336-night",
-        "title": "Toutes les fenêtres ramènent ici",
-        "concept": "Enchaîner neige, pluie, printemps et nuits d’été par match-cuts sur la fenêtre ; le bureau reste le point fixe et la communauté apparaît dans les reflets.",
-        "copy": "Years pass. The light stays on.",
+        {
+          "id": "u-me-love-timeline-896336-night",
+          "title": "Toutes les fenêtres ramènent ici",
+          "concept": "Enchaîner neige, pluie, printemps et nuits d’été par match-cuts sur la fenêtre ; le bureau reste le point fixe et la communauté apparaît dans les reflets.",
+          "copy": "Years pass. The light stays on.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "u-me-love-timeline-896336-boy",
-        "title": "Player two rejoint la timeline",
-        "concept": "Les jalons de Lofi Boy apparaissent comme des sauvegardes — premier setup, premier morceau, première nuit en ligne — puis sa fenêtre s’allume face à celle de Lofi Girl.",
-        "copy": "Two rooms, one long-running save file.",
+        {
+          "id": "u-me-love-timeline-896336-boy",
+          "title": "Player two rejoint la timeline",
+          "concept": "Les jalons de Lofi Boy apparaissent comme des sauvegardes — premier setup, premier morceau, première nuit en ligne — puis sa fenêtre s’allume face à celle de Lofi Girl.",
+          "copy": "Two rooms, one long-running save file.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3162,35 +3156,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "ss26-editorial-transition-757014-headphones",
-        "title": "Le carrousel des quatre focus",
-        "concept": "Nommer « deadline », « lecture », « soft morning » et « deep night » ; chaque beat change simultanément palette, météo, accessoire et page, sans bouger la caméra.",
-        "copy": "Same to-do list. Pick your visual operating system.",
+        {
+          "id": "ss26-editorial-transition-757014-headphones",
+          "title": "Le carrousel des quatre focus",
+          "concept": "Nommer « deadline », « lecture », « soft morning » et « deep night » ; chaque beat change simultanément palette, météo, accessoire et page, sans bouger la caméra.",
+          "copy": "Same to-do list. Pick your visual operating system.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "ss26-editorial-transition-757014-cat",
-        "title": "Mode cinq : chaos",
-        "concept": "Après quatre transformations impeccables, le chat touche le sélecteur et déclenche un cinquième décor composé de toutes les palettes, avec les post-it qui tombent du plafond.",
-        "copy": "Four focus modes tested. Chaos shipped to production.",
+        {
+          "id": "ss26-editorial-transition-757014-cat",
+          "title": "Mode cinq : chaos",
+          "concept": "Après quatre transformations impeccables, le chat touche le sélecteur et déclenche un cinquième décor composé de toutes les palettes, avec les post-it qui tombent du plafond.",
+          "copy": "Four focus modes tested. Chaos shipped to production.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "ss26-editorial-transition-757014-night",
-        "title": "Une nuit, quatre palettes",
-        "concept": "La fenêtre sert de transition continue : pluie bleue, crépuscule rose, ville violette puis aube dorée, pendant que Lofi Girl avance sur quatre tâches distinctes.",
-        "copy": "One frame, four moods, no broken concentration.",
+        {
+          "id": "ss26-editorial-transition-757014-night",
+          "title": "Une nuit, quatre palettes",
+          "concept": "La fenêtre sert de transition continue : pluie bleue, crépuscule rose, ville violette puis aube dorée, pendant que Lofi Girl avance sur quatre tâches distinctes.",
+          "copy": "One frame, four moods, no broken concentration.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "ss26-editorial-transition-757014-boy",
-        "title": "Loadout de concentration",
-        "concept": "Lofi Boy équipe successivement casque, boisson, clavier silencieux et mode hors-ligne ; chaque objet change les statistiques affichées à droite de son avatar.",
-        "copy": "Build complete: +20 focus, −100 notifications.",
+        {
+          "id": "ss26-editorial-transition-757014-boy",
+          "title": "Loadout de concentration",
+          "concept": "Lofi Boy équipe successivement casque, boisson, clavier silencieux et mode hors-ligne ; chaque objet change les statistiques affichées à droite de son avatar.",
+          "copy": "Build complete: +20 focus, −100 notifications.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3291,35 +3285,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "dracula-jennie-remix-455169-headphones",
-        "title": "Minuit déclenche le mode Dracula",
-        "concept": "L’horloge passe de 23:59 à 00:00 sur l’accent ; sans changer le cadre, la pluie s’intensifie, les pages se tournent plus vite et la lampe devient rouge sombre.",
-        "copy": "Midnight mode: dramatic, productive, slightly immortal.",
+        {
+          "id": "dracula-jennie-remix-455169-headphones",
+          "title": "Minuit déclenche le mode Dracula",
+          "concept": "L’horloge passe de 23:59 à 00:00 sur l’accent ; sans changer le cadre, la pluie s’intensifie, les pages se tournent plus vite et la lampe devient rouge sombre.",
+          "copy": "Midnight mode: dramatic, productive, slightly immortal.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "dracula-jennie-remix-455169-cat",
-        "title": "Le vampire avait des moustaches",
-        "concept": "Une ombre inquiétante monte derrière Lofi Girl à minuit ; le contrechamp révèle le chat debout devant la lampe, crocs en papier et regard affamé.",
-        "copy": "He does not drink blood. He does demand snacks after midnight.",
+        {
+          "id": "dracula-jennie-remix-455169-cat",
+          "title": "Le vampire avait des moustaches",
+          "concept": "Une ombre inquiétante monte derrière Lofi Girl à minuit ; le contrechamp révèle le chat debout devant la lampe, crocs en papier et regard affamé.",
+          "copy": "He does not drink blood. He does demand snacks after midnight.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "dracula-jennie-remix-455169-night",
-        "title": "La chambre après minuit",
-        "concept": "Construire un plan-séquence où seules évoluent les sources lumineuses : ville éteinte, écran rouge, éclairs puis première lueur de l’aube sur la page terminée.",
-        "copy": "The night got louder. Her pencil kept the tempo.",
+        {
+          "id": "dracula-jennie-remix-455169-night",
+          "title": "La chambre après minuit",
+          "concept": "Construire un plan-séquence où seules évoluent les sources lumineuses : ville éteinte, écran rouge, éclairs puis première lueur de l’aube sur la page terminée.",
+          "copy": "The night got louder. Her pencil kept the tempo.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "dracula-jennie-remix-455169-boy",
-        "title": "Boss nocturne à 00:00",
-        "concept": "À minuit, le setup de Lofi Boy affiche une barre « Deadline Dracula » ; chaque paragraphe écrit retire des points de vie jusqu’au coup final au lever du jour.",
-        "copy": "Final boss weakness discovered: finishing the draft.",
+        {
+          "id": "dracula-jennie-remix-455169-boy",
+          "title": "Boss nocturne à 00:00",
+          "concept": "À minuit, le setup de Lofi Boy affiche une barre « Deadline Dracula » ; chaque paragraphe écrit retire des points de vie jusqu’au coup final au lever du jour.",
+          "copy": "Final boss weakness discovered: finishing the draft.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3420,35 +3414,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "let-down-emotional-rescue-959894-headphones",
-        "title": "Le geste qui sauve la scène",
-        "concept": "Commencer sur une page froissée et le visage hors champ ; après le silence du son, une main pose une tasse près du cahier et Lofi Girl reprend une seule ligne.",
-        "copy": "You didn’t fix everything. You helped me start again.",
+        {
+          "id": "let-down-emotional-rescue-959894-headphones",
+          "title": "Le geste qui sauve la scène",
+          "concept": "Commencer sur une page froissée et le visage hors champ ; après le silence du son, une main pose une tasse près du cahier et Lofi Girl reprend une seule ligne.",
+          "copy": "You didn’t fix everything. You helped me start again.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "let-down-emotional-rescue-959894-cat",
-        "title": "Présence sans discours",
-        "concept": "Le chat s’assoit contre son bras au moment le plus calme ; aucune chute comique, seulement sa respiration qui ralentit et le crayon qu’elle récupère.",
-        "copy": "Some support arrives without saying a word.",
+        {
+          "id": "let-down-emotional-rescue-959894-cat",
+          "title": "Présence sans discours",
+          "concept": "Le chat s’assoit contre son bras au moment le plus calme ; aucune chute comique, seulement sa respiration qui ralentit et le crayon qu’elle récupère.",
+          "copy": "Some support arrives without saying a word.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "let-down-emotional-rescue-959894-night",
-        "title": "La fenêtre reste allumée",
-        "concept": "La caméra recule lentement du bureau vers la rue sombre ; toutes les fenêtres s’éteignent sauf celle de Lofi Girl, bientôt rejointe par une seconde lumière en face.",
-        "copy": "If tonight feels heavy, leave one small light on.",
+        {
+          "id": "let-down-emotional-rescue-959894-night",
+          "title": "La fenêtre reste allumée",
+          "concept": "La caméra recule lentement du bureau vers la rue sombre ; toutes les fenêtres s’éteignent sauf celle de Lofi Girl, bientôt rejointe par une seconde lumière en face.",
+          "copy": "If tonight feels heavy, leave one small light on.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "let-down-emotional-rescue-959894-boy",
-        "title": "Continue ? Player two répond oui",
-        "concept": "Écran « continue? » après un échec ; le message d’un ami apparaît sur le deuxième beat et Lofi Boy choisit YES, non pour rejouer, mais pour revenir au projet en pause.",
-        "copy": "Player two joined at exactly the right moment.",
+        {
+          "id": "let-down-emotional-rescue-959894-boy",
+          "title": "Continue ? Player two répond oui",
+          "concept": "Écran « continue? » après un échec ; le message d’un ami apparaît sur le deuxième beat et Lofi Boy choisit YES, non pour rejouer, mais pour revenir au projet en pause.",
+          "copy": "Player two joined at exactly the right moment.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3549,35 +3543,35 @@
           "character": "lofi-girl",
           "tone": "funny"
         },
-      {
-        "id": "broken-rules-temptation-530974-headphones",
-        "title": "Règle n°1 : pas de nouvelle playlist",
-        "concept": "Afficher la règle en blanc, puis une recommandation « mix parfait pour réviser » glisse à l’écran ; Lofi Girl clique avant même la fin du son et assume le lip-sync.",
-        "copy": "I made the rule. The algorithm found the loophole.",
+        {
+          "id": "broken-rules-temptation-530974-headphones",
+          "title": "Règle n°1 : pas de nouvelle playlist",
+          "concept": "Afficher la règle en blanc, puis une recommandation « mix parfait pour réviser » glisse à l’écran ; Lofi Girl clique avant même la fin du son et assume le lip-sync.",
+          "copy": "I made the rule. The algorithm found the loophole.",
           "character": "lofi-girl",
           "tone": "smart"
         },
-      {
-        "id": "broken-rules-temptation-530974-cat",
-        "title": "Exception féline immédiate",
-        "concept": "Texte : « pas de chat sur les notes aujourd’hui » ; un seul cut révèle le chat étalé sur tout le chapitre, pendant que Lofi Girl répète la phrase sans conviction.",
-        "copy": "Policy updated: apparently he is the notes.",
+        {
+          "id": "broken-rules-temptation-530974-cat",
+          "title": "Exception féline immédiate",
+          "concept": "Texte : « pas de chat sur les notes aujourd’hui » ; un seul cut révèle le chat étalé sur tout le chapitre, pendant que Lofi Girl répète la phrase sans conviction.",
+          "copy": "Policy updated: apparently he is the notes.",
           "character": "lofi-girl",
           "tone": "cat"
         },
-      {
-        "id": "broken-rules-temptation-530974-night",
-        "title": "Couvre-feu annulé par un refrain",
-        "concept": "La lampe s’éteint à 23:00 conformément à la règle ; le refrain démarre, elle se rallume aussitôt et le plan suivant montre une page supplémentaire terminée.",
-        "copy": "Bedtime was non-negotiable until the bridge.",
+        {
+          "id": "broken-rules-temptation-530974-night",
+          "title": "Couvre-feu annulé par un refrain",
+          "concept": "La lampe s’éteint à 23:00 conformément à la règle ; le refrain démarre, elle se rallume aussitôt et le plan suivant montre une page supplémentaire terminée.",
+          "copy": "Bedtime was non-negotiable until the bridge.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
-      {
-        "id": "broken-rules-temptation-530974-boy",
-        "title": "Une partie, pas plus",
-        "concept": "Lofi Boy affiche « one game only » avant de lancer la file ; le cut suivant montre le soleil levé et un compteur de six défaites.",
-        "copy": "The rule survived for almost one loading screen.",
+        {
+          "id": "broken-rules-temptation-530974-boy",
+          "title": "Une partie, pas plus",
+          "concept": "Lofi Boy affiche « one game only » avant de lancer la file ; le cut suivant montre le soleil levé et un compteur de six défaites.",
+          "copy": "The rule survived for almost one loading screen.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -3726,22 +3720,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@klemfamily",
-        "caption": "Is this a new WORLD RECORD???👀#familyfun #familygamenight #gameswithfriends #",
-        "url": "https://www.tiktok.com/@klemfamily/video/7668351340745116942",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast5-p-0068-tx/owFBmBAEV2isyI2YEmgG14FvarIvu4zPtdiUc~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/oo4kvijIgPRiB0t6Edv9mAa9iAYQrYAZBELAB.image?dr=10393&x-expires=1786640400&x-signature=9QSZPt5G7lx3HU1SNf%2F%2Fpr2OMOw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 220,
-        "publishedAt": "2026-07-31T00:00:00.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@klemfamily/video/7668351340745116942",
-        "exactness": "platform-estimate",
+        "author": "@asiansurfergirl",
+        "caption": "The perfect surfboard doesn’t exist till I saw this twin fins goes hard #surfboard #surftok #surfing #surfergirl",
+        "url": "https://www.tiktok.com/@asiansurfergirl/video/7668422119440567582",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast8-p-0068-tx2/oUa2UIgtlFGRAqAFgzbICfyXEqLqj1DI4fc7eS~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=Re0Fe5%2FBIXAoEd1Kclqad15oyro%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 14.904352,
+        "publishedAt": "2026-07-30T20:34:17.000Z",
         "metrics": {
-          "views": 9100000,
-          "likes": 442600,
-          "comments": 1139,
-          "shares": 1050
-        }
+          "views": null,
+          "likes": 239400,
+          "comments": 1152,
+          "shares": 105400
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@asiansurfergirl/video/7668422119440567582",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {
@@ -4758,22 +4752,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@jblaze8985",
-        "caption": "The Official Introvert Evening Routine #introvertlife #afterworkvibes #quiettime #socialbatterydead #mevstime",
-        "url": "https://www.tiktok.com/@jblaze8985/video/7531933277804907789",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast5-p-0068-tx/o8bIgEfCR0zEoAzfGHwhSsYbIVrDEBFrSnhDkO~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=1oroKkcMLgT0BQTvwoX%2B3s2A5wo%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 20,
-        "publishedAt": "2025-07-28T01:08:25.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@jblaze8985/video/7531933277804907789",
-        "exactness": "platform-estimate",
+        "author": "@allisonmnewman",
+        "caption": "#twoyearold #obnoxiouslaugh #joke",
+        "url": "https://www.tiktok.com/@allisonmnewman/video/7668117206517026079",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast8-p-0068-tx2/oALE9BD1FR3haQVeIRB8AB3EOuEQQVBfAqpD9E~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=ORAajWDYvABnj7%2F5ijQSHX9GVno%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 11.3,
+        "publishedAt": "2026-07-30T00:51:04.000Z",
         "metrics": {
-          "views": 54400,
-          "likes": 6156,
-          "comments": 986,
-          "shares": 562
-        }
+          "views": null,
+          "likes": 1800000,
+          "comments": 11400,
+          "shares": 268800
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@allisonmnewman/video/7668117206517026079",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {
@@ -4899,22 +4893,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@notxserious",
-        "caption": "Choose your character 😆#jyaime #trend #dance @jyaime ",
-        "url": "https://www.tiktok.com/@notxserious/video/7638591610346949910",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-p-0037-no/o0kNEW3AgokRAQEqqeQ0NZFFEOFBkbfuBvCKDV~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=0xHAvMFBC0tqfGnOJw8vowar2VY%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 11,
-        "publishedAt": "2026-05-11T11:16:51.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@notxserious/video/7638591610346949910",
-        "exactness": "platform-estimate",
+        "author": "@brookemonk_",
+        "caption": "Ib: @MinistryBricks",
+        "url": "https://www.tiktok.com/@brookemonk_/video/7645035159321873694",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast8-p-0068-tx2/oUQIxLUkTC05IcGtQem68qBAIePFWMf3XYzAjg~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=DPhpAVFyTkdLtD%2FucQuy6tY1El4%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 15.166666,
+        "publishedAt": "2026-05-28T20:00:56.000Z",
         "metrics": {
-          "views": 83600,
-          "likes": 415,
-          "comments": 29,
-          "shares": 86
-        }
+          "views": null,
+          "likes": 3700000,
+          "comments": 22400,
+          "shares": 47800
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@brookemonk_/video/7645035159321873694",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {
@@ -5034,22 +5028,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@rebeccalouisecosplays",
-        "caption": "Choose your character: Harry Potter edition ⚡️  @emyangofficial @Lana Harding @ItsChloeHill🖖  #harrypotter #cosplaygirls #hogwarts ",
-        "url": "https://www.tiktok.com/@rebeccalouisecosplays/video/7587116569881300246",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-p-0037-no/ooIKIELWj2zlAqDS1F5zfj2Mfe5ICEAAIJalDh~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=2XBiN8YzxU%2B0j6CNGV2SmI37128%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 13,
-        "publishedAt": "2025-12-23T18:07:19.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@rebeccalouisecosplays/video/7587116569881300246",
-        "exactness": "platform-estimate",
+        "author": "@blondebrunetteredhead",
+        "caption": "choose your character 👊🏼",
+        "url": "https://www.tiktok.com/@blondebrunetteredhead/video/7109308792961010986",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast5-p-0068-tx/2373683c4b5f4e368d11d0fcd54c9a0b_1655264944~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=V%2BDoR8PIJbdlMD1DmHUHsoIOwuo%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 22.766666,
+        "publishedAt": "2022-06-15T03:49:02.000Z",
         "metrics": {
-          "views": 320200,
-          "likes": 10300,
-          "comments": 158,
-          "shares": 425
-        }
+          "views": null,
+          "likes": 4300000,
+          "comments": 14200,
+          "shares": 17500
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@blondebrunetteredhead/video/7109308792961010986",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {
@@ -5175,22 +5169,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@lisamakeupxo",
-        "caption": "My social battery is empty 🪫 I just need silence and time for myself after that lol #introvert #introvertsbelike #fyp #socialbattery ",
-        "url": "https://www.tiktok.com/@lisamakeupxo/video/7559684438540553494",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-p-0037-no/oUyi7DIDRDZn7JPFEupsNAIjILepf0rAKjIPHf~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=yAKEsbpMtz%2B8U%2BGkBZ0%2BBzEUzBw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 6,
-        "publishedAt": "2025-10-10T19:56:39.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@lisamakeupxo/video/7559684438540553494",
-        "exactness": "platform-estimate",
+        "author": "@jorgierob",
+        "caption": "Energy is at an all time low #thirdtrimester #secondtimemom",
+        "url": "https://www.tiktok.com/@jorgierob/video/7641228021151583502",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast5-p-0068-tx/o0A6SFGMgiIHwWvLYaBJ4UPYVE4gCs77BiyIt~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=xSpDwdaK2GwKYMpwQJ56BiWb78M%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 10.190702,
+        "publishedAt": "2026-05-18T13:47:18.000Z",
         "metrics": {
-          "views": 63100,
-          "likes": 4629,
-          "comments": 22,
-          "shares": 422
-        }
+          "views": null,
+          "likes": 4200000,
+          "comments": 6709,
+          "shares": 240900
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@jorgierob/video/7641228021151583502",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {
@@ -5585,141 +5579,129 @@
       ]
     },
     {
-      "id": "tiktok-gaming-setup-night-reveal-265350",
-      "platform": "tiktok",
-      "type": "original",
-      "title": "Peak room · le setup s’allume · son original",
-      "author": "alcarajopuntocom",
-      "audioUrl": "https://www.tiktok.com/music/sonido-original-7053859243434265350",
+      "id": "youtube-matrix-focus-edit",
+      "platform": "youtube",
+      "type": "music",
+      "title": "Matrix focus edit",
+      "author": "@slimetree",
+      "audioUrl": "https://www.youtube.com/source/tbi6urWo0Oo/shorts",
       "source": {
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "label": "TikTok · page audio native, compteur et reprises vérifiés",
-        "url": "https://www.tiktok.com/music/sonido-original-7053859243434265350",
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "label": "YouTube Shorts · page audio native et reprises publiques",
+        "url": "https://www.youtube.com/source/tbi6urWo0Oo/shorts",
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@gabztek",
-        "caption": "Expectation: ✨ Transition Queen ✨ Reality: 🤡 I just wanted to show you my pc setup from day to night 🤣 #pcsetup #gamingroom #gamingsetup #pcgaming #blooper ",
-        "url": "https://www.tiktok.com/@gabztek/video/7559654340613508374",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-p-0037-no/oISOJQ6IjQdAzIVfwHQGngDRhNKFELeoDAf8k0~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=e%2F4g3l4%2BUxZKsjd2l8xLHhYKjE4%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 6,
-        "publishedAt": "2025-10-10T17:59:50.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@gabztek/video/7559654340613508374",
+        "author": "@slimetree",
+        "caption": "Verity Edit | matrix (bl studio loop)",
+        "url": "https://www.youtube.com/shorts/tbi6urWo0Oo",
+        "thumbnailUrl": "https://i.ytimg.com/vi/tbi6urWo0Oo/hqdefault.jpg",
+        "durationSeconds": 13,
+        "publishedAt": "2026-06-14T13:14:48-07:00",
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "YouTube Shorts · compteurs publics vérifiés",
+        "sourceUrl": "https://www.youtube.com/shorts/tbi6urWo0Oo",
         "exactness": "platform-estimate",
         "metrics": {
-          "views": 7052,
-          "likes": 673,
-          "comments": 27,
-          "shares": 16
+          "views": 6100000,
+          "likes": 77000,
+          "comments": 1928,
+          "shares": null
         }
       },
       "usageObservations": [
         {
-          "capturedAt": "2026-08-11T17:29:34.000Z",
-          "uses": 241600,
+          "capturedAt": "2026-08-11T18:31:14.325Z",
+          "uses": null,
           "rank": null,
           "rankWindow": null,
-          "sourceLabel": "TikTok · compteur public de la page audio",
-          "sourceUrl": "https://www.tiktok.com/music/sonido-original-7053859243434265350",
-          "exactness": "platform-estimate"
+          "sourceLabel": "YouTube Shorts · page audio native ; compteur global indisponible",
+          "sourceUrl": "https://www.youtube.com/source/tbi6urWo0Oo/shorts",
+          "exactness": "unavailable"
         }
       ],
       "reuseEvidence": {
-        "verifiedAt": "2026-08-11T17:29:34.000Z",
+        "verifiedAt": "2026-08-11T18:31:14.325Z",
         "minimumDistinctCreators": 3,
-        "summary": "241.6K videos sont affichées sur la page audio native ; des reprises ont été vérifiées chez au moins 58 créateurs, dont cinq URLs natives conservées.",
+        "summary": "La page audio native YouTube expose plus de douze reprises ; la référence et deux Shorts de créateurs distincts sont conservés comme preuve minimale.",
         "posts": [
           {
-            "platform": "tiktok",
-            "author": "@alcarajopuntocom",
-            "url": "https://www.tiktok.com/@alcarajopuntocom/video/7053859283112512774",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
+            "platform": "youtube",
+            "author": "@slimetree",
+            "url": "https://www.youtube.com/shorts/tbi6urWo0Oo",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
           },
           {
-            "platform": "tiktok",
-            "author": "@johnbeyond",
-            "url": "https://www.tiktok.com/@johnbeyond/video/7055745158280760623",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
+            "platform": "youtube",
+            "author": "@Notfluxxy1",
+            "url": "https://www.youtube.com/shorts/TI_NTv7dBOI",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
           },
           {
-            "platform": "tiktok",
-            "author": "@lori.gucci",
-            "url": "https://www.tiktok.com/@lori.gucci/video/7075786480546778373",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "tiktok",
-            "author": "@dburciaga85",
-            "url": "https://www.tiktok.com/@dburciaga85/video/7073321686518467882",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
-          },
-          {
-            "platform": "tiktok",
-            "author": "@equipedefrance",
-            "url": "https://www.tiktok.com/@equipedefrance/video/7058296493114985734",
-            "capturedAt": "2026-08-11T17:29:34.000Z"
+            "platform": "youtube",
+            "author": "@L_0_n_gMusic",
+            "url": "https://www.youtube.com/shorts/AlUgopGga_g",
+            "capturedAt": "2026-08-11T18:31:14.325Z"
           }
         ]
       },
-      "lofiFitScore": 99,
-      "lofiAngle": "Commencer dans le noir, puis synchroniser trois révélations lumineuses avec les accents du son.",
-      "lofiFitRationale": "La chambre nocturne et le setup sont le décor naturel de Synthwave Boy ; la trend révèle son monde sans explication.",
+      "lofiFitScore": 92,
+      "lofiAngle": "Transformer une session banale en séquence de concentration cinématographique : même cadrage, lumière resserrée et révélation sur le changement de rythme.",
+      "lofiFitRationale": "La montée sombre donne une intensité immédiate au bureau iconique tout en restant compatible avec une animation originale, courte et sans dialogue.",
       "proposals": [
         {
-          "id": "gaming-setup-night-reveal-265350-signature",
-          "title": "Quand la ville dort",
-          "concept": "Dans le noir, le setup de Lofi Girl s’allume en trois cuts : écran, néons, casque.",
-          "copy": "Quand la ville dort, mon monde s’allume. 🌌",
-          "character": "lofi-girl",
-          "tone": "relatable"
-        },
-        {
-          "id": "gaming-setup-night-reveal-265350-cozy",
-          "title": "Le vrai début de soirée",
-          "concept": "Chaque lumière révèle un détail calme : pluie à la fenêtre, boisson chaude, jeu en pause et playlist prête.",
-          "copy": "Le calme commence quand tout le reste s’éteint.",
-          "character": "lofi-girl",
-          "tone": "cozy"
-        },
-        {
-          "id": "gaming-setup-night-reveal-265350-twist",
-          "title": "Le mauvais bouton RGB",
-          "concept": "Le chat appuie sur le bouton ; le setup passe d’une ambiance douce à une rave incontrôlable avant de revenir au noir.",
-          "copy": "J’avais demandé mode nuit, pas boss final.",
-          "character": "lofi-girl",
-          "tone": "funny"
-        },
-        {
-          "id": "gaming-setup-night-reveal-265350-headphones",
-          "title": "Le cut casque sur sonido original",
-          "concept": "Commencer dans le noir, puis synchroniser trois révélations lumineuses avec les accents du son. Le moment charnière arrive quand Lofi Girl pose son casque exactement sur l’accent principal de l’audio.",
-          "copy": "Headphones on. Peak room · le setup s’allume starts now.",
-          "character": "lofi-girl",
-          "tone": "smart"
-        },
-        {
-          "id": "gaming-setup-night-reveal-265350-cat",
-          "title": "Le chat détourne Peak room · le setup s’allume",
-          "concept": "Un setup presque invisible s’allume en plusieurs cuts jusqu’à révéler un univers nocturne complet. Au dernier beat, le chat inverse le résultat sous les yeux de Lofi Girl et transforme le format en chute visuelle.",
-          "copy": "Same audio. Different plan. The cat won.",
-          "character": "lofi-girl",
-          "tone": "cat"
-        },
-        {
-          "id": "gaming-setup-night-reveal-265350-night",
-          "title": "Peak room · le setup s’allume · nuit de révision",
-          "concept": "Trois cuts nets : écran, néons, casque. Terminer sur Lofi Girl installé devant la ville de nuit. La pluie à la fenêtre, la lampe et le cahier gardent la scène immédiatement reconnaissable comme l’univers Lofi Girl.",
-          "copy": "Peak room · le setup s’allume, but make it a quiet study night.",
+          "id": "matrix-deadline-climax",
+          "title": "La deadline devient un film",
+          "concept": "Le plan cozy reste immobile jusqu’à l’apparition « 20 minutes restantes » ; au beat, les pages, le crayon et la lumière accélèrent comme un climax.",
+          "copy": "I started a playlist and the assignment became the final scene.",
           "character": "lofi-girl",
           "tone": "cinematic"
         },
         {
-          "id": "gaming-setup-night-reveal-265350-boy",
-          "title": "Peak room · le setup s’allume · side quest",
-          "concept": "Commencer dans le noir, puis synchroniser trois révélations lumineuses avec les accents du son. Lofi Boy transpose la même mécanique devant son setup, avec le jeu en pause et l’audio qui déclenche la dernière action.",
-          "copy": "New side quest unlocked: Peak room · le setup s’allume.",
+          "id": "matrix-lamp-pulse",
+          "title": "La lampe donne le tempo",
+          "concept": "Chaque pulsation resserre la lumière de la lampe sur une seule tâche, tandis que les distractions disparaissent une par une autour du cahier.",
+          "copy": "Less room. Less noise. One page left.",
+          "character": "lofi-girl",
+          "tone": "smart"
+        },
+        {
+          "id": "matrix-answer-b",
+          "title": "Boss final : réponse B",
+          "concept": "Toute la montée dramatique prépare la dernière question ; le chat pose sa patte sur B et Lofi Girl réalise qu’il avait raison.",
+          "copy": "All that cinematic tension for a multiple-choice question.",
+          "character": "lofi-girl",
+          "tone": "cat"
+        },
+        {
+          "id": "matrix-tabs-collapse",
+          "title": "Quinze onglets, puis un",
+          "concept": "Les onglets de recherche se multiplient sur l’intro ; au drop, ils se ferment en cascade jusqu’au document réellement utile.",
+          "copy": "The real plot twist was closing the tabs.",
+          "character": "lofi-girl",
+          "tone": "relatable"
+        },
+        {
+          "id": "matrix-midnight-skip",
+          "title": "Le saut de minuit",
+          "concept": "L’horloge passe de 23:58 à 00:01 sur le cut principal, révélant Lofi Girl dans la même pose mais avec une page enfin terminée.",
+          "copy": "Three minutes later. One tiny victory unlocked.",
+          "character": "lofi-girl",
+          "tone": "cozy"
+        },
+        {
+          "id": "matrix-city-sync",
+          "title": "La ville passe en mode focus",
+          "concept": "Les fenêtres de la ville s’éteignent en rythme derrière Lofi Girl, puis sa lampe reste la seule lumière au dernier accent.",
+          "copy": "When the whole city logs off and your focus logs in.",
+          "character": "lofi-girl",
+          "tone": "cinematic"
+        },
+        {
+          "id": "matrix-boy-phase-two",
+          "title": "Phase deux du boss",
+          "concept": "Lofi Boy pense avoir gagné ; la musique repart et l’écran révèle une seconde barre de vie pendant que les néons virent au rouge.",
+          "copy": "The save point was not the ending.",
           "character": "lofi-boy",
           "tone": "gaming"
         }
@@ -6162,22 +6144,22 @@
         "exactness": "exact"
       },
       "referenceVideo": {
-        "author": "@charl1efloor",
-        "caption": "#CapCut #grounded #groundedgame #fyp #backroomsmovie ",
-        "url": "https://www.tiktok.com/@charl1efloor/video/7670893417643248918",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-p-0037-no/owPHNDd6QAk9MUDE2FfEFNxbJI7RgjFBqoB2Qf~tplv-tiktokx-origin.image?dr=10395&x-expires=1786640400&x-signature=PzgjcJvH6ckQ8%2BZw5iyE9NnlEmQ%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
-        "durationSeconds": 8,
-        "publishedAt": "2026-08-06T12:24:19.000Z",
-        "capturedAt": "2026-08-11T17:29:34.000Z",
-        "sourceLabel": "TikTok · vidéo native et compteurs publics",
-        "sourceUrl": "https://www.tiktok.com/@charl1efloor/video/7670893417643248918",
-        "exactness": "platform-estimate",
+        "author": "@chiefgreenscreens",
+        "caption": "why you looking at me like that? #CapCut #capcutpioneer #pioneertemplate #backrooms",
+        "url": "https://www.tiktok.com/@chiefgreenscreens/video/7670682941835513118",
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast8-p-0068-tx2/ooPfQIAW5Bki3jBA7WI5jrA3jZeVM8LCqxfUEO~tplv-tiktokx-origin.image?dr=10395&x-expires=1786644000&x-signature=I5Mx5NbwpFnc1%2F0D5z0wkI0%2Fl3Q%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+        "durationSeconds": 8.706099,
+        "publishedAt": "2026-08-05T22:47:26.000Z",
         "metrics": {
-          "views": 189000,
-          "likes": 36600,
-          "comments": 271,
-          "shares": 7808
-        }
+          "views": null,
+          "likes": 68800,
+          "comments": 555,
+          "shares": 2917
+        },
+        "capturedAt": "2026-08-11T18:31:14.325Z",
+        "sourceLabel": "TikTok · vidéo native et compteurs publics vérifiés",
+        "sourceUrl": "https://www.tiktok.com/@chiefgreenscreens/video/7670682941835513118",
+        "exactness": "platform-estimate"
       },
       "usageObservations": [
         {

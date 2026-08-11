@@ -6,6 +6,7 @@ import {
   assertAudioTrendFeed,
   isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
+  isPublishableAudioTrendReferenceVideo,
 } from "../lib/audio-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -34,8 +35,9 @@ export function evaluateAudioRefreshInventory(feed) {
   const trendIds = new Set();
   const audioUrls = new Set();
   const referenceUrls = new Set();
+  const unpublishableReferenceTrendIds = [];
 
-  for (const trend of trends) {
+  for (const [index, trend] of trends.entries()) {
     if (typeof trend?.id === "string" && trend.id.trim().length > 0) {
       trendIds.add(trend.id.trim());
     }
@@ -43,6 +45,13 @@ export function evaluateAudioRefreshInventory(feed) {
     if (audioUrl) audioUrls.add(audioUrl);
     const referenceUrl = canonicalInventoryUrl(trend?.referenceVideo?.url);
     if (referenceUrl) referenceUrls.add(referenceUrl);
+    if (!isPublishableAudioTrendReferenceVideo(trend?.referenceVideo)) {
+      unpublishableReferenceTrendIds.push(
+        typeof trend?.id === "string" && trend.id.trim().length > 0
+          ? trend.id.trim()
+          : `index-${index}`,
+      );
+    }
   }
 
   const inventory = {
@@ -51,13 +60,16 @@ export function evaluateAudioRefreshInventory(feed) {
     distinctTrendIds: trendIds.size,
     distinctAudioUrls: audioUrls.size,
     distinctReferenceUrls: referenceUrls.size,
+    publishableReferenceVideos: trends.length - unpublishableReferenceTrendIds.length,
+    unpublishableReferenceTrendIds,
   };
   return {
     ...inventory,
     publishable: inventory.totalTrends >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
       inventory.distinctTrendIds >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
       inventory.distinctAudioUrls >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
-      inventory.distinctReferenceUrls >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS,
+      inventory.distinctReferenceUrls >= AUDIO_REFRESH_MIN_DISTINCT_TRENDS &&
+      inventory.publishableReferenceVideos === inventory.totalTrends,
   };
 }
 
@@ -69,8 +81,8 @@ export async function buildAudioTrendRefresh({
   timeoutMs = AUDIO_REFRESH_TIMEOUT_MS,
 }) {
   if (!Number.isFinite(Date.parse(now))) throw new Error("Horodatage de refresh audio invalide.");
-  const current = assertAudioTrendFeed(structuredClone(feed));
-  const inventory = evaluateAudioRefreshInventory(current);
+  const candidate = structuredClone(feed);
+  const inventory = evaluateAudioRefreshInventory(candidate);
   if (!inventory.publishable) {
     const status = {
       version: 1,
@@ -84,11 +96,13 @@ export async function buildAudioTrendRefresh({
     const error = new Error(
       `Inventaire Audio Trends insuffisant: ${inventory.distinctTrendIds} trends, ` +
       `${inventory.distinctAudioUrls} audios et ${inventory.distinctReferenceUrls} references distinctes; ` +
+      `${inventory.publishableReferenceVideos}/${inventory.totalTrends} videos de reference publiables; ` +
       `minimum ${inventory.requiredDistinctTrends}.`,
     );
     error.refreshStatus = status;
     throw error;
   }
+  const current = assertAudioTrendFeed(candidate);
   const next = structuredClone(current);
   const jobs = next.trends.filter((trend) => TRACKED_PLATFORMS.includes(trend.platform));
   const checks = await mapWithConcurrency(jobs, concurrency, (trend) =>

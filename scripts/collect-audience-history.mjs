@@ -79,6 +79,14 @@ export async function collectAudienceHistory(options = {}) {
       });
       continue;
     }
+    const plausibilityError = audienceObservationPlausibilityError(
+      latest,
+      result.value.observation,
+    );
+    if (plausibilityError) {
+      failures.push({ platform, error: plausibilityError });
+      continue;
+    }
     if (latest && parisCalendarDay(latest.capturedAt) === parisCalendarDay(result.value.observation.capturedAt)) {
       const latestIndex = next.platforms[platform].observations.findIndex(
         (item) => item.capturedAt === latest.capturedAt,
@@ -98,6 +106,28 @@ export async function collectAudienceHistory(options = {}) {
   assertAudienceHistory(recalculated);
   if (write) await writeJsonAtomically(outputPath, recalculated);
   return { history: recalculated, successes, failures };
+}
+
+export function audienceObservationPlausibilityError(previous, current) {
+  if (!previous) return null;
+  const previousTimestamp = Date.parse(previous.capturedAt);
+  const currentTimestamp = Date.parse(current.capturedAt);
+  if (
+    !Number.isFinite(previousTimestamp) ||
+    !Number.isFinite(currentTimestamp) ||
+    previous.followers <= 0 ||
+    current.followers <= 0
+  ) {
+    return "Le relevé audience ne permet pas un contrôle de cohérence.";
+  }
+  const ratio = current.followers / previous.followers;
+  const elapsedDays = (currentTimestamp - previousTimestamp) / (24 * 60 * 60 * 1_000);
+  const implausible = elapsedDays <= 7
+    ? ratio < 0.8 || ratio > 1.25
+    : ratio < 0.5 || ratio > 3;
+  return implausible
+    ? `Variation audience incohérente (${previous.followers} → ${current.followers}) ; dernier bon relevé conservé.`
+    : null;
 }
 
 async function collectYouTube({ env, fetchImpl, capturedAt }) {

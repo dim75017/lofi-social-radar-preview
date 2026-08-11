@@ -23,7 +23,7 @@ const history = assertAudienceHistory(
 );
 const publicHistory = JSON.parse(await readFile(postsPath, "utf8"));
 
-test("validates the real version 2 seed, its five periods and 11 August follower totals", () => {
+test("validates the real version 2 snapshot, its five periods and latest 11 August follower totals", () => {
   assert.equal(history.version, 2);
   assert.deepEqual(
     AUDIENCE_PERIODS.map(({ key, label, days }) => ({ key, label, days })),
@@ -41,10 +41,10 @@ test("validates the real version 2 seed, its five periods and 11 August follower
       AUDIENCE_PERIODS.map((period) => period.key).sort(),
     );
   }
-  assertSeedObservation("youtube", 15_800_000, "platform-rounded");
-  assertSeedObservation("instagram", 1_427_842, "exact");
-  assertSeedObservation("tiktok", 1_548_859, "exact");
-  assertSeedObservation("x", 260_800, "platform-rounded");
+  assertLatestObservation("youtube", 15_800_000, "platform-rounded");
+  assertLatestObservation("instagram", 1_427_888, "exact");
+  assertLatestObservation("tiktok", 1_548_818, "exact");
+  assertLatestObservation("x", 260_800, "platform-rounded");
 });
 
 test("rejects invented zeroes, non-HTTPS sources and unknown precision", () => {
@@ -288,6 +288,37 @@ test("keeps only the latest real observation when two collectors run the same Pa
   );
 });
 
+test("rejects an implausible same-day follower collapse and keeps the last good point", async () => {
+  const capturedAt = "2026-08-11T20:30:00.000Z";
+  const previousYouTube = latestAudienceObservation(history.platforms.youtube);
+  const collectors = Object.fromEntries(
+    ["youtube", "instagram", "tiktok", "x"].map((platform) => [
+      platform,
+      async () => observation(
+        capturedAt,
+        platform === "youtube"
+          ? 498_000
+          : latestAudienceObservation(history.platforms[platform]).followers,
+        platform === "youtube" || platform === "x" ? "platform-rounded" : "exact",
+      ),
+    ]),
+  );
+  const result = await collectAudienceHistory({
+    historyPath,
+    postsPath,
+    collectors,
+    now: capturedAt,
+    write: false,
+  });
+
+  assert.ok(result.failures.some((item) =>
+    item.platform === "youtube" && /variation audience incohérente/i.test(item.error)));
+  assert.equal(
+    latestAudienceObservation(result.history.platforms.youtube).followers,
+    previousYouTube.followers,
+  );
+});
+
 test("parses only explicit compact follower counters", () => {
   assert.equal(compactCount("15.8M"), 15_800_000);
   assert.equal(compactCount("1,548,859"), 1_548_859);
@@ -310,12 +341,9 @@ function observation(
   };
 }
 
-function assertSeedObservation(platform, followers, precision) {
-  const seed = history.platforms[platform].observations.find(
-    (item) =>
-      item.capturedAt.startsWith("2026-08-11") &&
-      item.followers === followers,
-  );
-  assert.ok(seed, `${platform} must retain its 11/08/2026 seed`);
-  assert.equal(seed.precision, precision);
+function assertLatestObservation(platform, followers, precision) {
+  const latest = latestAudienceObservation(history.platforms[platform]);
+  assert.ok(latest.capturedAt.startsWith("2026-08-11"), `${platform} must have a real 11/08/2026 observation`);
+  assert.equal(latest.followers, followers);
+  assert.equal(latest.precision, precision);
 }

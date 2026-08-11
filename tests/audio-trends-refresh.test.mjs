@@ -3,6 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS,
+  MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES,
+} from "../lib/audio-trends.ts";
+
+import {
   AUDIO_REFRESH_MIN_DISTINCT_TRENDS,
   buildAudioTrendRefresh,
   collectInstagramSignedPlayback,
@@ -17,9 +22,27 @@ import {
   requiredProviderMatches,
 } from "../scripts/refresh-audio-trends.mjs";
 
-const feed = JSON.parse(
+const storedFeed = JSON.parse(
   await readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
 );
+
+const feed = structuredClone(storedFeed);
+for (const trend of feed.trends) {
+  const likes = trend.referenceVideo.metrics?.likes;
+  const durationSeconds = trend.referenceVideo.durationSeconds;
+  if (!Number.isSafeInteger(likes) || likes < MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES) {
+    trend.referenceVideo.metrics.likes = MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES;
+  }
+  if (
+    typeof durationSeconds !== "number" ||
+    !Number.isFinite(durationSeconds) ||
+    durationSeconds <= 0 ||
+    durationSeconds >= MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS
+  ) {
+    trend.referenceVideo.durationSeconds =
+      MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS - 0.001;
+  }
+}
 
 function counterHtml(trend, uses) {
   const audioId = nativeAudioIdentity(trend.audioUrl, trend.platform);
@@ -113,6 +136,8 @@ function inventoryFixture(count) {
       audioUrl: `https://www.tiktok.com/music/audio-${10_000_000 + index}`,
       referenceVideo: {
         url: `https://www.tiktok.com/@creator-${index + 1}/video/${7_000_000_000_000_000_000n + BigInt(index)}`,
+        durationSeconds: MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS - 0.001,
+        metrics: { likes: MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES },
       },
     })),
   };
@@ -310,6 +335,38 @@ test("publication inventory fails closed on duplicate audio or reference URLs", 
   const referenceResult = evaluateAudioRefreshInventory(duplicateReference);
   assert.equal(referenceResult.distinctReferenceUrls, AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1);
   assert.equal(referenceResult.publishable, false);
+});
+
+test("publication inventory fails closed on weak, missing or long reference videos", () => {
+  for (const likes of [null, MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES - 1]) {
+    const candidate = inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS);
+    candidate.trends.at(-1).referenceVideo.metrics.likes = likes;
+    const result = evaluateAudioRefreshInventory(candidate);
+    assert.equal(result.publishableReferenceVideos, AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1);
+    assert.deepEqual(result.unpublishableReferenceTrendIds, ["audio-trend-50"]);
+    assert.equal(result.publishable, false);
+  }
+
+  for (const durationSeconds of [
+    null,
+    0,
+    MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS,
+    MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS + 1,
+  ]) {
+    const candidate = inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS);
+    candidate.trends.at(-1).referenceVideo.durationSeconds = durationSeconds;
+    const result = evaluateAudioRefreshInventory(candidate);
+    assert.equal(result.publishableReferenceVideos, AUDIO_REFRESH_MIN_DISTINCT_TRENDS - 1);
+    assert.deepEqual(result.unpublishableReferenceTrendIds, ["audio-trend-50"]);
+    assert.equal(result.publishable, false);
+  }
+
+  const boundary = inventoryFixture(AUDIO_REFRESH_MIN_DISTINCT_TRENDS);
+  boundary.trends.at(-1).referenceVideo.metrics.likes =
+    MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES;
+  boundary.trends.at(-1).referenceVideo.durationSeconds =
+    MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS - 0.001;
+  assert.equal(evaluateAudioRefreshInventory(boundary).publishable, true);
 });
 
 test("the scanner never exceeds its configured concurrency", async () => {

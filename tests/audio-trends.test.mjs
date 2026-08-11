@@ -3,18 +3,34 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS,
+  MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES,
   MIN_PUBLISHABLE_AUDIO_TRENDS,
   assertAudioTrendFeed,
   deriveAudioTrendGrowth,
+  isPublishableAudioTrendReferenceVideo,
   isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
   isNativeAudioReferenceVideoUrl,
   isNativeAudioTrendUrl,
 } from "../lib/audio-trends.ts";
 
-const bootstrapFeed = JSON.parse(
+const storedFeed = JSON.parse(
   await readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
 );
+
+function thresholdCompliantFixture(feed) {
+  const fixture = structuredClone(feed);
+  for (const trend of fixture.trends) {
+    if (isPublishableAudioTrendReferenceVideo(trend.referenceVideo)) continue;
+    trend.referenceVideo.metrics.likes = MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES;
+    trend.referenceVideo.durationSeconds =
+      MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS - 0.001;
+  }
+  return fixture;
+}
+
+const bootstrapFeed = thresholdCompliantFixture(storedFeed);
 
 function validProposals() {
   return [
@@ -146,13 +162,14 @@ function feedWith(...trends) {
   return feed;
 }
 
-test("the published feed contains sourced audio signals without invented growth", () => {
+test("a threshold-compliant feed contains sourced audio signals without invented growth", () => {
   assert.equal(assertAudioTrendFeed(bootstrapFeed), bootstrapFeed);
   assert.equal(bootstrapFeed.version, 1);
   assert.equal(bootstrapFeed.cadenceHours, 24);
   assert.equal(bootstrapFeed.trends.length, MIN_PUBLISHABLE_AUDIO_TRENDS);
-  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 42);
-  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 41);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "instagram").length, 6);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "youtube").length, 3);
   assert.ok(bootstrapFeed.trends.every((trend) => trend.lofiAngle.length > 0));
   assert.equal(
     bootstrapFeed.trends.reduce((total, trend) => total + trend.proposals.length, 0),
@@ -214,6 +231,35 @@ test("the publishable inventory accepts 50 distinct trends and rejects 49", () =
     () => assertAudioTrendFeed(incomplete),
     /au moins 50 tendances distinctes/i,
   );
+});
+
+test("reference videos fail closed below 50,000 likes or outside the sub-30-second window", () => {
+  for (const likes of [null, MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES - 1]) {
+    const trend = validTrend();
+    trend.referenceVideo.metrics.likes = likes;
+    assert.equal(isPublishableAudioTrendReferenceVideo(trend.referenceVideo), false);
+    assert.throws(
+      () => assertAudioTrendFeed(feedWith(trend)),
+      /at least 50000 public likes are required/i,
+    );
+  }
+
+  for (const durationSeconds of [null, 0, MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS]) {
+    const trend = validTrend();
+    trend.referenceVideo.durationSeconds = durationSeconds;
+    assert.equal(isPublishableAudioTrendReferenceVideo(trend.referenceVideo), false);
+    assert.throws(
+      () => assertAudioTrendFeed(feedWith(trend)),
+      /(?:reference video|r.f.rence audio)/i,
+    );
+  }
+
+  const boundary = validTrend();
+  boundary.referenceVideo.metrics.likes = MIN_AUDIO_TREND_REFERENCE_VIDEO_LIKES;
+  boundary.referenceVideo.durationSeconds =
+    MAX_AUDIO_TREND_REFERENCE_VIDEO_DURATION_SECONDS - 0.001;
+  assert.equal(isPublishableAudioTrendReferenceVideo(boundary.referenceVideo), true);
+  assert.equal(assertAudioTrendFeed(feedWith(boundary)).trends[0].id, boundary.id);
 });
 
 test("growth is derived from two comparable usage counters, never stored", () => {
@@ -327,12 +373,14 @@ test("native audio and video URLs are platform-bound", () => {
   );
 });
 
-test("reference metrics may be absent but can never be unsourced or fabricated", () => {
+test("publishable reference metrics must be present, sourced and non-fabricated", () => {
   const withoutMetrics = validTrend();
   withoutMetrics.referenceVideo.metrics = null;
   withoutMetrics.referenceVideo.exactness = "unavailable";
-  const withoutMetricsFeed = feedWith(withoutMetrics);
-  assert.equal(assertAudioTrendFeed(withoutMetricsFeed), withoutMetricsFeed);
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(withoutMetrics)),
+    /at least 50000 public likes are required/i,
+  );
 
   const unavailableWithMetrics = validTrend();
   unavailableWithMetrics.referenceVideo.exactness = "unavailable";
