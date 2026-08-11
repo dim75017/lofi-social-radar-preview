@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "attemptedAt": "2026-08-11T16:26:24.285Z",
+  "attemptedAt": "2026-08-11T16:59:14.789Z",
   "status": "degraded",
   "published": true,
   "coverage": {
@@ -13,6 +13,11 @@
     "instagramPlaybackChecked": 8,
     "instagramPlaybackMatched": 8,
     "instagramPlaybackComplete": true,
+    "tiktokThumbnailChecked": 8,
+    "tiktokThumbnailMatched": 8,
+    "tiktokThumbnailCoverage": 1,
+    "tiktokThumbnailComplete": true,
+    "thumbnailPublishable": true,
     "counterPublishable": false
   },
   "providers": [
@@ -23,6 +28,10 @@
       "updated": 8,
       "requiredMatched": 6,
       "coverage": 0,
+      "thumbnailChecked": 0,
+      "thumbnailMatched": 0,
+      "thumbnailCoverage": 0,
+      "thumbnailComplete": false,
       "status": "failed",
       "errors": [
         "everything-hallelujah: compteur public non lie a cette identite audio",
@@ -40,9 +49,13 @@
       "platform": "tiktok",
       "checked": 8,
       "matched": 0,
-      "updated": 0,
+      "updated": 8,
       "requiredMatched": 6,
       "coverage": 0,
+      "thumbnailChecked": 8,
+      "thumbnailMatched": 8,
+      "thumbnailCoverage": 1,
+      "thumbnailComplete": true,
       "status": "failed",
       "errors": [
         "pocketful-of-sunshine: compteur public non lie a cette identite audio",
@@ -63,6 +76,10 @@
       "updated": 0,
       "requiredMatched": 0,
       "coverage": 0,
+      "thumbnailChecked": 0,
+      "thumbnailMatched": 0,
+      "thumbnailCoverage": 0,
+      "thumbnailComplete": false,
       "status": "limited",
       "errors": [
         "YouTube n'expose pas de compteur global d'utilisations audio comparable."

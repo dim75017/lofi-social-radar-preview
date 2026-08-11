@@ -330,6 +330,26 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(audioTrendView, /platforms\/\$\{trend\.platform\}\.svg/);
   assert.match(audioTrendView, /activePlayerId/);
   assert.match(audioTrendView, /<SocialInlinePlayer/);
+  assert.match(audioTrendView, /resolveFreshInstagramPlaybackUrl/);
+  assert.match(audioTrendView, /instagramPreviewUrl/);
+  assert.match(audioTrendView, /<video/);
+  assert.match(audioTrendView, /muted/);
+  assert.match(audioTrendView, /playsInline/);
+  assert.match(audioTrendView, /preload="metadata"/);
+  assert.match(audioTrendView, /video\.currentTime = 0\.05/);
+  assert.match(audioTrendView, /audio-reference-play-overlay/);
+  assert.match(audioTrendView, /audio-reference-fallback/);
+  assert.match(
+    audioTrendView,
+    /trend\.referenceVideo\.thumbnailUrl \? \([\s\S]*?<img[\s\S]*?\) : instagramPreviewUrl \? \(/,
+  );
+  const inactiveAudioPreview = audioTrendView.slice(
+    audioTrendView.indexOf('className="audio-reference-trigger"'),
+    audioTrendView.indexOf('</button>', audioTrendView.indexOf('className="audio-reference-trigger"')),
+  );
+  assert.doesNotMatch(inactiveAudioPreview, /platforms\/\$\{trend\.platform\}\.svg/);
+  assert.match(styles, /\.audio-reference-trigger > :is\(img, video\)/);
+  assert.match(styles, /\.audio-reference-play-overlay\s*\{/);
   assert.match(component, /activePlayerId/);
   assert.match(component, /<SocialInlinePlayer/);
   assert.match(socialInlinePlayerModel, /autoplay=1&muted=0/);

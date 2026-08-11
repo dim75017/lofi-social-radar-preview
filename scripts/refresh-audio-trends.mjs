@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   assertAudioTrendFeed,
+  isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
 } from "../lib/audio-trends.ts";
 
@@ -17,6 +18,9 @@ const INSTAGRAM_REEL_HTML_MAX_BYTES = 2_000_000;
 const INSTAGRAM_PLAYBACK_PROBE_BYTES = 262_144;
 const INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS = 6 * 60 * 60 * 1_000;
 const INSTAGRAM_PLAYBACK_MAX_VALIDITY_MS = 7 * 24 * 60 * 60 * 1_000;
+const TIKTOK_OEMBED_MAX_BYTES = 256_000;
+const TIKTOK_THUMBNAIL_PROBE_BYTES = 65_536;
+const TIKTOK_THUMBNAIL_MAX_BYTES = 10_000_000;
 
 export const AUDIO_REFRESH_CONCURRENCY = 6;
 export const AUDIO_REFRESH_TIMEOUT_MS = 12_000;
@@ -44,6 +48,10 @@ export async function buildAudioTrendRefresh({
     const checked = platformChecks.length;
     const matched = platformChecks.filter((check) => check.matched).length;
     const updated = platformChecks.filter((check) => check.updated).length;
+    const thumbnailChecked = platform === "tiktok" ? checked : 0;
+    const thumbnailMatched = platformChecks.filter((check) => check.thumbnailMatched).length;
+    const thumbnailCoverage = thumbnailChecked === 0 ? 0 : thumbnailMatched / thumbnailChecked;
+    const thumbnailComplete = thumbnailChecked > 0 && thumbnailMatched === thumbnailChecked;
     const requiredMatched = requiredProviderMatches(checked);
     const status = checked > 0 && matched >= requiredMatched ? "success" : "failed";
     const errors = platformChecks
@@ -52,6 +60,9 @@ export async function buildAudioTrendRefresh({
     if (status === "failed" && checked > 0) {
       errors.push(`couverture insuffisante: ${matched}/${checked}, minimum ${requiredMatched}`);
     }
+    if (platform === "tiktok" && !thumbnailComplete) {
+      errors.push(`couverture miniatures insuffisante: ${thumbnailMatched}/${thumbnailChecked}, minimum ${thumbnailChecked}`);
+    }
     return {
       platform,
       checked,
@@ -59,6 +70,10 @@ export async function buildAudioTrendRefresh({
       updated,
       requiredMatched,
       coverage: checked === 0 ? 0 : matched / checked,
+      thumbnailChecked,
+      thumbnailMatched,
+      thumbnailCoverage,
+      thumbnailComplete,
       status,
       errors,
     };
@@ -71,6 +86,10 @@ export async function buildAudioTrendRefresh({
     updated: 0,
     requiredMatched: 0,
     coverage: 0,
+    thumbnailChecked: 0,
+    thumbnailMatched: 0,
+    thumbnailCoverage: 0,
+    thumbnailComplete: false,
     status: "limited",
     errors: ["YouTube n'expose pas de compteur global d'utilisations audio comparable."],
   });
@@ -81,13 +100,29 @@ export async function buildAudioTrendRefresh({
     .filter((check) => check.playbackMatched).length;
   const instagramPlaybackComplete = instagramPlaybackChecks.length > 0 &&
     instagramPlaybackMatched === instagramPlaybackChecks.length;
-  const successfulPublication = baseCoverage.publishable && instagramPlaybackMatched > 0;
-  const degradedPublication = !baseCoverage.publishable && instagramPlaybackComplete;
+  const tiktokThumbnailChecks = checks.filter((check) => check.platform === "tiktok");
+  const tiktokThumbnailMatched = tiktokThumbnailChecks
+    .filter((check) => check.thumbnailMatched).length;
+  const tiktokThumbnailComplete = tiktokThumbnailChecks.length > 0 &&
+    tiktokThumbnailMatched === tiktokThumbnailChecks.length;
+  const successfulPublication = baseCoverage.publishable &&
+    instagramPlaybackComplete &&
+    tiktokThumbnailComplete;
+  const degradedPublication = !baseCoverage.publishable &&
+    instagramPlaybackComplete &&
+    tiktokThumbnailComplete;
   const coverage = {
     ...baseCoverage,
     instagramPlaybackChecked: instagramPlaybackChecks.length,
     instagramPlaybackMatched,
     instagramPlaybackComplete,
+    tiktokThumbnailChecked: tiktokThumbnailChecks.length,
+    tiktokThumbnailMatched,
+    tiktokThumbnailCoverage: tiktokThumbnailChecks.length === 0
+      ? 0
+      : tiktokThumbnailMatched / tiktokThumbnailChecks.length,
+    tiktokThumbnailComplete,
+    thumbnailPublishable: tiktokThumbnailComplete,
     counterPublishable: baseCoverage.publishable,
     publishable: successfulPublication || degradedPublication,
   };
@@ -105,9 +140,11 @@ export async function buildAudioTrendRefresh({
   };
 
   if (!coverage.publishable) {
-    const reason = !instagramPlaybackComplete && !baseCoverage.publishable
-      ? `Couverture playback Instagram insuffisante: ${instagramPlaybackMatched}/${instagramPlaybackChecks.length}.`
-      : `Couverture audio insuffisante: ${coverage.totalMatched}/${coverage.totalChecked}, minimum ${coverage.requiredTotal}.`;
+    const reason = !tiktokThumbnailComplete
+      ? `Couverture miniature TikTok insuffisante: ${tiktokThumbnailMatched}/${tiktokThumbnailChecks.length}.`
+      : !instagramPlaybackComplete
+        ? `Couverture playback Instagram insuffisante: ${instagramPlaybackMatched}/${instagramPlaybackChecks.length}.`
+        : `Couverture audio insuffisante: ${coverage.totalMatched}/${coverage.totalChecked}, minimum ${coverage.requiredTotal}.`;
     const error = new Error(reason);
     error.refreshStatus = status;
     throw error;
@@ -130,6 +167,8 @@ export async function buildAudioTrendRefresh({
 
 async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
   let playbackMatched = false;
+  let thumbnailMatched = false;
+  const assetErrors = [];
   try {
     const expectedIdentity = nativeAudioIdentity(trend.audioUrl, trend.platform);
     if (!expectedIdentity) throw new Error("identite audio native absente");
@@ -142,9 +181,17 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
           timeoutMs,
         })
       : Promise.resolve(null);
+    const thumbnailPromise = trend.platform === "tiktok"
+      ? collectTikTokThumbnail({
+          referenceUrl: trend.referenceVideo.url,
+          fetchImpl,
+          timeoutMs,
+        })
+      : Promise.resolve(null);
     const counterPromise = fetchImpl(trend.audioUrl, publicPageRequestOptions(timeoutMs));
-    const [playbackResult, counterResult] = await Promise.allSettled([
+    const [playbackResult, thumbnailResult, counterResult] = await Promise.allSettled([
       playbackPromise,
+      thumbnailPromise,
       counterPromise,
     ]);
     if (playbackResult.status === "fulfilled" && playbackResult.value) {
@@ -153,10 +200,24 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
       trend.referenceVideo.playbackCapturedAt = playbackResult.value.capturedAt;
       trend.referenceVideo.playbackExpiresAt = playbackResult.value.expiresAt;
     }
+    if (thumbnailResult.status === "fulfilled" && thumbnailResult.value) {
+      thumbnailMatched = true;
+      trend.referenceVideo.thumbnailUrl = thumbnailResult.value.url;
+    }
+    if (playbackResult.status === "rejected") {
+      assetErrors.push(playbackResult.reason instanceof Error
+        ? playbackResult.reason.message
+        : "playback Instagram indisponible");
+    }
+    if (thumbnailResult.status === "rejected") {
+      assetErrors.push(thumbnailResult.reason instanceof Error
+        ? thumbnailResult.reason.message
+        : "miniature TikTok indisponible");
+    }
     if (counterResult.status === "rejected") throw counterResult.reason;
-    if (playbackResult.status === "rejected") throw playbackResult.reason;
 
     const playback = playbackResult.value;
+    const thumbnail = thumbnailResult.value;
     const response = counterResult.value;
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -188,9 +249,10 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
         id: trend.id,
         platform: trend.platform,
         matched: true,
-        updated: Boolean(playback),
+        updated: Boolean(playback || thumbnail),
         playbackMatched,
-        error: null,
+        thumbnailMatched,
+        error: assetErrors.length > 0 ? assetErrors.join("; ") : null,
       };
     }
 
@@ -211,16 +273,21 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
       matched: true,
       updated: true,
       playbackMatched,
-      error: null,
+      thumbnailMatched,
+      error: assetErrors.length > 0 ? assetErrors.join("; ") : null,
     };
   } catch (error) {
     return {
       id: trend.id,
       platform: trend.platform,
       matched: false,
-      updated: playbackMatched,
+      updated: playbackMatched || thumbnailMatched,
       playbackMatched,
-      error: error instanceof Error ? error.message : "erreur inconnue",
+      thumbnailMatched,
+      error: [
+        ...assetErrors,
+        error instanceof Error ? error.message : "erreur inconnue",
+      ].filter((message, index, messages) => messages.indexOf(message) === index).join("; "),
     };
   }
 }
@@ -280,6 +347,206 @@ export async function collectInstagramSignedPlayback({
     }
   }
   throw new Error(`aucun MP4 Instagram lisible avec son: ${probeErrors.join("; ")}`);
+}
+
+export async function collectTikTokThumbnail({
+  referenceUrl,
+  fetchImpl = fetch,
+  timeoutMs = AUDIO_REFRESH_TIMEOUT_MS,
+}) {
+  const expectedVideoId = nativeTikTokVideoIdentity(referenceUrl);
+  if (!expectedVideoId) throw new Error("reference video TikTok invalide");
+
+  const canonicalReferenceUrl = canonicalTikTokReferenceUrl(referenceUrl);
+  const endpoint = new URL("https://www.tiktok.com/oembed");
+  endpoint.searchParams.set("url", canonicalReferenceUrl);
+  const response = await fetchImpl(endpoint.toString(), tiktokOEmbedRequestOptions(timeoutMs));
+  if (!response.ok) throw new Error(`oEmbed TikTok HTTP ${response.status}`);
+  if (response.url && !isExpectedTikTokOEmbedResponseUrl(response.url, expectedVideoId)) {
+    throw new Error("redirection oEmbed TikTok invalide");
+  }
+
+  const declaredLength = response.headers.get("content-length");
+  if (
+    declaredLength !== null &&
+    (!Number.isFinite(Number(declaredLength)) || Number(declaredLength) > TIKTOK_OEMBED_MAX_BYTES)
+  ) {
+    throw new Error("reponse oEmbed TikTok trop volumineuse");
+  }
+  const body = await response.text();
+  if (new TextEncoder().encode(body).byteLength > TIKTOK_OEMBED_MAX_BYTES) {
+    throw new Error("reponse oEmbed TikTok trop volumineuse apres lecture");
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(body);
+  } catch {
+    throw new Error("reponse oEmbed TikTok non JSON");
+  }
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    Array.isArray(payload) ||
+    payload.type !== "video" ||
+    payload.provider_name !== "TikTok" ||
+    !isOfficialTikTokProviderUrl(payload.provider_url) ||
+    !oEmbedHtmlMatchesTikTokVideo(payload.html, expectedVideoId) ||
+    typeof payload.thumbnail_url !== "string" ||
+    !isOfficialAudioTrendThumbnailUrl(payload.thumbnail_url, "tiktok")
+  ) {
+    throw new Error("oEmbed TikTok non attribuable a la video de reference");
+  }
+
+  const accessibleUrl = await verifyTikTokThumbnail(payload.thumbnail_url, {
+    fetchImpl,
+    timeoutMs,
+  });
+  return { url: accessibleUrl };
+}
+
+function canonicalTikTokReferenceUrl(candidate) {
+  const url = new URL(candidate);
+  url.search = "";
+  url.hash = "";
+  url.pathname = url.pathname.replace(/\/+$/u, "");
+  return url.toString();
+}
+
+function nativeTikTokVideoIdentity(candidate) {
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    if (
+      url.protocol !== "https:" ||
+      !(hostname === "tiktok.com" || hostname.endsWith(".tiktok.com"))
+    ) {
+      return null;
+    }
+    return url.pathname.replace(/\/+$/u, "")
+      .match(/^\/@[^/]+\/video\/(\d{12,24})$/u)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function isOfficialTikTokProviderUrl(candidate) {
+  if (typeof candidate !== "string") return false;
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    return url.protocol === "https:" &&
+      url.username === "" &&
+      url.password === "" &&
+      url.port === "" &&
+      (hostname === "tiktok.com" || hostname === "www.tiktok.com") &&
+      (url.pathname === "" || url.pathname === "/") &&
+      url.search === "" &&
+      url.hash === "";
+  } catch {
+    return false;
+  }
+}
+
+function isExpectedTikTokOEmbedResponseUrl(candidate, expectedVideoId) {
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    if (
+      url.protocol !== "https:" ||
+      !(hostname === "tiktok.com" || hostname === "www.tiktok.com") ||
+      url.pathname.replace(/\/+$/u, "") !== "/oembed"
+    ) {
+      return false;
+    }
+    const embeddedReference = url.searchParams.get("url");
+    return embeddedReference === null || nativeTikTokVideoIdentity(embeddedReference) === expectedVideoId;
+  } catch {
+    return false;
+  }
+}
+
+function oEmbedHtmlMatchesTikTokVideo(html, expectedVideoId) {
+  if (typeof html !== "string" || html.length === 0 || html.length > 100_000) return false;
+  const identities = [
+    ...[...html.matchAll(/data-video-id\s*=\s*["'](\d{12,24})["']/giu)]
+      .map((match) => match[1]),
+    ...[...html.matchAll(/https:\/\/(?:www\.)?tiktok\.com\/@[^/"'\s<>]+\/video\/(\d{12,24})/giu)]
+      .map((match) => match[1]),
+  ];
+  return identities.length > 0 &&
+    identities.includes(expectedVideoId) &&
+    identities.every((identity) => identity === expectedVideoId);
+}
+
+async function verifyTikTokThumbnail(candidate, { fetchImpl, timeoutMs }) {
+  if (!isOfficialAudioTrendThumbnailUrl(candidate, "tiktok")) {
+    throw new Error("URL miniature TikTok invalide");
+  }
+  const response = await fetchImpl(candidate, {
+    headers: {
+      Accept: "image/avif,image/webp,image/png,image/jpeg",
+      Range: `bytes=0-${TIKTOK_THUMBNAIL_PROBE_BYTES - 1}`,
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (![200, 206].includes(response.status)) {
+    throw new Error(`miniature TikTok HTTP ${response.status}`);
+  }
+  const finalUrl = response.url || candidate;
+  if (!isOfficialAudioTrendThumbnailUrl(finalUrl, "tiktok")) {
+    throw new Error("redirection miniature TikTok invalide");
+  }
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+  if (!contentType?.startsWith("image/")) throw new Error("miniature TikTok non image");
+  const declaredLength = response.headers.get("content-length");
+  if (
+    declaredLength !== null &&
+    (!Number.isFinite(Number(declaredLength)) ||
+      Number(declaredLength) <= 0 ||
+      Number(declaredLength) > TIKTOK_THUMBNAIL_MAX_BYTES)
+  ) {
+    throw new Error("taille miniature TikTok invalide");
+  }
+  const prefix = await readResponsePrefix(response, TIKTOK_THUMBNAIL_PROBE_BYTES);
+  if (!isImagePrefix(prefix, contentType)) throw new Error("octets miniature TikTok invalides");
+  return finalUrl;
+}
+
+function isImagePrefix(bytes, contentType) {
+  if (!(bytes instanceof Uint8Array)) return false;
+  if (contentType === "image/jpeg" || contentType === "image/jpg") {
+    return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+  if (contentType === "image/png") {
+    return bytes.length >= 8 &&
+      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+      bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  }
+  if (contentType === "image/webp") {
+    return bytes.length >= 12 &&
+      new TextDecoder("latin1").decode(bytes.slice(0, 4)) === "RIFF" &&
+      new TextDecoder("latin1").decode(bytes.slice(8, 12)) === "WEBP";
+  }
+  if (contentType === "image/avif") {
+    const signature = new TextDecoder("latin1").decode(bytes.slice(0, 32));
+    return bytes.length >= 12 && signature.includes("ftyp") && /(?:avif|avis)/u.test(signature);
+  }
+  return false;
+}
+
+function tiktokOEmbedRequestOptions(timeoutMs) {
+  return {
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(timeoutMs),
+  };
 }
 
 export function extractInstagramSignedPlaybackCandidates(html) {
@@ -622,6 +889,11 @@ async function main() {
         instagramPlaybackChecked: 0,
         instagramPlaybackMatched: 0,
         instagramPlaybackComplete: false,
+        tiktokThumbnailChecked: 0,
+        tiktokThumbnailMatched: 0,
+        tiktokThumbnailCoverage: 0,
+        tiktokThumbnailComplete: false,
+        thumbnailPublishable: false,
         counterPublishable: false,
         publishable: false,
       },

@@ -6810,47 +6810,68 @@ a {
   padding: 0;
 }
 
-.audio-reference-trigger > img {
+.audio-reference-trigger > :is(img, video) {
   width: 100%;
   height: 100%;
+  background: #090b12;
   object-fit: cover;
   transition: transform 180ms ease, filter 180ms ease;
 }
 
-.audio-reference-trigger:hover > img {
+.audio-reference-trigger:hover > :is(img, video) {
   transform: scale(1.025);
   filter: brightness(0.76);
 }
 
 .audio-reference-fallback {
   display: grid;
-  min-width: 112px;
-  min-height: 112px;
-  place-items: center;
-  gap: 12px;
+  width: 100%;
+  height: 100%;
+  place-items: end center;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(154, 168, 255, 0.2), transparent 32%),
+    rgba(8, 10, 18, 0.5);
+  padding: 24px;
+  color: rgba(245, 247, 255, 0.72);
+  font-size: 12px;
+  font-weight: 820;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.audio-reference-fallback b {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 32px;
-  background: rgba(8, 10, 18, 0.5);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.34);
-}
-
-.audio-reference-fallback img {
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
-}
-
-.audio-reference-fallback i {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
   border-radius: 999px;
-  background: #f5f7ff;
+  background: rgba(8, 10, 18, 0.76);
+  padding: 7px 10px;
+  font: inherit;
+}
+
+.audio-reference-play-overlay {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 999px;
+  background: rgba(245, 247, 255, 0.94);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
   color: #0a0c14;
-  font-size: 13px;
-  font-style: normal;
+  font-size: 18px;
   line-height: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.audio-reference-trigger:hover .audio-reference-play-overlay,
+.audio-reference-trigger:focus-visible .audio-reference-play-overlay {
+  background: #fff;
+  transform: translate(-50%, -50%) scale(1.08);
 }
 
 .trend-rank-badge {

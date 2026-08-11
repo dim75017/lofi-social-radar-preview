@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   buildAudioTrendRefresh,
   collectInstagramSignedPlayback,
+  collectTikTokThumbnail,
   evaluateAudioRefreshCoverage,
   extractInstagramSignedPlaybackCandidates,
   instagramPlaybackExpiresAt,
@@ -51,6 +52,54 @@ function playbackProbeResponse() {
       "content-type": "video/mp4",
       "access-control-allow-origin": "*",
       "content-range": "bytes 0-40/1000",
+    },
+  });
+}
+
+function tiktokVideoId(trendOrUrl) {
+  const url = typeof trendOrUrl === "string" ? trendOrUrl : trendOrUrl.referenceVideo.url;
+  const identity = new URL(url).pathname.match(/\/video\/(\d{12,24})\/?$/u)?.[1];
+  assert.ok(identity);
+  return identity;
+}
+
+function tiktokThumbnailUrl(trendOrUrl) {
+  return `https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/${tiktokVideoId(trendOrUrl)}.jpeg`;
+}
+
+function tiktokOEmbedPayload(trend, overrides = {}) {
+  const videoId = tiktokVideoId(trend);
+  return {
+    version: "1.0",
+    type: "video",
+    provider_name: "TikTok",
+    provider_url: "https://www.tiktok.com/",
+    html: `<blockquote class="tiktok-embed" cite="${trend.referenceVideo.url}" data-video-id="${videoId}"></blockquote>`,
+    thumbnail_url: tiktokThumbnailUrl(trend),
+    thumbnail_width: 720,
+    thumbnail_height: 1280,
+    ...overrides,
+  };
+}
+
+function tiktokTrendFromOEmbedRequest(url) {
+  const candidate = new URL(url);
+  if (candidate.hostname !== "www.tiktok.com" || candidate.pathname !== "/oembed") return null;
+  const referenceUrl = candidate.searchParams.get("url");
+  return feed.trends.find((trend) =>
+    trend.platform === "tiktok" && trend.referenceVideo.url === referenceUrl
+  ) ?? null;
+}
+
+function thumbnailProbeResponse({ contentType = "image/jpeg", status = 206 } = {}) {
+  const bytes = contentType === "image/jpeg"
+    ? Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46])
+    : new TextEncoder().encode("not an image");
+  return new Response(bytes, {
+    status,
+    headers: {
+      "content-type": contentType,
+      "content-range": "bytes 0-9/1000",
     },
   });
 }
@@ -125,6 +174,74 @@ test("Instagram playback collection fails closed without an attributable playabl
   );
 });
 
+test("TikTok thumbnails come from the official oEmbed video and an accessible image CDN", async () => {
+  const trend = feed.trends.find((candidate) => candidate.platform === "tiktok");
+  assert.ok(trend);
+  const expectedThumbnail = tiktokThumbnailUrl(trend);
+  const requested = [];
+  const thumbnail = await collectTikTokThumbnail({
+    referenceUrl: trend.referenceVideo.url,
+    fetchImpl: async (url, options) => {
+      requested.push({ url, options });
+      if (String(url).startsWith("https://www.tiktok.com/oembed?")) {
+        assert.equal(new URL(url).searchParams.get("url"), trend.referenceVideo.url);
+        return Response.json(tiktokOEmbedPayload(trend));
+      }
+      if (url === expectedThumbnail) return thumbnailProbeResponse();
+      assert.fail(`unexpected TikTok thumbnail URL ${url}`);
+    },
+  });
+  assert.deepEqual(thumbnail, { url: expectedThumbnail });
+  assert.equal(requested.length, 2);
+  assert.equal(requested[0].options.headers.Accept, "application/json");
+  assert.match(requested[1].options.headers.Accept, /^image\//u);
+});
+
+test("TikTok thumbnail collection rejects mismatched identities, providers and non-images", async () => {
+  const trend = feed.trends.find((candidate) => candidate.platform === "tiktok");
+  assert.ok(trend);
+  const mismatchedHtml = tiktokOEmbedPayload(trend, {
+    html: '<blockquote data-video-id="7999999999999999999"></blockquote>',
+  });
+  await assert.rejects(
+    collectTikTokThumbnail({
+      referenceUrl: trend.referenceVideo.url,
+      fetchImpl: async () => Response.json(mismatchedHtml),
+    }),
+    /non attribuable/i,
+  );
+
+  await assert.rejects(
+    collectTikTokThumbnail({
+      referenceUrl: trend.referenceVideo.url,
+      fetchImpl: async () => Response.json(tiktokOEmbedPayload(trend, {
+        provider_name: "Lookalike",
+      })),
+    }),
+    /non attribuable/i,
+  );
+
+  await assert.rejects(
+    collectTikTokThumbnail({
+      referenceUrl: trend.referenceVideo.url,
+      fetchImpl: async () => Response.json(tiktokOEmbedPayload(trend, {
+        thumbnail_url: "https://images.example.test/reference.jpg",
+      })),
+    }),
+    /non attribuable/i,
+  );
+
+  await assert.rejects(
+    collectTikTokThumbnail({
+      referenceUrl: trend.referenceVideo.url,
+      fetchImpl: async (url) => String(url).startsWith("https://www.tiktok.com/oembed?")
+        ? Response.json(tiktokOEmbedPayload(trend))
+        : thumbnailProbeResponse({ contentType: "text/html" }),
+    }),
+    /non image/i,
+  );
+});
+
 test("publishing requires broad coverage on every tracked provider", () => {
   assert.equal(requiredProviderMatches(8), 6);
   const oneMatch = evaluateAudioRefreshCoverage([
@@ -182,15 +299,27 @@ test("a complete linked scan updates all counters without mutating the input", a
       );
       if (referenceTrend) return new Response(signedPlaybackHtml(now), { status: 200 });
       if (String(url).includes(".cdninstagram.com/")) return playbackProbeResponse();
+      const thumbnailTrend = tiktokTrendFromOEmbedRequest(url);
+      if (thumbnailTrend) return Response.json(tiktokOEmbedPayload(thumbnailTrend));
+      if (String(url).includes(".tiktokcdn.com/")) return thumbnailProbeResponse();
       assert.fail(`unexpected refresh URL ${url}`);
     },
   });
 
   const trackedTrends = feed.trends.filter((trend) => ["instagram", "tiktok"].includes(trend.platform));
   const instagramTrends = trackedTrends.filter((trend) => trend.platform === "instagram");
-  assert.equal(requested.length, trackedTrends.length + instagramTrends.length * 2);
+  const tiktokTrends = trackedTrends.filter((trend) => trend.platform === "tiktok");
+  assert.equal(
+    requested.length,
+    trackedTrends.length + instagramTrends.length * 2 + tiktokTrends.length * 2,
+  );
   assert.equal(result.status.coverage.totalMatched, trackedTrends.length);
   assert.equal(result.status.coverage.instagramPlaybackMatched, instagramTrends.length);
+  assert.equal(result.status.coverage.instagramPlaybackComplete, true);
+  assert.equal(result.status.coverage.tiktokThumbnailMatched, tiktokTrends.length);
+  assert.equal(result.status.coverage.tiktokThumbnailCoverage, 1);
+  assert.equal(result.status.coverage.tiktokThumbnailComplete, true);
+  assert.equal(result.status.coverage.thumbnailPublishable, true);
   assert.equal(result.status.published, true);
   assert.equal(result.feed.capturedAt, now);
   assert.ok(
@@ -206,6 +335,11 @@ test("a complete linked scan updates all counters without mutating the input", a
         trend.referenceVideo.playbackCapturedAt === now &&
         Date.parse(trend.referenceVideo.playbackExpiresAt) > Date.parse(now)
       ),
+  );
+  assert.ok(
+    result.feed.trends
+      .filter((trend) => trend.platform === "tiktok")
+      .every((trend) => trend.referenceVideo.thumbnailUrl === tiktokThumbnailUrl(trend)),
   );
   assert.deepEqual(feed, original, "the last validated feed remains untouched until publication");
 });
@@ -226,6 +360,9 @@ test("all fresh Instagram playbacks can publish degraded without rewriting faile
         return new Response(signedPlaybackHtml(now), { status: 200 });
       }
       if (String(url).includes(".cdninstagram.com/")) return playbackProbeResponse();
+      const thumbnailTrend = tiktokTrendFromOEmbedRequest(url);
+      if (thumbnailTrend) return Response.json(tiktokOEmbedPayload(thumbnailTrend));
+      if (String(url).includes(".tiktokcdn.com/")) return thumbnailProbeResponse();
       assert.fail(`unexpected degraded refresh URL ${url}`);
     },
   });
@@ -236,6 +373,8 @@ test("all fresh Instagram playbacks can publish degraded without rewriting faile
   assert.equal(result.status.coverage.counterPublishable, false);
   assert.equal(result.status.coverage.instagramPlaybackMatched, instagramTrends.length);
   assert.equal(result.status.coverage.instagramPlaybackComplete, true);
+  assert.equal(result.status.coverage.tiktokThumbnailMatched, 8);
+  assert.equal(result.status.coverage.tiktokThumbnailComplete, true);
   assert.deepEqual(
     result.feed.trends.map((trend) => trend.usageObservations),
     originalObservations,
@@ -269,6 +408,9 @@ test("degraded publication fails closed when even one Instagram playback is miss
           return new Response(signedPlaybackHtml(now), { status: 200 });
         }
         if (String(url).includes(".cdninstagram.com/")) return playbackProbeResponse();
+        const thumbnailTrend = tiktokTrendFromOEmbedRequest(url);
+        if (thumbnailTrend) return Response.json(tiktokOEmbedPayload(thumbnailTrend));
+        if (String(url).includes(".tiktokcdn.com/")) return thumbnailProbeResponse();
         assert.fail(`unexpected partial refresh URL ${url}`);
       },
     });
@@ -280,6 +422,55 @@ test("degraded publication fails closed when even one Instagram playback is miss
   assert.equal(failure.refreshStatus.status, "failed");
   assert.equal(failure.refreshStatus.coverage.instagramPlaybackMatched, instagramTrends.length - 1);
   assert.equal(failure.refreshStatus.coverage.instagramPlaybackComplete, false);
+  assert.equal(failure.refreshStatus.coverage.tiktokThumbnailComplete, true);
+  assert.equal(failure.refreshStatus.published, false);
+  assert.deepEqual(feed, original);
+});
+
+test("publication fails closed when even one TikTok thumbnail is missing", async () => {
+  const original = structuredClone(feed);
+  const now = new Date(Date.parse(feed.capturedAt) + 25 * 60 * 60 * 1_000).toISOString();
+  const instagramTrends = feed.trends.filter((trend) => trend.platform === "instagram");
+  const tiktokTrends = feed.trends.filter((trend) => trend.platform === "tiktok");
+  const missingThumbnailUrl = tiktokThumbnailUrl(tiktokTrends[0]);
+  let failure;
+  try {
+    await buildAudioTrendRefresh({
+      feed,
+      now,
+      fetchImpl: async (url) => {
+        const counterTrend = feed.trends.find((trend) => trend.audioUrl === url);
+        if (counterTrend) {
+          return new Response(counterHtml(counterTrend, latestUses(counterTrend)), { status: 200 });
+        }
+        if (instagramTrends.some((trend) => trend.referenceVideo.url === url)) {
+          return new Response(signedPlaybackHtml(now), { status: 200 });
+        }
+        if (String(url).includes(".cdninstagram.com/")) return playbackProbeResponse();
+        const thumbnailTrend = tiktokTrendFromOEmbedRequest(url);
+        if (thumbnailTrend) return Response.json(tiktokOEmbedPayload(thumbnailTrend));
+        if (url === missingThumbnailUrl) return new Response("missing", { status: 404 });
+        if (String(url).includes(".tiktokcdn.com/")) return thumbnailProbeResponse();
+        assert.fail(`unexpected thumbnail coverage URL ${url}`);
+      },
+    });
+  } catch (error) {
+    failure = error;
+  }
+
+  assert.ok(failure instanceof Error);
+  assert.match(failure.message, /miniature TikTok insuffisante: 7\/8/i);
+  assert.equal(failure.refreshStatus.status, "failed");
+  assert.equal(failure.refreshStatus.coverage.counterPublishable, true);
+  assert.equal(failure.refreshStatus.coverage.instagramPlaybackComplete, true);
+  assert.equal(failure.refreshStatus.coverage.tiktokThumbnailMatched, tiktokTrends.length - 1);
+  assert.equal(failure.refreshStatus.coverage.tiktokThumbnailCoverage, 7 / 8);
+  assert.equal(failure.refreshStatus.coverage.tiktokThumbnailComplete, false);
+  assert.equal(failure.refreshStatus.coverage.thumbnailPublishable, false);
+  const tiktokProvider = failure.refreshStatus.providers.find((provider) => provider.platform === "tiktok");
+  assert.equal(tiktokProvider.thumbnailMatched, tiktokTrends.length - 1);
+  assert.equal(tiktokProvider.thumbnailCoverage, 7 / 8);
+  assert.match(tiktokProvider.errors.join(" "), /miniatures insuffisante: 7\/8/i);
   assert.equal(failure.refreshStatus.published, false);
   assert.deepEqual(feed, original);
 });

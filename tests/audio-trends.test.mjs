@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   assertAudioTrendFeed,
   deriveAudioTrendGrowth,
+  isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
   isNativeAudioReferenceVideoUrl,
   isNativeAudioTrendUrl,
@@ -49,7 +50,7 @@ function validTrend() {
       author: "@quietcreator",
       caption: "the library is never actually silent",
       url: "https://www.instagram.com/reel/AbCdEfGhIjK/",
-      thumbnailUrl: "https://images.example.test/reference.webp",
+      thumbnailUrl: "https://scontent-cdg4-1.cdninstagram.com/v/t51.29350-15/reference.webp",
       durationSeconds: 12.4,
       publishedAt: "2026-08-10T09:00:00.000Z",
       capturedAt: "2026-08-11T11:00:00.000Z",
@@ -210,6 +211,8 @@ test("rank and rankWindow can preserve Creative Center evidence without a usage 
   trend.source.label = "TikTok · page musique native";
   trend.referenceVideo.url = "https://www.tiktok.com/@deskcreator/video/7412345678901234567";
   trend.referenceVideo.sourceUrl = trend.referenceVideo.url;
+  trend.referenceVideo.thumbnailUrl =
+    "https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/7412345678901234567.jpeg";
   trend.usageObservations = [{
     capturedAt: "2026-08-11T11:00:00.000Z",
     uses: null,
@@ -288,6 +291,56 @@ test("reference metrics may be absent but can never be unsourced or fabricated",
   assert.throws(
     () => assertAudioTrendFeed(feedWith(foreignMetricSource)),
     /vidéo de référence/i,
+  );
+});
+
+test("reference thumbnails are restricted to official platform CDNs", () => {
+  assert.equal(
+    isOfficialAudioTrendThumbnailUrl(
+      "https://scontent-cdg4-1.cdninstagram.com/v/t51.29350-15/reference.webp",
+      "instagram",
+    ),
+    true,
+  );
+  assert.equal(
+    isOfficialAudioTrendThumbnailUrl(
+      "https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/reference.jpeg",
+      "tiktok",
+    ),
+    true,
+  );
+  assert.equal(
+    isOfficialAudioTrendThumbnailUrl(
+      "https://p16.muscdn.com/obj/tos-maliva-p-0068/reference",
+      "tiktok",
+    ),
+    true,
+  );
+  assert.equal(
+    isOfficialAudioTrendThumbnailUrl(
+      "https://scontent-cdg4-1.cdninstagram.com/reference.webp",
+      "tiktok",
+    ),
+    false,
+  );
+  assert.equal(
+    isOfficialAudioTrendThumbnailUrl("https://images.example.test/reference.webp", "instagram"),
+    false,
+  );
+
+  const foreignThumbnail = validTrend();
+  foreignThumbnail.referenceVideo.thumbnailUrl = "https://images.example.test/reference.webp";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(foreignThumbnail)),
+    /r.f.rence audio invalide/i,
+  );
+
+  const crossPlatformThumbnail = validTrend();
+  crossPlatformThumbnail.referenceVideo.thumbnailUrl =
+    "https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/reference.jpeg";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(crossPlatformThumbnail)),
+    /r.f.rence audio invalide/i,
   );
 });
 

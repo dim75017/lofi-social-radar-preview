@@ -191,6 +191,47 @@ function hasDomain(hostname: string, domain: string) {
   return hostname === domain || hostname.endsWith(`.${domain}`);
 }
 
+const TIKTOK_THUMBNAIL_DOMAINS = [
+  "tiktokcdn.com",
+  "tiktokcdn-us.com",
+  "tiktokcdn-eu.com",
+  "muscdn.com",
+] as const;
+
+/**
+ * Thumbnail URLs are accepted only from the platform that owns the reference
+ * video. This deliberately excludes arbitrary HTTPS hosts so a refresh cannot
+ * smuggle an unrelated image into the public feed.
+ */
+export function isOfficialAudioTrendThumbnailUrl(
+  candidate: string,
+  platform: AudioTrendPlatform,
+) {
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    if (
+      url.protocol !== "https:" ||
+      url.username !== "" ||
+      url.password !== "" ||
+      url.port !== ""
+    ) {
+      return false;
+    }
+    if (platform === "instagram") {
+      return hasDomain(hostname, "cdninstagram.com") ||
+        hasDomain(hostname, "fbcdn.net") ||
+        hasDomain(hostname, "instagram.com");
+    }
+    if (platform === "tiktok") {
+      return TIKTOK_THUMBNAIL_DOMAINS.some((domain) => hasDomain(hostname, domain));
+    }
+    return hasDomain(hostname, "ytimg.com") || hasDomain(hostname, "youtube.com");
+  } catch {
+    return false;
+  }
+}
+
 function canonicalUrl(candidate: string) {
   const url = new URL(candidate);
   const pathname = url.pathname.replace(/\/+$/, "");
@@ -410,7 +451,8 @@ function assertReferenceVideo(
     !isText(reference.author) ||
     typeof reference.caption !== "string" ||
     !isNativeAudioReferenceVideoUrl(reference.url, trend.platform) ||
-    (reference.thumbnailUrl !== null && !isHttpsUrl(reference.thumbnailUrl)) ||
+    (reference.thumbnailUrl !== null &&
+      !isOfficialAudioTrendThumbnailUrl(reference.thumbnailUrl, trend.platform)) ||
     (reference.durationSeconds !== null &&
       (typeof reference.durationSeconds !== "number" ||
         !Number.isFinite(reference.durationSeconds) ||

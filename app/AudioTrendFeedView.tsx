@@ -13,6 +13,7 @@ import {
   type AudioTrendType,
 } from "../lib/audio-trends";
 import { dailyRotationIndex } from "../lib/daily-rotation";
+import { resolveFreshInstagramPlaybackUrl } from "../lib/social-inline-player";
 import { SocialInlinePlayer } from "./SocialInlinePlayer";
 
 type PlatformFilter = AudioTrendPlatform | "all";
@@ -214,6 +215,12 @@ function AudioTrendCard({
   const growth = deriveAudioTrendGrowth(trend.usageObservations);
   const uses = latestUses(trend);
   const rankSignal = latestRank(trend);
+  const instagramPreviewUrl = trend.platform === "instagram"
+    ? resolveFreshInstagramPlaybackUrl(
+        trend.referenceVideo.playbackUrl,
+        trend.referenceVideo.playbackExpiresAt,
+      )
+    : null;
   const [activeProposalIndex, setActiveProposalIndex] = useState(() =>
     dailyRotationIndex(trend.id, feedCapturedAt, trend.proposals.length),
   );
@@ -241,12 +248,26 @@ function AudioTrendCard({
           >
             {trend.referenceVideo.thumbnailUrl ? (
               <img src={trend.referenceVideo.thumbnailUrl} alt="" loading="lazy" />
+            ) : instagramPreviewUrl ? (
+              <video
+                src={instagramPreviewUrl}
+                muted
+                playsInline
+                preload="metadata"
+                aria-hidden="true"
+                onLoadedMetadata={(event) => {
+                  const video = event.currentTarget;
+                  if (Number.isFinite(video.duration) && video.duration > 0.05) {
+                    video.currentTime = 0.05;
+                  }
+                }}
+              />
             ) : (
               <span className="audio-reference-fallback">
-                <img src={`platforms/${trend.platform}.svg`} alt="" width="52" height="52" />
-                <i aria-hidden="true">▶</i>
+                <b>Vidéo de référence</b>
               </span>
             )}
+            <span className="audio-reference-play-overlay" aria-hidden="true">▶</span>
           </button>
         )}
         <span className="trend-rank-badge">#{rank}</span>
