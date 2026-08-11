@@ -334,6 +334,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.nav-submenu\[hidden\]\s*\{[\s\S]*?display:\s*none/);
   assert.match(styles, /\.nav-entry\.expanded > button \.nav-caret/);
   assert.doesNotMatch(styles, /nav-meta/);
+  assert.match(styles, /--sidebar:\s*280px/);
+  const navTextDeclarations = styles.match(/\.nav-text\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(navTextDeclarations, /white-space:\s*normal/);
+  assert.doesNotMatch(navTextDeclarations, /text-overflow:\s*ellipsis|overflow:\s*hidden/);
+  assert.match(styles, /--sidebar:\s*min\(88vw,\s*300px\)/);
   assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.inline-video-frame/);
   assert.match(styles, /\.post-details-modal/);

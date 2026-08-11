@@ -24,7 +24,7 @@
   --blue: #7dd3fc;
   --pink: #f472b6;
   --radius: 16px;
-  --sidebar: 238px;
+  --sidebar: 280px;
   --shadow: 0 18px 52px rgba(0, 0, 0, 0.32);
   --fs-micro: 11px;
   --fs-meta: 12px;
@@ -295,10 +295,11 @@ a {
 }
 
 .nav-text {
+  flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .nav-count {
@@ -3226,7 +3227,7 @@ a {
 
 @media (max-width: 640px) {
   :root {
-    --sidebar: 274px;
+    --sidebar: min(88vw, 300px);
   }
 
   .sidebar {
