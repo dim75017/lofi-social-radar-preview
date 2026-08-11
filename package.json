@@ -10,10 +10,11 @@
     "build": "vinext build",
     "build:preview": "vite build --config preview/vite.config.ts && node scripts/build-public-preview-data.mjs",
     "start": "vinext start",
-    "test": "vinext build && node --test tests/rendered-html.test.mjs tests/public-history-scope.test.mjs tests/live-metric-history.test.mjs tests/social-duration.test.mjs tests/social-editorial-analysis.test.mjs tests/social-formats.test.mjs tests/social-ideas.test.mjs tests/editorial-workflow.test.mjs tests/social-media.test.mjs tests/social-ranking.test.mjs tests/social-score.test.mjs tests/social-trends.test.mjs tests/social-trends-refresh.test.mjs tests/well-formed-unicode.test.mjs tests/instagram-embed-import.test.mjs",
+    "test": "vinext build && node --test tests/rendered-html.test.mjs tests/public-history-scope.test.mjs tests/live-metric-history.test.mjs tests/social-duration.test.mjs tests/social-editorial-analysis.test.mjs tests/social-formats.test.mjs tests/social-ideas.test.mjs tests/editorial-workflow.test.mjs tests/social-media.test.mjs tests/social-ranking.test.mjs tests/social-score.test.mjs tests/social-trends.test.mjs tests/social-trends-refresh.test.mjs tests/audience-metrics.test.mjs tests/well-formed-unicode.test.mjs tests/instagram-embed-import.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern work --ignore-pattern outputs",
     "db:generate": "drizzle-kit generate",
-    "trends:refresh": "node --experimental-strip-types scripts/refresh-social-trends.mjs"
+    "trends:refresh": "node --experimental-strip-types scripts/refresh-social-trends.mjs",
+    "audience:refresh": "node --experimental-strip-types scripts/collect-audience-history.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

@@ -20,6 +20,7 @@ Le premier écran ne part plus de tendances fictives. Il interroge Instagram, X,
 - `social_posts` : contenu normalisé, format, date, miniature, dernières métriques, score et explication.
 - `post_metric_snapshots` : relevés successifs immuables des vues et interactions.
 - `scan_runs` : tentative par source, durée, résultat, compteurs et erreur éventuelle.
+- `data/audience-history.json` : relevés horodatés des followers des quatre comptes, précision de chaque compteur et taux d’engagement dérivé. Les jalons historiques et relevés quotidiens sont conservés sans interpolation.
 
 Les anciennes tables `trends`, `ideas`, `briefs` et `decision_events` restent disponibles pour la phase d’idéation, mais aucune donnée de démonstration n’est plus injectée ou affichée.
 
@@ -33,6 +34,12 @@ Le score ne compare jamais les volumes bruts de deux plateformes différentes. I
 - conversation et partages lorsque disponibles.
 
 Une métrique absente est retirée du calcul et les poids restants sont renormalisés. Elle ne vaut jamais zéro. L’explication conserve la taille de l’échantillon, les métriques disponibles et leurs percentiles.
+
+## Audience et engagement
+
+Le Tableau de bord utilise la même méthode sur YouTube, Instagram, TikTok et X : moyenne des likes et commentaires des 30 derniers posts mesurables, divisée par le dernier nombre de followers réellement observé. Les commentaires YouTube publiés par Lofi Girl sont exclus de l’échantillon. Les partages et sauvegardes ne sont pas mélangés au calcul, car ils ne sont pas disponibles de façon comparable sur les quatre plateformes.
+
+Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. Si une source échoue, son dernier point valide est conservé ; aucune valeur n’est inventée. Les compteurs arrondis par une plateforme restent explicitement marqués comme tels. La preview publique recharge le fichier audience au démarrage, chaque heure et au retour sur l’onglet.
 
 ## Analyse éditoriale
 

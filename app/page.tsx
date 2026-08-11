@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import audienceHistoryJson from "../data/audience-history.json";
+import {
+  assertAudienceHistory,
+  type AudienceHistory,
+} from "../lib/audience-metrics";
 import { SocialOS } from "./SocialOS";
 
 export const metadata: Metadata = {
@@ -8,5 +13,11 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <SocialOS />;
+  return (
+    <SocialOS
+      initialAudienceHistory={assertAudienceHistory(
+        audienceHistoryJson as AudienceHistory,
+      )}
+    />
+  );
 }

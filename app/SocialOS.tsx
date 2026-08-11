@@ -2,7 +2,14 @@
 
 /* eslint-disable @next/next/no-img-element -- thumbnails come from live social sources with dynamic hosts. */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+
+import {
+  audienceGrowth,
+  latestAudienceObservation,
+  type AudienceHistory,
+  type AudienceObservation,
+} from "../lib/audience-metrics";
 
 import {
   generateSocialIdeas,
@@ -182,7 +189,7 @@ const NAV: Array<{
   label: string;
   group: "Pilotage";
 }> = [
-  { id: "overview", emoji: "📊", label: "Command Center", group: "Pilotage" },
+  { id: "overview", emoji: "📊", label: "Tableau de bord", group: "Pilotage" },
   { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
   { id: "trends", emoji: "🔥", label: "Trends", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Recommandations", group: "Pilotage" },
@@ -282,19 +289,6 @@ function formatDetailedDate(value: string | null | undefined) {
   }).format(date);
 }
 
-function relativeAge(value: string | null) {
-  if (!value) return "date publique absente";
-  const ms = Date.now() - new Date(value).getTime();
-  if (!Number.isFinite(ms)) return "date inconnue";
-  const hours = Math.max(0, Math.floor(ms / 3_600_000));
-  if (hours < 1) return "moins d’1 h";
-  if (hours < 24) return `${hours} h`;
-  const days = Math.floor(hours / 24);
-  if (days < 31) return `${days} j`;
-  const months = Math.floor(days / 30);
-  return `${months} mois`;
-}
-
 function formatEmptyCopy(platform: Platform, filter: SocialFormatFilter) {
   if (filter === "comment") {
     if (platform === "youtube") {
@@ -332,39 +326,6 @@ function postLabel(post: SocialPost, editorialAnalysis?: EditorialWhy | null) {
   if (signal === "commercial_copy") return "Information & activation";
   if (signal === "insufficient") return "Lecture à compléter";
   return "Relatable & humour";
-}
-
-function localInsights(posts: SocialPost[]): Insight[] {
-  if (!posts.length) return [];
-  const groups = new Map<string, SocialPost[]>();
-  for (const post of posts) {
-    const key = `${post.platform}:${post.format}`;
-    groups.set(key, [...(groups.get(key) ?? []), post]);
-  }
-  return [...groups.values()]
-    .filter((group) => group.length >= 2)
-    .map((group) => {
-      const top = rankPostsByPublicMetric(group).posts[0];
-      return { group, top, analysis: top.editorial_analysis };
-    })
-    .filter(
-      (item): item is { group: SocialPost[]; top: SocialPost; analysis: EditorialWhy } =>
-        Boolean(item.analysis),
-    )
-    .sort((left, right) =>
-      right.group.length !== left.group.length
-        ? right.group.length - left.group.length
-        : `${left.top.platform}:${left.top.format}`.localeCompare(
-            `${right.top.platform}:${right.top.format}`,
-          ),
-    )
-    .slice(0, 3)
-    .map(({ top, analysis }) => ({
-      emoji: PLATFORM_META[top.platform].emoji,
-      title: analysis.headline,
-      summary: analysis.mechanism,
-      evidence: analysis.comparison,
-    }));
 }
 
 function metricEmoji(metric: MetricKey, platform?: Platform) {
@@ -553,6 +514,7 @@ function formatTrendRefreshDate(value: string | null | undefined): string | null
 export function SocialOS({
   initialWorkspace = null,
   initialTrendFeed = null,
+  initialAudienceHistory = null,
   previewMode = false,
   publicCounts,
   publicFormatCounts,
@@ -561,6 +523,7 @@ export function SocialOS({
 }: {
   initialWorkspace?: WorkspacePayload | null;
   initialTrendFeed?: SocialTrendFeed | null;
+  initialAudienceHistory?: AudienceHistory | null;
   previewMode?: boolean;
   publicCounts?: Partial<Record<Platform, number>>;
   publicFormatCounts?: Partial<Record<Platform, Record<string, number>>>;
@@ -856,9 +819,6 @@ export function SocialOS({
   const activeLibraryFormat =
     categoryFilters(platform).find((filter) => filter.key === formatFilter) ??
     categoryFilters(platform)[0];
-  const insights = useMemo(() => {
-    return localInsights(posts);
-  }, [posts]);
   const ideaPlan = useMemo(
     () =>
       generateSocialIdeas(historyLoading ? [] : normalizedPosts, {
@@ -1205,134 +1165,7 @@ export function SocialOS({
         ) : null}
 
         {workspace && view === "overview" ? (
-          <div className="view-stack">
-            <section>
-              <div className="section-heading">
-                <div>
-                  <span className="section-kicker">Couverture maintenant</span>
-                  <h3>{activeSources} réseaux avec des posts exploitables</h3>
-                </div>
-                <span className="freshness">
-                  {totalPostCount} contenus · relevé {formatDate(lastSuccess ?? null, true)}
-                </span>
-              </div>
-              <div className="source-status-grid">
-                {(Object.keys(PLATFORM_META) as Platform[]).map((key) => {
-                  const account = accounts.find((item) => item.platform === key);
-                  const meta = PLATFORM_META[key];
-                  return (
-                    <button
-                      type="button"
-                      className={`source-status-card tone-${meta.tone}`}
-                      key={key}
-                      onClick={() => {
-                        setTopPlatform(key);
-                        setTopFormatFilter(DEFAULT_FORMAT_FILTER[key]);
-                        setTopDuration("all");
-                        setView("top");
-                      }}
-                    >
-                      <span className="source-logo">{meta.emoji}</span>
-                      <span className="source-card-copy">
-                        <b>{meta.label}</b>
-                        <small>{account?.coverage_label ?? "Source en attente"}</small>
-                      </span>
-                      <span className="source-count">
-                          <b>{resolvedPlatformCounts[key]}</b>
-                        <small>posts</small>
-                      </span>
-                      <span className={`source-state ${account?.status ?? "idle"}`}>
-                        {account?.status === "error" ? "Erreur" : account?.status === "limited" ? "Limité" : "Actif"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section>
-              <div className="section-heading">
-                <div>
-                  <span className="section-kicker">Analyse éditoriale</span>
-                  <h3>Ce qui mérite l’attention de l’équipe</h3>
-                </div>
-                <span className="freshness">
-                  {historyLoading
-                    ? `${loadedPlatformCount}/4 réseaux prêts`
-                    : `Calculé sur ${posts.length} posts réels`}
-                </span>
-              </div>
-              {historyLoading ? (
-                <HistoryLoadingState
-                  loadedPlatformCount={loadedPlatformCount}
-                  label="Analyse des posts en arrière-plan"
-                />
-              ) : (
-                <div className="insight-grid">
-                  {insights.map((insight, index) => (
-                    <article className={`insight-card insight-${index + 1}`} key={`${insight.title}-${index}`}>
-                      <span className="insight-emoji">{insight.emoji}</span>
-                      <span className="section-kicker">{index === 0 ? "Signal prioritaire" : "Lecture du radar"}</span>
-                      <h3>{insight.title}</h3>
-                      <p>{insight.summary}</p>
-                      {insight.evidence ? <small>{insight.evidence}</small> : null}
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className="overview-columns social-overview-columns">
-              <div className="panel">
-                <div className="panel-head">
-                  <div>
-                    <span className="section-kicker">Posts à retenir</span>
-                    <h3>Les publications les plus aimées</h3>
-                  </div>
-                  <button
-                    className="text-button"
-                    type="button"
-                    onClick={() => {
-                      setTopPlatform("youtube");
-                      setTopFormatFilter("short");
-                      setTopDuration("all");
-                      setView("top");
-                    }}
-                  >
-                    Voir tout →
-                  </button>
-                </div>
-                {historyLoading ? (
-                  <HistoryLoadingState
-                    loadedPlatformCount={loadedPlatformCount}
-                    label="Préparation du classement complet"
-                    compact
-                  />
-                ) : (
-                  <div className="top-post-list">
-                    {topPosts.slice(0, 5).map((post, index) => (
-                      <PostRow post={post} rank={index + 1} key={post.id} />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="panel methodology-panel">
-                <div className="panel-head">
-                  <div>
-                    <span className="section-kicker">Score explicable</span>
-                    <h3>Comparaisons honnêtes</h3>
-                  </div>
-                  <span className="audit-lock">🔒</span>
-                </div>
-                <div className="method-list">
-                  <div><span>01</span><p><b>Chaque réseau est comparé à lui-même.</b> Les vues TikTok ne sont jamais comparées brutes aux likes Instagram.</p></div>
-                  <div><span>02</span><p><b>L’âge du post est intégré quand sa date est publique.</b> Sans date, le radar signale qu’il compare seulement les volumes visibles.</p></div>
-                  <div><span>03</span><p><b>Les métriques absentes sont retirées.</b> Elles ne sont jamais remplacées artificiellement par zéro.</p></div>
-                </div>
-              </div>
-            </section>
-          </div>
+          <AudienceDashboard history={initialAudienceHistory} />
         ) : null}
 
         {view === "trends" ? (
@@ -1761,6 +1594,150 @@ export function SocialOS({
       {toast ? <div className="toast">✅ {toast}</div> : null}
     </div>
   );
+}
+
+function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
+  return (
+    <section className="audience-dashboard" aria-labelledby="audience-dashboard-title">
+      <header className="audience-dashboard-heading">
+        <div>
+          <span className="section-kicker">Audience & engagement</span>
+          <h2 id="audience-dashboard-title">Tableau de bord</h2>
+        </div>
+        <span className="audience-refresh-label">
+          ↻ Suivi quotidien{history ? ` · ${formatAudienceDate(history.generatedAt)}` : ""}
+        </span>
+      </header>
+
+      <div className="audience-platform-grid">
+        {PLATFORM_ORDER.map((platform) => {
+          const meta = PLATFORM_META[platform];
+          const platformHistory = history?.platforms[platform] ?? null;
+          const latest = platformHistory
+            ? latestAudienceObservation(platformHistory)
+            : null;
+          const growth = platformHistory
+            ? audienceGrowth(platformHistory, { days: 30, toleranceDays: 7 })
+              ?? audienceGrowth(platformHistory)
+            : null;
+          const engagement = platformHistory?.engagement ?? null;
+          const points = platformHistory?.observations.slice(-12) ?? [];
+          const values = points.map((point) => point.followers);
+          const minimum = values.length ? Math.min(...values) : 0;
+          const maximum = values.length ? Math.max(...values) : 0;
+
+          return (
+            <article className={`audience-platform-card tone-${meta.tone}`} key={platform}>
+              <header className="audience-platform-head">
+                <span className="source-logo large" aria-hidden="true">{meta.emoji}</span>
+                <div>
+                  <span className="section-kicker">@{platform === "youtube" ? "LofiGirl" : "lofigirl"}</span>
+                  <h3>{meta.label}</h3>
+                </div>
+                <time dateTime={latest?.capturedAt}>
+                  {latest ? formatAudienceDate(latest.capturedAt) : "En attente"}
+                </time>
+              </header>
+
+              <div className="audience-total-block">
+                <span>Total followers</span>
+                <strong>{latest ? formatAudienceFollowers(latest) : "—"}</strong>
+                <small>
+                  {latest
+                    ? latest.precision === "exact"
+                      ? "Compteur public exact"
+                      : latest.precision === "platform-rounded"
+                        ? "Compteur arrondi par la plateforme"
+                        : "Jalon public vérifié"
+                    : "Premier relevé à effectuer"}
+                </small>
+              </div>
+
+              <div className="audience-evolution-block">
+                <div className="audience-metric-heading">
+                  <span>Évolution des followers</span>
+                  <b className={growth && growth.followersDelta < 0 ? "negative" : "positive"}>
+                    {growth ? `${growth.followersDelta >= 0 ? "↗" : "↘"} ${formatAudienceDelta(growth.followersDelta)}` : "—"}
+                  </b>
+                </div>
+                <div className="audience-spark-bars" aria-hidden="true">
+                  {points.map((point) => {
+                    const height = maximum === minimum
+                      ? 62
+                      : 24 + ((point.followers - minimum) / (maximum - minimum)) * 76;
+                    return (
+                      <i
+                        key={`${point.capturedAt}:${point.followers}`}
+                        style={{ "--audience-bar-height": `${height}%` } as CSSProperties}
+                      />
+                    );
+                  })}
+                </div>
+                <small>
+                  {growth
+                    ? `${formatAudiencePercent(growth.ratePercent)} depuis le ${formatAudienceDate(growth.from.capturedAt)}`
+                    : latest
+                      ? `Suivi démarré le ${formatAudienceDate(latest.capturedAt)}`
+                      : "Suivi pas encore démarré"}
+                </small>
+              </div>
+
+              <div
+                className="audience-engagement-block"
+                title="Moyenne des likes et commentaires des 30 derniers posts mesurables, divisée par le nombre actuel de followers."
+              >
+                <span>Taux d’engagement</span>
+                <strong>{engagement ? formatAudiencePercent(engagement.ratePercent) : "—"}</strong>
+                <small>
+                  {engagement
+                    ? `${engagement.sampleSize} derniers posts mesurables`
+                    : "Données publiques insuffisantes"}
+                </small>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function formatAudienceFollowers(observation: AudienceObservation) {
+  if (observation.precision === "exact") {
+    return new Intl.NumberFormat("fr-FR").format(observation.followers);
+  }
+  return `≈ ${new Intl.NumberFormat("fr-FR", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(observation.followers)}`;
+}
+
+function formatAudienceDelta(value: number) {
+  const absolute = Math.abs(value);
+  const formatted = new Intl.NumberFormat("fr-FR", {
+    notation: absolute >= 1_000_000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(absolute);
+  return `${value >= 0 ? "+" : "−"}${formatted}`;
+}
+
+function formatAudiencePercent(value: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: value < 0.1 ? 2 : 1,
+    maximumFractionDigits: value < 0.1 ? 2 : 1,
+  }).format(value / 100);
+}
+
+function formatAudienceDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
 }
 
 function TrendFeedView({
@@ -3174,32 +3151,6 @@ function RoadmapDayModal({
         </div>
       </section>
     </div>
-  );
-}
-
-function PostRow({ post, rank }: { post: SocialPost; rank: number }) {
-  const meta = PLATFORM_META[post.platform];
-  const rowMetric =
-    post.likes !== null
-      ? { icon: "♥", label: `${formatNumber(post.likes)} likes` }
-      : post.views !== null
-        ? { icon: "▶", label: `${formatNumber(post.views)} vues` }
-        : { icon: "—", label: "Métrique publique indisponible" };
-  return (
-    <a className="social-post-row" href={post.url} target="_blank" rel="noreferrer">
-      <span className="rank">{String(rank).padStart(2, "0")}</span>
-      <span className="post-platform-icon">{meta.emoji}</span>
-      <span className="post-row-copy">
-        <b>{post.title || post.text || "Publication sans légende"}</b>
-        <small>{meta.label} · {getSocialFormatLabel(post)} · {post.published_at ? `il y a ${relativeAge(post.published_at)}` : "date publique absente"}</small>
-      </span>
-      <span className="row-metrics">
-        {metrics(post).slice(0, 2).map((metric) => (
-          <span key={metric.label}>{metric.icon} {formatNumber(metric.value)}</span>
-        ))}
-      </span>
-      <span className="mini-score" title={rowMetric.label}>{rowMetric.icon}</span>
-    </a>
   );
 }
 

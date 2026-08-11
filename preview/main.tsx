@@ -2,8 +2,13 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SocialOS, type WorkspacePayload } from "../app/SocialOS";
 import "../app/globals.css";
+import audienceHistoryJson from "../data/audience-history.json";
 import publicHistorySummaryJson from "../data/public-history-summary.json";
 import trendFeedJson from "../data/trends/feed.json";
+import {
+  assertAudienceHistory,
+  type AudienceHistory,
+} from "../lib/audience-metrics";
 import {
   mergeWorkspaceWithPublicHistory,
   type PublicHistorySnapshot,
@@ -25,8 +30,13 @@ const publicHistorySummary = publicHistorySummaryJson as PublicHistorySummary;
 const fallbackTrendFeed = assertSocialTrendFeed(
   trendFeedJson as SocialTrendFeed,
 );
+const fallbackAudienceHistory = assertAudienceHistory(
+  audienceHistoryJson as AudienceHistory,
+);
 const RAW_TREND_FEED_URL =
   "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/trends/feed.json";
+const RAW_AUDIENCE_HISTORY_URL =
+  "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/audience-history.json";
 const emptySnapshot: PublicHistorySnapshot = {
   generatedAt: publicHistorySummary.generatedAt,
   coverage: publicHistorySummary.coverage,
@@ -49,6 +59,7 @@ const snapshotVersion = encodeURIComponent(
 function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [trendFeed, setTrendFeed] = useState(fallbackTrendFeed);
+  const [audienceHistory, setAudienceHistory] = useState(fallbackAudienceHistory);
   const [pendingPlatforms, setPendingPlatforms] = useState<SocialPlatform[]>([
     ...PLATFORM_ORDER,
   ]);
@@ -93,6 +104,55 @@ function PublicPreview() {
 
     refreshTrendFeed();
     const hourlyRefresh = window.setInterval(refreshTrendFeed, 60 * 60 * 1_000);
+    document.addEventListener("visibilitychange", refreshOnReturn);
+
+    return () => {
+      active = false;
+      window.clearInterval(hourlyRefresh);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    const refreshAudienceHistory = () => {
+      void fetch(`${RAW_AUDIENCE_HISTORY_URL}?v=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Actualisation audience impossible (${response.status}).`);
+          }
+          return assertAudienceHistory(
+            (await response.json()) as AudienceHistory,
+          );
+        })
+        .then((snapshot) => {
+          if (!active) return;
+          const incomingAt = Date.parse(snapshot.generatedAt);
+          if (!Number.isFinite(incomingAt)) return;
+          setAudienceHistory((current) =>
+            incomingAt >= Date.parse(current.generatedAt) ? snapshot : current,
+          );
+        })
+        .catch(() => {
+          // Le dernier relevé embarqué reste visible si GitHub est indisponible.
+        });
+    };
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") refreshAudienceHistory();
+    };
+
+    refreshAudienceHistory();
+    const hourlyRefresh = window.setInterval(
+      refreshAudienceHistory,
+      60 * 60 * 1_000,
+    );
     document.addEventListener("visibilitychange", refreshOnReturn);
 
     return () => {
@@ -180,6 +240,7 @@ function PublicPreview() {
     <SocialOS
       initialWorkspace={workspace as WorkspacePayload}
       initialTrendFeed={trendFeed}
+      initialAudienceHistory={audienceHistory}
       previewMode
       publicCounts={publicHistorySummary.platformCounts}
       publicFormatCounts={publicHistorySummary.formatCounts}

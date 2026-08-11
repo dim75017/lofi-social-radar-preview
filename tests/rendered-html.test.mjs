@@ -33,7 +33,7 @@ test("server-renders the live Social Radar shell", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Lofi Social Radar<\/title>/i);
-  assert.match(html, /Command Center/);
+  assert.match(html, /Tableau de bord/);
   assert.match(html, /Meilleurs posts/);
   assert.match(html, /Recommandations/);
   assert.match(html, /Roadmap/);
@@ -45,7 +45,7 @@ test("server-renders the live Social Radar shell", async () => {
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking, previewEntry] = await Promise.all([
+  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking, previewEntry, audienceMetrics, audienceHistory] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
@@ -58,6 +58,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../lib/social-media.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/social-ranking.ts", import.meta.url), "utf8"),
     readFile(new URL("../preview/main.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/audience-metrics.ts", import.meta.url), "utf8"),
+    readFile(new URL("../data/audience-history.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -72,8 +74,12 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(scanner, /instagram\.com/);
   assert.match(scanner, /tiktok\.com/);
   assert.match(scanner, /x\.com/);
-  assert.match(component, /Chaque réseau est comparé à lui-même/);
-  assert.match(component, /métriques absentes sont retirées/i);
+  assert.match(component, /label: "Tableau de bord"/);
+  assert.match(component, /Total followers/);
+  assert.match(component, /Évolution des followers/);
+  assert.match(component, /Taux d’engagement/);
+  assert.match(component, /className="audience-platform-grid"/);
+  assert.doesNotMatch(component, /Couverture maintenant|Analyse éditoriale|Posts à retenir|Comparaisons honnêtes/);
   assert.match(component, /top-platform-subnav/);
   assert.match(component, /Plateformes des meilleurs posts/);
   assert.doesNotMatch(component, /topNavExpanded|setTopNavExpanded|nav-disclosure/);
@@ -123,8 +129,17 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /cache: "force-cache"/);
   assert.match(previewEntry, /RAW_TREND_FEED_URL/);
   assert.match(previewEntry, /initialTrendFeed=\{trendFeed\}/);
+  assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL/);
+  assert.match(previewEntry, /initialAudienceHistory=\{audienceHistory\}/);
+  assert.match(previewEntry, /refreshAudienceHistory/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
+  assert.match(audienceMetrics, /mean\(likes\+comments\)\/followers\*100/);
+  assert.match(audienceMetrics, /AUDIENCE_ENGAGEMENT_WINDOW_SIZE = 30/);
+  assert.match(audienceHistory, /"youtube"/);
+  assert.match(audienceHistory, /"instagram"/);
+  assert.match(audienceHistory, /"tiktok"/);
+  assert.match(audienceHistory, /"x"/);
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);

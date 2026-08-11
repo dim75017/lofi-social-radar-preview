@@ -6,7 +6,8 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 ## Fonctionnalités
 
-- Navigation interactive : Command Center, meilleurs posts, idées à produire, bibliothèque par catégorie et état des sources.
+- Navigation interactive : Tableau de bord, meilleurs posts, recommandations, roadmap et tendances.
+- Tableau de bord audience : total de followers, évolution issue de relevés réels et taux d’engagement comparable par plateforme, calculé sur les 30 derniers posts mesurables. Les compteurs sont relevés chaque jour sans interpolation ni remplacement des valeurs absentes par zéro.
 - Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
 - « Meilleurs posts » impose toujours une plateforme et une catégorie actives : aucun filtre « Tous » ne mélange les formats. Les contenus sont triés par likes publics décroissants dans chaque catégorie ; les Shorts utilisent provisoirement les vues, car leurs likes ne sont pas présents dans le snapshot public actuel.
 - Le filtre de durée (7 jours, 30 jours, 3 mois, 6 mois, 1 an ou All time) et la recherche restent disponibles. Le score analytique composite demeure réservé aux analyses et aux idées ; il n’ordonne plus la liste visible.
@@ -35,6 +36,7 @@ pnpm dev
 pnpm build
 pnpm build:preview
 pnpm test
+pnpm audience:refresh
 python scripts/collect_public_history.py
 ```
 
