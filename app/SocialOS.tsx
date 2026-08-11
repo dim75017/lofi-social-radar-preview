@@ -77,6 +77,7 @@ import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "comments" | "trends" | "ideas" | "planning" | "all" | "sources";
+type NavSection = "posts" | "recommendations";
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 type TrendPlatformFilter = TrendPlatform | "all";
@@ -198,11 +199,19 @@ const NAV: Array<{
   group: "Pilotage";
 }> = [
   { id: "overview", emoji: "📊", label: "Tableau de bord", group: "Pilotage" },
-  { id: "top", emoji: "🏆", label: "Meilleurs posts", group: "Pilotage" },
-  { id: "comments", emoji: "💬", label: "Commentaires", group: "Pilotage" },
-  { id: "trends", emoji: "🔥", label: "Trends", group: "Pilotage" },
+  { id: "top", emoji: "🏆", label: "Tous les posts", group: "Pilotage" },
   { id: "ideas", emoji: "💡", label: "Recommandations", group: "Pilotage" },
   { id: "planning", emoji: "🗓️", label: "Roadmap", group: "Pilotage" },
+];
+
+const RECOMMENDATION_NAV: Array<{
+  id: Extract<View, "ideas" | "comments" | "trends">;
+  emoji: string;
+  label: string;
+}> = [
+  { id: "ideas", emoji: "📝", label: "Posts recommandés" },
+  { id: "comments", emoji: "💬", label: "Commentaires" },
+  { id: "trends", emoji: "🔥", label: "Trends" },
 ];
 
 const EDITORIAL_WORKFLOW_STORAGE_KEY = "lofi-social-radar:editorial-workflow:v2";
@@ -550,8 +559,11 @@ export function SocialOS({
   const [commentsLoading, setCommentsLoading] = useState(!previewMode && !initialCommentOpportunityFeed);
   const [commentsError, setCommentsError] = useState("");
   const [view, setView] = useState<View>("overview");
-  const [platform, setPlatform] = useState<Platform>("youtube");
-  const [formatFilter, setFormatFilter] = useState<SocialFormatFilter>("short");
+  const expandedNavSection: NavSection | null = view === "all" || view === "top"
+    ? "posts"
+    : view === "ideas" || view === "comments" || view === "trends"
+      ? "recommendations"
+      : null;
   const [topPlatform, setTopPlatform] = useState<Platform>("youtube");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("short");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
@@ -864,23 +876,13 @@ export function SocialOS({
           }).length,
     [topDuration, topFormatFilter, topPlatform, topPosts],
   );
-  const filteredCategoryPosts = useMemo(() => {
-    return topPosts.filter(
-      (post) =>
-        post.platform === platform &&
-        matchesSocialFormatFilter(post, formatFilter),
-    );
-  }, [formatFilter, platform, topPosts]);
-  const filteredPosts = useMemo(
-    () => sortPosts(filteredCategoryPosts, librarySort),
-    [filteredCategoryPosts, librarySort],
+  const allPlatformPosts = useMemo(
+    () => sortPosts(durationTopPosts, librarySort),
+    [durationTopPosts, librarySort],
   );
   const activeTopFormat =
     categoryFilters(topPlatform).find((filter) => filter.key === topFormatFilter) ??
     categoryFilters(topPlatform)[0];
-  const activeLibraryFormat =
-    categoryFilters(platform).find((filter) => filter.key === formatFilter) ??
-    categoryFilters(platform)[0];
   const ideaPlan = useMemo(
     () =>
       generateSocialIdeas(historyLoading ? [] : normalizedPosts, {
@@ -928,10 +930,10 @@ export function SocialOS({
     });
     return buildEditorialAnalysisMapForTargets(normalizedPosts, [key]).get(key) ?? null;
   }, [activeDetailsPost, normalizedPosts]);
-  const paginationKey = `${view}:${platform}:${formatFilter}:${librarySort}`;
+  const paginationKey = `${view}:${topDuration}:${librarySort}`;
   const visiblePostCount =
     postPagination.key === paginationKey ? postPagination.count : POSTS_PAGE_SIZE;
-  const visiblePosts = filteredPosts.slice(0, visiblePostCount);
+  const visiblePosts = allPlatformPosts.slice(0, visiblePostCount);
 
   const chooseTopPlatform = (target: Platform) => {
     setView("top");
@@ -1107,25 +1109,45 @@ export function SocialOS({
             <div className="nav-group" key={group}>
               <div className="nav-label">{group}</div>
               {NAV.filter((item) => item.group === group).map((item) => {
-                const isTopItem = item.id === "top";
-                const isTopSection = isTopItem && view === "top";
-                const isActive = view === item.id && !isTopItem;
-                const isSectionActive = isTopSection;
+                const isPostsParent = item.id === "top";
+                const isRecommendationsParent = item.id === "ideas";
+                const navSection = isPostsParent
+                  ? "posts"
+                  : isRecommendationsParent
+                    ? "recommendations"
+                    : null;
+                const isExpanded = navSection === expandedNavSection;
+                const isRecommendationsView = view === "ideas" || view === "comments" || view === "trends";
+                const isActive = isPostsParent
+                  ? view === "all"
+                  : !isRecommendationsParent && view === item.id;
+                const isSectionActive = isPostsParent
+                  ? view === "top"
+                  : isRecommendationsParent && isRecommendationsView;
 
                 return (
                   <div
-                    className={`nav-entry ${isTopItem ? "has-children" : ""}`}
+                    className={`nav-entry ${navSection ? "has-children" : ""} ${isExpanded ? "expanded" : ""}`}
                     key={item.id}
                   >
                     <button
                       className={isActive ? "active" : isSectionActive ? "section-active" : ""}
                       type="button"
                       aria-current={isActive ? "page" : undefined}
-                      aria-label={isTopItem ? "Meilleurs posts par plateforme et catégorie" : undefined}
+                      aria-expanded={navSection ? isExpanded : undefined}
+                      aria-controls={isPostsParent
+                        ? "posts-platform-subnav"
+                        : isRecommendationsParent
+                          ? "recommendations-subnav"
+                          : undefined}
+                      aria-label={isPostsParent ? "Tous les posts, toutes plateformes confondues" : undefined}
                       onClick={() => {
-                        if (item.id === "top") {
-                          setView("top");
-                          setMobileOpen(false);
+                        if (isPostsParent) {
+                          setView("all");
+                          return;
+                        }
+                        if (isRecommendationsParent) {
+                          setView("ideas");
                           return;
                         }
 
@@ -1135,19 +1157,23 @@ export function SocialOS({
                     >
                       <span className="nav-emoji">{item.emoji}</span>
                       <span className="nav-text">{item.label}</span>
-                      {isTopItem ? (
+                      {isPostsParent ? (
                         <span className="nav-count">{navCount(item.id)}</span>
-                      ) : navCount(item.id) !== undefined ? (
+                      ) : !isRecommendationsParent && navCount(item.id) !== undefined ? (
                         <span className="nav-count">{navCount(item.id)}</span>
+                      ) : null}
+                      {navSection ? (
+                        <span className="nav-caret" aria-hidden="true">⌄</span>
                       ) : null}
                     </button>
 
-                    {isTopItem ? (
+                    {isPostsParent ? (
                       <div
                         className="nav-submenu"
-                        id="top-platform-subnav"
+                        id="posts-platform-subnav"
                         role="group"
-                        aria-label="Plateformes des meilleurs posts"
+                        aria-label="Plateformes de Tous les posts"
+                        hidden={!isExpanded}
                       >
                         {PLATFORM_ORDER.map((key) => {
                           const meta = PLATFORM_META[key];
@@ -1166,6 +1192,38 @@ export function SocialOS({
                               <span className="nav-emoji">{meta.emoji}</span>
                               <span className="nav-text">{meta.label}</span>
                               <span className="nav-count">{count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+
+                    {isRecommendationsParent ? (
+                      <div
+                        className="nav-submenu"
+                        id="recommendations-subnav"
+                        role="group"
+                        aria-label="Types de recommandations"
+                        hidden={!isExpanded}
+                      >
+                        {RECOMMENDATION_NAV.map((child) => {
+                          const isChildActive = view === child.id;
+                          return (
+                            <button
+                              className={isChildActive ? "active" : ""}
+                              type="button"
+                              aria-current={isChildActive ? "page" : undefined}
+                              onClick={() => {
+                                setView(child.id);
+                                setMobileOpen(false);
+                              }}
+                              key={child.id}
+                            >
+                              <span className="nav-emoji">{child.emoji}</span>
+                              <span className="nav-text">{child.label}</span>
+                              {navCount(child.id) !== undefined ? (
+                                <span className="nav-count">{navCount(child.id)}</span>
+                              ) : null}
                             </button>
                           );
                         })}
@@ -1250,7 +1308,7 @@ export function SocialOS({
         {workspace && view === "ideas" ? (
           <div className="recommendations-view">
             <header className="recommendations-heading">
-              <h2>Recommandations</h2>
+              <h2>Posts recommandés</h2>
             </header>
 
             <div className="reco-controlbar">
@@ -1301,7 +1359,7 @@ export function SocialOS({
             {historyLoading || !editorialWorkflowReady ? (
               <HistoryLoadingState
                 loadedPlatformCount={loadedPlatformCount}
-                label="Génération des recommandations à partir de l’historique complet"
+                label="Génération des posts recommandés à partir de l’historique complet"
               />
             ) : visibleIdeas.length ? (
               <div className="reco-grid">
@@ -1320,8 +1378,8 @@ export function SocialOS({
             ) : (
               <div className="empty-state reco-empty-state">
                 <span>🧭</span>
-                <h3>Aucune recommandation dans ce filtre</h3>
-                <p>Affiche un autre état pour retrouver les recommandations.</p>
+                <h3>Aucun post recommandé dans ce filtre</h3>
+                <p>Affiche un autre état pour retrouver les propositions.</p>
                 <button
                   className="button secondary"
                   type="button"
@@ -1329,7 +1387,7 @@ export function SocialOS({
                     setIdeaStatusFilter("pending");
                   }}
                 >
-                  Voir les recommandations à valider
+                  Voir les posts à valider
                 </button>
               </div>
             )}
@@ -1484,67 +1542,58 @@ export function SocialOS({
         ) : null}
 
         {workspace && view === "all" ? (
-          <div className="view-stack">
-            <div className="toolbar social-toolbar">
-              <div className="filter-tabs" aria-label="Filtrer par plateforme">
-                {PLATFORM_ORDER.map((key) => (
-                  <button
-                    className={platform === key ? "active" : ""}
-                    type="button"
-                    key={key}
-                    onClick={() => {
-                      setPlatform(key);
-                      setFormatFilter(DEFAULT_FORMAT_FILTER[key]);
-                    }}
-                  >
-                    {PLATFORM_META[key].emoji} {PLATFORM_META[key].label}
-                  </button>
-                ))}
+          <div className="view-stack all-posts-view">
+            <section className="top-ranking-controls tone-all all-posts-controls" aria-label="Contrôles de tous les posts">
+              <div className="all-posts-heading">
+                <span className="section-kicker">Toutes plateformes confondues</span>
+                <h2>🌐 Tous les posts</h2>
               </div>
-              <div className="format-filter-tabs library-sort-tabs" role="group" aria-label="Trier les publications de la catégorie">
-                <button className={librarySort === "popular" ? "active" : ""} type="button" aria-pressed={librarySort === "popular"} onClick={() => setLibrarySort("popular")}>
-                  🏆 Plus populaire
-                </button>
-                <button className={librarySort === "recent" ? "active" : ""} type="button" aria-pressed={librarySort === "recent"} onClick={() => setLibrarySort("recent")}>
-                  🗓️ Plus récent
-                </button>
-              </div>
-            </div>
 
-            <div
-              className="format-filter-tabs all-format-filters"
-              role="group"
-              aria-label={`Catégories ${PLATFORM_META[platform].label}`}
-            >
-                {categoryFilters(platform).map((filter) => (
-                  <button
-                    className={formatFilter === filter.key ? "active" : ""}
-                    type="button"
-                    aria-pressed={formatFilter === filter.key}
-                    onClick={() => setFormatFilter(filter.key)}
-                    key={filter.key}
-                  >
-                    {filter.emoji} {filter.label}
+              <div className="top-duration-control-row">
+                <span className="section-kicker">Durée</span>
+                <div className="format-filter-tabs top-duration-tabs" aria-label="Filtrer tous les posts par durée">
+                  {SOCIAL_DURATION_FILTERS.map((option) => (
+                    <button
+                      className={topDuration === option.key ? "active" : ""}
+                      type="button"
+                      aria-pressed={topDuration === option.key}
+                      onClick={() => setTopDuration(option.key)}
+                      key={option.key}
+                    >
+                      {option.emoji} {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="top-sort-control-row">
+                <span className="section-kicker">Trier</span>
+                <div className="format-filter-tabs library-sort-tabs" role="group" aria-label="Trier tous les posts">
+                  <button className={librarySort === "popular" ? "active" : ""} type="button" aria-pressed={librarySort === "popular"} onClick={() => setLibrarySort("popular")}>
+                    🏆 Plus populaire
                   </button>
-                ))}
-            </div>
+                  <button className={librarySort === "recent" ? "active" : ""} type="button" aria-pressed={librarySort === "recent"} onClick={() => setLibrarySort("recent")}>
+                    🗓️ Plus récent
+                  </button>
+                </div>
+              </div>
+            </section>
 
             <section
-              className={`category-results tone-${PLATFORM_META[platform].tone}`}
-              aria-labelledby="library-category-title"
+              className="category-results tone-all"
+              aria-labelledby="all-posts-title"
             >
               <header className="category-results-header">
                 <div>
-                  <span className="section-kicker">Catégorie active</span>
-                  <h2 id="library-category-title">
-                    {activeLibraryFormat?.emoji ?? "📂"} {PLATFORM_META[platform].label} · {activeLibraryFormat?.label ?? formatFilter}
-                  </h2>
+                  <span className="section-kicker">Classement global</span>
+                  <h2 id="all-posts-title">🏆 YouTube · Instagram · TikTok · X</h2>
                 </div>
+                <span>{formatNumber(allPlatformPosts.length)} posts</span>
               </header>
 
-              {filteredPosts.length ? (
+              {allPlatformPosts.length ? (
                 <>
-                  <div className="post-list-grid">
+                  <div className="post-grid top-ranking-grid all-platform-ranking-grid">
                     {visiblePosts.map((post, index) => (
                       <PostCard
                         post={post}
@@ -1557,10 +1606,10 @@ export function SocialOS({
                       />
                     ))}
                   </div>
-                  {visiblePosts.length < filteredPosts.length ? (
+                  {visiblePosts.length < allPlatformPosts.length ? (
                     <div className="progressive-pagination">
                       <span>
-                        {visiblePosts.length} sur {filteredPosts.length} contenus affichés
+                        {visiblePosts.length} sur {allPlatformPosts.length} posts affichés
                       </span>
                       <button
                         className="button ghost"
@@ -1572,16 +1621,16 @@ export function SocialOS({
                           })
                         }
                       >
-                        Afficher {Math.min(POSTS_PAGE_SIZE, filteredPosts.length - visiblePosts.length)} de plus ↓
+                        Afficher {Math.min(POSTS_PAGE_SIZE, allPlatformPosts.length - visiblePosts.length)} de plus ↓
                       </button>
                     </div>
                   ) : null}
                 </>
               ) : (
                 <div className="empty-state">
-                  <span>{formatFilter === "comment" ? "💭" : "🔎"}</span>
-                  <h3>Aucun contenu pour cette catégorie</h3>
-                  <p>{formatEmptyCopy(platform, formatFilter)}</p>
+                  <span>🔎</span>
+                  <h3>Aucun post disponible</h3>
+                  <p>Le prochain relevé remplira ce classement toutes plateformes confondues.</p>
                   <button className="button ghost" type="button" onClick={() => setView("sources")}>
                     Voir les limites →
                   </button>

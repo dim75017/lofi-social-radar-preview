@@ -6,15 +6,15 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 ## Fonctionnalités
 
-- Navigation interactive : Tableau de bord, meilleurs posts, commentaires, tendances, recommandations et roadmap.
+- Navigation interactive : Tableau de bord, « Tous les posts » dépliable par plateforme, « Recommandations » dépliable en Posts recommandés, Commentaires et Trends, puis Roadmap.
 - Veille « Commentaires » : vidéos virales repérées sur YouTube, Instagram, TikTok et X, classées par potentiel éditorial. Chaque carte propose trois réactions courtes dans la voix de Lofi Girl (drôle, smart et complice), avec lecture du post, copie en un clic et file locale « à commenter / fait / passé ». Le passage de veille est programmé toutes les six heures ; le radar ne publie jamais un commentaire automatiquement.
 - Tableau de bord audience : total de followers, évolution issue de relevés réels et taux d’engagement comparable par plateforme. Un filtre commun pilote les deux indicateurs sur 30 jours (vue par défaut), 3 mois, 6 mois, 1 an ou All time. L’engagement utilise tous les posts mesurables publiés dans la fenêtre sélectionnée ; l’évolution des followers repose uniquement sur les observations réellement collectées, sans interpolation ni remplacement des valeurs absentes par zéro.
 - Catalogue public de **910 contenus visibles** au 4 août 2026 : 519 YouTube (319 Shorts + 200 posts Communauté), 386 TikTok et 5 X.
-- « Meilleurs posts » impose toujours une plateforme et une catégorie actives : aucun filtre « Tous » ne mélange les formats. Les contenus sont triés par likes publics décroissants dans chaque catégorie ; les Shorts utilisent provisoirement les vues, car leurs likes ne sont pas présents dans le snapshot public actuel.
-- Le filtre de durée (7 jours, 30 jours, 3 mois, 6 mois, 1 an ou All time) et la recherche restent disponibles. Le score analytique composite demeure réservé aux analyses et aux idées ; il n’ordonne plus la liste visible.
+- « Tous les posts » ouvre par défaut le classement global YouTube, Instagram, TikTok et X. Son dépliant permet ensuite d’ouvrir une plateforme et ses catégories propres. Les contenus sont triés par likes publics décroissants ; les vues servent uniquement quand les likes ne sont pas disponibles.
+- Le filtre de durée (30 jours, 3 mois, 6 mois, 1 an ou All time) et le tri populaire/récent restent disponibles. Le score analytique composite demeure réservé aux analyses et aux idées ; il n’ordonne plus la liste visible.
 - Moteur d’idées explicable : chaque proposition cite les posts sources, le signal observé, le hook, le format et les déclinaisons YouTube, Instagram, TikTok et X.
 - Décisions éditoriales locales : « À produire », « À retravailler » ou « Écarter ».
-- Recherche, catégories et sous-catégories de plateformes entièrement interactives. Les aperçus média sont carrés : un clic sur un TikTok ou un Short lance directement le lecteur, un clic sur une image ouvre une grande preview, et les posts texte n’affichent aucune fausse vignette. Le classement Meilleurs posts n’est ni tronqué ni paginé.
+- Catégories et sous-catégories de plateformes entièrement interactives. Les aperçus média sont carrés : un clic sur un TikTok ou un Short lance directement le lecteur, un clic sur une image ouvre une grande preview, et les posts texte n’affichent aucune fausse vignette. La vue globale charge progressivement tout l’historique pour rester rapide.
 - Interface responsive alignée sur les Radars YouTube et Spotify, avec assets officiels Lofi Girl uniquement.
 
 ## Couverture des données publiques
