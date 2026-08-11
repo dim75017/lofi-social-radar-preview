@@ -2,14 +2,22 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
+  assertPublishableSocialTrendFeed,
   assertSocialTrendFeed,
   filterSocialTrends,
   isActionableSocialTrend,
   isQualifiedTrendReferencePost,
   MAX_TREND_VIDEO_DURATION_SECONDS,
   MIN_ACTIONABLE_TREND_LOFI_FIT,
+  MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  MIN_PUBLISHABLE_LOFI_GIRL_SHARE,
   MIN_TREND_VIDEO_LIKES,
   rankSocialTrends,
+  selectGirlFirstSocialTrends,
+  TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS,
+  TREND_PUBLISH_MAX_AGE_HOURS,
+  TREND_REFRESH_CADENCE_HOURS,
+  TREND_STEADY_MAX_VERIFICATION_AGE_HOURS,
   TREND_PRIORITY_THRESHOLD,
   trendPriorityScore,
 } from "../lib/social-trends.ts";
@@ -63,12 +71,50 @@ function cloneWithFirstNonVideoReferencePost() {
   return { snapshot, trend, referencePost: trend.referencePost };
 }
 
+function syncRefreshCounts(snapshot) {
+  const actionable = snapshot.trends.filter(isActionableSocialTrend);
+  const lofiGirl = actionable.filter(
+    (trend) => trend.character === "lofi-girl",
+  ).length;
+  snapshot.refresh.counts.actionable = actionable.length;
+  snapshot.refresh.counts.lofiGirl = lofiGirl;
+  snapshot.refresh.counts.lofiBoy = actionable.length - lofiGirl;
+  return snapshot;
+}
+
+function shortlyAfterCapture(snapshot = feed) {
+  return new Date(Date.parse(snapshot.capturedAt) + 60_000);
+}
+
 test("the current snapshot is complete, sourced and honest about missing metrics", () => {
   assert.equal(assertSocialTrendFeed(feed), feed);
-  assert.equal(feed.version, 4);
+  assert.equal(feed.version, 5);
+  assert.equal(feed.refresh.cadenceHours, TREND_REFRESH_CADENCE_HOURS);
+  assert.ok(
+    feed.refresh.runId === null || feed.refresh.runId.trim().length > 0,
+  );
+  assert.ok(
+    feed.refresh.runUrl === null ||
+      new URL(feed.refresh.runUrl).protocol === "https:",
+  );
+  assert.ok(feed.refresh.sourceChecks.length > 0);
+  assert.equal(
+    feed.refresh.counts.checkedSources,
+    feed.refresh.sourceChecks.filter((check) => check.status === "success").length,
+  );
+  assert.equal(
+    feed.refresh.counts.matchedSignals,
+    feed.refresh.sourceChecks
+      .filter((check) => check.status === "success")
+      .reduce((total, check) => total + check.candidatesMatched, 0),
+  );
   assert.ok(Date.parse(feed.capturedAt) >= Date.parse("2026-08-10T00:00:00+02:00"));
-  assert.ok(feed.trends.length >= 30);
+  assert.ok(feed.trends.length >= MIN_PUBLISHABLE_ACTIONABLE_TRENDS);
   assert.equal(new Set(feed.trends.map((trend) => trend.id)).size, feed.trends.length);
+  assert.equal(
+    new Set(feed.trends.map((trend) => trend.trendKey.toLowerCase())).size,
+    feed.trends.length,
+  );
 
   const trendsWithReference = feed.trends.filter((trend) => trend.referencePost !== null);
   const trendsWithoutReference = feed.trends.filter((trend) => trend.referencePost === null);
@@ -77,8 +123,20 @@ test("the current snapshot is complete, sourced and honest about missing metrics
 
   for (const trend of feed.trends) {
     assert.ok(["lofi-girl", "lofi-boy"].includes(trend.character), trend.id);
+    assert.ok(trend.trendKey.trim().length > 0, trend.id);
+    assert.ok(trend.clusterKey.trim().length > 0, trend.id);
     assert.ok(trend.territory.trim().length > 0, trend.id);
+    assert.ok(Date.parse(trend.firstSeenAt) <= Date.parse(trend.lastVerifiedAt), trend.id);
+    assert.ok(Date.parse(trend.lastVerifiedAt) <= Date.parse(feed.capturedAt), trend.id);
     assert.ok(trend.observations.length >= 1, trend.id);
+    assert.ok(
+      trend.observations.every(
+        (observation) =>
+          Date.parse(observation.observedAt) >= Date.parse(trend.firstSeenAt) &&
+          Date.parse(observation.observedAt) <= Date.parse(trend.lastVerifiedAt),
+      ),
+      trend.id,
+    );
     assert.deepEqual(
       new Set(trend.proposals.map((proposal) => proposal.tone)),
       new Set(["complice", "cozy", "absurde"]),
@@ -111,11 +169,16 @@ test("the current snapshot is complete, sourced and honest about missing metrics
     }
     assert.ok(Number.isFinite(Date.parse(referencePost.capturedAt)), trend.id);
     assert.ok(
-      Date.parse(referencePost.capturedAt) <= Date.parse(feed.capturedAt),
+      Date.parse(referencePost.capturedAt) >= Date.parse(trend.firstSeenAt) &&
+        Date.parse(referencePost.capturedAt) <= Date.parse(trend.lastVerifiedAt),
       trend.id,
     );
     if (referencePost.publishedAt !== null) {
       assert.ok(Number.isFinite(Date.parse(referencePost.publishedAt)), trend.id);
+      assert.ok(
+        Date.parse(referencePost.publishedAt) <= Date.parse(feed.capturedAt),
+        trend.id,
+      );
     }
     for (const metric of Object.values(referencePost.metrics)) {
       assert.ok(
@@ -166,7 +229,10 @@ test("the current snapshot is complete, sourced and honest about missing metrics
 
 test("the actionable feed keeps only strong, qualified Lofi-universe executions", () => {
   const actionable = feed.trends.filter(isActionableSocialTrend);
-  assert.ok(actionable.length >= 25, "the feed must expose at least 25 actionable trends");
+  assert.ok(
+    actionable.length >= MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+    "the feed must expose at least 50 actionable trends",
+  );
   assert.ok(
     actionable.every((trend) => trend.lofiFitScore >= MIN_ACTIONABLE_TREND_LOFI_FIT),
     "every actionable trend must clear the Lofi-fit threshold",
@@ -175,14 +241,20 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     actionable.every((trend) => isQualifiedTrendReferencePost(trend.referencePost)),
     "every actionable trend must keep a qualified reference post",
   );
+  assert.ok(
+    actionable.every(
+      (trend) =>
+        trend.lifecycle !== "watch" &&
+        trend.referencePost?.mediaType !== "unknown",
+    ),
+    "watch and unknown-media trends must stay outside the actionable feed",
+  );
 
   for (const rejectedId of [
-    "pain-oh-no-spain",
-    "choosin-texas-western-reveal",
-    "ss26-editorial-transition",
-    "dracula-jennie-remix",
-    "eurosummer-micro-montage",
-    "is-it-cake-or-fake",
+    "back-to-school-study-reset",
+    "notes-study-france",
+    "eclipse-perseides-12-aout",
+    "couch-acting-challenge",
   ]) {
     const trend = feed.trends.find((candidate) => candidate.id === rejectedId);
     assert.ok(trend, `${rejectedId} must remain auditable in the snapshot`);
@@ -237,6 +309,231 @@ test("the actionable Lofi-fit threshold changes exactly between 84 and 85", () =
   const atThreshold = structuredClone(qualified);
   atThreshold.lofiFitScore = 85;
   assert.equal(isActionableSocialTrend(atThreshold), true);
+});
+
+test("watch lifecycle and unknown media can never become actionable", () => {
+  const actionable = feed.trends.find(isActionableSocialTrend);
+  assert.ok(actionable?.referencePost, "the fixture must contain an actionable trend");
+
+  const watch = structuredClone(actionable);
+  watch.lifecycle = "watch";
+  assert.equal(isActionableSocialTrend(watch), false);
+
+  const unknown = structuredClone(actionable);
+  unknown.referencePost.mediaType = "unknown";
+  unknown.referencePost.durationSeconds = null;
+  assert.equal(isQualifiedTrendReferencePost(unknown.referencePost), false);
+  assert.equal(isActionableSocialTrend(unknown), false);
+});
+
+test("the v5 refresh proof is internally consistent and nullable outside GitHub", () => {
+  assert.equal(feed.refresh.cadenceHours, TREND_REFRESH_CADENCE_HOURS);
+  assert.ok(feed.refresh.sourceChecks.every((check) =>
+    Date.parse(check.checkedAt) >= Date.parse(feed.refresh.lastAttemptAt) &&
+    Date.parse(check.checkedAt) <= Date.parse(feed.capturedAt)
+  ));
+
+  const withoutRunUrl = structuredClone(feed);
+  withoutRunUrl.refresh.runUrl = null;
+  assert.equal(assertSocialTrendFeed(withoutRunUrl), withoutRunUrl);
+
+  const invalidRunUrl = structuredClone(feed);
+  invalidRunUrl.refresh.runUrl = "not-a-run-url";
+  assert.throws(() => assertSocialTrendFeed(invalidRunUrl), /snapshot trends invalide/i);
+
+  const invalidCheckedCount = structuredClone(feed);
+  invalidCheckedCount.refresh.counts.checkedSources += 1;
+  assert.throws(() => assertSocialTrendFeed(invalidCheckedCount), /compteurs/i);
+
+  const duplicateCheck = structuredClone(feed);
+  assert.ok(duplicateCheck.refresh.sourceChecks.length >= 2);
+  duplicateCheck.refresh.sourceChecks[1].id = duplicateCheck.refresh.sourceChecks[0].id;
+  assert.throws(() => assertSocialTrendFeed(duplicateCheck), /source trends invalide/i);
+});
+
+test("the publishable contract requires a fresh daily run and 50 verified trends", () => {
+  assert.equal(
+    assertPublishableSocialTrendFeed(feed, { now: shortlyAfterCapture() }),
+    feed,
+  );
+
+  const staleNow = new Date(
+    Date.parse(feed.capturedAt) +
+      TREND_PUBLISH_MAX_AGE_HOURS * 60 * 60 * 1_000 +
+      1,
+  );
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(feed, { now: staleNow }),
+    /fra|26 h/i,
+  );
+
+  const degraded = structuredClone(feed);
+  degraded.refresh.status = "degraded";
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(degraded, { now: shortlyAfterCapture(degraded) }),
+    /pas complet/i,
+  );
+
+  const tooSmall = structuredClone(feed);
+  const actionable = tooSmall.trends.filter(isActionableSocialTrend);
+  for (const trend of actionable.slice(MIN_PUBLISHABLE_ACTIONABLE_TRENDS - 1)) {
+    trend.lofiFitScore = 0;
+  }
+  syncRefreshCounts(tooSmall);
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(tooSmall, { now: shortlyAfterCapture(tooSmall) }),
+    /50 trends/i,
+  );
+});
+
+test("the top 50 is Girl-first while keeping real priority scores unchanged", () => {
+  const actionable = feed.trends.filter(isActionableSocialTrend);
+  const scoresBefore = new Map(
+    actionable.map((trend) => [trend.id, trendPriorityScore(trend)]),
+  );
+  const selected = selectGirlFirstSocialTrends(
+    actionable,
+    MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  );
+  const girls = selected.filter((trend) => trend.character === "lofi-girl");
+  const boys = selected.filter((trend) => trend.character === "lofi-boy");
+
+  assert.equal(selected.length, MIN_PUBLISHABLE_ACTIONABLE_TRENDS);
+  assert.ok(girls.length / selected.length >= MIN_PUBLISHABLE_LOFI_GIRL_SHARE);
+  assert.equal(selected[0].character, "lofi-girl");
+  if (boys.length > 0) {
+    assert.equal(selected.slice(0, 5).filter((trend) => trend.character === "lofi-girl").length, 4);
+    assert.equal(selected[4].character, "lofi-boy");
+  }
+  for (const character of ["lofi-girl", "lofi-boy"]) {
+    const universe = selected.filter((trend) => trend.character === character);
+    assert.ok(
+      universe.every(
+        (trend, index) =>
+          index === 0 ||
+          trendPriorityScore(universe[index - 1]) >= trendPriorityScore(trend),
+      ),
+      `${character} must keep its internal score order`,
+    );
+  }
+  assert.ok(
+    selected.every(
+      (trend) => scoresBefore.get(trend.id) === trendPriorityScore(trend),
+    ),
+    "Girl-first selection must not mutate or inflate any score",
+  );
+});
+
+test("publishable validation rejects a Girl-minority top, stale cards and duplicate native references", () => {
+  const tooFewGirls = structuredClone(feed);
+  const girlActionables = tooFewGirls.trends.filter(
+    (trend) =>
+      trend.character === "lofi-girl" && isActionableSocialTrend(trend),
+  );
+  for (const trend of girlActionables.slice(39)) {
+    trend.character = "lofi-boy";
+  }
+  syncRefreshCounts(tooFewGirls);
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(tooFewGirls, { now: shortlyAfterCapture(tooFewGirls) }),
+    /80 % de Lofi Girl/i,
+  );
+
+  const staleCard = structuredClone(feed);
+  const staleTrend = staleCard.trends.find(
+    (trend) =>
+      trend.lifecycle !== "steady" && isActionableSocialTrend(trend),
+  );
+  assert.ok(staleTrend?.referencePost);
+  const staleVerifiedAt = new Date(
+    Date.parse(staleCard.capturedAt) -
+      (TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS + 1) * 60 * 60 * 1_000,
+  ).toISOString();
+  staleTrend.firstSeenAt = new Date(
+    Date.parse(staleVerifiedAt) - 24 * 60 * 60 * 1_000,
+  ).toISOString();
+  staleTrend.lastVerifiedAt = staleVerifiedAt;
+  staleTrend.referencePost.capturedAt = staleVerifiedAt;
+  for (const observation of staleTrend.observations) {
+    observation.observedAt = staleVerifiedAt;
+  }
+  assert.equal(assertSocialTrendFeed(staleCard), staleCard);
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(staleCard, { now: shortlyAfterCapture(staleCard) }),
+    /trop ancienne|72 h/i,
+  );
+
+  const steadyBoundary = structuredClone(feed);
+  const steadyTrend = steadyBoundary.trends.find(
+    (trend) =>
+      trend.lifecycle === "steady" && isActionableSocialTrend(trend),
+  );
+  assert.ok(steadyTrend?.referencePost);
+  const steadyNow = shortlyAfterCapture(steadyBoundary);
+  const steadyVerifiedAt = new Date(
+    steadyNow.getTime() -
+      TREND_STEADY_MAX_VERIFICATION_AGE_HOURS * 60 * 60 * 1_000,
+  ).toISOString();
+  steadyTrend.firstSeenAt = new Date(
+    Date.parse(steadyVerifiedAt) - 24 * 60 * 60 * 1_000,
+  ).toISOString();
+  steadyTrend.lastVerifiedAt = steadyVerifiedAt;
+  steadyTrend.referencePost.capturedAt = steadyVerifiedAt;
+  for (const observation of steadyTrend.observations) {
+    observation.observedAt = steadyVerifiedAt;
+  }
+  assert.equal(
+    assertPublishableSocialTrendFeed(steadyBoundary, { now: steadyNow }),
+    steadyBoundary,
+  );
+
+  const expiredSteady = structuredClone(steadyBoundary);
+  const expiredSteadyTrend = expiredSteady.trends.find(
+    (trend) => trend.id === steadyTrend.id,
+  );
+  assert.ok(expiredSteadyTrend?.referencePost);
+  const expiredAt = new Date(Date.parse(steadyVerifiedAt) - 1).toISOString();
+  expiredSteadyTrend.firstSeenAt = new Date(
+    Date.parse(expiredAt) - 24 * 60 * 60 * 1_000,
+  ).toISOString();
+  expiredSteadyTrend.lastVerifiedAt = expiredAt;
+  expiredSteadyTrend.referencePost.capturedAt = expiredAt;
+  for (const observation of expiredSteadyTrend.observations) {
+    observation.observedAt = expiredAt;
+  }
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(expiredSteady, { now: steadyNow }),
+    /trop ancienne|336 h/i,
+  );
+
+  const duplicateReference = structuredClone(feed);
+  const samePlatformPair = duplicateReference.trends
+    .filter(isActionableSocialTrend)
+    .map((trend, index, trends) => [
+      trend,
+      trends.slice(index + 1).find(
+        (candidate) =>
+          candidate.referencePost.platform === trend.referencePost.platform,
+      ),
+    ])
+    .find((pair) => pair[1]);
+  assert.ok(samePlatformPair);
+  samePlatformPair[1].referencePost.url = `${samePlatformPair[0].referencePost.url}?utm_source=duplicate`;
+  assert.equal(assertSocialTrendFeed(duplicateReference), duplicateReference);
+  assert.throws(
+    () => assertPublishableSocialTrendFeed(duplicateReference, { now: shortlyAfterCapture(duplicateReference) }),
+    /dupliqu/i,
+  );
+});
+
+test("v5 validation rejects duplicate trend keys and future trend observations", () => {
+  const duplicateTrendKey = structuredClone(feed);
+  duplicateTrendKey.trends[1].trendKey = duplicateTrendKey.trends[0].trendKey.toUpperCase();
+  assert.throws(() => assertSocialTrendFeed(duplicateTrendKey), /cl.*trend.*dupliqu/i);
+
+  const futureObservation = structuredClone(feed);
+  futureObservation.trends[0].observations[0].observedAt = "2100-01-01T00:00:00.000Z";
+  assert.throws(() => assertSocialTrendFeed(futureObservation), /observation invalide/i);
 });
 
 test("runtime validation rejects an unknown lifecycle and an unverifiable source", () => {

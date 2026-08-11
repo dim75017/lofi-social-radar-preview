@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "cadenceHours": 24,
+  "lastAttemptAt": "2026-08-11T08:21:04.282Z",
+  "lastSuccessfulAt": "2026-08-11T08:21:04.282Z",
+  "nextScheduledAt": "2026-08-12T08:21:04.282Z",
+  "status": "success",
+  "runId": "local-2026-08-11",
+  "runUrl": null,
+  "sourceChecks": [
+    {
+      "id": "buffer-tiktok",
+      "label": "Buffer · TikTok",
+      "platform": "tiktok",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 15
+    },
+    {
+      "id": "later-instagram",
+      "label": "Later · Instagram Reels",
+      "platform": "instagram",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 16
+    },
+    {
+      "id": "socialpilot-tiktok",
+      "label": "SocialPilot · TikTok",
+      "platform": "tiktok",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 21
+    },
+    {
+      "id": "socialpilot-instagram",
+      "label": "SocialPilot · Instagram Reels",
+      "platform": "instagram",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 21
+    },
+    {
+      "id": "tokchart-public",
+      "label": "Tokchart · sons TikTok",
+      "platform": "tiktok",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 2
+    },
+    {
+      "id": "youtube-shorts-daily",
+      "label": "TrendVideosHub · YouTube Shorts",
+      "platform": "youtube",
+      "status": "success",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 8
+    },
+    {
+      "id": "x-france-trends",
+      "label": "X · tendances France",
+      "platform": "x",
+      "status": "failed",
+      "checkedAt": "2026-08-11T08:21:04.282Z",
+      "candidatesMatched": 0
+    }
+  ],
+  "counts": {
+    "checkedSources": 6,
+    "matchedSignals": 83,
+    "actionable": 50,
+    "lofiGirl": 42,
+    "lofiBoy": 8
+  },
+  "message": "Rafraîchissement quotidien publié après validation complète."
+}

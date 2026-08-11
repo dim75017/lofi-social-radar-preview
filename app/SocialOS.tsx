@@ -50,6 +50,7 @@ import {
   filterSocialTrends,
   isActionableSocialTrend,
   latestTrendObservation,
+  selectGirlFirstSocialTrends,
   trendPriorityScore,
   type SocialTrend,
   type SocialTrendFeed,
@@ -535,6 +536,19 @@ function formatCardPublishedDate(value: string | null | undefined): string | nul
     month: "2-digit",
     year: "numeric",
   }).format(date);
+}
+
+function formatTrendRefreshDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return `Actualisé le ${new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)}`;
 }
 
 export function SocialOS({
@@ -1762,34 +1776,64 @@ function TrendFeedView({
   const [platformFilter, setPlatformFilter] = useState<TrendPlatformFilter>("all");
   const [characterFilter, setCharacterFilter] = useState<TrendCharacterFilter>("all");
   const [activeTrend, setActiveTrend] = useState<SocialTrend | null>(null);
+  const [refreshIsLate, setRefreshIsLate] = useState(false);
   const actionableTrends = useMemo(
     () => (feed?.trends ?? []).filter(isActionableSocialTrend),
     [feed?.trends],
   );
   const visibleTrends = useMemo(
-    () =>
-      filterSocialTrends(actionableTrends, {
+    () => {
+      const filtered = filterSocialTrends(actionableTrends, {
         platform: platformFilter,
         character: characterFilter,
-      }),
+      });
+      return characterFilter === "all"
+        ? selectGirlFirstSocialTrends(filtered, filtered.length)
+        : filtered;
+    },
     [actionableTrends, characterFilter, platformFilter],
   );
-  const snapshotDate = formatCardPublishedDate(feed?.capturedAt);
+  const refreshDate = formatTrendRefreshDate(feed?.refresh.lastSuccessfulAt);
+
+  useEffect(() => {
+    const updateFreshness = () => {
+      const refreshTimestamp = feed
+        ? Date.parse(feed.refresh.lastSuccessfulAt)
+        : Number.NaN;
+      setRefreshIsLate(Boolean(
+        feed &&
+          (!Number.isFinite(refreshTimestamp) ||
+            Date.now() - refreshTimestamp > 26 * 60 * 60 * 1_000),
+      ));
+    };
+    updateFreshness();
+    const interval = window.setInterval(updateFreshness, 60 * 60 * 1_000);
+    return () => window.clearInterval(interval);
+  }, [feed]);
 
   return (
     <div className="trend-feed-view">
       <header className="trend-feed-heading">
         <div>
-          <span className="section-kicker">Sélection Lofi Girl + Lofi Boy</span>
-          <h2>🔥 Trends vraiment exploitables</h2>
+          <span className="section-kicker">Mise à jour quotidienne · focus Lofi Girl</span>
+          <h2>🔥 50+ trends vraiment exploitables</h2>
           <p>
-            Chaque carte montre un post concret à produire dans le bon univers : étude et quotidien pour Lofi Girl ; gaming, culture geek, introversion et cinéma pour Lofi Boy.
+            Des exemples concrets classés avec Lofi Girl en priorité ; Lofi Boy reste un complément pour le gaming, la culture geek et l’introversion.
           </p>
         </div>
-        {snapshotDate ? (
-          <span className="trend-snapshot-pill">Snapshot {snapshotDate} · 🎯 Fit univers 85+ · ❤️ 50K+ · ⏱️ &lt;30 s</span>
+        {feed && refreshDate ? (
+          <span className={`trend-snapshot-pill ${refreshIsLate ? "is-late" : ""}`}>
+            {refreshIsLate ? "⚠️" : "✅"} {refreshDate} · {actionableTrends.length} trends · {feed.refresh.counts.lofiGirl} Lofi Girl · {feed.refresh.counts.checkedSources} sources
+          </span>
         ) : null}
       </header>
+
+      {refreshIsLate && !error ? (
+        <div className="trend-feed-notice" role="status">
+          <span aria-hidden="true">⚠️</span>
+          <p>La mise à jour quotidienne est en retard. Le dernier feed validé reste affiché sans modifier ses chiffres.</p>
+        </div>
+      ) : null}
 
       <div className="trend-feed-controls" aria-label="Filtres des tendances">
         <div className="trend-filter-group">

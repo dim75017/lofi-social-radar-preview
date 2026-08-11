@@ -1,8 +1,8 @@
 {
-  "version": 4,
-  "capturedAt": "2026-08-10T12:00:00+02:00",
+  "version": 5,
+  "capturedAt": "2026-08-11T08:21:04.282Z",
   "market": "France · signaux francophones et internationaux adaptables",
-  "methodology": "Sélection éditoriale au 10/08/2026 pour les univers Lofi Girl et Lofi Boy / Synthwave Boy : études, quotidien cozy, gaming, culture geek, introversion et cinéma récent. Chaque vidéo de référence possède au moins 50 000 likes publics et une durée vérifiée strictement inférieure à 30 secondes. Les métriques absentes restent nulles et les adaptations forcées sont exclues.",
+  "methodology": "Feed éditorial Lofi Girl-first actualisé chaque jour à partir de signaux TikTok, Instagram, YouTube Shorts et X. Chaque carte garde un exemple natif distinct ; toute vidéo possède au moins 50 000 likes publics et une durée vérifiée strictement inférieure à 30 secondes. Les métriques absentes restent nulles, les signaux faibles restent hors du feed et Lofi Boy demeure un complément minoritaire.",
   "trends": [
     {
       "id": "shakira-at-the-computer",
@@ -90,7 +90,11 @@
           "concept": "Elle prend des notes avec conviction devant un écran noir ; le chat semble être le seul à l’avoir remarqué.",
           "copy": "Locked in. L’écran aussi."
         }
-      ]
+      ],
+      "trendKey": "shakira-at-the-computer",
+      "clusterKey": "meme-template:shakira-at-the-computer",
+      "firstSeenAt": "2026-08-04T21:05:29.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "eclipse-perseides-12-aout",
@@ -174,7 +178,11 @@
           "concept": "Le calendrier indique « éclipse » comme une deadline ; Lofi Girl coche la tâche avec beaucoup trop de sérieux.",
           "copy": "To-do du 12 août : 1. finir le chapitre 2. déplacer la Lune devant le Soleil."
         }
-      ]
+      ],
+      "trendKey": "eclipse-perseides-12-aout",
+      "clusterKey": "moment:eclipse-perseides-du-12-aout",
+      "firstSeenAt": "2026-08-07T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-09T12:00:00.000Z"
     },
     {
       "id": "back-to-school-study-reset",
@@ -245,7 +253,11 @@
           "concept": "Lofi Girl prépare son timer pendant plus longtemps que la session de travail elle-même.",
           "copy": "45 minutes de préparation pour un Pomodoro de 25. Le système est parfaitement optimisé."
         }
-      ]
+      ],
+      "trendKey": "back-to-school-study-reset",
+      "clusterKey": "hashtag:back-to-school-study-reset",
+      "firstSeenAt": "2026-08-10T08:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
     },
     {
       "id": "notes-study-france",
@@ -314,7 +326,11 @@
           "concept": "Chaque nouveau surligneur exige une nouvelle catégorie jusqu’à rendre la légende plus longue que le cours.",
           "copy": "Le code couleur a maintenant besoin de son propre cours."
         }
-      ]
+      ],
+      "trendKey": "notes-study-france",
+      "clusterKey": "hashtag:notes",
+      "firstSeenAt": "2026-08-10T08:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
     },
     {
       "id": "rentree-scolaire-france",
@@ -384,7 +400,11 @@
           "concept": "Lofi Girl choisit solennellement un stylo censé résoudre toute son année.",
           "copy": "J’ai acheté LE stylo. Les diplômes peuvent déjà être imprimés."
         }
-      ]
+      ],
+      "trendKey": "rentree-scolaire-france",
+      "clusterKey": "hashtag:rentreescolaire",
+      "firstSeenAt": "2026-08-10T08:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
     },
     {
       "id": "just-say-here-bro",
@@ -473,7 +493,11 @@
           "concept": "Sa réponse devient une présentation avec graphiques pendant que la classe attend.",
           "copy": "Just say “here”, bro. Pas besoin d’un TED Talk avec bibliographie."
         }
-      ]
+      ],
+      "trendKey": "just-say-here-bro",
+      "clusterKey": "spoken-audio:just-say-here-bro",
+      "firstSeenAt": "2026-07-24T20:28:08.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "twins-at-the-carousel",
@@ -575,7 +599,11 @@
           "concept": "Les mini-versions organisent une réunion autour de Lofi Girl, qui continue à écrire sans réagir.",
           "copy": "Mon cerveau a convoqué un comité. Aucun membre n’a lu l’ordre du jour."
         }
-      ]
+      ],
+      "trendKey": "twins-at-the-carousel",
+      "clusterKey": "sound:twins-at-the-carousel",
+      "firstSeenAt": "2026-06-10T20:06:32.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "freaked-out-list",
@@ -663,7 +691,11 @@
           "concept": "Un faux centre d’aide répond « lance la playlist » à absolument tous les problèmes, même la plante qui penche.",
           "copy": "Avez-vous essayé d’éteindre, de rallumer… puis de mettre du lofi ?"
         }
-      ]
+      ],
+      "trendKey": "freaked-out-list",
+      "clusterKey": "sound:freaked-out",
+      "firstSeenAt": "2026-07-24T07:11:53.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "on-off-switch",
@@ -731,7 +763,11 @@
           "concept": "Le casque déclenche un panneau « pensées parasites hors service » ; le chat essaie aussi le bouton.",
           "copy": "J’ai trouvé l’interrupteur du cerveau. Il était sur le casque."
         }
-      ]
+      ],
+      "trendKey": "on-off-switch",
+      "clusterKey": "format:on-off-switch-transition",
+      "firstSeenAt": "2026-08-07T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-07T12:00:00.000Z"
     },
     {
       "id": "two-personalities",
@@ -820,7 +856,11 @@
           "concept": "Les deux versions organisent un débat télévisé pour choisir entre soirée et sieste.",
           "copy": "Le débat est terminé : nous sortons. Jusqu’au balcon."
         }
-      ]
+      ],
+      "trendKey": "two-personalities",
+      "clusterKey": "spoken-audio:two-personalities",
+      "firstSeenAt": "2025-05-06T17:52:14.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "heatwave-tatooine",
@@ -890,7 +930,11 @@
           "concept": "Un second soleil apparaît ; le chat pose silencieusement une pancarte « je démissionne ».",
           "copy": "Le bulletin météo annonce : soleil, puis son collègue."
         }
-      ]
+      ],
+      "trendKey": "heatwave-tatooine",
+      "clusterKey": "moment:canicule-facon-tatooine",
+      "firstSeenAt": "2026-08-08T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-08T12:00:00.000Z"
     },
     {
       "id": "youll-never-see-it-coming",
@@ -958,7 +1002,11 @@
           "concept": "L’exercice est présenté comme un boss ; Lofi Girl gagne avec l’arme ultime : une gomme.",
           "copy": "You’ll never see it coming. Sauf le prof, qui avait mis la réponse page 38."
         }
-      ]
+      ],
+      "trendKey": "youll-never-see-it-coming",
+      "clusterKey": "spoken-audio:you-ll-never-see-it-coming",
+      "firstSeenAt": "2026-08-06T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-06T12:00:00.000Z"
     },
     {
       "id": "add-more-color",
@@ -1026,16 +1074,20 @@
           "concept": "La couleur augmente trop loin et le chat doit baisser un curseur géant.",
           "copy": "J’ai demandé un peu de couleur. Le service graphique s’est emballé."
         }
-      ]
+      ],
+      "trendKey": "add-more-color",
+      "clusterKey": "format:can-you-add-more-color-to-my-day",
+      "firstSeenAt": "2026-07-31T12:00:00.000Z",
+      "lastVerifiedAt": "2026-07-31T12:00:00.000Z"
     },
     {
       "id": "less-than-a-lover",
-      "title": "Less Than a Lover · mélancolie nocturne",
+      "title": "Notification fantôme · retour au focus",
       "character": "lofi-girl",
-      "territory": "Émotions & quotidien",
+      "territory": "Études · solitude cozy",
       "type": "sound",
-      "summary": "Une ambiance alt-pop estivale accompagne les mini-récits d’hésitation, de notification et de retour à soi.",
-      "mechanic": "Construire une histoire sans dialogue : notification, hésitation, casque remis, retour au bureau.",
+      "summary": "Un message attendu détourne une session nocturne, puis Lofi Girl choisit de remettre son casque et de reprendre son propre rythme.",
+      "mechanic": "Raconter en trois gestes lisibles sans dialogue : téléphone qui s’allume, réponse tapée puis effacée, casque remis au moment où le beat repart.",
       "platforms": [
         "instagram",
         "youtube",
@@ -1050,12 +1102,12 @@
       "lifecycle": "rising",
       "confidence": "medium",
       "momentumScore": 80,
-      "lofiFitScore": 81,
+      "lofiFitScore": 94,
       "saturationRisk": 46,
-      "whyLofi": "Le récit nocturne doux-amer est très compatible avec l’émotion historique de Lofi Girl.",
-      "timing": "Fenêtre encore ouverte, à condition de publier vite.",
-      "production": "Micro-récit original avec animation humaine officielle et éventuelle musique maison.",
-      "caveat": "Utiliser le titre seulement s’il est autorisé sur le compte ; sinon conserver le mécanisme avec un morceau Lofi Girl.",
+      "whyLofi": "La solitude choisie, l’étude de nuit et la notification qui brise la concentration sont déjà au cœur de l’expérience Lofi Girl ; la reprise du casque donne une vraie résolution de marque.",
+      "timing": "À produire cette semaine tant que le récit de notification reste identifiable.",
+      "production": "Animation officielle de 12 à 18 secondes, cadrée sur le bureau, avec la lumière du téléphone comme seul élément perturbateur.",
+      "caveat": "Utiliser l’audio seulement s’il est autorisé sur le compte ; sinon conserver les trois temps avec un morceau Lofi Girl licencié.",
       "referencePost": {
         "platform": "instagram",
         "author": "@craevx_",
@@ -1097,25 +1149,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Vu à 23:48",
-          "concept": "Elle retourne une notification, remet son casque et reprend la session nocturne.",
-          "copy": "Le message auquel je réponds très bien… dans ma tête."
+          "title": "Réponse enregistrée dans ma tête",
+          "concept": "Une notification interrompt sa fiche ; elle écrit trois réponses, les efface, active le mode silencieux et relance son Pomodoro.",
+          "copy": "Le message auquel j’ai parfaitement répondu… sans jamais appuyer sur envoyer."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Retour à soi",
-          "concept": "Après l’hésitation, la lumière de la chambre et la musique ramènent doucement son attention.",
-          "copy": "Il y a des soirs où la meilleure réponse est de revenir doucement à soi."
+          "title": "Revenir à son rythme",
+          "concept": "Le téléphone s’éteint, la pluie reprend sa place dans le cadre et Lofi Girl recommence la ligne abandonnée.",
+          "copy": "Certaines réponses peuvent attendre. Ton calme aussi mérite une notification."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Trois points depuis 40 minutes",
-          "concept": "La bulle « écrit… » reste si longtemps que le chat lui apporte un chargeur.",
-          "copy": "Typing… depuis suffisamment longtemps pour obtenir un diplôme en communication."
+          "title": "Le chat choisit la réponse",
+          "concept": "Après trois messages effacés, le chat s’allonge sur le téléphone et envoie seulement une suite de lettres.",
+          "copy": "J’ai hésité quarante minutes. Mon chat a répondu en 0,4 seconde."
         }
-      ]
+      ],
+      "trendKey": "less-than-a-lover",
+      "clusterKey": "sound:notification-fantome",
+      "firstSeenAt": "2026-07-24T06:17:35.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "ghosting-you-montage",
@@ -1204,7 +1260,11 @@
           "concept": "Chaque objet du bureau est interrogé pour expliquer pourquoi le message est resté sans réponse.",
           "copy": "Le chat invoque son droit au silence. Le café refuse de témoigner."
         }
-      ]
+      ],
+      "trendKey": "ghosting-you-montage",
+      "clusterKey": "spoken-audio:yo-i-ve-been-ghosting-you",
+      "firstSeenAt": "2026-08-07T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "couch-acting-challenge",
@@ -1273,16 +1333,20 @@
           "concept": "La chaise ouvre une trappe où disparaissent les deadlines ; elles remontent aussitôt par l’autre côté.",
           "copy": "J’ai rangé mes deadlines dans un endroit sûr. Elles ont appris à prendre l’ascenseur."
         }
-      ]
+      ],
+      "trendKey": "couch-acting-challenge",
+      "clusterKey": "format:couch-acting-challenge",
+      "firstSeenAt": "2026-08-07T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-07T12:00:00.000Z"
     },
     {
       "id": "meal-swap",
-      "title": "Meal Swap",
+      "title": "Snack swap · pause d’étude",
       "character": "lofi-girl",
-      "territory": "Chat & quotidien",
+      "territory": "Études & communauté",
       "type": "format",
-      "summary": "Deux amis échangent leur repas parce que chacun préfère secrètement la commande de l’autre.",
-      "mechanic": "Lofi Girl et son chat comparent leur café et leur snack, puis échangent avec un sérieux disproportionné.",
+      "summary": "Deux partenaires de révision découvrent qu’ils préfèrent chacun le snack de l’autre et transforment la pause en échange silencieux.",
+      "mechanic": "Poser deux snacks de part et d’autre du bureau, montrer les regards croisés, puis faire glisser les deux assiettes exactement sur le beat.",
       "platforms": [
         "instagram",
         "tiktok",
@@ -1297,12 +1361,12 @@
       "lifecycle": "new",
       "confidence": "medium",
       "momentumScore": 76,
-      "lofiFitScore": 78,
+      "lofiFitScore": 91,
       "saturationRisk": 24,
-      "whyLofi": "Le snack, le café et le chat offrent une version immédiatement reconnaissable sans sortir du décor.",
-      "timing": "À tester rapidement pendant la phase émergente.",
-      "production": "Courte animation officielle centrée sur les expressions et les deux objets échangés.",
-      "caveat": "Signal frais sans volume public confirmé ; ne pas en faire une série avant le premier résultat.",
+      "whyLofi": "La petite pause au milieu d’une longue session est un rituel universel de la communauté ; l’échange raconte l’entraide sans quitter le bureau iconique.",
+      "timing": "À tester rapidement pendant la phase émergente, de préférence à l’heure du goûter.",
+      "production": "Animation officielle de 8 à 12 secondes en split-screen, centrée sur les mains, les regards et le glissement synchronisé des snacks.",
+      "caveat": "Garder un véritable duo de révision dans la version principale ; le chat peut porter la chute, mais ne doit pas remplacer la logique d’échange.",
       "referencePost": {
         "platform": "instagram",
         "author": "@itskacylee",
@@ -1344,25 +1408,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Il avait encore mieux choisi",
-          "concept": "Elle échange très sérieusement son snack de nuit avec celui du chat.",
-          "copy": "Quand ton ami dit “on goûte ?” mais avait déjà planifié l’échange depuis le début."
+          "title": "Le traité de la pause",
+          "concept": "Lofi Girl et sa partenaire de révision font glisser simultanément café froid et cookie encore chaud, sans interrompre leur lecture.",
+          "copy": "On n’a pas les mêmes fiches, mais on a enfin trouvé le bon échange."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Partager la pause",
-          "concept": "L’échange devient un petit rituel silencieux avant de reprendre le travail.",
-          "copy": "La meilleure partie de la pause, c’est parfois juste de la partager."
+          "title": "Pause partagée",
+          "concept": "Les deux divisent chaque snack en deux, trinquent avec leurs tasses et relancent ensemble le minuteur.",
+          "copy": "Une moitié pour toi, une moitié pour moi, puis encore vingt-cinq minutes ensemble."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Négociation féline",
-          "concept": "Le chat exige le café, le snack et la chaise en échange d’une seule croquette.",
-          "copy": "J’ai accepté le deal. Mon avocat est un chat et travaille contre moi."
+          "title": "Le troisième participant",
+          "concept": "L’échange est parfaitement synchronisé jusqu’à ce que le chat récupère les deux snacks et laisse une croquette au centre.",
+          "copy": "Le groupe de travail vient de renégocier les avantages en nature."
         }
-      ]
+      ],
+      "trendKey": "meal-swap",
+      "clusterKey": "format:snack-swap",
+      "firstSeenAt": "2026-08-02T22:48:28.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "everything-hallelujah-wins",
@@ -1431,7 +1499,11 @@
           "concept": "Une médaille est remise au routeur pour être revenu après onze secondes d’absence.",
           "copy": "Nous remercions le Wi-Fi pour son courage et son retour héroïque."
         }
-      ]
+      ],
+      "trendKey": "everything-hallelujah-wins",
+      "clusterKey": "sound:everything-hallelujah",
+      "firstSeenAt": "2026-07-31T12:00:00.000Z",
+      "lastVerifiedAt": "2026-07-31T12:00:00.000Z"
     },
     {
       "id": "flicker-memory-transition",
@@ -1520,16 +1592,20 @@
           "concept": "Chaque clignotement révèle un nouveau post-it oublié jusqu’à recouvrir toute la chambre.",
           "copy": "Mon cerveau essaie de charger un souvenir. Il reste 47 onglets ouverts."
         }
-      ]
+      ],
+      "trendKey": "flicker-memory-transition",
+      "clusterKey": "format:flicker",
+      "firstSeenAt": "2026-05-25T11:11:02.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "shoe-toss-outfit-transition",
-      "title": "Shoe toss · transition instantanée",
+      "title": "Objet lancé · changement de mode d’étude",
       "character": "lofi-girl",
-      "territory": "Univers visuel",
+      "territory": "Études & routines",
       "type": "format",
-      "summary": "Un objet traverse le cadre et déclenche une transformation complète au moment précis où il masque l’image.",
-      "mechanic": "Lancer un objet iconique vers la caméra, couper pendant l’occlusion et révéler une nouvelle ambiance.",
+      "summary": "Un cahier ou un casque traverse le cadre et fait basculer Lofi Girl d’un moment de procrastination à une session de focus immédiatement lisible.",
+      "mechanic": "Lancer l’objet qui déclenche la routine vers la caméra, couper pendant l’occlusion, puis révéler le même cadrage avec timer lancé, bureau prêt et lumière transformée.",
       "platforms": [
         "instagram",
         "tiktok",
@@ -1544,12 +1620,12 @@
       "lifecycle": "rising",
       "confidence": "high",
       "momentumScore": 84,
-      "lofiFitScore": 76,
+      "lofiFitScore": 94,
       "saturationRisk": 42,
-      "whyLofi": "Le casque, un vinyle ou un cahier peut remplacer la chaussure et révéler un nouvel univers musical.",
-      "timing": "À produire rapidement, avec une variation Lofi Girl immédiatement reconnaissable.",
-      "production": "Transition image par image avec un objet officiel, deux palettes et exactement le même cadrage.",
-      "caveat": "Le mécanisme est librement adaptable ; ne pas reproduire la tenue, la personne ou le montage plan par plan.",
+      "whyLofi": "Le casque et le cahier ne sont pas de simples accessoires : ce sont les déclencheurs visuels du rituel de concentration qui définit Lofi Girl.",
+      "timing": "À produire rapidement comme format de rentrée ou de reprise après procrastination.",
+      "production": "Transition image par image avec un objet officiel, deux états du même bureau et un cadrage parfaitement verrouillé.",
+      "caveat": "Reprendre uniquement l’occlusion comme mécanique ; le récit doit montrer un vrai changement d’état, pas un simple changement de tenue.",
       "referencePost": {
         "platform": "instagram",
         "author": "@valerii.murr",
@@ -1591,25 +1667,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Un casque, une autre humeur",
-          "concept": "Un cahier masque la caméra et révèle son mode révision nocturne.",
-          "copy": "Même bureau. Nouvelle playlist. Personnalité entièrement remplacée."
+          "title": "Activation du mode focus",
+          "concept": "Elle lance son casque vers la caméra ; le plan revient avec téléphone retourné, timer à 25:00 et première ligne déjà écrite.",
+          "copy": "Le moment précis où « je commence dans cinq minutes » devient maintenant."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Passer en mode nuit",
-          "concept": "Un vinyle masque l’image puis révèle la chambre éclairée seulement par la lampe et la ville.",
-          "copy": "Quand la journée se ferme, la bonne musique peut ouvrir un autre espace."
+          "title": "Le rituel du soir",
+          "concept": "Un vinyle masque l’image et révèle la lampe allumée, la pluie à la fenêtre et une page neuve prête pour la session nocturne.",
+          "copy": "Même bureau, lumière plus douce, une page à la fois."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Le cahier boomerang",
-          "concept": "Le cahier lancé revient avec trois fois plus de devoirs et un post-it du chat.",
-          "copy": "J’ai essayé de jeter ma to-do. Elle est revenue avec des pièces jointes."
+          "title": "La to-do contre-attaque",
+          "concept": "Le cahier lancé revient dans le plan transformé avec trois intercalaires, huit post-it et le chat assis sur la seule page terminée.",
+          "copy": "J’ai lancé un cahier. Il est revenu sous forme de semestre complet."
         }
-      ]
+      ],
+      "trendKey": "shoe-toss-outfit-transition",
+      "clusterKey": "format:objet-lance",
+      "firstSeenAt": "2026-07-25T15:12:30.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "kumar-method",
@@ -1698,7 +1778,11 @@
           "concept": "Le chat devient directeur financier et refuse le budget goûter avec un graphique rouge beaucoup trop alarmant.",
           "copy": "Le conseil d’administration a parlé. Le budget biscuits est gelé."
         }
-      ]
+      ],
+      "trendKey": "kumar-method",
+      "clusterKey": "format:the-kumar-method",
+      "firstSeenAt": "2026-06-05T19:42:03.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "saxophones-getting-louder",
@@ -1787,7 +1871,11 @@
           "concept": "Chaque saxophone révèle une nouvelle version du même fichier jusqu’à final-final-vraiment-final-12.",
           "copy": "Le document est presque final. Le saxophone confirme."
         }
-      ]
+      ],
+      "trendKey": "saxophones-getting-louder",
+      "clusterKey": "sound:saxophones-getting-louder",
+      "firstSeenAt": "2026-08-04T21:02:50.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "not-very-nonchalant",
@@ -1876,7 +1964,11 @@
           "concept": "Confettis, fanfare et danse générale pour avoir simplement terminé la deuxième page du chapitre.",
           "copy": "Deux pages lues. La parade peut commencer."
         }
-      ]
+      ],
+      "trendKey": "not-very-nonchalant",
+      "clusterKey": "sound:not-very-nonchalant",
+      "firstSeenAt": "2026-04-10T20:59:44.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "netflix-documentary-confessional",
@@ -1965,16 +2057,20 @@
           "concept": "Trois témoins et une reconstitution tentent d’expliquer pourquoi le post-it était collé à l’envers.",
           "copy": "Les experts restent divisés. Le post-it, lui, ne parlera pas."
         }
-      ]
+      ],
+      "trendKey": "netflix-documentary-confessional",
+      "clusterKey": "format:netflix-documentary-confessional",
+      "firstSeenAt": "2026-07-26T10:30:11.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "pain-oh-no-spain",
-      "title": "I’m in Pain, Oh No, I’m in Spain",
+      "title": "Pain / Spain · les devoirs voyagent",
       "character": "lofi-girl",
-      "territory": "Chat & quotidien",
+      "territory": "Études & vacances",
       "type": "spoken-audio",
-      "summary": "Une plainte dramatique se retourne en révélation de vacances grâce au jeu de mots pain / Spain.",
-      "mechanic": "Commencer en gros plan sur un problème, synchroniser la phrase, puis élargir le cadre pour révéler un décor beaucoup plus enviable.",
+      "summary": "Une plainte sur les révisions d’été paraît dramatique jusqu’au plan large : Lofi Girl travaille depuis un décor espagnol beaucoup trop agréable pour justifier ce ton.",
+      "mechanic": "Ouvrir en très gros plan sur une deadline et un visage épuisé, synchroniser le jeu de mots, puis élargir pour révéler balcon, soleil et cahier de vacances.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -1989,12 +2085,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 84,
-      "lofiFitScore": 54,
+      "lofiFitScore": 88,
       "saturationRisk": 62,
-      "whyLofi": "La mécanique permet de révéler Lofi Girl loin de son bureau tout en gardant une plainte étudiante familière.",
-      "timing": "À utiliser avant la mi-août, tant que le pic de voyages d’été reste actif.",
-      "production": "Deux plans officiels : fausse plainte au bureau, puis révélation d’un décor estival illustré.",
-      "caveat": "Le format est saisonnier et déjà au pic ; vérifier les droits audio et publier seulement avec une vraie variation.",
+      "whyLofi": "Le gag repose sur une vérité étudiante précise : changer de décor ne fait pas disparaître la deadline. Lofi Girl reste elle-même, mais son bureau devient nomade.",
+      "timing": "À utiliser avant la mi-août, pendant la fenêtre des devoirs et révisions emportés en vacances.",
+      "production": "Deux plans officiels reliés par un zoom arrière : stress cadré sur le cahier, puis révélation d’un petit poste de travail estival en Espagne.",
+      "caveat": "Le mot Spain doit être justifié par le décor ou la situation ; vérifier les droits audio et éviter la simple carte postale sans insight étudiant.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@soypau_cacho",
@@ -2036,34 +2132,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Je souffre énormément",
-          "concept": "La révélation Espagne impose un contenu voyage hors du territoire.",
-          "copy": "I’m in pain… oh no, j’ai juste emporté mes révisions en vacances."
+          "title": "La deadline a pris le même vol",
+          "concept": "Gros plan sur son devoir non commencé ; le cadre s’ouvre sur un balcon espagnol où le même cahier l’a suivie.",
+          "copy": "I’m in pain… ah non, je suis en Spain. Ma deadline aussi."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Étudier ailleurs",
-          "concept": "La révélation montre un petit bureau d’été calme plutôt qu’une destination spectaculaire.",
-          "copy": "Changer de décor ne résout pas tout, mais parfois ça aide à respirer."
+          "title": "Un bureau ailleurs",
+          "concept": "La révélation montre un coin calme à l’ombre, le chat endormi et une seule page à terminer avant de sortir.",
+          "copy": "La tâche n’a pas changé. La lumière, elle, aide un peu."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Spain sans quitter la chambre",
-          "concept": "Le plan large révèle seulement une carte d’Espagne scotchée derrière le bureau et une lampe beaucoup trop forte.",
-          "copy": "Budget voyage : une carte, un ventilateur et beaucoup d’imagination."
+          "title": "Le budget Erasmus",
+          "concept": "Le plan large révèle que le balcon est une affiche, le soleil une lampe et le vent un ventilateur tenu par le chat.",
+          "copy": "Programme d’échange validé par mon budget : Espagne, chambre 1, bureau B."
         }
-      ]
+      ],
+      "trendKey": "pain-oh-no-spain",
+      "clusterKey": "spoken-audio:pain-spain",
+      "firstSeenAt": "2026-07-06T16:02:14.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "bangladesh-absurd-complaint",
-      "title": "Bangladesh · plainte absurde",
+      "title": "La liste avant de réviser · escalade absurde",
       "character": "lofi-girl",
-      "territory": "Humour du quotidien",
+      "territory": "Études & procrastination",
       "type": "sound",
-      "summary": "Une chanson commence comme un reproche amoureux crédible puis accumule des demandes de plus en plus absurdes.",
-      "mechanic": "Garder une interprétation totalement sérieuse pendant que chaque nouveau souhait devient plus illogique que le précédent.",
+      "summary": "La petite liste de conditions nécessaires avant de commencer à travailler devient si longue et absurde qu’elle révèle la procrastination.",
+      "mechanic": "Commencer par une demande crédible — un stylo ou un café — puis ajouter à chaque phrase une condition de focus plus impossible, en gardant Lofi Girl parfaitement sérieuse.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2078,12 +2178,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 94,
-      "lofiFitScore": 72,
+      "lofiFitScore": 93,
       "saturationRisk": 60,
-      "whyLofi": "Une liste de besoins d’étude qui dérive vers l’absurde correspond bien au ton deadpan et aux objets iconiques de la chambre.",
-      "timing": "À produire uniquement avec un angle très distinctif, le son étant déjà au pic.",
-      "production": "Animation officielle en liste progressive avec un nouvel objet ou une nouvelle exigence à chaque phrase.",
-      "caveat": "Ne pas republier le morceau sans licence ; préférer une voix ou une composition originale reprenant seulement la mécanique d’escalade.",
+      "whyLofi": "La préparation interminable avant un Pomodoro est un comportement extrêmement reconnaissable de l’audience study ; le bureau fournit naturellement chaque étape de l’escalade.",
+      "timing": "À produire rapidement avec l’angle « rituel de focus qui dérape », le son étant déjà au pic.",
+      "production": "Animation officielle en six plans fixes : chaque nouvelle condition apparaît sur le bureau jusqu’à ce qu’il ne reste plus de place pour le cahier.",
+      "caveat": "Ne pas republier le morceau sans licence ; si nécessaire, enregistrer une voix originale qui conserve seulement la structure cumulative.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@ianmcconnellmusic",
@@ -2125,34 +2225,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Tu ne m’emmènes jamais",
-          "concept": "Ses besoins de révision escaladent jusqu’à demander l’annulation des examens.",
-          "copy": "Tu ne m’emmènes jamais nulle part. Même pas jusqu’à la bouilloire."
+          "title": "Je commence dès que…",
+          "concept": "Lofi Girl réclame successivement un stylo précis, un café, le silence absolu, la bonne météo puis l’annulation officielle de l’examen.",
+          "copy": "Je commence dès que tout est prêt. Tout inclut apparemment l’alignement des planètes."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "La liste des petites envies",
-          "concept": "La chanson accompagne une liste simple qui reste volontairement douce : lumière basse, tasse chaude et cinq minutes de calme.",
-          "copy": "Ce soir, je ne demande presque rien : un peu de temps, une chanson et le silence."
+          "title": "Le vrai minimum",
+          "concept": "La liste commence trop longue ; Lofi Girl retire les objets un à un jusqu’à ne garder qu’un cahier, une boisson et une chanson.",
+          "copy": "Finalement, il me fallait moins de choses. Juste un premier pas tranquille."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Cahier, lune et sous-marin",
-          "concept": "La liste commence par un stylo puis exige une pleine lune, un sous-marin et un diplôme livré avant minuit.",
-          "copy": "Je voulais juste réviser. Maintenant il nous faut un sous-marin."
+          "title": "Setup de focus niveau impossible",
+          "concept": "Chaque accessoire réclamé pousse le cahier vers le bord ; le chat finit par déposer une fusée miniature comme ultime condition.",
+          "copy": "Le setup est enfin parfait. Dommage qu’il n’y ait plus de place pour travailler."
         }
-      ]
+      ],
+      "trendKey": "bangladesh-absurd-complaint",
+      "clusterKey": "sound:la-liste-avant-de-reviser",
+      "firstSeenAt": "2026-06-08T14:55:43.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "choosin-texas-western-reveal",
-      "title": "Choosin’ Texas · révélation western",
+      "title": "Choosin’ Texas · la playlist change le décor",
       "character": "lofi-girl",
-      "territory": "Univers visuel",
+      "territory": "Playlists & univers",
       "type": "sound",
-      "summary": "Le morceau accompagne des révélations country, des changements de tenue et des déclarations fières d’origine.",
-      "mechanic": "Commencer dans un décor neutre, attendre le refrain puis révéler une silhouette ou un univers western très affirmé.",
+      "summary": "Le changement de morceau transforme entièrement l’espace de travail : le bureau Lofi Girl devient un coin d’étude country sans perdre ses repères iconiques.",
+      "mechanic": "Montrer le choix d’une playlist, attendre le refrain, puis transformer au même cadrage lumière, fenêtre et objets du bureau selon le genre musical.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2167,12 +2271,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 86,
-      "lofiFitScore": 28,
+      "lofiFitScore": 91,
       "saturationRisk": 55,
-      "whyLofi": "Une version country de la chambre ou du personnage permet une transformation lisible sans perdre les repères de Lofi Girl.",
-      "timing": "À tester rapidement avec un traitement visuel original plutôt qu’un simple changement de tenue.",
-      "production": "Transition dessinée à cadrage constant entre le bureau classique et une variation western officielle.",
-      "caveat": "Vérifier les droits du morceau et éviter les clichés culturels ou géographiques réducteurs.",
+      "whyLofi": "Lofi Girl est d’abord un univers musical : faire réagir sa chambre au genre choisi matérialise immédiatement la promesse « une playlist, un monde ».",
+      "timing": "À tester rapidement comme premier épisode d’une série courte sur les genres de playlists.",
+      "production": "Transition dessinée à cadrage constant : clic sur la playlist, passage country, puis transformation originale du bureau et du paysage extérieur.",
+      "caveat": "Vérifier les droits du morceau, éviter tout cliché culturel et traiter le western comme une direction musicale et lumineuse, pas comme un déguisement.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@liamswiderski",
@@ -2214,34 +2318,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Lofi Girl choisit le western",
-          "concept": "La chambre western ne raconte aucune situation étudiante.",
-          "copy": "Même playlist, mais aujourd’hui le bureau a choisi le Texas."
+          "title": "Un clic, nouveau monde",
+          "concept": "Elle clique sur « Country focus » ; le même bureau se transforme en bois chaud, la ville devient grand ciel et le crayon bat la mesure.",
+          "copy": "J’ai changé de playlist. Mon bureau a pris la transformation beaucoup trop au sérieux."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Étudier sous un autre ciel",
-          "concept": "La transformation révèle un bureau en bois, une lampe chaude et un grand ciel étoilé sans caricature.",
-          "copy": "Parfois, changer d’horizon suffit à retrouver le rythme."
+          "title": "Même focus, autre horizon",
+          "concept": "La chambre reste reconnaissable mais la lumière, les matières et le paysage suivent doucement le nouveau genre musical.",
+          "copy": "Même page à finir. Un autre paysage pour l’accompagner."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Le duel de surligneurs",
-          "concept": "Deux surligneurs s’affrontent comme dans un western pour déterminer la couleur du prochain chapitre.",
-          "copy": "Midi pile. Le duel pour le code couleur commence."
+          "title": "Duel de playlists",
+          "concept": "Deux boutons « focus classique » et « country lofi » se font face ; le chat appuie sur les deux et mélange les décors.",
+          "copy": "Le duel devait choisir une ambiance. Le chat a débloqué le mashup secret."
         }
-      ]
+      ],
+      "trendKey": "choosin-texas-western-reveal",
+      "clusterKey": "sound:choosin-texas",
+      "firstSeenAt": "2026-05-13T12:58:30.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "u-me-love-timeline",
-      "title": "u + me = <3 · timeline émotionnelle",
+      "title": "Lofi Girl × communauté · timeline émotionnelle",
       "character": "lofi-girl",
-      "territory": "Émotions & quotidien",
+      "territory": "Histoire de la marque & communauté",
       "type": "sound",
-      "summary": "Le refrain porte des montages qui montrent une relation, une équipe ou une histoire à travers le temps.",
-      "mechanic": "Aligner quelques images datées, faire progresser la chronologie et terminer sur un plan actuel qui répond au premier souvenir.",
+      "summary": "Des archives montrent comment la chambre, les saisons et la communauté ont grandi ensemble, puis reviennent au bureau tel qu’il existe aujourd’hui.",
+      "mechanic": "Faire défiler des plans officiels datés sur le même geste — écrire, tourner une page, regarder la fenêtre — puis conclure au présent avec un message à la communauté.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2256,12 +2364,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 91,
-      "lofiFitScore": 84,
+      "lofiFitScore": 99,
       "saturationRisk": 52,
-      "whyLofi": "La longévité de Lofi Girl et la familiarité de sa chambre offrent naturellement une chronologie émotive et reconnaissable.",
-      "timing": "À publier rapidement avec des archives officielles vraiment signifiantes.",
-      "production": "Montage d’archives et d’assets officiels classés chronologiquement, avec une conclusion au présent.",
-      "caveat": "Vérifier la licence du morceau et n’utiliser que des archives dont les droits sont détenus par la marque.",
+      "whyLofi": "Peu de marques disposent d’un même rituel observé pendant autant d’années ; la tendance devient ici une preuve de lien collectif, pas un montage nostalgique générique.",
+      "timing": "À publier avec un anniversaire, un cap de communauté ou une rentrée pour donner une raison claire à la chronologie.",
+      "production": "Montage d’archives officielles dans un cadrage harmonisé, dates sobres à l’écran et dernier plan créé spécifiquement pour remercier la communauté.",
+      "caveat": "Vérifier la licence du morceau, n’utiliser que des archives détenues par la marque et choisir des jalons réellement significatifs plutôt qu’un remplissage annuel.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@katseyeworld",
@@ -2303,34 +2411,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Toujours au même bureau",
-          "concept": "Les mêmes positions d’elle et du chat défilent au fil des années.",
-          "copy": "Tout a changé. Sauf nous, ce bureau et la prochaine chanson."
+          "title": "Vous étiez là entre les pages",
+          "concept": "Chaque année montre la même page tournée, accompagnée d’un jalon réel de la communauté, jusqu’au plan actuel.",
+          "copy": "Des millions d’heures, beaucoup de pages, et toujours quelqu’un de l’autre côté de la fenêtre."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Les années à la fenêtre",
-          "concept": "La lumière et les saisons changent dans la chambre tandis que le dernier plan revient au présent.",
-          "copy": "Certaines habitudes deviennent doucement des endroits où revenir."
+          "title": "L’endroit où revenir",
+          "concept": "Saisons, lumières et décors changent, mais le dernier raccord replace la communauté face à la fenêtre familière.",
+          "copy": "Les années changent la vue. Certaines habitudes restent un endroit où revenir."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "La dynastie des tasses",
-          "concept": "Chaque année est représentée par une nouvelle tasse jusqu’à ce que le bureau ressemble à un musée.",
-          "copy": "Notre histoire tient en douze ans et beaucoup trop de tasses."
+          "title": "L’archive du chat",
+          "concept": "Chaque grand jalon est interrompu par la même habitude du chat, qui finit par s’asseoir exactement au même endroit aujourd’hui.",
+          "copy": "Tout a évolué. Son respect du clavier, absolument pas."
         }
-      ]
+      ],
+      "trendKey": "u-me-love-timeline",
+      "clusterKey": "sound:lofi-girl-communaute",
+      "firstSeenAt": "2026-07-02T16:00:55.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "ss26-editorial-transition",
-      "title": "SS26 · transition éditoriale",
+      "title": "Quatre modes de focus · transition éditoriale",
       "character": "lofi-girl",
-      "territory": "Univers visuel",
+      "territory": "Playlists & concentration",
       "type": "sound",
-      "summary": "Un morceau sombre et dansant accompagne des transformations mode, des poses nettes et des montages éditoriaux.",
-      "mechanic": "Conserver un cadrage précis et faire changer palette, silhouette ou décor sur chaque accent du son.",
+      "summary": "Chaque accent du son sélectionne un mode de concentration différent — pluie, nuit, bibliothèque, matin calme — autour du même bureau.",
+      "mechanic": "Verrouiller la pose et le cadrage, afficher brièvement le nom du mode, puis faire changer palette, météo, matière sonore et tâche à chaque beat.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2345,12 +2457,12 @@
       "lifecycle": "rising",
       "confidence": "high",
       "momentumScore": 82,
-      "lofiFitScore": 41,
+      "lofiFitScore": 93,
       "saturationRisk": 36,
-      "whyLofi": "Les univers visuels Lofi Girl peuvent se succéder comme une collection sans perdre la silhouette iconique du personnage.",
-      "timing": "Bonne fenêtre de test avant une éventuelle saturation des transitions mode.",
-      "production": "Créer quatre variations officielles du même plan, dessinées à la main et alignées image par image.",
-      "caveat": "Le morceau peut être restreint sur un compte de marque ; prévoir une alternative musicale autorisée.",
+      "whyLofi": "Les playlists Lofi Girl répondent précisément à des contextes de concentration ; la grammaire mode devient un sélecteur visuel utile où chacun reconnaît son propre rituel.",
+      "timing": "Bonne fenêtre pour lancer un format « choisis ton mode de focus » avant la rentrée.",
+      "production": "Créer quatre variations officielles du même plan, dessinées à la main, avec un libellé de mode très court et des raccords image par image.",
+      "caveat": "Le morceau peut être restreint sur un compte de marque ; prévoir une alternative musicale autorisée et éviter le simple lookbook sans usage de concentration.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@charlixcx",
@@ -2392,34 +2504,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Quatre moods, un bureau",
-          "concept": "Le changement de tenue reste un lookbook sans insight étudiant.",
-          "copy": "Je n’ai pas changé de place. Seulement de personnalité quatre fois."
+          "title": "Choisis ton mode de focus",
+          "concept": "Quatre beats révèlent « deadline », « lecture », « révisions de nuit » et « soft morning », chacun avec sa propre ambiance de bureau.",
+          "copy": "Même to-do. Quel monde t’aiderait à commencer aujourd’hui ?"
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Collection de nuits calmes",
-          "concept": "Quatre palettes nocturnes se succèdent avec la même posture et une lumière de lampe constante.",
-          "copy": "Une chambre, plusieurs nuits, le même endroit pour ralentir."
+          "title": "Une ambiance pour chaque rythme",
+          "concept": "Le bureau passe de pluie légère à ville endormie, puis à lever du jour, sans rompre le geste d’écriture.",
+          "copy": "Ton rythme change. Tu peux garder le même endroit pour avancer."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Fashion week du pyjama",
-          "concept": "Chaque transition révèle un pyjama presque identique, présenté avec un sérieux haute couture.",
-          "copy": "SS26 : quatre nuances révolutionnaires de rester chez soi."
+          "title": "Le mode deadline gagne toujours",
+          "concept": "Les trois premiers modes sont très esthétiques ; le quatrième révèle une pile de feuilles, un minuteur rouge et le même pyjama.",
+          "copy": "J’ai choisi « focus intense ». Le focus intense m’a choisie en premier."
         }
-      ]
+      ],
+      "trendKey": "ss26-editorial-transition",
+      "clusterKey": "sound:quatre-modes-de-focus",
+      "firstSeenAt": "2026-05-21T23:35:10.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "dracula-jennie-remix",
-      "title": "Dracula · JENNIE Remix",
+      "title": "Mode deadline après minuit · transformation",
       "character": "lofi-girl",
-      "territory": "Univers visuel",
+      "territory": "Études de nuit",
       "type": "sound",
-      "summary": "Le remix hypnotique porte des fit checks, des transformations beauté et des montages cinématiques très polis.",
-      "mechanic": "Installer une silhouette ou un décor sobre, puis révéler une version plus intense sur le passage clé du remix.",
+      "summary": "Une session de révision ordinaire devient soudain cinématique lorsque l’horloge passe minuit et que Lofi Girl active son mode deadline.",
+      "mechanic": "Montrer le bureau calme avant minuit, faire coïncider le passage clé avec 00:00, puis intensifier lumière, pluie, pages et rythme d’écriture sans changer de cadrage.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2434,12 +2550,12 @@
       "lifecycle": "rising",
       "confidence": "high",
       "momentumScore": 90,
-      "lofiFitScore": 46,
+      "lofiFitScore": 92,
       "saturationRisk": 64,
-      "whyLofi": "Le remix convient à une transformation nocturne de la chambre et à une version plus cinématique du personnage.",
-      "timing": "À tester vite avec une direction artistique forte, car l’audio est déjà très répandu.",
-      "production": "Transition officielle jour vers nuit avec deux palettes, ombres renforcées et mouvement de caméra minimal.",
-      "caveat": "Audio potentiellement non autorisé pour un usage de marque ; vérifier la licence avant production.",
+      "whyLofi": "L’étude nocturne est l’image la plus reconnaissable de Lofi Girl ; la transformation traduit un état réel — le sprint de deadline — plutôt qu’un simple changement esthétique.",
+      "timing": "À tester vite avec l’angle minuit/deadline, car l’audio est déjà très répandu.",
+      "production": "Animation officielle avant/après minuit avec cadrage verrouillé, horloge lisible, ombres renforcées et accélération des gestes.",
+      "caveat": "Audio potentiellement non autorisé pour un usage de marque ; vérifier la licence et conserver le basculement 00:00 comme idée centrale avec une alternative autorisée.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@tameimpala",
@@ -2481,34 +2597,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Quand la playlist devient sérieuse",
-          "concept": "La transformation nocturne reste esthétique sans histoire étudiante.",
-          "copy": "J’ai changé de playlist et soudain mon devoir a une bande-annonce."
+          "title": "00:00 · mode deadline",
+          "concept": "À minuit, le minuteur vire au rouge, les feuilles se multiplient et Lofi Girl passe du surlignage tranquille au sprint final.",
+          "copy": "Avant minuit : je prends mon temps. Après minuit : ce devoir a une bande-annonce."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "La chambre après minuit",
-          "concept": "La transition assombrit doucement la pièce et fait apparaître les lumières de la ville.",
-          "copy": "Après minuit, la chambre devient parfois un monde à part."
+          "title": "La ville dort, la page avance",
+          "concept": "Le passage clé éteint les fenêtres de la ville une à une tandis que la lampe et le cahier restent allumés.",
+          "copy": "Quand tout ralentit dehors, une seule ligne peut encore suffire."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Transformation du chat",
-          "concept": "Tout devient mystérieux sauf le chat, qui porte seulement une minuscule cape et garde la même expression.",
-          "copy": "La métamorphose est complète. Le chat a ajouté une cape."
+          "title": "Le boss de minuit",
+          "concept": "La chambre se transforme dramatiquement ; le chat apparaît sur la dernière page avec une mini-cape et bloque le sprint final.",
+          "copy": "Plot twist : la deadline avait un boss final."
         }
-      ]
+      ],
+      "trendKey": "dracula-jennie-remix",
+      "clusterKey": "sound:mode-deadline-apres-minuit",
+      "firstSeenAt": "2026-05-15T15:50:08.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "eurosummer-micro-montage",
-      "title": "Euro Summer · micro-montage",
+      "title": "Le cahier voyage aussi · micro-montage d’été",
       "character": "lofi-girl",
-      "territory": "Chat & quotidien",
+      "territory": "Études & vacances",
       "type": "hashtag",
-      "summary": "Des fragments très courts de voyage sont assemblés pour donner l’impression d’un souvenir d’été compact et sensoriel.",
-      "mechanic": "Enchaîner rapidement cinq à huit détails de lieu, de lumière ou de geste, sans expliquer la destination.",
+      "summary": "Un même cahier relie plusieurs petits lieux d’été et montre comment Lofi Girl emporte son rituel de concentration sans transformer le post en carte postale.",
+      "mechanic": "Raccorder cinq à huit plans sur le même geste — ouvrir le cahier, poser le casque, écrire une ligne — tandis que lieu, lumière et boisson changent autour.",
       "platforms": [
         "tiktok",
         "instagram",
@@ -2523,12 +2643,12 @@
       "lifecycle": "rising",
       "confidence": "high",
       "momentumScore": 93,
-      "lofiFitScore": 60,
+      "lofiFitScore": 90,
       "saturationRisk": 53,
-      "whyLofi": "L’univers repose déjà sur des sensations de lieu, de météo et de lumière ; quelques détails suffisent à raconter un été Lofi Girl.",
+      "whyLofi": "Le rituel portable — cahier, casque, quelques minutes de focus — prolonge la fonction de Lofi Girl tout en ouvrant visuellement sa chambre sur l’été.",
       "timing": "À publier avant la fin de la fenêtre estivale, idéalement cette semaine.",
-      "production": "Créer huit vignettes illustrées officielles reliées par des cuts très courts et une palette cohérente.",
-      "caveat": "Éviter le montage touristique générique ; construire une mini-histoire et utiliser uniquement des visuels détenus par la marque.",
+      "production": "Créer huit vignettes illustrées officielles raccordées par le cahier au centre du cadre, avec une progression du matin vers le soir.",
+      "caveat": "Chaque lieu doit faire avancer le mini-récit d’étude ou de pause ; éviter le montage touristique générique et n’utiliser que des visuels détenus par la marque.",
       "referencePost": {
         "platform": "tiktok",
         "author": "@elishaswong",
@@ -2570,25 +2690,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "L’été entre deux chapitres",
-          "concept": "Ajouter un cahier à un montage de voyage ne suffit pas.",
-          "copy": "J’avais prévu de ne rien faire. J’ai quand même emporté le cahier."
+          "title": "Le devoir qui a vu l’Europe",
+          "concept": "Le même devoir apparaît dans un train, un café, un parc puis au bord de l’eau ; une ligne de plus est écrite à chaque raccord.",
+          "copy": "Il n’est pas encore terminé, mais ce cahier a plus voyagé que moi."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Les détails qu’on garde",
-          "concept": "Le montage privilégie ombres, tasse, pages, vent dans les rideaux et lumière de fin de journée.",
-          "copy": "L’été tient parfois dans quelques détails qu’on n’avait pas pensé à retenir."
+          "title": "Un petit rythme partout",
+          "concept": "Casque posé, page ouverte, ombre d’arbre puis lumière de train : le geste reste le même, seul le monde autour change.",
+          "copy": "Pas besoin du bureau parfait. Parfois, un coin calme et une chanson suffisent."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Tour d’Europe du même devoir",
-          "concept": "Chaque destination révèle exactement le même devoir toujours pas commencé.",
-          "copy": "Huit villes, trois trains, zéro ligne écrite. Voyage très productif."
+          "title": "Tour d’Europe de la page une",
+          "concept": "Chaque nouveau lieu révèle exactement la même page blanche ; le dernier plan montre seulement le titre enfin écrit.",
+          "copy": "Huit villes, trois trains, un titre. Progression internationale."
         }
-      ]
+      ],
+      "trendKey": "eurosummer-micro-montage",
+      "clusterKey": "hashtag:le-cahier-voyage-aussi",
+      "firstSeenAt": "2026-08-05T09:01:45.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "let-down-emotional-rescue",
@@ -2677,7 +2801,11 @@
           "concept": "Le chat arrive avec un badge de soutien émotionnel puis réclame immédiatement la moitié du bureau.",
           "copy": "Service de soutien disponible. Paiement exigé en surface de bureau."
         }
-      ]
+      ],
+      "trendKey": "let-down-emotional-rescue",
+      "clusterKey": "sound:let-down",
+      "firstSeenAt": "2026-07-31T16:56:52.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "matrix-verity-edit",
@@ -2766,16 +2894,20 @@
           "concept": "Le cut dramatique révèle que toute cette tension vient d'une question très simple ; le chat porte un minuscule casque de combat.",
           "copy": "Toute cette mise en scène pour découvrir que la réponse était B."
         }
-      ]
+      ],
+      "trendKey": "matrix-verity-edit",
+      "clusterKey": "sound:matrix-verity",
+      "firstSeenAt": "2026-06-14T20:14:48.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "young-and-beautiful-summer-nostalgia",
-      "title": "Young and Beautiful · souvenir d'été",
+      "title": "Fin d’été · les souvenirs entre les pages",
       "character": "lofi-girl",
-      "territory": "Univers visuel",
+      "territory": "Rentrée & nostalgie",
       "type": "sound",
-      "summary": "Des images ordinaires de l'été deviennent un souvenir précieux grâce à une lumière dorée, des mouvements ralentis et une nostalgie immédiatement reconnaissable.",
-      "mechanic": "Choisir trois à cinq détails simples, les filmer ou les animer dans une lumière de fin de journée et laisser le refrain transformer le présent en souvenir.",
+      "summary": "En préparant son bureau pour la rentrée, Lofi Girl retrouve entre ses pages les petits objets qui racontent son été sans quitter le rituel du cahier.",
+      "mechanic": "Faire surgir un souvenir à chaque objet retiré d’un cahier — ticket, fleur, photo, sable — puis refermer sur le bureau prêt pour une nouvelle saison.",
       "platforms": [
         "instagram",
         "tiktok",
@@ -2790,12 +2922,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 89,
-      "lofiFitScore": 74,
+      "lofiFitScore": 94,
       "saturationRisk": 72,
-      "whyLofi": "La nostalgie, la lumière de fenêtre et les petits rituels sont déjà au cœur de Lofi Girl ; le son leur donne une émotion plus ample sans changer la marque.",
-      "timing": "À publier avant la fin d'août avec un angle précis, car le son est déjà très utilisé.",
-      "production": "Composer un Reel vertical avec des illustrations officielles : fenêtre ouverte, carnet, boisson fraîche, chat au soleil et dernier plan sur la chambre vide.",
-      "caveat": "La tendance est saturée ; éviter le simple montage esthétique et vérifier la licence musicale pour le compte de marque.",
+      "whyLofi": "Le cahier, les saisons et la chambre sont la mémoire visuelle de Lofi Girl ; l’angle rentrée donne à la nostalgie un début, une progression et un retour au présent.",
+      "timing": "À publier avant la fin d’août, au moment précis où l’audience range l’été et prépare la rentrée.",
+      "production": "Composer un Reel vertical avec illustrations officielles : quatre objets-souvenirs sortent du carnet, puis un plan final montre une page neuve datée de septembre.",
+      "caveat": "La tendance est saturée ; raconter un passage concret de l’été à la rentrée et vérifier la licence musicale pour le compte de marque.",
       "referencePost": {
         "platform": "instagram",
         "author": "@allileighann",
@@ -2851,25 +2983,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Les vacances ont suivi au bureau",
-          "concept": "En rangeant ses notes, elle retrouve les petits souvenirs de son été étudiant.",
-          "copy": "Physiquement au bureau. Mentalement encore dans ce coucher de soleil."
+          "title": "Retrouvé entre deux chapitres",
+          "concept": "En rouvrant son cahier de rentrée, elle trouve un ticket de train, une fleur séchée et une photo que le chat tente de récupérer.",
+          "copy": "La rentrée est dans une semaine. Mon esprit est encore entre ces deux pages."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Les petits souvenirs restent",
-          "concept": "La chambre se vide progressivement ; restent un ticket, une fleur séchée, une photo et la lumière dorée sur le carnet.",
-          "copy": "L'été passe. Les petits détails trouvent toujours une place entre deux pages."
+          "title": "Une page neuve, pas une page vide",
+          "concept": "Elle classe chaque souvenir dans une petite boîte, garde la fleur comme marque-page et ouvre le premier chapitre de septembre.",
+          "copy": "L’été se range doucement. Il reste toujours quelque chose pour accompagner la page suivante."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Golden hour très organisée",
-          "concept": "Lofi Girl déplace frénétiquement lampe, rideaux et chat pour fabriquer la lumière parfaite, puis le soleil disparaît.",
-          "copy": "Quarante minutes d'installation pour huit secondes de golden hour."
+          "title": "Le souvenir très authentique",
+          "concept": "Elle arrange méticuleusement ticket, fleur et lumière pendant que le chat remet tout en désordre ; la photo finale garde le chaos.",
+          "copy": "Souvenir spontané, après seulement quarante minutes de mise en place."
         }
-      ]
+      ],
+      "trendKey": "young-and-beautiful-summer-nostalgia",
+      "clusterKey": "sound:fin-d-ete",
+      "firstSeenAt": "2026-07-14T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "sirens-cinematic-tension",
@@ -2972,7 +3108,11 @@
           "concept": "Toute la chambre semble menacée ; le plan final révèle le chat qui essaie seulement d'ouvrir un paquet de snacks.",
           "copy": "Alerte maximale. Il avait faim depuis approximativement quatre minutes."
         }
-      ]
+      ],
+      "trendKey": "sirens-cinematic-tension",
+      "clusterKey": "sound:sirens",
+      "firstSeenAt": "2026-07-21T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "odysseus-heroic-edit",
@@ -3075,7 +3215,11 @@
           "concept": "Musique épique, couloir immense et obstacles dramatiques ; Lofi Girl revient simplement avec une nouvelle tasse de thé.",
           "copy": "Elle est partie chercher du thé. Elle est revenue changée."
         }
-      ]
+      ],
+      "trendKey": "odysseus-heroic-edit",
+      "clusterKey": "sound:odysseus",
+      "firstSeenAt": "2026-07-21T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "golden-brown-month-reset",
@@ -3178,16 +3322,20 @@
           "concept": "Lofi Girl remplace méthodiquement chaque objet du bureau, sauf le chat qui refuse d'être déplacé et bloque toute la transition.",
           "copy": "Nouveau mois, nouveau bureau. Même responsable du blocage."
         }
-      ]
+      ],
+      "trendKey": "golden-brown-month-reset",
+      "clusterKey": "sound:golden-brown",
+      "firstSeenAt": "2026-07-31T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "stupid-song-nostalgic-montage",
-      "title": "Stupid Song · chronologie affective",
+      "title": "Lofi Girl + chat · une journée en huit fragments",
       "character": "lofi-girl",
-      "territory": "Humour du quotidien",
+      "territory": "Chat & routine",
       "type": "sound",
-      "summary": "Une succession de petits moments raconte une relation ou une amitié sans explication, avec une énergie tendre, spontanée et légèrement imparfaite.",
-      "mechanic": "Assembler six à huit fragments dans l'ordre émotionnel plutôt que chronologique, garder les gestes imparfaits et terminer sur le moment le plus simple.",
+      "summary": "Huit micro-scènes racontent la vraie relation de travail entre Lofi Girl et son chat : interruptions, entraide involontaire et présence constante.",
+      "mechanic": "Raccorder les scènes par les gestes du chat — patte sur la page, tasse poussée, sieste déplacée — et terminer sur lui endormi près du devoir enfin fini.",
       "platforms": [
         "instagram",
         "tiktok",
@@ -3202,12 +3350,12 @@
       "lifecycle": "steady",
       "confidence": "medium",
       "momentumScore": 81,
-      "lofiFitScore": 80,
+      "lofiFitScore": 97,
       "saturationRisk": 55,
-      "whyLofi": "La communauté connaît déjà les personnages, le chat et la chambre ; quelques micro-scènes suffisent à donner l'impression de souvenirs partagés.",
-      "timing": "À tester pendant la fenêtre estivale avec une relation clairement identifiable dès le premier plan.",
-      "production": "Créer huit vignettes animées originales montrant Lofi Girl et son chat au fil d'une journée, avec des raccords de gestes plutôt que des effets lourds.",
-      "caveat": "Ne pas copier le clip original ; utiliser uniquement les personnages et visuels autorisés et confirmer la licence du morceau.",
+      "whyLofi": "Le chat est déjà le partenaire silencieux que toute la communauté reconnaît ; le format révèle leur dynamique au lieu d’ajouter une trend extérieure à la marque.",
+      "timing": "À tester maintenant comme mini-portrait de duo, avec la relation identifiable dès la première seconde.",
+      "production": "Créer huit vignettes animées originales sur une journée de révision, avec le même axe de bureau et des raccords déclenchés par le chat.",
+      "caveat": "Ne pas copier le clip original ; utiliser uniquement les personnages et visuels autorisés, et confirmer la licence du morceau.",
       "referencePost": {
         "platform": "instagram",
         "author": "@oliviarodrigo",
@@ -3263,34 +3411,38 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Une journée avec mon collègue",
-          "concept": "Huit moments montrent le chat interrompre puis accompagner une journée de révision.",
-          "copy": "Il ne m'aide sur aucun devoir. Il est quand même présent à toutes les sessions."
+          "title": "Mon collègue le plus constant",
+          "concept": "Du premier café à la dernière phrase, le chat change huit fois de place mais reste dans chaque étape du travail.",
+          "copy": "Il ne connaît aucun sujet. Il assiste pourtant à toutes les sessions."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "Les moments qui ne font pas de bruit",
-          "concept": "Le montage garde seulement les gestes minuscules : tasse posée, couverture partagée, page tournée et chat qui s'endort près de la lampe.",
-          "copy": "Ce sont rarement les grands moments qu'on aimerait pouvoir rejouer."
+          "title": "Présent sans faire de bruit",
+          "concept": "Tasse posée, couverture partagée, page tournée et chat endormi près de la lampe composent toute la journée.",
+          "copy": "Les meilleures présences n’ont pas toujours besoin de parler."
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Notre relation professionnelle",
-          "concept": "Chaque souvenir tendre est interrompu par le chat qui cause un nouveau petit désastre, avant de poser innocemment pour le dernier plan.",
-          "copy": "Une collaboration fondée sur la confiance, le chaos et zéro respect du clavier."
+          "title": "Évaluation annuelle du chat",
+          "concept": "Chaque fragment montre une nouvelle infraction — clavier, tasse, surligneur — puis le dernier plan lui attribue quand même « indispensable ».",
+          "copy": "Productivité : discutable. Présence : irréprochable. Contrat renouvelé."
         }
-      ]
+      ],
+      "trendKey": "stupid-song-nostalgic-montage",
+      "clusterKey": "sound:lofi-girl-chat",
+      "firstSeenAt": "2026-06-12T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "is-it-cake-or-fake",
-      "title": "Is it cake or fake? · illusion à résoudre",
+      "title": "Cahier ou gâteau ? · pause à deviner",
       "character": "lofi-girl",
-      "territory": "Culture web",
+      "territory": "Études & interaction",
       "type": "format",
-      "summary": "Une question visuelle très simple oblige à regarder jusqu'au bout pour découvrir lequel de deux objets apparemment identiques est réel.",
-      "mechanic": "Présenter deux éléments presque identiques dès la première seconde, inviter mentalement au choix puis révéler la réponse par une action irréversible.",
+      "summary": "Deux cahiers identiques sont posés sur le bureau ; la communauté doit deviner lequel contient les notes et lequel est le gâteau de la pause.",
+      "mechanic": "Afficher les deux objets et la question dès la première seconde, laisser trois secondes de choix, puis révéler par une coupe nette avant la réaction du chat.",
       "platforms": [
         "instagram",
         "tiktok",
@@ -3305,12 +3457,12 @@
       "lifecycle": "peaking",
       "confidence": "high",
       "momentumScore": 96,
-      "lofiFitScore": 68,
+      "lofiFitScore": 88,
       "saturationRisk": 59,
-      "whyLofi": "Le bureau contient assez d'objets iconiques pour fabriquer une devinette immédiatement reconnaissable et provoquer le rewatch sans dialogue.",
-      "timing": "À produire sous quelques jours pendant que le format illusion figure encore parmi les plus gros Reels d'août.",
-      "production": "Créer deux accessoires originaux en 3D ou animation — par exemple deux tasses ou deux livres — puis une coupe propre qui révèle l'objet impossible.",
-      "caveat": "Reprendre la question et la structure, pas le tour précis de Zach King ; ne pas présenter un rendu généré comme une captation réelle.",
+      "whyLofi": "Le cahier et la tasse sont assez iconiques pour rendre le jeu instantanément Lofi Girl ; le choix explicite crée une interaction simple avant une pause réellement intégrée à la session.",
+      "timing": "À produire sous quelques jours pendant que le format illusion figure encore parmi les plus gros Reels d’août.",
+      "production": "Fabriquer ou animer deux accessoires originaux au même cadrage — un vrai cahier et un gâteau-cahier — puis filmer une coupe propre et une réaction dessinée du chat.",
+      "caveat": "Reprendre la question et la structure, pas le tour précis de Zach King ; signaler clairement l’animation ou l’accessoire et ne pas présenter un rendu généré comme une captation réelle.",
       "referencePost": {
         "platform": "instagram",
         "author": "@zachking",
@@ -3352,25 +3504,29 @@
         {
           "tone": "complice",
           "label": "Complice",
-          "title": "Tasse ou gâteau ?",
-          "concept": "Le faux cahier-gâteau reste une illusion générique, pas un insight Lofi Girl.",
-          "copy": "Une seule contient du café. L'autre explique pourquoi le chat est déjà sur le bureau."
+          "title": "Choisis avant la coupe",
+          "concept": "Deux cahiers annotés paraissent identiques ; Lofi Girl lève le couteau et le chat pose sa patte sur celui que la communauté doit sauver.",
+          "copy": "L’un contient mes notes. L’autre contient ma vraie motivation de finir ce chapitre."
         },
         {
           "tone": "cozy",
           "label": "Cozy",
-          "title": "La fenêtre impossible",
-          "concept": "Deux vues de la ville paraissent identiques ; le rideau bouge et révèle que l'une est une petite peinture posée contre la vraie fenêtre.",
-          "copy": "Parfois, le paysage qu'on cherche tient déjà sur le coin du bureau."
+          "title": "La pause cachée sur le bureau",
+          "concept": "La caméra parcourt les objets du bureau ; un seul est un gâteau, révélé après le dernier bloc de 25 minutes.",
+          "copy": "Une petite récompense s’est glissée entre les pages. Tu l’avais repérée ?"
         },
         {
           "tone": "absurde",
           "label": "Absurde",
-          "title": "Chat ou coussin ?",
-          "concept": "Deux silhouettes identiques dorment sur le lit ; Lofi Girl touche la mauvaise et découvre un coussin, tandis que le vrai chat apparaît dans sa tasse.",
-          "copy": "Bonne réponse : aucun des deux. Il était dans la tasse."
+          "title": "Le chat choisit mal",
+          "concept": "Le chat s’assoit sur le vrai cahier pour le protéger ; Lofi Girl coupe l’autre, qui révèle un gâteau, puis il change immédiatement de camp.",
+          "copy": "Il défendait mes notes jusqu’à ce qu’il comprenne l’option dessert."
         }
-      ]
+      ],
+      "trendKey": "is-it-cake-or-fake",
+      "clusterKey": "format:cahier-ou-gateau",
+      "firstSeenAt": "2026-07-11T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "not-a-relaxing-environment",
@@ -3439,7 +3595,11 @@
           "concept": "Un badge « espace calme » apparaît pendant que le chat renverse trois crayons, lance la musique et occupe tout le cahier.",
           "copy": "Audit terminé : le chat a lui-même délivré la certification."
         }
-      ]
+      ],
+      "trendKey": "not-a-relaxing-environment",
+      "clusterKey": "format:not-a-relaxing-environment",
+      "firstSeenAt": "2026-08-06T12:00:00.000Z",
+      "lastVerifiedAt": "2026-08-06T12:00:00.000Z"
     },
     {
       "id": "broken-rules-temptation",
@@ -3527,7 +3687,11 @@
           "concept": "Le chat lui apporte une fiche supplémentaire après qu’elle a officiellement terminé ses révisions.",
           "copy": "La direction vient d’ajouter un chapitre au programme."
         }
-      ]
+      ],
+      "trendKey": "broken-rules-temptation",
+      "clusterKey": "spoken-audio:la-regle-qui-saute-a-la-premiere-tentation",
+      "firstSeenAt": "2026-07-09T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "viral-moment-backstory",
@@ -3615,7 +3779,11 @@
           "concept": "Le chat interrompt le récit et revendique toute la création de la routine Lofi.",
           "copy": "Elle dit que c’était son idée. Les archives disent autre chose."
         }
-      ]
+      ],
+      "trendKey": "viral-moment-backstory",
+      "clusterKey": "spoken-audio:l-histoire-derriere-mon-moment-viral",
+      "firstSeenAt": "2026-07-16T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "baby-just-wanna-dance",
@@ -3703,7 +3871,11 @@
           "concept": "Le chat relance volontairement le minuteur toutes les trente secondes pour multiplier les pauses dansées.",
           "copy": "Quelqu’un a modifié les réglages du Pomodoro."
         }
-      ]
+      ],
+      "trendKey": "baby-just-wanna-dance",
+      "clusterKey": "sound:baby-i-just-wanna-dance",
+      "firstSeenAt": "2026-07-10T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "different-lives-split",
@@ -3791,7 +3963,11 @@
           "concept": "Lofi Girl termine une page pendant que le chat lance une entreprise, tient une réunion et prend sa retraite.",
           "copy": "J’ai fini mon introduction. Lui a déjà revendu sa société."
         }
-      ]
+      ],
+      "trendKey": "different-lives-split",
+      "clusterKey": "format:deux-vies-completement-differentes",
+      "firstSeenAt": "2026-07-30T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "rush-hour-understand-me",
@@ -3879,7 +4055,11 @@
           "concept": "Le chat refuse le calendrier d’examens et tamponne chaque date avec une patte rouge.",
           "copy": "La direction n’a validé aucun de mes délais."
         }
-      ]
+      ],
+      "trendKey": "rush-hour-understand-me",
+      "clusterKey": "spoken-audio:do-you-understand-the-words-coming-out-of-my-mouth",
+      "firstSeenAt": "2026-06-19T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "petal-soft-chaos",
@@ -3967,7 +4147,11 @@
           "concept": "Le chat inspecte chaque élément cozy puis pousse méthodiquement la tasse hors du cadre.",
           "copy": "Contrôle qualité terminé. Une non-conformité détectée."
         }
-      ]
+      ],
+      "trendKey": "petal-soft-chaos",
+      "clusterKey": "sound:petal",
+      "firstSeenAt": "2026-07-31T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "suspect-hidden-plain-sight",
@@ -4055,7 +4239,11 @@
           "concept": "Le chat apparaît entouré de preuves : réveil débranché, stylo volé et planning déchiré.",
           "copy": "Il nie les faits malgré un dossier particulièrement solide."
         }
-      ]
+      ],
+      "trendKey": "suspect-hidden-plain-sight",
+      "clusterKey": "meme-template:le-suspect-etait-la-depuis-le-debut",
+      "firstSeenAt": "2026-07-31T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "te-extrano-motivation",
@@ -4143,7 +4331,11 @@
           "concept": "Le chat colle un avis de recherche pour une motivation vue pour la dernière fois avant les vacances.",
           "copy": "Disparue depuis juin. Récompense : une pause de quinze minutes."
         }
-      ]
+      ],
+      "trendKey": "te-extrano-motivation",
+      "clusterKey": "spoken-audio:te-extrano",
+      "firstSeenAt": "2026-07-29T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "pocketful-sunshine-mood-flip",
@@ -4231,7 +4423,11 @@
           "concept": "Le refrain transforme le chat en coach surexcité qui distribue les fiches comme des confettis.",
           "copy": "Le coach a interprété motivation de manière assez personnelle."
         }
-      ]
+      ],
+      "trendKey": "pocketful-sunshine-mood-flip",
+      "clusterKey": "sound:pocketful-of-sunshine",
+      "firstSeenAt": "2026-07-17T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "phones-eras-study-desk",
@@ -4333,7 +4529,11 @@
           "concept": "Chaque époque ajoute un appareil plus futuriste ; en 2030, un hologramme procrastine à la place de Lofi Girl.",
           "copy": "Enfin une technologie qui repousse mes deadlines automatiquement."
         }
-      ]
+      ],
+      "trendKey": "phones-eras-study-desk",
+      "clusterKey": "format:le-bureau-d-etude-a-travers-les-epoques",
+      "firstSeenAt": "2026-06-27T17:30:37.000Z",
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
     },
     {
       "id": "she-outplayed-him-study-cat",
@@ -4435,7 +4635,11 @@
           "concept": "Le chat vole le minuteur, lance 25 minutes de sieste et fixe Lofi Girl comme si c'était la règle officielle.",
           "copy": "Nouvelle méthode : 25 minutes de sieste, 5 minutes de culpabilité."
         }
-      ]
+      ],
+      "trendKey": "she-outplayed-him-study-cat",
+      "clusterKey": "format:le-chat-gagne-la-bataille-du-focus",
+      "firstSeenAt": "2026-07-10T18:09:21.000Z",
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
     },
     {
       "id": "fun-at-first-exam-week",
@@ -4537,7 +4741,11 @@
           "concept": "La première fiche se multiplie à chaque cut jusqu'à encercler Lofi Girl et le chat.",
           "copy": "J'ai fait une fiche. La fiche a fait des enfants."
         }
-      ]
+      ],
+      "trendKey": "fun-at-first-exam-week",
+      "clusterKey": "meme-template:c-etait-fun-au-debut-puis-les-examens",
+      "firstSeenAt": "2026-07-14T15:50:17.000Z",
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
     },
     {
       "id": "artist-rates-study-excuses",
@@ -4639,7 +4847,11 @@
           "concept": "Le chat juge les notes manuscrites de Lofi Girl avec des cartons de score de plus en plus sévères.",
           "copy": "Lisibilité : 2/10. Coin chaud pour dormir dessus : 10/10."
         }
-      ]
+      ],
+      "trendKey": "artist-rates-study-excuses",
+      "clusterKey": "format:un-expert-note-nos-excuses-de-procrastination",
+      "firstSeenAt": "2026-07-16T12:53:14.000Z",
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
     },
     {
       "id": "gaming-setup-night-reveal",
@@ -4743,7 +4955,11 @@
           "concept": "Le chat appuie sur le bouton ; le setup passe d’une ambiance douce à une rave incontrôlable avant de revenir au noir.",
           "copy": "J’avais demandé mode nuit, pas boss final."
         }
-      ]
+      ],
+      "trendKey": "gaming-setup-night-reveal",
+      "clusterKey": "format:peak-room",
+      "firstSeenAt": "2026-07-31T14:01:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "social-battery-solo-mode",
@@ -4848,7 +5064,11 @@
           "concept": "Il essaie café, sieste et soleil : rien. Le câble du casque touche son PC et la jauge passe immédiatement à 100%.",
           "copy": "Compatible uniquement avec mon setup. Désolé."
         }
-      ]
+      ],
+      "trendKey": "social-battery-solo-mode",
+      "clusterKey": "meme-template:social-battery-0",
+      "firstSeenAt": "2026-02-06T15:17:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "discord-eh-les-copains",
@@ -4952,7 +5172,11 @@
           "concept": "La notification commence ; Lofi Boy est déjà connecté sur PC, téléphone et console avant que la phrase se termine.",
           "copy": "Temps de réponse : moins deux secondes."
         }
-      ]
+      ],
+      "trendKey": "discord-eh-les-copains",
+      "clusterKey": "spoken-audio:eh-les-copains",
+      "firstSeenAt": "2026-03-08T23:22:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "explaining-game-lore",
@@ -5056,7 +5280,11 @@
           "concept": "Il explique pendant quatorze secondes pourquoi une porte est rouge ; le schéma finit par relier la porte à la lune et au chat.",
           "copy": "C’est essentiel au lore. Enfin… probablement."
         }
-      ]
+      ],
+      "trendKey": "explaining-game-lore",
+      "clusterKey": "format:expliquer-le-lore-comme-un-fever-dream",
+      "firstSeenAt": "2026-05-13T18:51:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "video-game-main-menu",
@@ -5160,7 +5388,11 @@
           "concept": "Il choisit Sleep ; un écran annonce « mise à jour du cerveau : 8 h 43 restantes ».",
           "copy": "Pourquoi le patch sommeil fait encore 84 Go ?"
         }
-      ]
+      ],
+      "trendKey": "video-game-main-menu",
+      "clusterKey": "format:la-vie-devient-un-menu-de-jeu",
+      "firstSeenAt": "2026-05-16T01:20:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "choose-your-lofi-character",
@@ -5265,7 +5497,11 @@
           "concept": "Le chat apparaît avec « Chaos +999 / Productivité -40 / Charisme infini » et verrouille automatiquement la sélection.",
           "copy": "Le personnage secret nous a choisis."
         }
-      ]
+      ],
+      "trendKey": "choose-your-lofi-character",
+      "clusterKey": "format:choose-your-character",
+      "firstSeenAt": "2026-05-15T03:54:00.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "backrooms-stay-in-character-lofi-boy",
@@ -5370,7 +5606,11 @@
           "concept": "Le chat débranche la console ; Lofi Boy lui remet une mini-perruque d’avatar et crie « STAY IN CHARACTER ».",
           "copy": "Le seul PNJ qui refuse systématiquement le script."
         }
-      ]
+      ],
+      "trendKey": "backrooms-stay-in-character-lofi-boy",
+      "clusterKey": "spoken-audio:stay-in-character",
+      "firstSeenAt": "2026-08-06T14:39:13.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     },
     {
       "id": "obsession-nice-date-lofi-boy",
@@ -5475,7 +5715,85 @@
           "concept": "Lofi Girl lui demande s’il a fini sa to-do ; Lofi Boy cache sa manette pendant la panique croissante.",
           "copy": "Quand ton alibi « pause de cinq minutes » rencontre l’historique Steam."
         }
-      ]
+      ],
+      "trendKey": "obsession-nice-date-lofi-boy",
+      "clusterKey": "spoken-audio:no-no-no-nice-date",
+      "firstSeenAt": "2026-05-21T21:01:31.000Z",
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
     }
-  ]
+  ],
+  "refresh": {
+    "cadenceHours": 24,
+    "lastAttemptAt": "2026-08-11T08:21:04.282Z",
+    "lastSuccessfulAt": "2026-08-11T08:21:04.282Z",
+    "nextScheduledAt": "2026-08-12T08:21:04.282Z",
+    "status": "success",
+    "runId": "local-2026-08-11",
+    "runUrl": null,
+    "sourceChecks": [
+      {
+        "id": "buffer-tiktok",
+        "label": "Buffer · TikTok",
+        "platform": "tiktok",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 15
+      },
+      {
+        "id": "later-instagram",
+        "label": "Later · Instagram Reels",
+        "platform": "instagram",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 16
+      },
+      {
+        "id": "socialpilot-tiktok",
+        "label": "SocialPilot · TikTok",
+        "platform": "tiktok",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 21
+      },
+      {
+        "id": "socialpilot-instagram",
+        "label": "SocialPilot · Instagram Reels",
+        "platform": "instagram",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 21
+      },
+      {
+        "id": "tokchart-public",
+        "label": "Tokchart · sons TikTok",
+        "platform": "tiktok",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 2
+      },
+      {
+        "id": "youtube-shorts-daily",
+        "label": "TrendVideosHub · YouTube Shorts",
+        "platform": "youtube",
+        "status": "success",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 8
+      },
+      {
+        "id": "x-france-trends",
+        "label": "X · tendances France",
+        "platform": "x",
+        "status": "failed",
+        "checkedAt": "2026-08-11T08:21:04.282Z",
+        "candidatesMatched": 0
+      }
+    ],
+    "counts": {
+      "checkedSources": 6,
+      "matchedSignals": 83,
+      "actionable": 50,
+      "lofiGirl": 42,
+      "lofiBoy": 8
+    }
+  }
 }

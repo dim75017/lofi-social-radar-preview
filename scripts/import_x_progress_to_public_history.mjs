@@ -13,6 +13,7 @@ import { hasUnpairedSurrogate, sanitizeJsonUnicode, truncateUnicode } from "./li
 const ROOT = resolve(import.meta.dirname, "..");
 const DEFAULT_PROGRESS_PATH = resolve(ROOT, "work", "x-scan-progress.json");
 const DEFAULT_HISTORY_PATH = resolve(ROOT, "data", "public-history.json");
+const DEFAULT_SUMMARY_PATH = resolve(ROOT, "data", "public-history-summary.json");
 const PROVIDER = "x-api-v2-full-archive";
 const ENDPOINT = "https://api.x.com/2/tweets/search/all";
 const QUERY = "from:lofigirl -is:retweet";
@@ -519,7 +520,12 @@ async function main() {
   const options = parseOptions(process.argv.slice(2));
   const progressPath = configuredPath("X_PROGRESS_PATH", DEFAULT_PROGRESS_PATH);
   const historyPath = configuredPath("PUBLIC_HISTORY_PATH", DEFAULT_HISTORY_PATH);
+  const summaryPath = configuredPath("PUBLIC_HISTORY_SUMMARY_PATH", DEFAULT_SUMMARY_PATH);
   const progress = requireRecord(await readJson(progressPath, "Progression X"), "work/x-scan-progress.json");
+  const publicSummary = requireRecord(
+    sanitizeJsonUnicode(await readJson(summaryPath, "Résumé de l'historique public")),
+    "data/public-history-summary.json",
+  );
   const { snapshot, xCoverage } = validateSnapshot(
     sanitizeJsonUnicode(await readJson(historyPath, "Historique public")),
   );
@@ -617,8 +623,31 @@ async function main() {
   if (nextSnapshot.posts.length < snapshot.posts.length) {
     throw new Error(`Import X refusé : le snapshot total passerait de ${snapshot.posts.length} à ${nextSnapshot.posts.length} posts.`);
   }
+  const nextPublicSummary = {
+    ...publicSummary,
+    generatedAt: nextSnapshot.generatedAt,
+    totalPostCount: nextSnapshot.posts.length,
+    platformCounts: {
+      ...publicSummary.platformCounts,
+      x: finalXPosts.length,
+    },
+    formatCounts: {
+      ...publicSummary.formatCounts,
+      x: {
+        static: finalXPosts.filter((post) => post.format === "static").length,
+        video: finalXPosts.filter((post) => post.format === "video").length,
+        text: finalXPosts.filter((post) => post.format === "text").length,
+      },
+    },
+    coverage: nextSnapshot.coverage,
+  };
   const changed = JSON.stringify(nextSnapshot) !== JSON.stringify(snapshot);
-  if (changed && !options.dryRun) await writeAtomically(historyPath, nextSnapshot);
+  if (changed && !options.dryRun) {
+    await Promise.all([
+      writeAtomically(historyPath, nextSnapshot),
+      writeAtomically(summaryPath, nextPublicSummary),
+    ]);
+  }
 
   const summary = {
     dryRun: options.dryRun,

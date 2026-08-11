@@ -3,6 +3,36 @@ export type TrendLifecycle = "new" | "rising" | "peaking" | "steady" | "watch";
 export type TrendConfidence = "high" | "medium" | "watch";
 export type TrendTone = "complice" | "cozy" | "absurde";
 export type TrendCharacter = "lofi-girl" | "lofi-boy";
+export type TrendRefreshStatus = "success" | "degraded";
+
+export type TrendSourceCheck = {
+  id: string;
+  label: string;
+  platform: TrendPlatform;
+  status: "success" | "failed";
+  checkedAt: string;
+  candidatesMatched: number;
+};
+
+export type TrendRefreshCounts = {
+  checkedSources: number;
+  matchedSignals: number;
+  actionable: number;
+  lofiGirl: number;
+  lofiBoy: number;
+};
+
+export type TrendRefreshMetadata = {
+  cadenceHours: 24;
+  lastAttemptAt: string;
+  lastSuccessfulAt: string;
+  nextScheduledAt: string;
+  status: TrendRefreshStatus;
+  runId: string | null;
+  runUrl: string | null;
+  sourceChecks: TrendSourceCheck[];
+  counts: TrendRefreshCounts;
+};
 
 export type TrendObservation = {
   id: string;
@@ -51,9 +81,13 @@ export type TrendReferencePost = {
 
 export type SocialTrend = {
   id: string;
+  trendKey: string;
+  clusterKey: string;
   title: string;
   character: TrendCharacter;
   territory: string;
+  firstSeenAt: string;
+  lastVerifiedAt: string;
   type: "hashtag" | "sound" | "spoken-audio" | "meme-template" | "format" | "moment";
   summary: string;
   mechanic: string;
@@ -74,8 +108,9 @@ export type SocialTrend = {
 };
 
 export type SocialTrendFeed = {
-  version: 4;
+  version: 5;
   capturedAt: string;
+  refresh: TrendRefreshMetadata;
   market: string;
   methodology: string;
   trends: SocialTrend[];
@@ -91,6 +126,14 @@ export const TREND_PRIORITY_THRESHOLD = 90;
 export const MIN_TREND_VIDEO_LIKES = 50_000;
 export const MAX_TREND_VIDEO_DURATION_SECONDS = 30;
 export const MIN_ACTIONABLE_TREND_LOFI_FIT = 85;
+export const TREND_REFRESH_CADENCE_HOURS = 24;
+export const TREND_PUBLISH_MAX_AGE_HOURS = 26;
+export const TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS = 72;
+export const TREND_STEADY_MAX_VERIFICATION_AGE_HOURS = 14 * 24;
+export const MIN_PUBLISHABLE_ACTIONABLE_TRENDS = 50;
+export const MIN_PUBLISHABLE_LOFI_GIRL_SHARE = 0.8;
+
+const HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
 
 export function hasValidTrendReferenceDuration(referencePost: TrendReferencePost) {
   if (referencePost.mediaType !== "video") {
@@ -108,6 +151,7 @@ export function isQualifiedTrendReferencePost(
   referencePost: TrendReferencePost | null,
 ) {
   if (!referencePost || !hasValidTrendReferenceDuration(referencePost)) return false;
+  if (referencePost.mediaType === "unknown") return false;
   if (referencePost.mediaType !== "video") return true;
   return (
     referencePost.metrics.likes !== null &&
@@ -117,6 +161,7 @@ export function isQualifiedTrendReferencePost(
 
 export function isActionableSocialTrend(trend: SocialTrend) {
   return (
+    trend.lifecycle !== "watch" &&
     trend.lofiFitScore >= MIN_ACTIONABLE_TREND_LOFI_FIT &&
     isQualifiedTrendReferencePost(trend.referencePost)
   );
@@ -149,6 +194,74 @@ export function rankSocialTrends(trends: readonly SocialTrend[]) {
   });
 }
 
+/**
+ * Selects a Lofi Girl-led feed without changing any trend priority score.
+ * Each universe keeps its own score order; Lofi Boy is capped at 20% and
+ * interleaved after groups of four Lofi Girl trends when enough data exists.
+ */
+export function selectGirlFirstSocialTrends(
+  trends: readonly SocialTrend[],
+  limit = MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+) {
+  const normalizedLimit = Number.isFinite(limit)
+    ? Math.max(0, Math.floor(limit))
+    : 0;
+  const targetSize = Math.min(normalizedLimit, trends.length);
+  if (targetSize === 0) return [];
+
+  const ranked = rankSocialTrends(trends);
+  const girls = ranked.filter((trend) => trend.character === "lofi-girl");
+  const boys = ranked.filter((trend) => trend.character === "lofi-boy");
+  const minimumGirlCount = Math.ceil(
+    targetSize * MIN_PUBLISHABLE_LOFI_GIRL_SHARE,
+  );
+  const maximumBoyCount = targetSize - minimumGirlCount;
+  const selectedBoyCount = Math.min(boys.length, maximumBoyCount);
+  const selectedGirlCount = Math.min(
+    girls.length,
+    targetSize - selectedBoyCount,
+  );
+  const selectedGirls = girls.slice(0, selectedGirlCount);
+  const selectedBoys = boys.slice(0, selectedBoyCount);
+
+  let remaining = targetSize - selectedGirls.length - selectedBoys.length;
+  if (remaining > 0) {
+    const extraGirls = girls.slice(selectedGirls.length, selectedGirls.length + remaining);
+    selectedGirls.push(...extraGirls);
+    remaining -= extraGirls.length;
+  }
+  if (remaining > 0) {
+    selectedBoys.push(
+      ...boys.slice(selectedBoys.length, selectedBoys.length + remaining),
+    );
+  }
+
+  const selected: SocialTrend[] = [];
+  let girlIndex = 0;
+  let boyIndex = 0;
+  while (
+    girlIndex < selectedGirls.length ||
+    boyIndex < selectedBoys.length
+  ) {
+    for (let index = 0; index < 4 && girlIndex < selectedGirls.length; index += 1) {
+      selected.push(selectedGirls[girlIndex]);
+      girlIndex += 1;
+    }
+    if (boyIndex < selectedBoys.length) {
+      selected.push(selectedBoys[boyIndex]);
+      boyIndex += 1;
+    }
+    if (girlIndex >= selectedGirls.length) {
+      while (boyIndex < selectedBoys.length) {
+        selected.push(selectedBoys[boyIndex]);
+        boyIndex += 1;
+      }
+    }
+  }
+
+  return selected.slice(0, targetSize);
+}
+
 export function filterSocialTrends(
   trends: readonly SocialTrend[],
   options: {
@@ -171,6 +284,31 @@ export function filterSocialTrends(
       return true;
     }),
   );
+}
+
+type PublishableTrendFeedOptions = {
+  now?: Date | string | number;
+};
+
+function canonicalReferenceIdentity(referencePost: TrendReferencePost) {
+  const url = new URL(referencePost.url);
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  const path = url.pathname.replace(/\/+$/, "");
+  return `${referencePost.platform}:${host}${path}`;
+}
+
+function resolveNowTimestamp(now: PublishableTrendFeedOptions["now"]) {
+  const timestamp = now === undefined
+    ? Date.now()
+    : now instanceof Date
+      ? now.getTime()
+      : typeof now === "number"
+        ? now
+        : Date.parse(now);
+  if (!Number.isFinite(timestamp)) {
+    throw new Error("Date de contrÃ´le du feed Trends invalide.");
+  }
+  return timestamp;
 }
 
 export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
@@ -217,6 +355,10 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     "text",
     "unknown",
   ]);
+  const validRefreshStatuses = new Set<TrendRefreshStatus>([
+    "success",
+    "degraded",
+  ]);
   const isNullableMetric = (candidate: unknown) =>
     candidate === null ||
     (typeof candidate === "number" && Number.isFinite(candidate) && candidate >= 0);
@@ -245,17 +387,91 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     }
   };
 
+  const capturedTimestamp = typeof feed?.capturedAt === "string"
+    ? Date.parse(feed.capturedAt)
+    : Number.NaN;
+  const refresh = feed?.refresh;
   if (
-    feed?.version !== 4 ||
+    feed?.version !== 5 ||
     !isText(feed.capturedAt) ||
-    !Number.isFinite(Date.parse(feed.capturedAt)) ||
+    !Number.isFinite(capturedTimestamp) ||
+    !refresh ||
+    refresh.cadenceHours !== TREND_REFRESH_CADENCE_HOURS ||
+    !isText(refresh.lastAttemptAt) ||
+    !Number.isFinite(Date.parse(refresh.lastAttemptAt)) ||
+    !isText(refresh.lastSuccessfulAt) ||
+    !Number.isFinite(Date.parse(refresh.lastSuccessfulAt)) ||
+    !isText(refresh.nextScheduledAt) ||
+    !Number.isFinite(Date.parse(refresh.nextScheduledAt)) ||
+    !validRefreshStatuses.has(refresh.status) ||
+    (refresh.runId !== null && !isText(refresh.runId)) ||
+    (refresh.runUrl !== null && !isWebUrl(refresh.runUrl)) ||
+    !Array.isArray(refresh.sourceChecks) ||
+    refresh.sourceChecks.length === 0 ||
+    !refresh.counts ||
     !isText(feed.market) ||
     !isText(feed.methodology) ||
     !Array.isArray(feed.trends)
   ) {
     throw new Error("Snapshot Trends invalide.");
   }
+  const lastAttemptTimestamp = Date.parse(refresh.lastAttemptAt);
+  const lastSuccessfulTimestamp = Date.parse(refresh.lastSuccessfulAt);
+  const nextScheduledTimestamp = Date.parse(refresh.nextScheduledAt);
+  if (
+    lastSuccessfulTimestamp > lastAttemptTimestamp ||
+    lastAttemptTimestamp > capturedTimestamp ||
+    nextScheduledTimestamp <= capturedTimestamp ||
+    nextScheduledTimestamp - lastAttemptTimestamp >
+      TREND_PUBLISH_MAX_AGE_HOURS * HOUR_IN_MILLISECONDS
+  ) {
+    throw new Error("MÃ©tadonnÃ©es de rafraÃ®chissement Trends incohÃ©rentes.");
+  }
+  const sourceCheckIds = new Set<string>();
+  for (const check of refresh.sourceChecks) {
+    const checkedTimestamp = typeof check?.checkedAt === "string"
+      ? Date.parse(check.checkedAt)
+      : Number.NaN;
+    if (
+      !check ||
+      !isText(check.id) ||
+      sourceCheckIds.has(check.id) ||
+      !isText(check.label) ||
+      !validPlatforms.has(check.platform) ||
+      !["success", "failed"].includes(check.status) ||
+      !isText(check.checkedAt) ||
+      !Number.isFinite(checkedTimestamp) ||
+      checkedTimestamp < lastAttemptTimestamp ||
+      checkedTimestamp > capturedTimestamp ||
+      !Number.isInteger(check.candidatesMatched) ||
+      check.candidatesMatched < 0
+    ) {
+      throw new Error(`ContrÃ´le de source Trends invalide : ${check?.id ?? "inconnu"}`);
+    }
+    sourceCheckIds.add(check.id);
+  }
+  const refreshCountValues = [
+    refresh.counts.checkedSources,
+    refresh.counts.matchedSignals,
+    refresh.counts.actionable,
+    refresh.counts.lofiGirl,
+    refresh.counts.lofiBoy,
+  ];
+  if (
+    refreshCountValues.some((count) => !Number.isInteger(count) || count < 0) ||
+    refresh.counts.checkedSources !== refresh.sourceChecks.filter(
+      (check) => check.status === "success",
+    ).length ||
+    refresh.counts.matchedSignals !== refresh.sourceChecks.reduce(
+      (total, check) =>
+        check.status === "success" ? total + check.candidatesMatched : total,
+      0,
+    )
+  ) {
+    throw new Error("Compteurs de rafraÃ®chissement Trends incohÃ©rents.");
+  }
   const ids = new Set<string>();
+  const trendKeys = new Set<string>();
   const observationIds = new Set<string>();
   for (const trend of feed.trends) {
     if (!trend || typeof trend !== "object") {
@@ -263,10 +479,29 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     }
     if (!trend.id || ids.has(trend.id)) throw new Error(`Trend dupliquée : ${trend.id}`);
     ids.add(trend.id);
+    const normalizedTrendKey = trend.trendKey?.trim().toLocaleLowerCase("fr");
+    if (!normalizedTrendKey || trendKeys.has(normalizedTrendKey)) {
+      throw new Error(`ClÃ© de trend dupliquÃ©e ou invalide : ${trend.trendKey ?? trend.id}`);
+    }
+    trendKeys.add(normalizedTrendKey);
+    const firstSeenTimestamp = typeof trend.firstSeenAt === "string"
+      ? Date.parse(trend.firstSeenAt)
+      : Number.NaN;
+    const lastVerifiedTimestamp = typeof trend.lastVerifiedAt === "string"
+      ? Date.parse(trend.lastVerifiedAt)
+      : Number.NaN;
     if (
+      !isText(trend.trendKey) ||
+      !isText(trend.clusterKey) ||
       !isText(trend.title) ||
       !validCharacters.has(trend.character) ||
       !isText(trend.territory) ||
+      !isText(trend.firstSeenAt) ||
+      !Number.isFinite(firstSeenTimestamp) ||
+      !isText(trend.lastVerifiedAt) ||
+      !Number.isFinite(lastVerifiedTimestamp) ||
+      firstSeenTimestamp > lastVerifiedTimestamp ||
+      lastVerifiedTimestamp > capturedTimestamp ||
       !validTypes.has(trend.type) ||
       !isText(trend.summary) ||
       !isText(trend.mechanic) ||
@@ -304,10 +539,13 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
         !hasValidTrendReferenceDuration(referencePost) ||
         (referencePost.thumbnailUrl !== null && !isWebUrl(referencePost.thumbnailUrl)) ||
         (referencePost.publishedAt !== null &&
-          (!isText(referencePost.publishedAt) || !Number.isFinite(Date.parse(referencePost.publishedAt)))) ||
+          (!isText(referencePost.publishedAt) ||
+            !Number.isFinite(Date.parse(referencePost.publishedAt)) ||
+            Date.parse(referencePost.publishedAt) > capturedTimestamp)) ||
         !isText(referencePost.capturedAt) ||
         !Number.isFinite(Date.parse(referencePost.capturedAt)) ||
-        Date.parse(referencePost.capturedAt) > Date.parse(feed.capturedAt) ||
+        Date.parse(referencePost.capturedAt) < firstSeenTimestamp ||
+        Date.parse(referencePost.capturedAt) > lastVerifiedTimestamp ||
         !isText(referencePost.selectionLabel) ||
         !isText(referencePost.sourceLabel) ||
         !isWebUrl(referencePost.sourceUrl) ||
@@ -353,6 +591,8 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
         !isWebUrl(observation.sourceUrl) ||
         !isText(observation.observedAt) ||
         !Number.isFinite(Date.parse(observation.observedAt)) ||
+        Date.parse(observation.observedAt) < firstSeenTimestamp ||
+        Date.parse(observation.observedAt) > lastVerifiedTimestamp ||
         !isText(observation.windowLabel) ||
         !isText(observation.signal) ||
         !validExactness.has(observation.exactness)
@@ -367,6 +607,111 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
       }
     }
   }
+  const actionable = feed.trends.filter(isActionableSocialTrend);
+  const lofiGirlCount = actionable.filter(
+    (trend) => trend.character === "lofi-girl",
+  ).length;
+  const lofiBoyCount = actionable.length - lofiGirlCount;
+  if (
+    refresh.counts.actionable !== actionable.length ||
+    refresh.counts.lofiGirl !== lofiGirlCount ||
+    refresh.counts.lofiBoy !== lofiBoyCount ||
+    refresh.counts.lofiGirl + refresh.counts.lofiBoy !==
+      refresh.counts.actionable
+  ) {
+    throw new Error("Compteurs de tendances exploitables incohÃ©rents.");
+  }
+  return feed;
+}
+
+export function assertPublishableSocialTrendFeed(
+  value: unknown,
+  options: PublishableTrendFeedOptions = {},
+) {
+  const feed = assertSocialTrendFeed(value);
+  const nowTimestamp = resolveNowTimestamp(options.now);
+  const capturedTimestamp = Date.parse(feed.capturedAt);
+  const lastAttemptTimestamp = Date.parse(feed.refresh.lastAttemptAt);
+  const lastSuccessfulTimestamp = Date.parse(feed.refresh.lastSuccessfulAt);
+  const maximumAge = TREND_PUBLISH_MAX_AGE_HOURS * HOUR_IN_MILLISECONDS;
+
+  if (
+    capturedTimestamp > nowTimestamp ||
+    lastAttemptTimestamp > nowTimestamp ||
+    lastSuccessfulTimestamp > nowTimestamp
+  ) {
+    throw new Error("Le feed Trends contient une date future.");
+  }
+  if (
+    nowTimestamp - capturedTimestamp > maximumAge ||
+    nowTimestamp - lastAttemptTimestamp > maximumAge ||
+    nowTimestamp - lastSuccessfulTimestamp > maximumAge
+  ) {
+    throw new Error(
+      `Le snapshot Trends dÃ©passe la fraÃ®cheur maximale de ${TREND_PUBLISH_MAX_AGE_HOURS} h.`,
+    );
+  }
+  if (feed.refresh.status !== "success") {
+    throw new Error("Le dernier rafraÃ®chissement Trends n'est pas complet.");
+  }
+
+  const actionable = feed.trends.filter(isActionableSocialTrend);
+  if (actionable.length < MIN_PUBLISHABLE_ACTIONABLE_TRENDS) {
+    throw new Error(
+      `Au moins ${MIN_PUBLISHABLE_ACTIONABLE_TRENDS} trends exploitables sont requises.`,
+    );
+  }
+
+  const referenceIdentities = new Set<string>();
+  const actionableTrendKeys = new Set<string>();
+  for (const trend of actionable) {
+    const referencePost = trend.referencePost;
+    if (
+      trend.lifecycle === "watch" ||
+      !referencePost ||
+      referencePost.mediaType === "unknown"
+    ) {
+      throw new Error(`Trend non publiable : ${trend.id}`);
+    }
+    const lastVerifiedTimestamp = Date.parse(trend.lastVerifiedAt);
+    const maximumVerificationAgeHours = trend.lifecycle === "steady"
+      ? TREND_STEADY_MAX_VERIFICATION_AGE_HOURS
+      : TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS;
+    if (
+      lastVerifiedTimestamp > nowTimestamp ||
+      nowTimestamp - lastVerifiedTimestamp >
+        maximumVerificationAgeHours * HOUR_IN_MILLISECONDS
+    ) {
+      throw new Error(
+        `Trend trop ancienne : ${trend.id} (vÃ©rification > ${maximumVerificationAgeHours} h).`,
+      );
+    }
+    const referenceIdentity = canonicalReferenceIdentity(referencePost);
+    if (referenceIdentities.has(referenceIdentity)) {
+      throw new Error(`RÃ©fÃ©rence native dupliquÃ©e : ${referencePost.url}`);
+    }
+    referenceIdentities.add(referenceIdentity);
+    const trendKey = trend.trendKey.trim().toLocaleLowerCase("fr");
+    if (actionableTrendKeys.has(trendKey)) {
+      throw new Error(`ClÃ© de trend dupliquÃ©e : ${trend.trendKey}`);
+    }
+    actionableTrendKeys.add(trendKey);
+  }
+
+  const topTrends = selectGirlFirstSocialTrends(
+    actionable,
+    MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  );
+  const lofiGirlCount = topTrends.filter(
+    (trend) => trend.character === "lofi-girl",
+  ).length;
+  if (
+    topTrends.length !== MIN_PUBLISHABLE_ACTIONABLE_TRENDS ||
+    lofiGirlCount / topTrends.length < MIN_PUBLISHABLE_LOFI_GIRL_SHARE
+  ) {
+    throw new Error("Le top 50 Trends doit contenir au moins 80 % de Lofi Girl.");
+  }
+
   return feed;
 }
 

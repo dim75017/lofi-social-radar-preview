@@ -6328,6 +6328,12 @@ a {
   white-space: nowrap;
 }
 
+.trend-snapshot-pill.is-late {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.1);
+  color: #fecaca;
+}
+
 .trend-details-modal {
   width: min(100%, 980px);
 }

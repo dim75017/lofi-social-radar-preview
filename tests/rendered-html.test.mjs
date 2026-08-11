@@ -123,6 +123,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /cache: "force-cache"/);
   assert.match(previewEntry, /RAW_TREND_FEED_URL/);
   assert.match(previewEntry, /initialTrendFeed=\{trendFeed\}/);
+  assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
+  assert.match(previewEntry, /visibilitychange/);
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);
@@ -136,8 +138,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /TrendReferenceMedia/);
   assert.match(component, /TrendDetailsModal/);
   assert.match(component, /trend-reference-card/);
-  assert.match(component, /Trends vraiment exploitables/);
+  assert.match(component, /50\+ trends vraiment exploitables/);
+  assert.match(component, /Mise à jour quotidienne · focus Lofi Girl/);
   assert.match(component, /isActionableSocialTrend/);
+  assert.match(component, /selectGirlFirstSocialTrends/);
+  assert.match(component, /feed\.refresh\.counts\.lofiGirl/);
   assert.match(component, /trend-card-source-title/);
   assert.match(component, /TREND_CHARACTER_FILTERS/);
   assert.match(component, /TREND_CHARACTER_META/);
@@ -201,6 +206,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.trend-shorts-grid \.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.trend-card-source-title\s*\{/);
   assert.match(styles, /\.trend-feed-heading\s*\{/);
+  assert.match(styles, /\.trend-snapshot-pill\.is-late\s*\{/);
   assert.match(styles, /\.trend-duration-badge\s*\{/);
   assert.match(styles, /\.trend-details-modal\s*\{/);
   assert.match(styles, /\.recommendation-source-links a > img/);

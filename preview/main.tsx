@@ -58,36 +58,47 @@ function PublicPreview() {
     const controller = new AbortController();
     let active = true;
 
-    void fetch(`${RAW_TREND_FEED_URL}?v=${Date.now()}`, {
-      cache: "no-store",
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Actualisation Trends impossible (${response.status}).`);
-        }
-        return assertSocialTrendFeed(
-          (await response.json()) as SocialTrendFeed,
-        );
+    const refreshTrendFeed = () => {
+      void fetch(`${RAW_TREND_FEED_URL}?v=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
       })
-      .then((snapshot) => {
-        if (!active) return;
-        const incomingAt = Date.parse(snapshot.capturedAt);
-        if (!Number.isFinite(incomingAt)) return;
-        setTrendFeed((current) => {
-          const currentAt = Date.parse(current.capturedAt);
-          return !Number.isFinite(currentAt) || incomingAt >= currentAt
-            ? snapshot
-            : current;
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Actualisation Trends impossible (${response.status}).`);
+          }
+          return assertSocialTrendFeed(
+            (await response.json()) as SocialTrendFeed,
+          );
+        })
+        .then((snapshot) => {
+          if (!active) return;
+          const incomingAt = Date.parse(snapshot.capturedAt);
+          if (!Number.isFinite(incomingAt)) return;
+          setTrendFeed((current) => {
+            const currentAt = Date.parse(current.capturedAt);
+            return !Number.isFinite(currentAt) || incomingAt >= currentAt
+              ? snapshot
+              : current;
+          });
+        })
+        .catch(() => {
+          // Le snapshot embarqué reste disponible hors ligne ou si GitHub est indisponible.
         });
-      })
-      .catch(() => {
-        // Le snapshot embarqué reste disponible hors ligne ou si GitHub est indisponible.
-      });
+    };
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") refreshTrendFeed();
+    };
+
+    refreshTrendFeed();
+    const hourlyRefresh = window.setInterval(refreshTrendFeed, 60 * 60 * 1_000);
+    document.addEventListener("visibilitychange", refreshOnReturn);
 
     return () => {
       active = false;
+      window.clearInterval(hourlyRefresh);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
       controller.abort();
     };
   }, []);
