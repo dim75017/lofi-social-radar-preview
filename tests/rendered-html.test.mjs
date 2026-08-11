@@ -140,6 +140,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /trend-reference-card/);
   assert.match(component, /50\+ trends vraiment exploitables/);
   assert.match(component, /Mise à jour quotidienne · focus Lofi Girl/);
+  assert.match(component, /Repris par \{reuseCount\}\+ créateurs/);
+  assert.match(component, /Vraie trend, pas simple post viral/);
+  assert.match(component, /Preuve de reprise par plusieurs créateurs/);
+  assert.match(component, /reuseEvidence\.posts\.map/);
   assert.match(component, /isActionableSocialTrend/);
   assert.match(component, /selectGirlFirstSocialTrends/);
   assert.match(component, /feed\.refresh\.counts\.lofiGirl/);
@@ -205,6 +209,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.trend-shorts-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(260px,\s*1fr\)\)/);
   assert.match(styles, /\.trend-shorts-grid \.trend-reference-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.trend-card-source-title\s*\{/);
+  assert.match(styles, /\.trend-reuse-pill\s*\{/);
+  assert.match(styles, /\.trend-reuse-creators\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(styles, /\.trend-feed-heading\s*\{/);
   assert.match(styles, /\.trend-snapshot-pill\.is-late\s*\{/);
   assert.match(styles, /\.trend-duration-badge\s*\{/);

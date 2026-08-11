@@ -6279,6 +6279,22 @@ a {
   gap: 11px;
 }
 
+.trend-reuse-pill {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 27px;
+  align-items: center;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.09);
+  padding: 5px 9px;
+  color: #f7d488;
+  font-size: 11px;
+  font-weight: 840;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .trend-card-meta-line {
   display: flex;
   min-height: 31px;
@@ -6376,9 +6392,93 @@ a {
 .trend-details-modal .trend-modal-copy-section,
 .trend-details-modal .trend-detail-grid,
 .trend-details-modal .trend-tags,
+.trend-details-modal .trend-reuse-proof,
 .trend-details-modal .trend-proof-section,
 .trend-details-modal .trend-caveat {
   margin-top: 12px;
+}
+
+.trend-reuse-proof {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.26);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(251, 191, 36, 0.1), transparent 36%),
+    rgba(7, 8, 13, 0.38);
+  padding: 14px;
+}
+
+.trend-reuse-proof > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trend-reuse-proof h4,
+.trend-reuse-proof p {
+  margin: 0;
+}
+
+.trend-reuse-proof h4 {
+  margin-top: 3px;
+  font-family: Sora, Inter, sans-serif;
+  font-size: 16px;
+}
+
+.trend-reuse-proof > header time {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.trend-reuse-proof > p {
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+}
+
+.trend-reuse-creators {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trend-reuse-creators a {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.trend-reuse-creators a:hover,
+.trend-reuse-creators a:focus-visible {
+  border-color: rgba(251, 191, 36, 0.42);
+  background: rgba(251, 191, 36, 0.07);
+  outline: none;
+}
+
+.trend-reuse-creators b,
+.trend-reuse-creators small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-reuse-creators b {
+  font-size: 12px;
+}
+
+.trend-reuse-creators small {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .trend-modal-copy-section {
@@ -6409,6 +6509,10 @@ a {
 
 @media (max-width: 640px) {
   .trend-shorts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-reuse-creators {
     grid-template-columns: 1fr;
   }
 }

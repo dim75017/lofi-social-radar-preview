@@ -1,4 +1,4 @@
-# Feed Trends v5
+# Feed Trends v6
 
 Le feed public est un snapshot quotidien conservé dans `data/trends/feed.json`. Il est conçu pour afficher au moins 50 tendances distinctes et exploitables, avec Lofi Girl comme univers prioritaire. Lofi Boy reste un complément minoritaire.
 
@@ -9,6 +9,9 @@ Un nouveau snapshot n’est publié que si tous les contrôles passent :
 - au moins 50 cartes actionnables ;
 - au moins 80 % de Lofi Girl dans les 50 premières cartes ;
 - une URL native et un fingerprint distincts pour chaque carte ;
+- au moins trois créateurs distincts et trois posts natifs indépendants reprenant réellement la même mécanique ;
+- le post de référence doit faire partie de cette preuve multi-créateurs ;
+- les republications du même clip, compilations et contenus seulement homonymes ne comptent pas ;
 - aucune vidéo sous 50 000 likes publics ;
 - durée vidéo vérifiée, strictement inférieure à 30 secondes ;
 - aucun média `unknown`, aucune trend au stade `watch` dans le feed visible ;
@@ -39,6 +42,8 @@ La preview GitHub Pages embarque le dernier snapshot de secours, puis recharge l
 - `editorial-observation` : format ou mécanisme observé sur une page publique, sans métrique numérique.
 
 Une vérification quotidienne d’une page éditoriale ne rafraîchit jamais artificiellement les likes ou les vues du post de référence. Chaque métrique conserve sa propre date de capture.
+
+La preuve `reuseEvidence` est elle aussi datée. Un simple post viral reste hors du feed visible tant que deux autres créateurs n’ont pas publié leurs propres adaptations. Pour une trend active, cette preuve doit être revérifiée dans les 72 heures ; une trend stable dispose d’une fenêtre de quatorze jours.
 
 ## Limites des plateformes
 

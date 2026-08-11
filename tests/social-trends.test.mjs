@@ -7,10 +7,12 @@ import {
   filterSocialTrends,
   isActionableSocialTrend,
   isQualifiedTrendReferencePost,
+  isVerifiedMultiCreatorTrend,
   MAX_TREND_VIDEO_DURATION_SECONDS,
   MIN_ACTIONABLE_TREND_LOFI_FIT,
   MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
   MIN_PUBLISHABLE_LOFI_GIRL_SHARE,
+  MIN_TREND_DISTINCT_CREATORS,
   MIN_TREND_VIDEO_LIKES,
   rankSocialTrends,
   selectGirlFirstSocialTrends,
@@ -88,7 +90,7 @@ function shortlyAfterCapture(snapshot = feed) {
 
 test("the current snapshot is complete, sourced and honest about missing metrics", () => {
   assert.equal(assertSocialTrendFeed(feed), feed);
-  assert.equal(feed.version, 5);
+  assert.equal(feed.version, 6);
   assert.equal(feed.refresh.cadenceHours, TREND_REFRESH_CADENCE_HOURS);
   assert.ok(
     feed.refresh.runId === null || feed.refresh.runId.trim().length > 0,
@@ -155,6 +157,7 @@ test("the current snapshot is complete, sourced and honest about missing metrics
     );
 
     if (trend.referencePost === null) {
+      assert.equal(trend.reuseEvidence, null, trend.id);
       continue;
     }
 
@@ -205,6 +208,19 @@ test("the current snapshot is complete, sourced and honest about missing metrics
         trend.id,
       );
     }
+    if (isActionableSocialTrend(trend)) {
+      assert.equal(isVerifiedMultiCreatorTrend(trend), true, trend.id);
+      assert.ok(trend.reuseEvidence, trend.id);
+      assert.equal(
+        trend.reuseEvidence.minimumDistinctCreators,
+        MIN_TREND_DISTINCT_CREATORS,
+        trend.id,
+      );
+      assert.ok(
+        trend.reuseEvidence.posts.length >= MIN_TREND_DISTINCT_CREATORS,
+        trend.id,
+      );
+    }
   }
 
   assert.equal(
@@ -213,11 +229,13 @@ test("the current snapshot is complete, sourced and honest about missing metrics
   );
   for (const excludedId of [
     "back-to-school-study-reset",
-    "youll-never-see-it-coming",
     "not-a-relaxing-environment",
   ]) {
     assert.equal(feed.trends.find((trend) => trend.id === excludedId)?.referencePost, null);
   }
+  const neverSeeItComing = feed.trends.find((trend) => trend.id === "youll-never-see-it-coming");
+  assert.equal(neverSeeItComing?.referencePost?.durationSeconds, 20);
+  assert.equal(neverSeeItComing?.referencePost?.metrics.likes, 57000);
 
   assert.ok(
     feed.trends.some((trend) =>
@@ -242,6 +260,10 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     "every actionable trend must keep a qualified reference post",
   );
   assert.ok(
+    actionable.every(isVerifiedMultiCreatorTrend),
+    "every actionable trend must prove reuse by at least three creators",
+  );
+  assert.ok(
     actionable.every(
       (trend) =>
         trend.lifecycle !== "watch" &&
@@ -255,6 +277,11 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     "notes-study-france",
     "eclipse-perseides-12-aout",
     "couch-acting-challenge",
+    "is-it-cake-or-fake",
+    "she-outplayed-him-study-cat",
+    "fun-at-first-exam-week",
+    "artist-rates-study-excuses",
+    "discord-eh-les-copains",
   ]) {
     const trend = feed.trends.find((candidate) => candidate.id === rejectedId);
     assert.ok(trend, `${rejectedId} must remain auditable in the snapshot`);
@@ -267,13 +294,16 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     "suspect-hidden-plain-sight",
     "pocketful-sunshine-mood-flip",
     "phones-eras-study-desk",
-    "she-outplayed-him-study-cat",
-    "fun-at-first-exam-week",
+    "youll-never-see-it-coming",
+    "ice-melting-study-challenge",
+    "study-until-they-text-aging",
+    "deadline-tomorrow-turbo",
+    "wrap-it-up-procrastination",
+    "study-hours-scoreboard",
     "backrooms-stay-in-character-lofi-boy",
     "obsession-nice-date-lofi-boy",
     "gaming-setup-night-reveal",
     "social-battery-solo-mode",
-    "discord-eh-les-copains",
     "explaining-game-lore",
     "video-game-main-menu",
     "choose-your-lofi-character",
@@ -284,7 +314,7 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
   }
 
   const lofiBoyTrends = actionable.filter((trend) => trend.character === "lofi-boy");
-  assert.ok(lofiBoyTrends.length >= 8, "the feed must expose a real Lofi Boy selection");
+  assert.ok(lofiBoyTrends.length >= 7, "the feed must expose a real Lofi Boy selection");
   assert.ok(
     lofiBoyTrends.some((trend) => trend.territory.toLowerCase().includes("introversion")),
     "Lofi Boy must cover introversion",
@@ -326,7 +356,56 @@ test("watch lifecycle and unknown media can never become actionable", () => {
   assert.equal(isActionableSocialTrend(unknown), false);
 });
 
-test("the v5 refresh proof is internally consistent and nullable outside GitHub", () => {
+test("a trend is actionable only after reuse by three distinct creators is proven", () => {
+  assert.equal(MIN_TREND_DISTINCT_CREATORS, 3);
+  const actionable = feed.trends.find(isActionableSocialTrend);
+  assert.ok(actionable?.referencePost);
+  assert.ok(actionable.reuseEvidence);
+  assert.equal(isVerifiedMultiCreatorTrend(actionable), true);
+
+  const uniqueUrls = new Set(
+    actionable.reuseEvidence.posts.map((post) => {
+      const url = new URL(post.url);
+      return `${post.platform}:${url.hostname.replace(/^www\./, "")}${url.pathname.replace(/\/+$/, "")}`;
+    }),
+  );
+  const distinctCreators = new Set(
+    actionable.reuseEvidence.posts.map((post) =>
+      post.author.normalize("NFKC").trim().replace(/^@+/, "").toLocaleLowerCase("fr")
+    ),
+  );
+  assert.equal(uniqueUrls.size, actionable.reuseEvidence.posts.length);
+  assert.ok(distinctCreators.size >= MIN_TREND_DISTINCT_CREATORS);
+
+  const withoutProof = structuredClone(actionable);
+  withoutProof.reuseEvidence = null;
+  assert.equal(isVerifiedMultiCreatorTrend(withoutProof), false);
+  assert.equal(isActionableSocialTrend(withoutProof), false);
+
+  const duplicateCreator = structuredClone(actionable);
+  duplicateCreator.reuseEvidence.posts = duplicateCreator.reuseEvidence.posts.slice(0, 3);
+  duplicateCreator.reuseEvidence.posts[1].author =
+    ` @${duplicateCreator.reuseEvidence.posts[0].author.replace(/^@+/, "").toUpperCase()} `;
+  duplicateCreator.reuseEvidence.posts[2].author = duplicateCreator.reuseEvidence.posts[0].author;
+  assert.equal(isVerifiedMultiCreatorTrend(duplicateCreator), false);
+
+  const duplicateNativePost = structuredClone(actionable);
+  duplicateNativePost.reuseEvidence.posts[1] = {
+    ...duplicateNativePost.reuseEvidence.posts[1],
+    platform: duplicateNativePost.reuseEvidence.posts[0].platform,
+    url: `${duplicateNativePost.reuseEvidence.posts[0].url}?utm_source=duplicate`,
+  };
+  assert.equal(isVerifiedMultiCreatorTrend(duplicateNativePost), false);
+
+  const withoutReferenceInProof = structuredClone(actionable);
+  withoutReferenceInProof.reuseEvidence.posts =
+    withoutReferenceInProof.reuseEvidence.posts.filter(
+      (post) => post.url !== withoutReferenceInProof.referencePost.url,
+    );
+  assert.equal(isVerifiedMultiCreatorTrend(withoutReferenceInProof), false);
+});
+
+test("the v6 refresh proof is internally consistent and nullable outside GitHub", () => {
   assert.equal(feed.refresh.cadenceHours, TREND_REFRESH_CADENCE_HOURS);
   assert.ok(feed.refresh.sourceChecks.every((check) =>
     Date.parse(check.checkedAt) >= Date.parse(feed.refresh.lastAttemptAt) &&
@@ -454,6 +533,10 @@ test("publishable validation rejects a Girl-minority top, stale cards and duplic
   ).toISOString();
   staleTrend.lastVerifiedAt = staleVerifiedAt;
   staleTrend.referencePost.capturedAt = staleVerifiedAt;
+  staleTrend.reuseEvidence.verifiedAt = staleVerifiedAt;
+  for (const post of staleTrend.reuseEvidence.posts) {
+    post.capturedAt = staleVerifiedAt;
+  }
   for (const observation of staleTrend.observations) {
     observation.observedAt = staleVerifiedAt;
   }
@@ -479,6 +562,10 @@ test("publishable validation rejects a Girl-minority top, stale cards and duplic
   ).toISOString();
   steadyTrend.lastVerifiedAt = steadyVerifiedAt;
   steadyTrend.referencePost.capturedAt = steadyVerifiedAt;
+  steadyTrend.reuseEvidence.verifiedAt = steadyVerifiedAt;
+  for (const post of steadyTrend.reuseEvidence.posts) {
+    post.capturedAt = steadyVerifiedAt;
+  }
   for (const observation of steadyTrend.observations) {
     observation.observedAt = steadyVerifiedAt;
   }
@@ -498,6 +585,10 @@ test("publishable validation rejects a Girl-minority top, stale cards and duplic
   ).toISOString();
   expiredSteadyTrend.lastVerifiedAt = expiredAt;
   expiredSteadyTrend.referencePost.capturedAt = expiredAt;
+  expiredSteadyTrend.reuseEvidence.verifiedAt = expiredAt;
+  for (const post of expiredSteadyTrend.reuseEvidence.posts) {
+    post.capturedAt = expiredAt;
+  }
   for (const observation of expiredSteadyTrend.observations) {
     observation.observedAt = expiredAt;
   }
@@ -518,7 +609,14 @@ test("publishable validation rejects a Girl-minority top, stale cards and duplic
     ])
     .find((pair) => pair[1]);
   assert.ok(samePlatformPair);
+  const duplicatedTrend = samePlatformPair[1];
+  const previousReferenceUrl = duplicatedTrend.referencePost.url;
   samePlatformPair[1].referencePost.url = `${samePlatformPair[0].referencePost.url}?utm_source=duplicate`;
+  const reuseReference = duplicatedTrend.reuseEvidence.posts.find(
+    (post) => post.url === previousReferenceUrl,
+  );
+  assert.ok(reuseReference);
+  reuseReference.url = duplicatedTrend.referencePost.url;
   assert.equal(assertSocialTrendFeed(duplicateReference), duplicateReference);
   assert.throws(
     () => assertPublishableSocialTrendFeed(duplicateReference, { now: shortlyAfterCapture(duplicateReference) }),
@@ -526,7 +624,7 @@ test("publishable validation rejects a Girl-minority top, stale cards and duplic
   );
 });
 
-test("v5 validation rejects duplicate trend keys and future trend observations", () => {
+test("v6 validation rejects duplicate trend keys and future trend observations", () => {
   const duplicateTrendKey = structuredClone(feed);
   duplicateTrendKey.trends[1].trendKey = duplicateTrendKey.trends[0].trendKey.toUpperCase();
   assert.throws(() => assertSocialTrendFeed(duplicateTrendKey), /cl.*trend.*dupliqu/i);

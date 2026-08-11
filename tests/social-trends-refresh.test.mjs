@@ -11,6 +11,7 @@ import {
 import {
   assertPublishableSocialTrendFeed,
   isActionableSocialTrend,
+  TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS,
 } from "../lib/social-trends.ts";
 
 const feed = JSON.parse(
@@ -47,7 +48,8 @@ test("source text normalization and matching are deterministic", () => {
 
 test("a real parsed-source run refreshes metadata without altering native metrics", async () => {
   const originalReferences = feed.trends.map((trend) => trend.referencePost);
-  const now = "2026-08-11T06:17:00.000+02:00";
+  const originalReuseEvidence = feed.trends.map((trend) => trend.reuseEvidence);
+  const now = new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString();
   const result = await buildDailyTrendRefresh({
     feed,
     watchlists,
@@ -71,6 +73,11 @@ test("a real parsed-source run refreshes metadata without altering native metric
     originalReferences,
     "an editorial source check must never rewrite native post metrics",
   );
+  assert.deepEqual(
+    result.feed.trends.map((trend) => trend.reuseEvidence),
+    originalReuseEvidence,
+    "an editorial source check must never claim that native creator reuse was reverified",
+  );
   assert.equal(assertPublishableSocialTrendFeed(result.feed, { now }), result.feed);
 });
 
@@ -79,11 +86,43 @@ test("the daily publisher fails closed when too few sources parse", async () => 
     buildDailyTrendRefresh({
       feed,
       watchlists,
-      now: "2026-08-11T06:17:00.000+02:00",
+      now: new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString(),
       force: true,
       fetchImpl: async () => new Response("blocked", { status: 503 }),
     }),
     /sources Trends ont été parsées/i,
+  );
+});
+
+test("the daily publisher fails closed when multi-creator proof is stale", async () => {
+  const staleFeed = structuredClone(feed);
+  const now = new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString();
+  const staleVerifiedAt = new Date(
+    Date.parse(now) -
+      (TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS + 1) * 60 * 60 * 1_000,
+  ).toISOString();
+  const trend = staleFeed.trends.find(
+    (candidate) =>
+      candidate.lifecycle !== "steady" &&
+      isActionableSocialTrend(candidate) &&
+      Date.parse(candidate.firstSeenAt) <= Date.parse(staleVerifiedAt),
+  );
+  assert.ok(trend?.reuseEvidence);
+  trend.reuseEvidence.verifiedAt = staleVerifiedAt;
+  for (const post of trend.reuseEvidence.posts) {
+    post.capturedAt = staleVerifiedAt;
+  }
+
+  await assert.rejects(
+    buildDailyTrendRefresh({
+      feed: staleFeed,
+      watchlists,
+      now,
+      force: true,
+      fetchImpl: successfulSourceFetch,
+      xBearerToken: "test-token",
+    }),
+    /trop ancienne|72 h/i,
   );
 });
 

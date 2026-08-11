@@ -79,6 +79,20 @@ export type TrendReferencePost = {
   };
 };
 
+export type TrendReusePost = {
+  platform: TrendPlatform;
+  author: string;
+  url: string;
+  capturedAt: string;
+};
+
+export type TrendReuseEvidence = {
+  verifiedAt: string;
+  minimumDistinctCreators: 3;
+  summary: string;
+  posts: TrendReusePost[];
+};
+
 export type SocialTrend = {
   id: string;
   trendKey: string;
@@ -103,12 +117,13 @@ export type SocialTrend = {
   production: string;
   caveat: string;
   referencePost: TrendReferencePost | null;
+  reuseEvidence: TrendReuseEvidence | null;
   observations: TrendObservation[];
   proposals: TrendProposal[];
 };
 
 export type SocialTrendFeed = {
-  version: 5;
+  version: 6;
   capturedAt: string;
   refresh: TrendRefreshMetadata;
   market: string;
@@ -132,6 +147,7 @@ export const TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS = 72;
 export const TREND_STEADY_MAX_VERIFICATION_AGE_HOURS = 14 * 24;
 export const MIN_PUBLISHABLE_ACTIONABLE_TRENDS = 50;
 export const MIN_PUBLISHABLE_LOFI_GIRL_SHARE = 0.8;
+export const MIN_TREND_DISTINCT_CREATORS = 3;
 
 const HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
 
@@ -159,11 +175,140 @@ export function isQualifiedTrendReferencePost(
   );
 }
 
+type NativeTrendPost = Pick<TrendReusePost, "platform" | "url">;
+
+function canonicalNativePostIdentity(post: NativeTrendPost) {
+  const url = new URL(post.url);
+  const segments = url.pathname.split("/").filter(Boolean);
+  const nativeId = post.platform === "instagram"
+    ? segments[1]
+    : post.platform === "tiktok"
+      ? segments.at(-1)
+      : post.platform === "youtube"
+        ? segments[1]
+        : segments.at(-1);
+  return `${post.platform}:${nativeId}`;
+}
+
+function normalizeTrendCreator(author: string) {
+  return author
+    .normalize("NFKC")
+    .trim()
+    .replace(/^@+/, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("fr");
+}
+
+function isNativePostUrlForPlatform(candidate: string, platform: TrendPlatform) {
+  try {
+    const url = new URL(candidate);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.replace(/\/+$/, "");
+    if (url.protocol !== "https:") return false;
+    if (platform === "instagram") {
+      return (host === "instagram.com" || host.endsWith(".instagram.com")) &&
+        /^\/(?:p|reel)\/[^/]+$/i.test(path);
+    }
+    if (platform === "tiktok") {
+      return (host === "tiktok.com" || host.endsWith(".tiktok.com")) &&
+        /^\/@[^/]+\/video\/\d{12,24}$/i.test(path);
+    }
+    if (platform === "youtube") {
+      return (host === "youtube.com" || host.endsWith(".youtube.com")) &&
+        /^\/shorts\/[A-Za-z0-9_-]{11}$/i.test(path);
+    }
+    return (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) &&
+      /^\/[^/]+\/status\/\d+$/i.test(path);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A single viral post is not a trend. This proof requires at least three
+ * distinct creators and three distinct native posts, including the card's
+ * reference post exactly once.
+ */
+export function isVerifiedMultiCreatorTrend(trend: SocialTrend) {
+  const evidence = trend.reuseEvidence;
+  const referencePost = trend.referencePost;
+  if (
+    !evidence ||
+    !referencePost ||
+    typeof referencePost.author !== "string" ||
+    !normalizeTrendCreator(referencePost.author) ||
+    !trend.platforms.includes(referencePost.platform) ||
+    !isNativePostUrlForPlatform(referencePost.url, referencePost.platform) ||
+    evidence.minimumDistinctCreators !== MIN_TREND_DISTINCT_CREATORS ||
+    typeof evidence.summary !== "string" ||
+    !evidence.summary.trim() ||
+    !Array.isArray(evidence.posts) ||
+    evidence.posts.length < MIN_TREND_DISTINCT_CREATORS
+  ) {
+    return false;
+  }
+
+  const firstSeenTimestamp = Date.parse(trend.firstSeenAt);
+  const lastVerifiedTimestamp = Date.parse(trend.lastVerifiedAt);
+  const evidenceVerifiedTimestamp = Date.parse(evidence.verifiedAt);
+  if (
+    !Number.isFinite(firstSeenTimestamp) ||
+    !Number.isFinite(lastVerifiedTimestamp) ||
+    !Number.isFinite(evidenceVerifiedTimestamp) ||
+    evidenceVerifiedTimestamp < firstSeenTimestamp ||
+    evidenceVerifiedTimestamp > lastVerifiedTimestamp
+  ) {
+    return false;
+  }
+
+  const referenceIdentity = canonicalNativePostIdentity(referencePost);
+  const referenceAuthor = normalizeTrendCreator(referencePost.author);
+  const nativePosts = new Set<string>();
+  const creators = new Set<string>();
+  let referenceMatches = 0;
+
+  for (const post of evidence.posts) {
+    if (
+      !post ||
+      typeof post.author !== "string" ||
+      !normalizeTrendCreator(post.author) ||
+      !trend.platforms.includes(post.platform) ||
+      !isNativePostUrlForPlatform(post.url, post.platform)
+    ) {
+      return false;
+    }
+    const capturedTimestamp = Date.parse(post.capturedAt);
+    if (
+      !Number.isFinite(capturedTimestamp) ||
+      capturedTimestamp < firstSeenTimestamp ||
+      capturedTimestamp > evidenceVerifiedTimestamp
+    ) {
+      return false;
+    }
+    const identity = canonicalNativePostIdentity(post);
+    if (nativePosts.has(identity)) return false;
+    nativePosts.add(identity);
+    const creator = normalizeTrendCreator(post.author);
+    creators.add(creator);
+    if (identity === referenceIdentity) {
+      if (creator !== referenceAuthor) return false;
+      referenceMatches += 1;
+    }
+  }
+
+  return (
+    referenceMatches === 1 &&
+    nativePosts.size >= MIN_TREND_DISTINCT_CREATORS &&
+    creators.size >= MIN_TREND_DISTINCT_CREATORS
+  );
+}
+
 export function isActionableSocialTrend(trend: SocialTrend) {
   return (
     trend.lifecycle !== "watch" &&
     trend.lofiFitScore >= MIN_ACTIONABLE_TREND_LOFI_FIT &&
-    isQualifiedTrendReferencePost(trend.referencePost)
+    isQualifiedTrendReferencePost(trend.referencePost) &&
+    isVerifiedMultiCreatorTrend(trend)
   );
 }
 
@@ -291,10 +436,7 @@ type PublishableTrendFeedOptions = {
 };
 
 function canonicalReferenceIdentity(referencePost: TrendReferencePost) {
-  const url = new URL(referencePost.url);
-  const host = url.hostname.toLowerCase().replace(/^www\./, "");
-  const path = url.pathname.replace(/\/+$/, "");
-  return `${referencePost.platform}:${host}${path}`;
+  return canonicalNativePostIdentity(referencePost);
 }
 
 function resolveNowTimestamp(now: PublishableTrendFeedOptions["now"]) {
@@ -362,37 +504,12 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
   const isNullableMetric = (candidate: unknown) =>
     candidate === null ||
     (typeof candidate === "number" && Number.isFinite(candidate) && candidate >= 0);
-  const isReferenceUrlForPlatform = (candidate: string, platform: TrendPlatform) => {
-    try {
-      const url = new URL(candidate);
-      const host = url.hostname.toLowerCase();
-      const path = url.pathname.replace(/\/+$/, "");
-      if (url.protocol !== "https:") return false;
-      if (platform === "instagram") {
-        return (host === "instagram.com" || host.endsWith(".instagram.com")) &&
-          /^\/(?:p|reel)\/[^/]+$/i.test(path);
-      }
-      if (platform === "tiktok") {
-        return (host === "tiktok.com" || host.endsWith(".tiktok.com")) &&
-          /^\/@[^/]+\/video\/\d{12,24}$/i.test(path);
-      }
-      if (platform === "youtube") {
-        return (host === "youtube.com" || host.endsWith(".youtube.com")) &&
-          /^\/shorts\/[A-Za-z0-9_-]{11}$/i.test(path);
-      }
-      return (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) &&
-        /^\/[^/]+\/status\/\d+$/i.test(path);
-    } catch {
-      return false;
-    }
-  };
-
   const capturedTimestamp = typeof feed?.capturedAt === "string"
     ? Date.parse(feed.capturedAt)
     : Number.NaN;
   const refresh = feed?.refresh;
   if (
-    feed?.version !== 5 ||
+    feed?.version !== 6 ||
     !isText(feed.capturedAt) ||
     !Number.isFinite(capturedTimestamp) ||
     !refresh ||
@@ -519,7 +636,8 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
       !isText(trend.timing) ||
       !isText(trend.production) ||
       !isText(trend.caveat) ||
-      !Object.prototype.hasOwnProperty.call(trend, "referencePost")
+      !Object.prototype.hasOwnProperty.call(trend, "referencePost") ||
+      !Object.prototype.hasOwnProperty.call(trend, "reuseEvidence")
     ) {
       throw new Error(`Trend incomplète ou invalide : ${trend.id}`);
     }
@@ -534,7 +652,7 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
         !trend.platforms.includes(referencePost.platform) ||
         (referencePost.author !== null && !isText(referencePost.author)) ||
         !isText(referencePost.caption) ||
-        !isReferenceUrlForPlatform(referencePost.url, referencePost.platform) ||
+        !isNativePostUrlForPlatform(referencePost.url, referencePost.platform) ||
         !validMediaTypes.has(referencePost.mediaType) ||
         !hasValidTrendReferenceDuration(referencePost) ||
         (referencePost.thumbnailUrl !== null && !isWebUrl(referencePost.thumbnailUrl)) ||
@@ -561,6 +679,48 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
           [metrics.views, metrics.likes, metrics.comments, metrics.shares].some((metric) => metric !== null))
       ) {
         throw new Error(`Post de référence invalide : ${trend.id}`);
+      }
+    }
+    const reuseEvidence = trend.reuseEvidence;
+    if (reuseEvidence !== null) {
+      const verifiedTimestamp = typeof reuseEvidence?.verifiedAt === "string"
+        ? Date.parse(reuseEvidence.verifiedAt)
+        : Number.NaN;
+      if (
+        !reuseEvidence ||
+        typeof reuseEvidence !== "object" ||
+        reuseEvidence.minimumDistinctCreators !== MIN_TREND_DISTINCT_CREATORS ||
+        !isText(reuseEvidence.summary) ||
+        !isText(reuseEvidence.verifiedAt) ||
+        !Number.isFinite(verifiedTimestamp) ||
+        verifiedTimestamp < firstSeenTimestamp ||
+        verifiedTimestamp > lastVerifiedTimestamp ||
+        !Array.isArray(reuseEvidence.posts) ||
+        reuseEvidence.posts.length < MIN_TREND_DISTINCT_CREATORS
+      ) {
+        throw new Error(`Preuve multi-créateurs invalide : ${trend.id}`);
+      }
+      for (const post of reuseEvidence.posts) {
+        const capturedTimestamp = typeof post?.capturedAt === "string"
+          ? Date.parse(post.capturedAt)
+          : Number.NaN;
+        if (
+          !post ||
+          typeof post !== "object" ||
+          !validPlatforms.has(post.platform) ||
+          !trend.platforms.includes(post.platform) ||
+          !isText(post.author) ||
+          !isNativePostUrlForPlatform(post.url, post.platform) ||
+          !isText(post.capturedAt) ||
+          !Number.isFinite(capturedTimestamp) ||
+          capturedTimestamp < firstSeenTimestamp ||
+          capturedTimestamp > verifiedTimestamp
+        ) {
+          throw new Error(`Post de reprise invalide : ${trend.id}`);
+        }
+      }
+      if (!isVerifiedMultiCreatorTrend(trend)) {
+        throw new Error(`Preuve multi-créateurs insuffisante : ${trend.id}`);
       }
     }
     if (!Array.isArray(trend.observations) || !trend.observations.length) {
@@ -669,17 +829,22 @@ export function assertPublishableSocialTrendFeed(
     if (
       trend.lifecycle === "watch" ||
       !referencePost ||
-      referencePost.mediaType === "unknown"
+      referencePost.mediaType === "unknown" ||
+      !isVerifiedMultiCreatorTrend(trend)
     ) {
       throw new Error(`Trend non publiable : ${trend.id}`);
     }
     const lastVerifiedTimestamp = Date.parse(trend.lastVerifiedAt);
+    const reuseVerifiedTimestamp = Date.parse(trend.reuseEvidence!.verifiedAt);
     const maximumVerificationAgeHours = trend.lifecycle === "steady"
       ? TREND_STEADY_MAX_VERIFICATION_AGE_HOURS
       : TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS;
     if (
       lastVerifiedTimestamp > nowTimestamp ||
+      reuseVerifiedTimestamp > nowTimestamp ||
       nowTimestamp - lastVerifiedTimestamp >
+        maximumVerificationAgeHours * HOUR_IN_MILLISECONDS ||
+      nowTimestamp - reuseVerifiedTimestamp >
         maximumVerificationAgeHours * HOUR_IN_MILLISECONDS
     ) {
       throw new Error(

@@ -49,7 +49,6 @@ import {
   assertSocialTrendFeed,
   filterSocialTrends,
   isActionableSocialTrend,
-  latestTrendObservation,
   selectGirlFirstSocialTrends,
   trendPriorityScore,
   type SocialTrend,
@@ -1818,7 +1817,7 @@ function TrendFeedView({
           <span className="section-kicker">Mise à jour quotidienne · focus Lofi Girl</span>
           <h2>🔥 50+ trends vraiment exploitables</h2>
           <p>
-            Des exemples concrets classés avec Lofi Girl en priorité ; Lofi Boy reste un complément pour le gaming, la culture geek et l’introversion.
+            Un exemple performant par trend, uniquement si la même mécanique a été reprise par plusieurs créateurs. Lofi Girl reste prioritaire.
           </p>
         </div>
         {feed && refreshDate ? (
@@ -1943,6 +1942,7 @@ function TrendFeedCard({
   const publishedDate = formatCardPublishedDate(referencePost.publishedAt);
   const footerMetrics = trendReferenceFooterMetrics(referencePost);
   const lofiExecution = trend.proposals[0]?.concept ?? trend.whyLofi;
+  const reuseCount = trend.reuseEvidence?.posts.length ?? 0;
 
   return (
     <article className={`social-post-card trend-reference-card has-media tone-${lifecycle.tone}`}>
@@ -1956,6 +1956,9 @@ function TrendFeedCard({
             {lifecycle.emoji} {lifecycle.label}
           </span>
         </div>
+        <span className="trend-reuse-pill">
+          🔥 Repris par {reuseCount}+ créateurs
+        </span>
         <div className="post-card-title">
           <div className="post-media-caption">
             <span className="trend-card-source-title">{character.emoji} {character.label} · {trend.territory}</span>
@@ -2173,7 +2176,7 @@ function TrendDetailsModal({
   const referencePost = trend.referencePost;
   const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
   const character = TREND_CHARACTER_META[trend.character];
-  const latestObservation = latestTrendObservation(trend);
+  const reuseEvidence = trend.reuseEvidence;
   const proposal =
     trend.proposals.find((candidate) => candidate.tone === activeTone) ?? trend.proposals[0];
   const referenceMetrics = trendReferenceMetrics(referencePost);
@@ -2248,11 +2251,36 @@ function TrendDetailsModal({
             <small>{trend.timing}</small>
           </div>
           <div>
-            <span>Dernier relevé</span>
-            <b>{formatDetailedDate(latestObservation?.observedAt ?? null)}</b>
-            <small>{trend.observations.length} preuve{trend.observations.length > 1 ? "s" : ""} sourcée{trend.observations.length > 1 ? "s" : ""}</small>
+            <span>Créateurs vérifiés</span>
+            <b>🔥 {reuseEvidence?.posts.length ?? 0}</b>
+            <small>Adaptations natives distinctes</small>
           </div>
         </div>
+
+        {reuseEvidence ? (
+          <section className="trend-reuse-proof" aria-label="Preuve de reprise par plusieurs créateurs">
+            <header>
+              <div>
+                <span className="section-kicker">Vraie trend, pas simple post viral</span>
+                <h4>🔥 Reprise par plusieurs créateurs</h4>
+              </div>
+              <time dateTime={reuseEvidence.verifiedAt}>{formatDetailedDate(reuseEvidence.verifiedAt)}</time>
+            </header>
+            <p>{reuseEvidence.summary}</p>
+            <div className="trend-reuse-creators">
+              {reuseEvidence.posts.map((post) => {
+                const isReference = post.url === referencePost.url;
+                return (
+                  <a href={post.url} target="_blank" rel="noreferrer" key={`${post.platform}:${post.url}`}>
+                    <span>{trendPlatformEmoji(post.platform)}</span>
+                    <b>{post.author}</b>
+                    <small>{isReference ? "Exemple principal" : "Reprise vérifiée"} ↗</small>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section className="trend-lofi-adaptation" aria-label={`Adaptation ${character.detailLabel} proposée`}>
           <span>{character.emoji} Adaptation {character.detailLabel}</span>

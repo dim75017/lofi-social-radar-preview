@@ -1,8 +1,8 @@
 {
-  "version": 5,
-  "capturedAt": "2026-08-11T08:21:04.282Z",
+  "version": 6,
+  "capturedAt": "2026-08-11T09:15:10.913Z",
   "market": "France · signaux francophones et internationaux adaptables",
-  "methodology": "Feed éditorial Lofi Girl-first actualisé chaque jour à partir de signaux TikTok, Instagram, YouTube Shorts et X. Chaque carte garde un exemple natif distinct ; toute vidéo possède au moins 50 000 likes publics et une durée vérifiée strictement inférieure à 30 secondes. Les métriques absentes restent nulles, les signaux faibles restent hors du feed et Lofi Boy demeure un complément minoritaire.",
+  "methodology": "Feed éditorial Lofi Girl-first actualisé chaque jour à partir de signaux TikTok, Instagram, YouTube Shorts et X. Une carte n’est publiée comme trend qu’après vérification de la même mécanique chez au moins trois créateurs distincts, avec trois posts natifs indépendants. Chaque vidéo de référence possède au moins 50 000 likes publics et une durée vérifiée strictement inférieure à 30 secondes. Les métriques absentes restent nulles, les posts viraux isolés restent hors du feed et Lofi Boy demeure un complément minoritaire.",
   "trends": [
     {
       "id": "shakira-at-the-computer",
@@ -94,7 +94,32 @@
       "trendKey": "shakira-at-the-computer",
       "clusterKey": "meme-template:shakira-at-the-computer",
       "firstSeenAt": "2026-08-04T21:05:29.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Recréer la pose très sérieuse, puis révéler le détail absurde de l’écran ou de la fausse productivité. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@shakira",
+            "url": "https://www.instagram.com/p/DbodqXOKa0E/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "x",
+            "author": "@KimimaroQuest",
+            "url": "https://x.com/KimimaroQuest/status/2087013931256819760",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "x",
+            "author": "@DanladiSam",
+            "url": "https://x.com/DanladiSam/status/2086734561258455310",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "eclipse-perseides-12-aout",
@@ -182,7 +207,8 @@
       "trendKey": "eclipse-perseides-12-aout",
       "clusterKey": "moment:eclipse-perseides-du-12-aout",
       "firstSeenAt": "2026-08-07T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-09T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-09T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "back-to-school-study-reset",
@@ -257,7 +283,8 @@
       "trendKey": "back-to-school-study-reset",
       "clusterKey": "hashtag:back-to-school-study-reset",
       "firstSeenAt": "2026-08-10T08:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "notes-study-france",
@@ -330,7 +357,8 @@
       "trendKey": "notes-study-france",
       "clusterKey": "hashtag:notes",
       "firstSeenAt": "2026-08-10T08:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "rentree-scolaire-france",
@@ -404,7 +432,8 @@
       "trendKey": "rentree-scolaire-france",
       "clusterKey": "hashtag:rentreescolaire",
       "firstSeenAt": "2026-08-10T08:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T08:00:00.000Z"
+      "lastVerifiedAt": "2026-08-10T08:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "just-say-here-bro",
@@ -497,7 +526,32 @@
       "trendKey": "just-say-here-bro",
       "clusterKey": "spoken-audio:just-say-here-bro",
       "firstSeenAt": "2026-07-24T20:28:08.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Installer une question banale, laisser le personnage partir dans une réponse interminable, puis couper net. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@h2t.alt",
+            "url": "https://www.tiktok.com/@h2t.alt/video/7666194022913887501",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@rebornintochrist",
+            "url": "https://www.tiktok.com/@rebornintochrist/video/7666961330498194702",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@t_backedits",
+            "url": "https://www.tiktok.com/@t_backedits/video/7667235314557046038",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "twins-at-the-carousel",
@@ -603,7 +657,32 @@
       "trendKey": "twins-at-the-carousel",
       "clusterKey": "sound:twins-at-the-carousel",
       "firstSeenAt": "2026-06-10T20:06:32.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Placer Lofi Girl au centre et faire tourner ses différentes micro-tâches ou pensées autour d’elle. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@mushuuno",
+            "url": "https://www.tiktok.com/@mushuuno/video/7649860709261544736",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "AnnaMationz",
+            "url": "https://www.youtube.com/shorts/V1LIQK4wshc",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Robbie Animations",
+            "url": "https://www.youtube.com/shorts/T6N-Y2_Pswg",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "freaked-out-list",
@@ -695,7 +774,32 @@
       "trendKey": "freaked-out-list",
       "clusterKey": "sound:freaked-out",
       "firstSeenAt": "2026-07-24T07:11:53.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Poser trois ou quatre questions différentes et révéler la même solution à chaque fois. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@marlon3lg",
+            "url": "https://www.instagram.com/reel/DbKrHAtB3VI/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@picsbyjuliette",
+            "url": "https://www.instagram.com/reel/DbLmzCsoKgj/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@nejlaa_belh",
+            "url": "https://www.instagram.com/reel/DbJgYkaM9mn/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "on-off-switch",
@@ -767,7 +871,8 @@
       "trendKey": "on-off-switch",
       "clusterKey": "format:on-off-switch-transition",
       "firstSeenAt": "2026-08-07T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-07T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-07T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "two-personalities",
@@ -860,7 +965,32 @@
       "trendKey": "two-personalities",
       "clusterKey": "spoken-audio:two-personalities",
       "firstSeenAt": "2025-05-06T17:52:14.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer deux Lofi Girl dans le même décor, chacune tirant la journée dans une direction opposée. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@juttaleerdam",
+            "url": "https://www.tiktok.com/@juttaleerdam/video/7501392027473464598",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@livinwithiz",
+            "url": "https://www.tiktok.com/@livinwithiz/video/7412728217775164702",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@allie_spa",
+            "url": "https://www.tiktok.com/@allie_spa/video/7420637385370717482",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "heatwave-tatooine",
@@ -934,7 +1064,8 @@
       "trendKey": "heatwave-tatooine",
       "clusterKey": "moment:canicule-facon-tatooine",
       "firstSeenAt": "2026-08-08T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-08T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-08T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "youll-never-see-it-coming",
@@ -946,7 +1077,8 @@
       "mechanic": "Montrer trois tentatives ratées, puis le passage calme en mode focus au moment exact de la relance.",
       "platforms": [
         "youtube",
-        "tiktok"
+        "tiktok",
+        "instagram"
       ],
       "keywords": [
         "you'll never see it coming",
@@ -963,7 +1095,27 @@
       "timing": "À adapter rapidement tant que les edits progressent.",
       "production": "Animation originale d’un exercice ou d’un projet ; aucun extrait du stream.",
       "caveat": "Ne pas reprendre l’image de Speed ; revérifier les droits du son Persona 5 ou utiliser un beat original.",
-      "referencePost": null,
+      "referencePost": {
+        "platform": "instagram",
+        "author": "@rztrc",
+        "caption": "Edit Persona / Genshin utilisant la relance « You’ll never see it coming ».",
+        "url": "https://www.instagram.com/reel/DYkoJ3xKW6Z/",
+        "mediaType": "video",
+        "durationSeconds": 20,
+        "thumbnailUrl": null,
+        "publishedAt": "2026-05-20T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:00:00.000Z",
+        "selectionLabel": "57 k likes · 20 s · compteurs publics vérifiés",
+        "sourceLabel": "Instagram · post natif vérifié",
+        "sourceUrl": "https://www.instagram.com/reel/DYkoJ3xKW6Z/",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 57000,
+          "comments": 330,
+          "shares": 11200
+        }
+      },
       "observations": [
         {
           "id": "speed-coming-20260806",
@@ -1006,7 +1158,32 @@
       "trendKey": "youll-never-see-it-coming",
       "clusterKey": "spoken-audio:you-ll-never-see-it-coming",
       "firstSeenAt": "2026-08-06T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-06T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer trois tentatives ratées, puis le passage calme en mode focus au moment exact de la relance. Le montage et sa relance ont été retrouvés chez trois créateurs distincts, avec des exécutions propres.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@rztrc",
+            "url": "https://www.instagram.com/reel/DYkoJ3xKW6Z/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@kgfantasy",
+            "url": "https://www.instagram.com/reel/DbkI4i4spkz/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@tricksterteas",
+            "url": "https://www.instagram.com/reel/DbBU8D1vzKx/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "add-more-color",
@@ -1078,7 +1255,8 @@
       "trendKey": "add-more-color",
       "clusterKey": "format:can-you-add-more-color-to-my-day",
       "firstSeenAt": "2026-07-31T12:00:00.000Z",
-      "lastVerifiedAt": "2026-07-31T12:00:00.000Z"
+      "lastVerifiedAt": "2026-07-31T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "less-than-a-lover",
@@ -1171,7 +1349,32 @@
       "trendKey": "less-than-a-lover",
       "clusterKey": "sound:notification-fantome",
       "firstSeenAt": "2026-07-24T06:17:35.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Raconter en trois gestes lisibles sans dialogue : téléphone qui s’allume, réponse tapée puis effacée, casque remis au moment où le beat repart. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@craevx_",
+            "url": "https://www.instagram.com/reel/DbKkjyBiRVo/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@blinkfrance_officiel",
+            "url": "https://www.instagram.com/reel/DbICdnIvS1Y/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@juilletteugc",
+            "url": "https://www.instagram.com/reel/DbqjrncMWhQ/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "ghosting-you-montage",
@@ -1264,7 +1467,32 @@
       "trendKey": "ghosting-you-montage",
       "clusterKey": "spoken-audio:yo-i-ve-been-ghosting-you",
       "firstSeenAt": "2026-08-07T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Enchaîner douze micro-plans très courts : onglets, notes, café, chat, réveil et micro-sieste. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@nemzzz_",
+            "url": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@zah1de",
+            "url": "https://www.tiktok.com/@zah1de/video/7668007675438927137",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@tinyartshow",
+            "url": "https://www.tiktok.com/@tinyartshow/video/7667026255182793998",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "couch-acting-challenge",
@@ -1337,7 +1565,8 @@
       "trendKey": "couch-acting-challenge",
       "clusterKey": "format:couch-acting-challenge",
       "firstSeenAt": "2026-08-07T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-07T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-07T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "meal-swap",
@@ -1430,7 +1659,32 @@
       "trendKey": "meal-swap",
       "clusterKey": "format:snack-swap",
       "firstSeenAt": "2026-08-02T22:48:28.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Poser deux snacks de part et d’autre du bureau, montrer les regards croisés, puis faire glisser les deux assiettes exactement sur le beat. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@itskacylee",
+            "url": "https://www.instagram.com/reel/DbjhcHjOZ8U/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@westendhyannis",
+            "url": "https://www.instagram.com/reel/Db1MlDZPGGB/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@thescuttlebuttclub",
+            "url": "https://www.instagram.com/reel/Dbv6Gu6K-nX/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "everything-hallelujah-wins",
@@ -1503,7 +1757,8 @@
       "trendKey": "everything-hallelujah-wins",
       "clusterKey": "sound:everything-hallelujah",
       "firstSeenAt": "2026-07-31T12:00:00.000Z",
-      "lastVerifiedAt": "2026-07-31T12:00:00.000Z"
+      "lastVerifiedAt": "2026-07-31T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "flicker-memory-transition",
@@ -1596,7 +1851,32 @@
       "trendKey": "flicker-memory-transition",
       "clusterKey": "format:flicker",
       "firstSeenAt": "2026-05-25T11:11:02.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Faire clignoter le même décor entre présent et souvenir, puis arrêter l’alternance sur le détail émotionnel. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@venusarosa",
+            "url": "https://www.instagram.com/reel/DYwSBiroW57/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@sarahrln_ugc",
+            "url": "https://www.instagram.com/reel/DbJCTixgF_N/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@maaevsocials",
+            "url": "https://www.instagram.com/reel/DbGhAUfob5O/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "shoe-toss-outfit-transition",
@@ -1689,7 +1969,32 @@
       "trendKey": "shoe-toss-outfit-transition",
       "clusterKey": "format:objet-lance",
       "firstSeenAt": "2026-07-25T15:12:30.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Lancer l’objet qui déclenche la routine vers la caméra, couper pendant l’occlusion, puis révéler le même cadrage avec timer lancé, bureau prêt et lumière transformée. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@valerii.murr",
+            "url": "https://www.instagram.com/reel/DbOGyXlNIed/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@itsjust3va__",
+            "url": "https://www.instagram.com/reel/Dbdlse4iXH6/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@thekimberlynsmith",
+            "url": "https://www.instagram.com/reel/DbwCa7CSrTG/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "kumar-method",
@@ -1782,7 +2087,32 @@
       "trendKey": "kumar-method",
       "clusterKey": "format:the-kumar-method",
       "firstSeenAt": "2026-06-05T19:42:03.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Filmer un personnage sérieux, enchaîner des cuts secs et des textes rouges, puis faire monter une ambition volontairement disproportionnée. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@thekumarmethod",
+            "url": "https://www.tiktok.com/@thekumarmethod/video/7647998974489627917",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@joycelimrealtor",
+            "url": "https://www.tiktok.com/@joycelimrealtor/video/7661118928088878344",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@jossyautomotive6",
+            "url": "https://www.tiktok.com/@jossyautomotive6/video/7665724163738438929",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "saxophones-getting-louder",
@@ -1875,7 +2205,32 @@
       "trendKey": "saxophones-getting-louder",
       "clusterKey": "sound:saxophones-getting-louder",
       "firstSeenAt": "2026-08-04T21:02:50.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer trois ou quatre étapes d’un problème croissant et synchroniser chaque aggravation avec la montée du saxophone. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@jazz13570",
+            "url": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@johanna_frc",
+            "url": "https://www.tiktok.com/@johanna_frc/video/7658716302537788705",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@goobchi",
+            "url": "https://www.tiktok.com/@goobchi/video/7658381126158814495",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "not-very-nonchalant",
@@ -1968,7 +2323,32 @@
       "trendKey": "not-very-nonchalant",
       "clusterKey": "sound:not-very-nonchalant",
       "firstSeenAt": "2026-04-10T20:59:44.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Ajouter une phrase qui rejette le détachement, puis montrer une réaction sincèrement enthousiaste sans chercher à rester cool. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@trace.young",
+            "url": "https://www.tiktok.com/@trace.young/video/7627238223386873119",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@iangohke",
+            "url": "https://www.tiktok.com/@iangohke/video/7654384958831709447",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@mayedie.ugc",
+            "url": "https://www.tiktok.com/@mayedie.ugc/video/7670860568642850070",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "netflix-documentary-confessional",
@@ -2061,7 +2441,32 @@
       "trendKey": "netflix-documentary-confessional",
       "clusterKey": "format:netflix-documentary-confessional",
       "firstSeenAt": "2026-07-26T10:30:11.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Installer une interview très sérieuse, poser un texte dramatique et alterner témoignage et reconstitution d’un problème minuscule. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@johnnellis_",
+            "url": "https://www.tiktok.com/@johnnellis_/video/7666782102377024790",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@janayandkalisha",
+            "url": "https://www.tiktok.com/@janayandkalisha/video/7665832849349659918",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@liammillerr",
+            "url": "https://www.tiktok.com/@liammillerr/video/7663238721306627359",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "pain-oh-no-spain",
@@ -2154,7 +2559,32 @@
       "trendKey": "pain-oh-no-spain",
       "clusterKey": "spoken-audio:pain-spain",
       "firstSeenAt": "2026-07-06T16:02:14.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Ouvrir en très gros plan sur une deadline et un visage épuisé, synchroniser le jeu de mots, puis élargir pour révéler balcon, soleil et cahier de vacances. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@soypau_cacho",
+            "url": "https://www.tiktok.com/@soypau_cacho/video/7659445964796644629",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@tatianakopala0",
+            "url": "https://www.tiktok.com/@tatianakopala0/video/7659506493535964448",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@chloe__michelle",
+            "url": "https://www.tiktok.com/@chloe__michelle/video/7667339292821245205",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "bangladesh-absurd-complaint",
@@ -2247,7 +2677,32 @@
       "trendKey": "bangladesh-absurd-complaint",
       "clusterKey": "sound:la-liste-avant-de-reviser",
       "firstSeenAt": "2026-06-08T14:55:43.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Commencer par une demande crédible — un stylo ou un café — puis ajouter à chaque phrase une condition de focus plus impossible, en gardant Lofi Girl parfaitement sérieuse. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@ianmcconnellmusic",
+            "url": "https://www.tiktok.com/@ianmcconnellmusic/video/7649038438942985503",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@arthenaa",
+            "url": "https://www.tiktok.com/@arthenaa/video/7651446709867777294",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@cherylporterdiva",
+            "url": "https://www.tiktok.com/@cherylporterdiva/video/7653614393908792606",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "choosin-texas-western-reveal",
@@ -2340,7 +2795,32 @@
       "trendKey": "choosin-texas-western-reveal",
       "clusterKey": "sound:choosin-texas",
       "firstSeenAt": "2026-05-13T12:58:30.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer le choix d’une playlist, attendre le refrain, puis transformer au même cadrage lumière, fenêtre et objets du bureau selon le genre musical. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@liamswiderski",
+            "url": "https://www.tiktok.com/@liamswiderski/video/7639360020605390100",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@stinkerbelljr",
+            "url": "https://www.tiktok.com/@stinkerbelljr/video/7672103152027471118",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@aaliyahsteedmann",
+            "url": "https://www.tiktok.com/@aaliyahsteedmann/video/7658952161568492821",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "u-me-love-timeline",
@@ -2433,7 +2913,32 @@
       "trendKey": "u-me-love-timeline",
       "clusterKey": "sound:lofi-girl-communaute",
       "firstSeenAt": "2026-07-02T16:00:55.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Faire défiler des plans officiels datés sur le même geste — écrire, tourner une page, regarder la fenêtre — puis conclure au présent avec un message à la communauté. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@katseyeworld",
+            "url": "https://www.tiktok.com/@katseyeworld/video/7657961287862799629",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@avapumpelly",
+            "url": "https://www.tiktok.com/@avapumpelly/video/7653833092053961998",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@iconistaedits",
+            "url": "https://www.tiktok.com/@iconistaedits/video/7656914605926632734",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "ss26-editorial-transition",
@@ -2526,7 +3031,32 @@
       "trendKey": "ss26-editorial-transition",
       "clusterKey": "sound:quatre-modes-de-focus",
       "firstSeenAt": "2026-05-21T23:35:10.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Verrouiller la pose et le cadrage, afficher brièvement le nom du mode, puis faire changer palette, météo, matière sonore et tâche à chaque beat. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@charlixcx",
+            "url": "https://www.tiktok.com/@charlixcx/video/7642492769965067542",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@plastik",
+            "url": "https://www.tiktok.com/@plastik/video/7643090478052773141",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@monsterklawz",
+            "url": "https://www.tiktok.com/@monsterklawz/video/7645016781974719758",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "dracula-jennie-remix",
@@ -2619,7 +3149,32 @@
       "trendKey": "dracula-jennie-remix",
       "clusterKey": "sound:mode-deadline-apres-minuit",
       "firstSeenAt": "2026-05-15T15:50:08.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer le bureau calme avant minuit, faire coïncider le passage clé avec 00:00, puis intensifier lumière, pluie, pages et rythme d’écriture sans changer de cadrage. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@tameimpala",
+            "url": "https://www.tiktok.com/@tameimpala/video/7640146419336187149",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@ddlovato",
+            "url": "https://www.tiktok.com/@ddlovato/video/7629030173538536717",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@brookemonk_",
+            "url": "https://www.tiktok.com/@brookemonk_/video/7631305154494549279",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "eurosummer-micro-montage",
@@ -2712,7 +3267,32 @@
       "trendKey": "eurosummer-micro-montage",
       "clusterKey": "hashtag:le-cahier-voyage-aussi",
       "firstSeenAt": "2026-08-05T09:01:45.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Raccorder cinq à huit plans sur le même geste — ouvrir le cahier, poser le casque, écrire une ligne — tandis que lieu, lumière et boisson changent autour. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@elishaswong",
+            "url": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@jemipongi",
+            "url": "https://www.tiktok.com/@jemipongi/video/7665219078407064840",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@joannapiguet",
+            "url": "https://www.tiktok.com/@joannapiguet/video/7665301816128834838",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "let-down-emotional-rescue",
@@ -2805,7 +3385,32 @@
       "trendKey": "let-down-emotional-rescue",
       "clusterKey": "sound:let-down",
       "firstSeenAt": "2026-07-31T16:56:52.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Présenter une difficulté sans tout expliquer, laisser le son installer l’émotion puis révéler la présence ou le geste qui change la scène. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@aikibem",
+            "url": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@fallmw_",
+            "url": "https://www.tiktok.com/@fallmw_/video/7654182450855185682",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@annierawrrrrr",
+            "url": "https://www.tiktok.com/@annierawrrrrr/video/7644197018210012433",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "matrix-verity-edit",
@@ -2898,7 +3503,32 @@
       "trendKey": "matrix-verity-edit",
       "clusterKey": "sound:matrix-verity",
       "firstSeenAt": "2026-06-14T20:14:48.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Installer un plan quotidien lisible, faire monter la tension sur la boucle Matrix puis révéler une version plus intense du même décor au changement de rythme. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "youtube",
+            "author": "@slimetree",
+            "url": "https://www.youtube.com/shorts/tbi6urWo0Oo",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Niightmxre",
+            "url": "https://www.youtube.com/shorts/q1xmojKn9ko",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "J Edits",
+            "url": "https://www.youtube.com/shorts/tdGxeDuKFJs",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "young-and-beautiful-summer-nostalgia",
@@ -3005,7 +3635,32 @@
       "trendKey": "young-and-beautiful-summer-nostalgia",
       "clusterKey": "sound:fin-d-ete",
       "firstSeenAt": "2026-07-14T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Faire surgir un souvenir à chaque objet retiré d’un cahier — ticket, fleur, photo, sable — puis refermer sur le bureau prêt pour une nouvelle saison. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@allileighann",
+            "url": "https://www.instagram.com/reel/DaxhQSCRsOC/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@chloeunpeupartout",
+            "url": "https://www.instagram.com/reel/Daw1QxEoeON/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@mrs.romaissa_bentoumi",
+            "url": "https://www.instagram.com/reel/DbEOc7PMowg/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "sirens-cinematic-tension",
@@ -3112,7 +3767,32 @@
       "trendKey": "sirens-cinematic-tension",
       "clusterKey": "sound:sirens",
       "firstSeenAt": "2026-07-21T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Filmer une tâche banale comme une mission à haut risque, accumuler les gros plans pendant la montée puis révéler l'objet réel de la tension au point culminant. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@ryancameron49",
+            "url": "https://www.instagram.com/reel/DbDkQYUxjrT/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@con_glacon",
+            "url": "https://www.instagram.com/reel/DbkyBWUOcxr/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@guillaume_experience",
+            "url": "https://www.instagram.com/reel/Dbi8UjzI7au/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "odysseus-heroic-edit",
@@ -3219,7 +3899,32 @@
       "trendKey": "odysseus-heroic-edit",
       "clusterKey": "sound:odysseus",
       "firstSeenAt": "2026-07-21T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer trois étapes d'un effort dans l'ordre, garder les mêmes repères visuels et réserver le plan de résultat au moment où le thème s'ouvre. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@revivewith_hursh",
+            "url": "https://www.instagram.com/reel/DbCDTRVPjCW/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@gakirulestattoo",
+            "url": "https://www.instagram.com/reel/Dbix8V6M2lw/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@chicodelsurr",
+            "url": "https://www.instagram.com/reel/DbOQrUiIbVY/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "golden-brown-month-reset",
@@ -3326,7 +4031,32 @@
       "trendKey": "golden-brown-month-reset",
       "clusterKey": "sound:golden-brown",
       "firstSeenAt": "2026-07-31T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Ouvrir sur un changement de date explicite, montrer quatre signes du nouveau mois puis terminer sur un détail qui rappelle que le temps a passé. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@moizzfilms",
+            "url": "https://www.instagram.com/reel/DbdAJCaMCpZ/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@maison.metamorphose",
+            "url": "https://www.instagram.com/reel/DbpZbzyiWzg/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@hugovertheworld",
+            "url": "https://www.instagram.com/reel/Dbn7Jsmo3kQ/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "stupid-song-nostalgic-montage",
@@ -3433,7 +4163,32 @@
       "trendKey": "stupid-song-nostalgic-montage",
       "clusterKey": "sound:lofi-girl-chat",
       "firstSeenAt": "2026-06-12T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Raccorder les scènes par les gestes du chat — patte sur la page, tasse poussée, sieste déplacée — et terminer sur lui endormi près du devoir enfin fini. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "instagram",
+            "author": "@oliviarodrigo",
+            "url": "https://www.instagram.com/reel/DZfyMVWBh_T/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@gabriel.decottignies",
+            "url": "https://www.instagram.com/reel/DbdxGF1o5m4/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "instagram",
+            "author": "@tocatica3",
+            "url": "https://www.instagram.com/reel/Dbnd8TkOi1B/",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "is-it-cake-or-fake",
@@ -3526,7 +4281,8 @@
       "trendKey": "is-it-cake-or-fake",
       "clusterKey": "format:cahier-ou-gateau",
       "firstSeenAt": "2026-07-11T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "not-a-relaxing-environment",
@@ -3599,7 +4355,8 @@
       "trendKey": "not-a-relaxing-environment",
       "clusterKey": "format:not-a-relaxing-environment",
       "firstSeenAt": "2026-08-06T12:00:00.000Z",
-      "lastVerifiedAt": "2026-08-06T12:00:00.000Z"
+      "lastVerifiedAt": "2026-08-06T12:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "broken-rules-temptation",
@@ -3691,7 +4448,32 @@
       "trendKey": "broken-rules-temptation",
       "clusterKey": "spoken-audio:la-regle-qui-saute-a-la-premiere-tentation",
       "firstSeenAt": "2026-07-09T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Afficher la règle en première ligne, montrer le déclencheur en un cut, puis assumer l’abandon avec le lip-sync. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@romero.szee",
+            "url": "https://www.tiktok.com/@romero.szee/video/7660435196302363934",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@yumberryyogurt99",
+            "url": "https://www.tiktok.com/@yumberryyogurt99/video/7665821726822927647",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@laken.bryant",
+            "url": "https://www.tiktok.com/@laken.bryant/video/7658304480160632094",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "viral-moment-backstory",
@@ -3783,7 +4565,32 @@
       "trendKey": "viral-moment-backstory",
       "clusterKey": "spoken-audio:l-histoire-derriere-mon-moment-viral",
       "firstSeenAt": "2026-07-16T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Poser une phrase d’origine à l’écran, lip-syncer le récit, puis révéler la conséquence disproportionnée sur le dernier temps. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@kaylee_halko",
+            "url": "https://www.tiktok.com/@kaylee_halko/video/7663189220135013646",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@lifewithyaaya",
+            "url": "https://www.tiktok.com/@lifewithyaaya/video/7666599141300129037",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@addie_mccracken123",
+            "url": "https://www.tiktok.com/@addie_mccracken123/video/7665458699720248589",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "baby-just-wanna-dance",
@@ -3875,7 +4682,32 @@
       "trendKey": "baby-just-wanna-dance",
       "clusterKey": "sound:baby-i-just-wanna-dance",
       "firstSeenAt": "2026-07-10T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Commencer parfaitement immobile, lancer le hook, puis faire partir un mouvement très simple et répétable. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@luv.iolett",
+            "url": "https://www.tiktok.com/@luv.iolett/video/7660688157242871054",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@ddamarcusssss",
+            "url": "https://www.tiktok.com/@ddamarcusssss/video/7657777908211141902",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@cashewtokk",
+            "url": "https://www.tiktok.com/@cashewtokk/video/7662782151452151071",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "different-lives-split",
@@ -3967,7 +4799,32 @@
       "trendKey": "different-lives-split",
       "clusterKey": "format:deux-vies-completement-differentes",
       "firstSeenAt": "2026-07-30T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Alterner deux séquences avec la même heure ou la même consigne, mais deux réactions radicalement différentes. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@asiansurfergirl",
+            "url": "https://www.tiktok.com/@asiansurfergirl/video/7668422119440567582",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@klemfamily",
+            "url": "https://www.tiktok.com/@klemfamily/video/7668351340745116942",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@life.of.duck",
+            "url": "https://www.tiktok.com/@life.of.duck/video/7671787826937122068",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "rush-hour-understand-me",
@@ -4059,7 +4916,32 @@
       "trendKey": "rush-hour-understand-me",
       "clusterKey": "spoken-audio:do-you-understand-the-words-coming-out-of-my-mouth",
       "firstSeenAt": "2026-06-19T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Montrer deux personnages, faire porter l’explication au premier, puis laisser le second répondre par une incompréhension totale. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@maciejsphotos",
+            "url": "https://www.tiktok.com/@maciejsphotos/video/7653092844613160214",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@cintascl_",
+            "url": "https://www.tiktok.com/@cintascl_/video/7655167358876601607",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@salzabiw_",
+            "url": "https://www.tiktok.com/@salzabiw_/video/7655922769955147025",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "petal-soft-chaos",
@@ -4151,7 +5033,32 @@
       "trendKey": "petal-soft-chaos",
       "clusterKey": "sound:petal",
       "firstSeenAt": "2026-07-31T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Enchaîner trois plans esthétiques très courts, puis terminer sur une rupture légère qui humanise la scène. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@nibsgonewild",
+            "url": "https://www.tiktok.com/@nibsgonewild/video/7668822589699067149",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@imnotjordy",
+            "url": "https://www.tiktok.com/@imnotjordy/video/7671575860167609631",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@halleberry",
+            "url": "https://www.tiktok.com/@halleberry/video/7669135147848977677",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "suspect-hidden-plain-sight",
@@ -4243,7 +5150,32 @@
       "trendKey": "suspect-hidden-plain-sight",
       "clusterKey": "meme-template:le-suspect-etait-la-depuis-le-debut",
       "firstSeenAt": "2026-07-31T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Énoncer le problème en texte, maintenir le plan une seconde, puis recadrer ou pointer vers le coupable déjà visible. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@ameliamitchspam",
+            "url": "https://www.tiktok.com/@ameliamitchspam/video/7668735049658879254",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@hope.along.the.way",
+            "url": "https://www.tiktok.com/@hope.along.the.way/video/7666712012000333069",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@inesstitaa",
+            "url": "https://www.tiktok.com/@inesstitaa/video/7670161263544257814",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "te-extrano-motivation",
@@ -4335,7 +5267,32 @@
       "trendKey": "te-extrano-motivation",
       "clusterKey": "spoken-audio:te-extrano",
       "firstSeenAt": "2026-07-29T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Regarder un espace vide ou un ancien souvenir, afficher ce qui manque, puis laisser le son porter la chute. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@anaola__",
+            "url": "https://www.tiktok.com/@anaola__/video/7668035118283509012",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@malyorie_10",
+            "url": "https://www.tiktok.com/@malyorie_10/video/7656901787286392078",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@becomingaby",
+            "url": "https://www.tiktok.com/@becomingaby/video/7658387400871136530",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "pocketful-sunshine-mood-flip",
@@ -4427,7 +5384,32 @@
       "trendKey": "pocketful-sunshine-mood-flip",
       "clusterKey": "sound:pocketful-of-sunshine",
       "firstSeenAt": "2026-07-17T00:00:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Commencer avec un problème lisible, synchroniser le changement sur le refrain, puis montrer la nouvelle humeur sans explication. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@itsgivingmother",
+            "url": "https://www.tiktok.com/@itsgivingmother/video/7663570718331768084",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@tyrellhampton2",
+            "url": "https://www.tiktok.com/@tyrellhampton2/video/7552766129840606519",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@kaiyafromaustralia",
+            "url": "https://www.tiktok.com/@kaiyafromaustralia/video/7669792494338526497",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "phones-eras-study-desk",
@@ -4533,7 +5515,32 @@
       "trendKey": "phones-eras-study-desk",
       "clusterKey": "format:le-bureau-d-etude-a-travers-les-epoques",
       "firstSeenAt": "2026-06-27T17:30:37.000Z",
-      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Conserver le cadrage et le rythme du format 2000 → 2010 → 2020 → 2030, mais remplacer les téléphones par le bureau et les outils d'étude de Lofi Girl. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "youtube",
+            "author": "Ryan HD",
+            "url": "https://www.youtube.com/shorts/yaDcdlYhW-A",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Bluriemations",
+            "url": "https://www.youtube.com/shorts/otHCrnn8znw",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "youtube",
+            "author": "Cubobluh",
+            "url": "https://www.youtube.com/shorts/Lj2HOojXsvs",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "she-outplayed-him-study-cat",
@@ -4639,7 +5646,8 @@
       "trendKey": "she-outplayed-him-study-cat",
       "clusterKey": "format:le-chat-gagne-la-bataille-du-focus",
       "firstSeenAt": "2026-07-10T18:09:21.000Z",
-      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "fun-at-first-exam-week",
@@ -4745,7 +5753,8 @@
       "trendKey": "fun-at-first-exam-week",
       "clusterKey": "meme-template:c-etait-fun-au-debut-puis-les-examens",
       "firstSeenAt": "2026-07-14T15:50:17.000Z",
-      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "artist-rates-study-excuses",
@@ -4851,7 +5860,8 @@
       "trendKey": "artist-rates-study-excuses",
       "clusterKey": "format:un-expert-note-nos-excuses-de-procrastination",
       "firstSeenAt": "2026-07-16T12:53:14.000Z",
-      "lastVerifiedAt": "2026-08-09T22:00:00.000Z"
+      "lastVerifiedAt": "2026-08-09T22:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "gaming-setup-night-reveal",
@@ -4959,7 +5969,32 @@
       "trendKey": "gaming-setup-night-reveal",
       "clusterKey": "format:peak-room",
       "firstSeenAt": "2026-07-31T14:01:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Commencer dans le noir, puis synchroniser trois révélations lumineuses avec les accents du son. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@cantu.setup",
+            "url": "https://www.tiktok.com/@cantu.setup/video/7668692002451574048",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@tokay0ff",
+            "url": "https://www.tiktok.com/@tokay0ff/video/7665806228362120480",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@gabztek",
+            "url": "https://www.tiktok.com/@gabztek/video/7559654340613508374",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "social-battery-solo-mode",
@@ -5068,7 +6103,32 @@
       "trendKey": "social-battery-solo-mode",
       "clusterKey": "meme-template:social-battery-0",
       "firstSeenAt": "2026-02-06T15:17:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Opposer deux jauges très lisibles avant/après, avec un changement d’énergie immédiat au cut. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@shari_10v3",
+            "url": "https://www.tiktok.com/@shari_10v3/video/7603771667696946454",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@jblaze8985",
+            "url": "https://www.tiktok.com/@jblaze8985/video/7531933277804907789",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@lisamakeupxo",
+            "url": "https://www.tiktok.com/@lisamakeupxo/video/7559684438540553494",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "discord-eh-les-copains",
@@ -5176,7 +6236,8 @@
       "trendKey": "discord-eh-les-copains",
       "clusterKey": "spoken-audio:eh-les-copains",
       "firstSeenAt": "2026-03-08T23:22:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-10T10:00:00.000Z",
+      "reuseEvidence": null
     },
     {
       "id": "explaining-game-lore",
@@ -5284,7 +6345,32 @@
       "trendKey": "explaining-game-lore",
       "clusterKey": "format:expliquer-le-lore-comme-un-fever-dream",
       "firstSeenAt": "2026-05-13T18:51:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Commencer par une question simple, puis faire escalader l’explication en schémas de plus en plus absurdes. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@s3ashellss",
+            "url": "https://www.tiktok.com/@s3ashellss/video/7639451066282577174",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@charl1efloor",
+            "url": "https://www.tiktok.com/@charl1efloor/video/7670893417643248918",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@vyraninn",
+            "url": "https://www.tiktok.com/@vyraninn/video/7672062821768776992",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "video-game-main-menu",
@@ -5392,7 +6478,32 @@
       "trendKey": "video-game-main-menu",
       "clusterKey": "format:la-vie-devient-un-menu-de-jeu",
       "firstSeenAt": "2026-05-16T01:20:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Filmer une scène fixe et y superposer une interface de menu qui raconte un dilemme quotidien. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@maruzee_dragon",
+            "url": "https://www.tiktok.com/@maruzee_dragon/video/7640293351899647248",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@falcopunch",
+            "url": "https://www.tiktok.com/@falcopunch/video/7640823037209644321",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@allthepotsnpans",
+            "url": "https://www.tiktok.com/@allthepotsnpans/video/7642079191780953358",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "choose-your-lofi-character",
@@ -5501,7 +6612,32 @@
       "trendKey": "choose-your-lofi-character",
       "clusterKey": "format:choose-your-character",
       "firstSeenAt": "2026-05-15T03:54:00.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Présenter deux profils très contrastés, puis laisser un troisième choix inattendu voler la sélection. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@qwiipm._",
+            "url": "https://www.tiktok.com/@qwiipm._/video/7639962111162010893",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@notxserious",
+            "url": "https://www.tiktok.com/@notxserious/video/7638591610346949910",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@rebeccalouisecosplays",
+            "url": "https://www.tiktok.com/@rebeccalouisecosplays/video/7587116569881300246",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "backrooms-stay-in-character-lofi-boy",
@@ -5610,7 +6746,32 @@
       "trendKey": "backrooms-stay-in-character-lofi-boy",
       "clusterKey": "spoken-audio:stay-in-character",
       "firstSeenAt": "2026-08-06T14:39:13.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Un personnage essaie de quitter une situation ; un second lui ordonne dramatiquement de rester dans son rôle. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@limemation0",
+            "url": "https://www.tiktok.com/@limemation0/video/7670928215589817622",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@monkey.dmateo121",
+            "url": "https://www.tiktok.com/@monkey.dmateo121/video/7671771487493213461",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@tom_aura17",
+            "url": "https://www.tiktok.com/@tom_aura17/video/7671112464993357076",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
     },
     {
       "id": "obsession-nice-date-lofi-boy",
@@ -5719,7 +6880,612 @@
       "trendKey": "obsession-nice-date-lofi-boy",
       "clusterKey": "spoken-audio:no-no-no-nice-date",
       "firstSeenAt": "2026-05-21T21:01:31.000Z",
-      "lastVerifiedAt": "2026-08-10T10:00:00.000Z"
+      "lastVerifiedAt": "2026-08-11T09:00:00.000Z",
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:00:00.000Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Traiter une activité comme un rendez-vous parfait, puis paniquer lorsqu’un détail vient briser l’illusion. Cette mécanique a été vérifiée dans trois créations indépendantes, et non dans de simples republications du même clip.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@universalpics",
+            "url": "https://www.tiktok.com/@universalpics/video/7642453175194225934",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@cciarajones",
+            "url": "https://www.tiktok.com/@cciarajones/video/7655465091176975619",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@jaquelinearagonn",
+            "url": "https://www.tiktok.com/@jaquelinearagonn/video/7651042461854223647",
+            "capturedAt": "2026-08-11T09:00:00.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ice-melting-study-challenge",
+      "trendKey": "ice-melting-study-challenge",
+      "clusterKey": "format:ice-melting-study-timer",
+      "title": "Étudier jusqu’à ce que la glace fonde",
+      "character": "lofi-girl",
+      "territory": "Études & examens",
+      "firstSeenAt": "2026-02-17T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-11T09:15:10.913Z",
+      "type": "format",
+      "summary": "Un glaçon devient un minuteur physique : la session accélérée continue jusqu’à sa fonte complète.",
+      "mechanic": "Poser un glaçon visible au début, lancer un timelapse d’étude et terminer exactement lorsqu’il a fondu.",
+      "platforms": [
+        "tiktok"
+      ],
+      "keywords": [
+        "ice melting",
+        "study challenge",
+        "studytok",
+        "study timer"
+      ],
+      "lifecycle": "rising",
+      "confidence": "high",
+      "momentumScore": 91,
+      "lofiFitScore": 100,
+      "saturationRisk": 48,
+      "whyLofi": "Le défi rend la concentration visible sans quitter le bureau iconique de Lofi Girl, avec un hook compris immédiatement.",
+      "timing": "À produire maintenant dans une version de 12 à 20 secondes.",
+      "production": "Animation en plan fixe : glaçon, cahier, timelapse et petite intervention du chat avant la fin.",
+      "caveat": "Utiliser une animation originale et éviter tout gaspillage ; un petit glaçon dans un récipient suffit.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@jenniferstudyacc",
+        "caption": "11 hours of studying",
+        "url": "https://www.tiktok.com/@jenniferstudyacc/video/7607873486056344850",
+        "mediaType": "video",
+        "durationSeconds": 22,
+        "thumbnailUrl": null,
+        "publishedAt": "2026-02-17T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:15:10.913Z",
+        "selectionLabel": "Référence native TikTok · 4 M likes · 22 s",
+        "sourceLabel": "TikTok · compteurs publics vérifiés le 11/08/2026",
+        "sourceUrl": "https://www.tiktok.com/@jenniferstudyacc/video/7607873486056344850",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 4000000,
+          "comments": 8536,
+          "shares": 58100
+        }
+      },
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:15:10.913Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Même défi visuel repris indépendamment : un glaçon sert de minuterie physique et chaque créateur étudie en accéléré jusqu’à sa fonte.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@jenniferstudyacc",
+            "url": "https://www.tiktok.com/@jenniferstudyacc/video/7607873486056344850",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@otai_studyy",
+            "url": "https://www.tiktok.com/@otai_studyy/video/7655658714409602311",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@ku_ya_",
+            "url": "https://www.tiktok.com/@ku_ya_/video/7665642595791457544",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          }
+        ]
+      },
+      "observations": [
+        {
+          "id": "ice-melting-study-native-20260811",
+          "platform": "tiktok",
+          "sourceLabel": "TikTok · post et reprises natifs",
+          "sourceUrl": "https://www.tiktok.com/@jenniferstudyacc/video/7607873486056344850",
+          "observedAt": "2026-08-11T09:15:10.913Z",
+          "windowLabel": "Vérification du 11/08/2026",
+          "signal": "Le post principal affiche 4 M de likes et la même minuterie au glaçon a été retrouvée chez deux autres créateurs StudyTok.",
+          "rank": null,
+          "posts": null,
+          "views": null,
+          "uses": null,
+          "exactness": "platform-estimate"
+        }
+      ],
+      "proposals": [
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "title": "Le Pomodoro à glaçon",
+          "concept": "Lofi Girl pose un glaçon à côté du cahier et lance un timelapse jusqu’à sa fonte.",
+          "copy": "Je travaille jusqu’à ce que le glaçon fonde. Le chat a déjà demandé le deuxième round."
+        },
+        {
+          "tone": "cozy",
+          "label": "Cozy",
+          "title": "Une fonte à la fois",
+          "concept": "Une session calme où la glace, la lumière et la page avancent ensemble.",
+          "copy": "Pas besoin de finir le monde aujourd’hui. Juste rester là jusqu’à ce petit glaçon."
+        },
+        {
+          "tone": "absurde",
+          "label": "Absurde",
+          "title": "Le chapitre iceberg",
+          "concept": "Le chat remplace le glaçon par un bloc énorme au moment où elle pense avoir fini.",
+          "copy": "J’avais dit un glaçon, pas l’Antarctique du chapitre 4."
+        }
+      ]
+    },
+    {
+      "id": "study-until-they-text-aging",
+      "trendKey": "study-until-they-text-aging",
+      "clusterKey": "sound:study-until-they-text-aging",
+      "title": "Étudier jusqu’à ce qu’il réponde",
+      "character": "lofi-girl",
+      "territory": "Études & quotidien",
+      "firstSeenAt": "2026-01-31T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-11T09:15:10.913Z",
+      "type": "sound",
+      "summary": "Une attente banale dure si longtemps que le personnage vieillit à l’écran avant d’obtenir sa réponse.",
+      "mechanic": "Installer une attente en une phrase, conserver le même cadre et révéler une version âgée du personnage sur la chute.",
+      "platforms": [
+        "tiktok"
+      ],
+      "keywords": [
+        "study until he texts",
+        "aging",
+        "waiting",
+        "studytok"
+      ],
+      "lifecycle": "rising",
+      "confidence": "high",
+      "momentumScore": 88,
+      "lofiFitScore": 99,
+      "saturationRisk": 52,
+      "whyLofi": "L’attente devient une vraie session d’étude et transforme un gag relationnel en victoire relatable pour la communauté.",
+      "timing": "À tester cette semaine avec une chute visible avant huit secondes.",
+      "production": "Même bureau, deux états du personnage et un changement rapide de cheveux/décor pour signifier les années.",
+      "caveat": "Éviter de centrer tout le post sur la romance ; la session d’étude doit rester le moteur du gag.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@yammin_",
+        "caption": "study until he texts me back",
+        "url": "https://www.tiktok.com/@yammin_/video/7601563909660642582",
+        "mediaType": "video",
+        "durationSeconds": 8,
+        "thumbnailUrl": null,
+        "publishedAt": "2026-01-31T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:15:10.913Z",
+        "selectionLabel": "Référence native TikTok · 2,7 M likes · 8 s",
+        "sourceLabel": "TikTok · compteurs publics vérifiés le 11/08/2026",
+        "sourceUrl": "https://www.tiktok.com/@yammin_/video/7601563909660642582",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 2700000,
+          "comments": 2815,
+          "shares": 231800
+        }
+      },
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:15:10.913Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Même son et même ellipse : le personnage vieillit pendant qu’il attend une réponse, une fin d’études ou un événement qui n’arrive pas.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@yammin_",
+            "url": "https://www.tiktok.com/@yammin_/video/7601563909660642582",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@steciathv",
+            "url": "https://www.tiktok.com/@steciathv/video/7603357546539273490",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@itskajja",
+            "url": "https://www.tiktok.com/@itskajja/video/7626469513948744982",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          }
+        ]
+      },
+      "observations": [
+        {
+          "id": "study-until-text-native-20260811",
+          "platform": "tiktok",
+          "sourceLabel": "TikTok · post et reprises natifs",
+          "sourceUrl": "https://www.tiktok.com/@yammin_/video/7601563909660642582",
+          "observedAt": "2026-08-11T09:15:10.913Z",
+          "windowLabel": "Vérification du 11/08/2026",
+          "signal": "Le post principal affiche 2,7 M de likes ; la même ellipse d’attente et de vieillissement apparaît chez deux autres créateurs.",
+          "rank": null,
+          "posts": null,
+          "views": null,
+          "uses": null,
+          "exactness": "platform-estimate"
+        }
+      ],
+      "proposals": [
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "title": "Le binôme fantôme",
+          "concept": "Lofi Girl commence à travailler en attendant la réponse de son binôme, puis finit la session avec des cheveux gris.",
+          "copy": "J’étudie jusqu’à ce que mon binôme réponde. À demain pour ma retraite."
+        },
+        {
+          "tone": "cozy",
+          "label": "Cozy",
+          "title": "Attendre sans perdre sa soirée",
+          "concept": "L’attente devient une bulle calme : casque, thé et quelques pages terminées.",
+          "copy": "Il n’a pas répondu, mais le chapitre est fini. On prend les petites victoires."
+        },
+        {
+          "tone": "absurde",
+          "label": "Absurde",
+          "title": "Vu à 19 h 42",
+          "concept": "Le message reste en vu pendant que le décor traverse plusieurs décennies.",
+          "copy": "Bonne nouvelle : j’ai eu le temps d’obtenir trois diplômes."
+        }
+      ]
+    },
+    {
+      "id": "deadline-tomorrow-turbo",
+      "trendKey": "deadline-tomorrow-turbo",
+      "clusterKey": "sound:deadline-tomorrow-turbo",
+      "title": "La deadline est demain · turbo de dernière minute",
+      "character": "lofi-girl",
+      "territory": "Études & examens",
+      "firstSeenAt": "2025-11-13T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-11T09:15:10.913Z",
+      "type": "sound",
+      "summary": "Le cerveau reste inactif jusqu’à ce que l’urgence d’une deadline déclenche soudainement une énergie spectaculaire.",
+      "mechanic": "Opposer une longue phase molle à une accélération brutale dès que la deadline apparaît à l’écran.",
+      "platforms": [
+        "tiktok"
+      ],
+      "keywords": [
+        "deadline tomorrow",
+        "last minute",
+        "anxiety caffeine",
+        "student"
+      ],
+      "lifecycle": "steady",
+      "confidence": "high",
+      "momentumScore": 83,
+      "lofiFitScore": 100,
+      "saturationRisk": 61,
+      "whyLofi": "La procrastination avant deadline est un insight central de l’audience et le décor nocturne rend la transformation immédiatement Lofi Girl.",
+      "timing": "Format evergreen à utiliser pendant les périodes de rendus et d’examens.",
+      "production": "Deux vitesses d’animation dans le même plan, avec horloge lisible et accélération des feuilles/cafés.",
+      "caveat": "Ne pas glorifier la nuit blanche ; la version cozy doit proposer une sortie réaliste de la panique.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@pfthannah",
+        "caption": "Running purely on anxiety and caffeine",
+        "url": "https://www.tiktok.com/@pfthannah/video/7572161262285589782",
+        "mediaType": "video",
+        "durationSeconds": 12,
+        "thumbnailUrl": null,
+        "publishedAt": "2025-11-13T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:15:10.913Z",
+        "selectionLabel": "Référence native TikTok · 2 M likes · 12 s",
+        "sourceLabel": "TikTok · compteurs publics vérifiés le 11/08/2026",
+        "sourceUrl": "https://www.tiktok.com/@pfthannah/video/7572161262285589782",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 2000000,
+          "comments": 3561,
+          "shares": 254700
+        }
+      },
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:15:10.913Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Même son et même mise en scène du cerveau qui n’active sa pleine puissance qu’à l’approche immédiate d’une deadline.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@pfthannah",
+            "url": "https://www.tiktok.com/@pfthannah/video/7572161262285589782",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@lizalima777",
+            "url": "https://www.tiktok.com/@lizalima777/video/7573005794094992647",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@byantonya",
+            "url": "https://www.tiktok.com/@byantonya/video/7599281141585022230",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          }
+        ]
+      },
+      "observations": [
+        {
+          "id": "deadline-turbo-native-20260811",
+          "platform": "tiktok",
+          "sourceLabel": "TikTok · post et reprises natifs",
+          "sourceUrl": "https://www.tiktok.com/@pfthannah/video/7572161262285589782",
+          "observedAt": "2026-08-11T09:15:10.913Z",
+          "windowLabel": "Vérification du 11/08/2026",
+          "signal": "Le post principal affiche 2 M de likes et le même turbo de dernière minute a été vérifié chez deux autres créateurs.",
+          "rank": null,
+          "posts": null,
+          "views": null,
+          "uses": null,
+          "exactness": "platform-estimate"
+        }
+      ],
+      "proposals": [
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "title": "Le turbo de 23 h 58",
+          "concept": "Lofi Girl somnole toute la journée puis devient soudain ultra-efficace quand l’horloge affiche deux minutes avant minuit.",
+          "copy": "Mon cerveau à J-7 : non. Mon cerveau à 23 h 58 : nous sommes une machine."
+        },
+        {
+          "tone": "cozy",
+          "label": "Cozy",
+          "title": "Le dernier petit bloc",
+          "concept": "Une tasse, une page et un timer court remplacent la panique par une fin de session maîtrisée.",
+          "copy": "La deadline est proche. On respire, on ouvre la page, on fait juste le prochain bloc."
+        },
+        {
+          "tone": "absurde",
+          "label": "Absurde",
+          "title": "Mode boss final",
+          "concept": "Le café devient une jauge de puissance et le chat lance le compte à rebours comme un boss de jeu.",
+          "copy": "Deadline demain. Café légendaire équipé. Chat en mode spectateur."
+        }
+      ]
+    },
+    {
+      "id": "wrap-it-up-procrastination",
+      "trendKey": "wrap-it-up-procrastination",
+      "clusterKey": "sound:wrap-it-up-procrastination",
+      "title": "Wrap it up · le cerveau coupe la session",
+      "character": "lofi-girl",
+      "territory": "Procrastination & humour étudiant",
+      "firstSeenAt": "2026-04-09T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-11T09:15:10.913Z",
+      "type": "sound",
+      "summary": "Le son « Wrap it up » interrompt net une activité dès que l’attention ou la motivation disparaît.",
+      "mechanic": "Préparer longuement une activité puis couper immédiatement la scène au premier signe d’effort ou de lassitude.",
+      "platforms": [
+        "tiktok"
+      ],
+      "keywords": [
+        "wrap it up",
+        "procrastinator",
+        "homework",
+        "student humor"
+      ],
+      "lifecycle": "steady",
+      "confidence": "high",
+      "momentumScore": 78,
+      "lofiFitScore": 99,
+      "saturationRisk": 58,
+      "whyLofi": "Le contraste entre un setup de travail parfait et une session minuscule correspond exactement à l’humour relatable de Lofi Girl.",
+      "timing": "Format stable à conserver pour les semaines de faible motivation.",
+      "production": "Animation de six secondes, préparation très détaillée puis coupure sèche au premier mot écrit.",
+      "caveat": "Garder une lecture bienveillante de la procrastination et prévoir une variante qui valorise une petite avancée réelle.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@m.i.h.a.e.l.a89",
+        "caption": "d1 procrastinator",
+        "url": "https://www.tiktok.com/@m.i.h.a.e.l.a89/video/7626838176945933582",
+        "mediaType": "video",
+        "durationSeconds": 6,
+        "thumbnailUrl": null,
+        "publishedAt": "2026-04-09T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:15:10.913Z",
+        "selectionLabel": "Référence native TikTok · 180,9 k likes · 6 s",
+        "sourceLabel": "TikTok · compteurs publics vérifiés le 11/08/2026",
+        "sourceUrl": "https://www.tiktok.com/@m.i.h.a.e.l.a89/video/7626838176945933582",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 180900,
+          "comments": 146,
+          "shares": 22300
+        }
+      },
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:15:10.913Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Le son est repris pour couper net une activité dès que l’attention disparaît ; les trois exemples l’appliquent à la procrastination, l’école ou les devoirs.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@m.i.h.a.e.l.a89",
+            "url": "https://www.tiktok.com/@m.i.h.a.e.l.a89/video/7626838176945933582",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@eky2107",
+            "url": "https://www.tiktok.com/@eky2107/video/7325930286838025515",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@syd456123",
+            "url": "https://www.tiktok.com/@syd456123/video/7321895999947967787",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          }
+        ]
+      },
+      "observations": [
+        {
+          "id": "wrap-it-up-native-20260811",
+          "platform": "tiktok",
+          "sourceLabel": "TikTok · post et reprises natifs",
+          "sourceUrl": "https://www.tiktok.com/@m.i.h.a.e.l.a89/video/7626838176945933582",
+          "observedAt": "2026-08-11T09:15:10.913Z",
+          "windowLabel": "Vérification du 11/08/2026",
+          "signal": "Le post principal affiche 180,9 k likes ; la même coupure anti-procrastination a été vérifiée chez deux autres créateurs.",
+          "rank": null,
+          "posts": null,
+          "views": null,
+          "uses": null,
+          "exactness": "platform-estimate"
+        }
+      ],
+      "proposals": [
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "title": "Préparer longtemps, étudier six secondes",
+          "concept": "Lofi Girl règle la lumière, choisit sa playlist et prépare son thé ; dès qu’elle écrit un mot, le son coupe la session.",
+          "copy": "40 minutes de setup. 6 secondes d’étude. Wrap it up."
+        },
+        {
+          "tone": "cozy",
+          "label": "Cozy",
+          "title": "Une page suffit aujourd’hui",
+          "concept": "Le son arrive après une vraie petite page terminée ; elle ferme calmement le cahier sans culpabiliser.",
+          "copy": "Une page faite vaut mieux qu’une session parfaite jamais commencée."
+        },
+        {
+          "tone": "absurde",
+          "label": "Absurde",
+          "title": "Le chat décide",
+          "concept": "Le chat appuie sur stop dès que le stylo touche la feuille.",
+          "copy": "La direction artistique vient officiellement d’annuler la session."
+        }
+      ]
+    },
+    {
+      "id": "study-hours-scoreboard",
+      "trendKey": "study-hours-scoreboard",
+      "clusterKey": "format:study-hours-scoreboard",
+      "title": "Le scoreboard d’heures d’étude",
+      "character": "lofi-girl",
+      "territory": "Études & examens",
+      "firstSeenAt": "2026-01-09T00:00:00.000Z",
+      "lastVerifiedAt": "2026-08-11T09:15:10.913Z",
+      "type": "format",
+      "summary": "Un tableau très court matérialise les heures d’étude accumulées sur une semaine et invite l’audience à rejoindre le défi.",
+      "mechanic": "Afficher un compteur quotidien puis révéler le total de la période en gardant les petites sessions visibles.",
+      "platforms": [
+        "tiktok"
+      ],
+      "keywords": [
+        "study hours",
+        "YPT",
+        "study scoreboard",
+        "studytok"
+      ],
+      "lifecycle": "rising",
+      "confidence": "high",
+      "momentumScore": 86,
+      "lofiFitScore": 99,
+      "saturationRisk": 39,
+      "whyLofi": "Le compteur transforme la routine continue de Lofi Girl en défi communautaire sans trahir son rythme calme.",
+      "timing": "À lancer en série hebdomadaire pendant la rentrée.",
+      "production": "Tableau animé de huit secondes avec les jours, le total et une petite ligne concurrente réservée au chat.",
+      "caveat": "Éviter la compétition toxique et rappeler que les petits blocs comptent autant que les longues sessions.",
+      "referencePost": {
+        "platform": "tiktok",
+        "author": "@4zhfn",
+        "caption": "this is YOUR sign to match my hours of studying this year of 2026",
+        "url": "https://www.tiktok.com/@4zhfn/video/7593407705604197654",
+        "mediaType": "video",
+        "durationSeconds": 8,
+        "thumbnailUrl": null,
+        "publishedAt": "2026-01-09T00:00:00.000Z",
+        "capturedAt": "2026-08-11T09:15:10.913Z",
+        "selectionLabel": "Référence native TikTok · 137,3 k likes · 8 s",
+        "sourceLabel": "TikTok · compteurs publics vérifiés le 11/08/2026",
+        "sourceUrl": "https://www.tiktok.com/@4zhfn/video/7593407705604197654",
+        "exactness": "platform-estimate",
+        "metrics": {
+          "views": null,
+          "likes": 137300,
+          "comments": 540,
+          "shares": 3034
+        }
+      },
+      "reuseEvidence": {
+        "verifiedAt": "2026-08-11T09:15:10.913Z",
+        "minimumDistinctCreators": 3,
+        "summary": "Même mécanique de scoreboard : afficher les heures réellement étudiées sur une période et inviter l’audience à comparer ou rejoindre le défi.",
+        "posts": [
+          {
+            "platform": "tiktok",
+            "author": "@4zhfn",
+            "url": "https://www.tiktok.com/@4zhfn/video/7593407705604197654",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@mia_yilin",
+            "url": "https://www.tiktok.com/@mia_yilin/video/7619910978590854413",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          },
+          {
+            "platform": "tiktok",
+            "author": "@cutesiiistudiii",
+            "url": "https://www.tiktok.com/@cutesiiistudiii/video/7611653812360629536",
+            "capturedAt": "2026-08-11T09:15:10.913Z"
+          }
+        ]
+      },
+      "observations": [
+        {
+          "id": "study-hours-scoreboard-native-20260811",
+          "platform": "tiktok",
+          "sourceLabel": "TikTok · post et reprises natifs",
+          "sourceUrl": "https://www.tiktok.com/@4zhfn/video/7593407705604197654",
+          "observedAt": "2026-08-11T09:15:10.913Z",
+          "windowLabel": "Vérification du 11/08/2026",
+          "signal": "Le post principal affiche 137,3 k likes et le même scoreboard d’heures d’étude a été vérifié chez deux autres créateurs.",
+          "rank": null,
+          "posts": null,
+          "views": null,
+          "uses": null,
+          "exactness": "platform-estimate"
+        }
+      ],
+      "proposals": [
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "title": "Le vrai scoreboard",
+          "concept": "Chaque jour apparaît avec son nombre d’heures ; les petites sessions restent visibles au lieu d’être masquées.",
+          "copy": "Pas 12 heures par jour. Juste assez de petits blocs pour que la semaine ressemble enfin à quelque chose."
+        },
+        {
+          "tone": "cozy",
+          "label": "Cozy",
+          "title": "Chaque bloc compte",
+          "concept": "Le tableau se remplit doucement au fil de sessions courtes et réalistes.",
+          "copy": "30 minutes, puis 40, puis encore 20. Les petites heures finissent aussi par construire une semaine."
+        },
+        {
+          "tone": "absurde",
+          "label": "Absurde",
+          "title": "Le score du chat",
+          "concept": "Le scoreboard ajoute automatiquement les heures de sieste du chat, qui gagne largement.",
+          "copy": "Étude : 8 h. Sieste sur les notes : 43 h. Nous avons un vainqueur."
+        }
+      ]
     }
   ],
   "refresh": {
@@ -5791,9 +7557,9 @@
     "counts": {
       "checkedSources": 6,
       "matchedSignals": 83,
-      "actionable": 50,
-      "lofiGirl": 42,
-      "lofiBoy": 8
+      "actionable": 51,
+      "lofiGirl": 44,
+      "lofiBoy": 7
     }
   }
 }
