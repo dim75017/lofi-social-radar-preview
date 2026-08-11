@@ -273,9 +273,13 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(audienceHistory, /"x"/);
   for (const logo of [youtubeLogo, instagramLogo, tiktokLogo, xLogo]) {
     assert.match(logo, /^<svg\b/i);
-    assert.match(logo, /<path\b/i);
+    assert.match(logo, /<(?:path|rect|circle)\b/i);
     assert.doesNotMatch(logo, /<script\b|<foreignObject\b/i);
   }
+  assert.match(youtubeLogo, /<path fill="#FFFFFF" d="M9\.545 8\.432/);
+  assert.match(instagramLogo, /<radialGradient\b/);
+  assert.match(instagramLogo, /stroke="#FFFFFF"/);
+  assert.match(tiktokLogo, /<svg fill="#FFFFFF"/);
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);
