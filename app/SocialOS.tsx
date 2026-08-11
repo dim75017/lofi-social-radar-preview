@@ -822,10 +822,6 @@ export function SocialOS({
     }
     return counts;
   }, [posts, publicCounts]);
-  const totalPostCount = PLATFORM_ORDER.reduce(
-    (total, key) => total + resolvedPlatformCounts[key],
-    0,
-  );
   const historyLoading = pendingPlatforms.length > 0;
   const loadedPlatformCount = PLATFORM_ORDER.length - pendingPlatforms.length;
   const topPlatformPending = pendingPlatforms.includes(topPlatform);
@@ -1041,21 +1037,6 @@ export function SocialOS({
     .sort()
     .at(-1) as string | undefined;
 
-  const navCount = (id: View) => {
-    if (id === "top") return totalPostCount;
-    if (id === "comments") return commentOpportunityFeed?.opportunities.length;
-    if (id === "trends") {
-      return trendFeed
-        ? trendFeed.trends.filter(isActionableSocialTrend).length
-        : undefined;
-    }
-    if (id === "ideas") return ideaPlan.ideas.length;
-    if (id === "planning") return editorialWorkflow.schedule.length;
-    if (id === "all") return totalPostCount;
-    if (id === "sources") return accounts.length;
-    return undefined;
-  };
-
   return (
     <div className="app-shell">
       <button
@@ -1157,11 +1138,6 @@ export function SocialOS({
                     >
                       <span className="nav-emoji">{item.emoji}</span>
                       <span className="nav-text">{item.label}</span>
-                      {isPostsParent ? (
-                        <span className="nav-count">{navCount(item.id)}</span>
-                      ) : !isRecommendationsParent && navCount(item.id) !== undefined ? (
-                        <span className="nav-count">{navCount(item.id)}</span>
-                      ) : null}
                       {navSection ? (
                         <span className="nav-caret" aria-hidden="true">⌄</span>
                       ) : null}
@@ -1178,20 +1154,24 @@ export function SocialOS({
                         {PLATFORM_ORDER.map((key) => {
                           const meta = PLATFORM_META[key];
                           const isPlatformActive = view === "top" && topPlatform === key;
-                          const count = resolvedPlatformCounts[key];
                           return (
                             <button
                               className={isPlatformActive ? "active" : ""}
                               type="button"
                               aria-current={isPlatformActive ? "page" : undefined}
-                              aria-label={`${meta.label}, ${count} posts`}
-                              title={`${meta.label} · ${count} posts`}
+                              aria-label={meta.label}
+                              title={meta.label}
                               onClick={() => chooseTopPlatform(key)}
                               key={key}
                             >
-                              <span className="nav-emoji">{meta.emoji}</span>
+                              <img
+                                className="nav-platform-logo"
+                                src={`platforms/${key}.svg`}
+                                alt=""
+                                width="18"
+                                height="18"
+                              />
                               <span className="nav-text">{meta.label}</span>
-                              <span className="nav-count">{count}</span>
                             </button>
                           );
                         })}
@@ -1221,9 +1201,6 @@ export function SocialOS({
                             >
                               <span className="nav-emoji">{child.emoji}</span>
                               <span className="nav-text">{child.label}</span>
-                              {navCount(child.id) !== undefined ? (
-                                <span className="nav-count">{navCount(child.id)}</span>
-                              ) : null}
                             </button>
                           );
                         })}

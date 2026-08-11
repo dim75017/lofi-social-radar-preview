@@ -160,6 +160,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /setView\("all"\)/);
   assert.match(component, /view === "top" && topPlatform === key/);
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
+  const postsPlatformSubnav = component.slice(
+    component.indexOf('id="posts-platform-subnav"'),
+    component.indexOf("{isRecommendationsParent ?"),
+  );
+  assert.match(postsPlatformSubnav, /className="nav-platform-logo"/);
+  assert.match(postsPlatformSubnav, /src=\{`platforms\/\$\{key\}\.svg`\}/);
+  assert.doesNotMatch(postsPlatformSubnav, /const count|\$\{count\}|nav-count/);
+  assert.doesNotMatch(component, /className="nav-count"/);
   assert.doesNotMatch(component, /top-platform-picker/);
   assert.match(component, /SOCIAL_DURATION_FILTERS/);
   assert.doesNotMatch(component, /Règle de classement/);
@@ -334,6 +342,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.nav-submenu\[hidden\]\s*\{[\s\S]*?display:\s*none/);
   assert.match(styles, /\.nav-entry\.expanded > button \.nav-caret/);
   assert.doesNotMatch(styles, /nav-meta/);
+  assert.doesNotMatch(styles, /\.nav-count\b/);
+  assert.match(styles, /\.nav-platform-logo\s*\{[\s\S]*?object-fit:\s*contain/);
   assert.match(styles, /--sidebar:\s*280px/);
   const navTextDeclarations = styles.match(/\.nav-text\s*\{([^}]*)\}/)?.[1] ?? "";
   assert.match(navTextDeclarations, /white-space:\s*normal/);
