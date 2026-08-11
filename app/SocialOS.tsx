@@ -77,7 +77,6 @@ import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "comments" | "trends" | "ideas" | "planning" | "all" | "sources";
-type NavSection = "posts" | "recommendations";
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 type TrendPlatformFilter = TrendPlatform | "all";
@@ -559,11 +558,6 @@ export function SocialOS({
   const [commentsLoading, setCommentsLoading] = useState(!previewMode && !initialCommentOpportunityFeed);
   const [commentsError, setCommentsError] = useState("");
   const [view, setView] = useState<View>("overview");
-  const expandedNavSection: NavSection | null = view === "all" || view === "top"
-    ? "posts"
-    : view === "ideas" || view === "comments" || view === "trends"
-      ? "recommendations"
-      : null;
   const [topPlatform, setTopPlatform] = useState<Platform>("youtube");
   const [topFormatFilter, setTopFormatFilter] = useState<SocialFormatFilter>("short");
   const [topDuration, setTopDuration] = useState<SocialDurationFilter>("all");
@@ -1092,12 +1086,6 @@ export function SocialOS({
               {NAV.filter((item) => item.group === group).map((item) => {
                 const isPostsParent = item.id === "top";
                 const isRecommendationsParent = item.id === "ideas";
-                const navSection = isPostsParent
-                  ? "posts"
-                  : isRecommendationsParent
-                    ? "recommendations"
-                    : null;
-                const isExpanded = navSection === expandedNavSection;
                 const isRecommendationsView = view === "ideas" || view === "comments" || view === "trends";
                 const isActive = isPostsParent
                   ? view === "all"
@@ -1108,27 +1096,23 @@ export function SocialOS({
 
                 return (
                   <div
-                    className={`nav-entry ${navSection ? "has-children" : ""} ${isExpanded ? "expanded" : ""}`}
+                    className="nav-entry"
                     key={item.id}
                   >
                     <button
                       className={isActive ? "active" : isSectionActive ? "section-active" : ""}
                       type="button"
                       aria-current={isActive ? "page" : undefined}
-                      aria-expanded={navSection ? isExpanded : undefined}
-                      aria-controls={isPostsParent
-                        ? "posts-platform-subnav"
-                        : isRecommendationsParent
-                          ? "recommendations-subnav"
-                          : undefined}
                       aria-label={isPostsParent ? "Tous les posts, toutes plateformes confondues" : undefined}
                       onClick={() => {
                         if (isPostsParent) {
                           setView("all");
+                          setMobileOpen(false);
                           return;
                         }
                         if (isRecommendationsParent) {
                           setView("ideas");
+                          setMobileOpen(false);
                           return;
                         }
 
@@ -1138,9 +1122,6 @@ export function SocialOS({
                     >
                       <span className="nav-emoji">{item.emoji}</span>
                       <span className="nav-text">{item.label}</span>
-                      {navSection ? (
-                        <span className="nav-caret" aria-hidden="true">⌄</span>
-                      ) : null}
                     </button>
 
                     {isPostsParent ? (
@@ -1149,7 +1130,6 @@ export function SocialOS({
                         id="posts-platform-subnav"
                         role="group"
                         aria-label="Plateformes de Tous les posts"
-                        hidden={!isExpanded}
                       >
                         {PLATFORM_ORDER.map((key) => {
                           const meta = PLATFORM_META[key];
@@ -1184,7 +1164,6 @@ export function SocialOS({
                         id="recommendations-subnav"
                         role="group"
                         aria-label="Types de recommandations"
-                        hidden={!isExpanded}
                       >
                         {RECOMMENDATION_NAV.map((child) => {
                           const isChildActive = view === child.id;
@@ -1193,6 +1172,8 @@ export function SocialOS({
                               className={isChildActive ? "active" : ""}
                               type="button"
                               aria-current={isChildActive ? "page" : undefined}
+                              aria-label={child.label}
+                              title={child.label}
                               onClick={() => {
                                 setView(child.id);
                                 setMobileOpen(false);

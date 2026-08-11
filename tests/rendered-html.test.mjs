@@ -42,6 +42,8 @@ test("server-renders the live Social Radar shell", async () => {
   assert.match(html, /Roadmap/);
   assert.match(html, /id="posts-platform-subnav"/);
   assert.match(html, /id="recommendations-subnav"/);
+  assert.doesNotMatch(html, /<div[^>]*id="posts-platform-subnav"[^>]*\shidden\b/);
+  assert.doesNotMatch(html, /<div[^>]*id="recommendations-subnav"[^>]*\shidden\b/);
   assert.doesNotMatch(html, /Données publiques réelles|Snapshot public interactif|Générer les idées/);
   assert.match(html, /Instagram, X, TikTok et YouTube/);
   assert.doesNotMatch(html, /<iframe\b/i);
@@ -153,10 +155,15 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   );
   assert.match(component, /posts-platform-subnav/);
   assert.match(component, /recommendations-subnav/);
-  assert.match(component, /aria-expanded=\{navSection \? isExpanded : undefined\}/);
-  assert.match(component, /hidden=\{!isExpanded\}/);
-  assert.match(component, /const expandedNavSection: NavSection \| null = view === "all" \|\| view === "top"/);
-  assert.match(component, /view === "ideas" \|\| view === "comments" \|\| view === "trends"/);
+  assert.doesNotMatch(component, /NavSection|expandedNavSection|isExpanded/);
+  assert.doesNotMatch(component, /className="nav-caret"|hidden=\{!isExpanded\}/);
+  const primaryNavSource = component.slice(
+    component.indexOf('<nav className="nav"'),
+    component.indexOf('<div className="sidebar-foot"'),
+  );
+  assert.doesNotMatch(primaryNavSource, /aria-expanded|aria-controls/);
+  assert.match(primaryNavSource, /aria-label=\{child\.label\}/);
+  assert.match(primaryNavSource, /title=\{child\.label\}/);
   assert.match(component, /setView\("all"\)/);
   assert.match(component, /view === "top" && topPlatform === key/);
   assert.match(component, /onClick=\{\(\) => chooseTopPlatform\(key\)\}/);
@@ -339,8 +346,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(socialRanking, /Likes décroissants/);
   assert.match(socialRanking, /Vues décroissantes · likes indisponibles/);
   assert.doesNotMatch(socialRanking, /published_at|performance_score/);
-  assert.match(styles, /\.nav-submenu\[hidden\]\s*\{[\s\S]*?display:\s*none/);
-  assert.match(styles, /\.nav-entry\.expanded > button \.nav-caret/);
+  assert.doesNotMatch(styles, /\.nav-submenu\[hidden\]|\.nav-caret|\.nav-entry\.expanded/);
   assert.doesNotMatch(styles, /nav-meta/);
   assert.doesNotMatch(styles, /\.nav-count\b/);
   assert.match(styles, /\.nav-platform-logo\s*\{[\s\S]*?object-fit:\s*contain/);
