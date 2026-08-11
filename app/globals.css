@@ -4762,9 +4762,7 @@ a {
 
 .top-ranking-controls {
   --platform-rgb: 154, 168, 255;
-  position: sticky;
-  z-index: 30;
-  top: 103px;
+  position: static;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: linear-gradient(150deg, rgba(20, 24, 40, 0.95), rgba(11, 13, 21, 0.97));

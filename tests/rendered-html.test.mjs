@@ -280,6 +280,18 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /categoryFilters\(topPlatform\)\.map/);
   assert.match(component, /category-results/);
   assert.match(component, /className="category-results tone-all"/);
+  const topRankingView = component.slice(
+    component.indexOf('{workspace && view === "top"'),
+    component.indexOf('{workspace && view === "all"'),
+  );
+  const rankingControlsStart = topRankingView.indexOf("top-ranking-controls");
+  const rankingControlsEnd = topRankingView.indexOf("</section>", rankingControlsStart);
+  const categoryResultsStart = topRankingView.indexOf("category-results", rankingControlsEnd);
+  const categoryTitleStart = topRankingView.indexOf('id="active-category-title"', categoryResultsStart);
+  assert.ok(rankingControlsStart >= 0);
+  assert.ok(rankingControlsEnd > rankingControlsStart);
+  assert.ok(categoryResultsStart > rankingControlsEnd);
+  assert.ok(categoryTitleStart > categoryResultsStart);
   assert.match(component, /Toutes plateformes confondues/);
   assert.match(component, /allPlatformPosts\.slice\(0, visiblePostCount\)/);
   assert.match(component, /choices\.length \? "poll-card" : ""/);
@@ -321,6 +333,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.audience-period-tabs\s*\{/);
   assert.match(styles, /\.audience-platform-logo\s*\{/);
   assert.match(styles, /\.audience-platform-logo img\s*\{/);
+  const topRankingControlDeclarations = [
+    ...styles.matchAll(/\.top-ranking-controls\s*\{([^}]*)\}/g),
+  ].map((match) => match[1]);
+  assert.ok(topRankingControlDeclarations.length > 0);
+  for (const declarations of topRankingControlDeclarations) {
+    assert.doesNotMatch(declarations, /\bposition\s*:\s*sticky\b/i);
+    assert.doesNotMatch(declarations, /\btop\s*:\s*103px\b/i);
+  }
   assert.match(styles, /\.comment-opportunity-grid \.comment-opportunity-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.comment-suggestion\s*\{/);
   assert.match(styles, /\.comment-copy-button\s*\{/);
