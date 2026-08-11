@@ -226,6 +226,8 @@ function AudioTrendCard({
           <SocialInlinePlayer
             active
             platform={trend.platform}
+            playbackUrl={trend.referenceVideo.playbackUrl}
+            playbackExpiresAt={trend.referenceVideo.playbackExpiresAt}
             sourceUrl={trend.referenceVideo.url}
             title={`Vidéo de référence pour ${trend.title}`}
             onClose={onClose}

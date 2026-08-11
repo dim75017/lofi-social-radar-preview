@@ -2,7 +2,10 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { assertAudioTrendFeed } from "../lib/audio-trends.ts";
+import {
+  assertAudioTrendFeed,
+  isInstagramSignedPlaybackUrl,
+} from "../lib/audio-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const feedPath = resolve(root, "data", "audio-trends", "feed.json");
@@ -10,6 +13,10 @@ const statusPath = resolve(root, "data", "audio-trends", "refresh-status.json");
 const TRACKED_PLATFORMS = ["instagram", "tiktok"];
 const PARIS_TIMEZONE = "Europe/Paris";
 const COUNTER_LINK_WINDOW = 8_192;
+const INSTAGRAM_REEL_HTML_MAX_BYTES = 2_000_000;
+const INSTAGRAM_PLAYBACK_PROBE_BYTES = 262_144;
+const INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS = 6 * 60 * 60 * 1_000;
+const INSTAGRAM_PLAYBACK_MAX_VALIDITY_MS = 7 * 24 * 60 * 60 * 1_000;
 
 export const AUDIO_REFRESH_CONCURRENCY = 6;
 export const AUDIO_REFRESH_TIMEOUT_MS = 12_000;
@@ -68,20 +75,40 @@ export async function buildAudioTrendRefresh({
     errors: ["YouTube n'expose pas de compteur global d'utilisations audio comparable."],
   });
 
-  const coverage = evaluateAudioRefreshCoverage(providerResults);
+  const baseCoverage = evaluateAudioRefreshCoverage(providerResults);
+  const instagramPlaybackChecks = checks.filter((check) => check.platform === "instagram");
+  const instagramPlaybackMatched = instagramPlaybackChecks
+    .filter((check) => check.playbackMatched).length;
+  const instagramPlaybackComplete = instagramPlaybackChecks.length > 0 &&
+    instagramPlaybackMatched === instagramPlaybackChecks.length;
+  const successfulPublication = baseCoverage.publishable && instagramPlaybackMatched > 0;
+  const degradedPublication = !baseCoverage.publishable && instagramPlaybackComplete;
+  const coverage = {
+    ...baseCoverage,
+    instagramPlaybackChecked: instagramPlaybackChecks.length,
+    instagramPlaybackMatched,
+    instagramPlaybackComplete,
+    counterPublishable: baseCoverage.publishable,
+    publishable: successfulPublication || degradedPublication,
+  };
   const status = {
     version: 1,
     attemptedAt: now,
-    status: coverage.publishable ? "success" : "failed",
+    status: successfulPublication
+      ? "success"
+      : degradedPublication
+        ? "degraded"
+        : "failed",
     published: coverage.publishable,
     coverage,
     providers: providerResults,
   };
 
   if (!coverage.publishable) {
-    const error = new Error(
-      `Couverture audio insuffisante: ${coverage.totalMatched}/${coverage.totalChecked}, minimum ${coverage.requiredTotal}.`,
-    );
+    const reason = !instagramPlaybackComplete && !baseCoverage.publishable
+      ? `Couverture playback Instagram insuffisante: ${instagramPlaybackMatched}/${instagramPlaybackChecks.length}.`
+      : `Couverture audio insuffisante: ${coverage.totalMatched}/${coverage.totalChecked}, minimum ${coverage.requiredTotal}.`;
+    const error = new Error(reason);
     error.refreshStatus = status;
     throw error;
   }
@@ -102,19 +129,35 @@ export async function buildAudioTrendRefresh({
 }
 
 async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
+  let playbackMatched = false;
   try {
     const expectedIdentity = nativeAudioIdentity(trend.audioUrl, trend.platform);
     if (!expectedIdentity) throw new Error("identite audio native absente");
 
-    const response = await fetchImpl(trend.audioUrl, {
-      headers: {
-        Accept: "text/html,application/xhtml+xml",
-        "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
-        "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
-      },
-      redirect: "follow",
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+    const playbackPromise = trend.platform === "instagram"
+      ? collectInstagramSignedPlayback({
+          referenceUrl: trend.referenceVideo.url,
+          capturedAt,
+          fetchImpl,
+          timeoutMs,
+        })
+      : Promise.resolve(null);
+    const counterPromise = fetchImpl(trend.audioUrl, publicPageRequestOptions(timeoutMs));
+    const [playbackResult, counterResult] = await Promise.allSettled([
+      playbackPromise,
+      counterPromise,
+    ]);
+    if (playbackResult.status === "fulfilled" && playbackResult.value) {
+      playbackMatched = true;
+      trend.referenceVideo.playbackUrl = playbackResult.value.url;
+      trend.referenceVideo.playbackCapturedAt = playbackResult.value.capturedAt;
+      trend.referenceVideo.playbackExpiresAt = playbackResult.value.expiresAt;
+    }
+    if (counterResult.status === "rejected") throw counterResult.reason;
+    if (playbackResult.status === "rejected") throw playbackResult.reason;
+
+    const playback = playbackResult.value;
+    const response = counterResult.value;
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const finalUrl = response.url || trend.audioUrl;
@@ -141,7 +184,14 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
 
     const lastCapturedAt = trend.usageObservations.at(-1)?.capturedAt;
     if (lastCapturedAt && sameParisDay(lastCapturedAt, capturedAt)) {
-      return { id: trend.id, platform: trend.platform, matched: true, updated: false, error: null };
+      return {
+        id: trend.id,
+        platform: trend.platform,
+        matched: true,
+        updated: Boolean(playback),
+        playbackMatched,
+        error: null,
+      };
     }
 
     const sourceUrl = canonicalNativeAudioUrl(trend.audioUrl);
@@ -155,16 +205,211 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
       exactness: parsed.exactness,
     });
     trend.usageObservations = trend.usageObservations.slice(-30);
-    return { id: trend.id, platform: trend.platform, matched: true, updated: true, error: null };
+    return {
+      id: trend.id,
+      platform: trend.platform,
+      matched: true,
+      updated: true,
+      playbackMatched,
+      error: null,
+    };
   } catch (error) {
     return {
       id: trend.id,
       platform: trend.platform,
       matched: false,
-      updated: false,
+      updated: playbackMatched,
+      playbackMatched,
       error: error instanceof Error ? error.message : "erreur inconnue",
     };
   }
+}
+
+export async function collectInstagramSignedPlayback({
+  referenceUrl,
+  capturedAt,
+  fetchImpl = fetch,
+  timeoutMs = AUDIO_REFRESH_TIMEOUT_MS,
+}) {
+  const expectedShortcode = nativeInstagramReelIdentity(referenceUrl);
+  if (!expectedShortcode) throw new Error("reference Reel Instagram invalide");
+  const response = await fetchImpl(referenceUrl, publicPageRequestOptions(timeoutMs));
+  if (!response.ok) throw new Error(`Reel Instagram HTTP ${response.status}`);
+  const finalUrl = response.url || referenceUrl;
+  if (nativeInstagramReelIdentity(finalUrl) !== expectedShortcode) {
+    throw new Error("redirection vers un autre Reel Instagram");
+  }
+  const declaredLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > INSTAGRAM_REEL_HTML_MAX_BYTES) {
+    throw new Error("page Reel Instagram trop volumineuse");
+  }
+  const html = await response.text();
+  if (new TextEncoder().encode(html).byteLength > INSTAGRAM_REEL_HTML_MAX_BYTES) {
+    throw new Error("page Reel Instagram trop volumineuse apres lecture");
+  }
+
+  const capturedTimestamp = Date.parse(capturedAt);
+  if (!Number.isFinite(capturedTimestamp)) throw new Error("horodatage playback invalide");
+  const candidates = extractInstagramSignedPlaybackCandidates(html)
+    .map((url) => ({ url, expiresAt: instagramPlaybackExpiresAt(url) }))
+    .filter(({ expiresAt }) => {
+      if (!expiresAt) return false;
+      const validity = Date.parse(expiresAt) - capturedTimestamp;
+      return validity >= INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS &&
+        validity <= INSTAGRAM_PLAYBACK_MAX_VALIDITY_MS;
+    });
+  if (candidates.length === 0) {
+    throw new Error("URL MP4 Instagram signee absente ou trop proche de son expiration");
+  }
+
+  const probeErrors = [];
+  for (const candidate of candidates) {
+    try {
+      await verifyInstagramSignedPlayback(candidate.url, {
+        expiresAt: candidate.expiresAt,
+        fetchImpl,
+        timeoutMs,
+      });
+      return {
+        url: candidate.url,
+        capturedAt,
+        expiresAt: candidate.expiresAt,
+      };
+    } catch (error) {
+      probeErrors.push(error instanceof Error ? error.message : "probe inconnue");
+    }
+  }
+  throw new Error(`aucun MP4 Instagram lisible avec son: ${probeErrors.join("; ")}`);
+}
+
+export function extractInstagramSignedPlaybackCandidates(html) {
+  let decoded = String(html ?? "");
+  for (let pass = 0; pass < 2; pass += 1) {
+    decoded = decoded
+      .replace(/\\u([0-9a-f]{4})/giu, (_match, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+      .replace(/\\\//gu, "/")
+      .replace(/&amp;/giu, "&")
+      .replace(/&#0*38;|&#x0*26;/giu, "&");
+  }
+  const pattern = /https:\/\/scontent(?:-[a-z0-9-]+)?\.cdninstagram\.com\/[^"'<>\\\s]{1,8000}/giu;
+  const candidates = [];
+  for (const match of decoded.matchAll(pattern)) {
+    const candidate = match[0];
+    if (candidate.length > 8_192 || !isInstagramSignedPlaybackUrl(candidate)) continue;
+    candidates.push(candidate);
+  }
+  return [...new Set(candidates)].sort((left, right) =>
+    instagramPlaybackCandidateScore(right) - instagramPlaybackCandidateScore(left)
+  );
+}
+
+export function instagramPlaybackExpiresAt(candidate) {
+  if (!isInstagramSignedPlaybackUrl(candidate)) return null;
+  const encodedExpiry = new URL(candidate).searchParams.get("oe");
+  const expiryMilliseconds = Number.parseInt(encodedExpiry, 16) * 1_000;
+  if (!Number.isSafeInteger(expiryMilliseconds)) return null;
+  return new Date(expiryMilliseconds).toISOString();
+}
+
+async function verifyInstagramSignedPlayback(candidate, {
+  expiresAt,
+  fetchImpl,
+  timeoutMs,
+}) {
+  if (!isInstagramSignedPlaybackUrl(candidate, expiresAt)) {
+    throw new Error("URL CDN Instagram invalide");
+  }
+  const response = await fetchImpl(candidate, {
+    headers: {
+      Accept: "video/mp4",
+      Origin: "https://dim75017.github.io",
+      Range: `bytes=0-${INSTAGRAM_PLAYBACK_PROBE_BYTES - 1}`,
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (![200, 206].includes(response.status)) {
+    throw new Error(`CDN Instagram HTTP ${response.status}`);
+  }
+  const finalUrl = response.url || candidate;
+  if (!isInstagramSignedPlaybackUrl(finalUrl, expiresAt)) {
+    throw new Error("redirection CDN Instagram invalide");
+  }
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0].trim();
+  if (contentType !== "video/mp4") throw new Error("contenu CDN non MP4");
+  const allowOrigin = response.headers.get("access-control-allow-origin");
+  if (allowOrigin !== "*" && allowOrigin !== "https://dim75017.github.io") {
+    throw new Error("CDN Instagram non lisible depuis GitHub Pages");
+  }
+  const prefix = await readResponsePrefix(response, INSTAGRAM_PLAYBACK_PROBE_BYTES);
+  const boxText = new TextDecoder("latin1").decode(prefix);
+  const hasVideo = boxText.includes("vide") &&
+    (boxText.includes("avc1") || boxText.includes("hvc1") || boxText.includes("hev1"));
+  const hasAudio = boxText.includes("soun") && boxText.includes("mp4a");
+  if (!hasVideo || !hasAudio) throw new Error("MP4 Instagram sans pistes audio et video confirmees");
+}
+
+function nativeInstagramReelIdentity(candidate) {
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    if (
+      url.protocol !== "https:" ||
+      !(hostname === "instagram.com" || hostname.endsWith(".instagram.com"))
+    ) {
+      return null;
+    }
+    return url.pathname.replace(/\/+$/u, "")
+      .match(/^\/(?:reel|reels)\/([A-Za-z0-9_-]+)$/u)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function instagramPlaybackCandidateScore(candidate) {
+  const url = new URL(candidate);
+  return Number(url.searchParams.has("vs")) + Number(url.searchParams.has("_nc_vs"));
+}
+
+function publicPageRequestOptions(timeoutMs) {
+  return {
+    headers: {
+      Accept: "text/html,application/xhtml+xml",
+      "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(timeoutMs),
+  };
+}
+
+async function readResponsePrefix(response, maximumBytes) {
+  if (!response.body) {
+    return new Uint8Array((await response.arrayBuffer()).slice(0, maximumBytes));
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (total < maximumBytes) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const remaining = maximumBytes - total;
+      const chunk = value.byteLength > remaining ? value.slice(0, remaining) : value;
+      chunks.push(chunk);
+      total += chunk.byteLength;
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+  }
+  const combined = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    combined.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return combined;
 }
 
 export function nativeAudioIdentity(candidate, platform) {
@@ -374,6 +619,10 @@ async function main() {
         requiredTotal: AUDIO_REFRESH_MIN_PROVIDER_MATCHES,
         ratio: 0,
         providersPassed: false,
+        instagramPlaybackChecked: 0,
+        instagramPlaybackMatched: 0,
+        instagramPlaybackComplete: false,
+        counterPublishable: false,
         publishable: false,
       },
       providers: [],

@@ -1,33 +1,71 @@
 {
   "version": 1,
-  "attemptedAt": "2026-08-11T14:15:00.000Z",
-  "status": "success",
+  "attemptedAt": "2026-08-11T16:26:24.285Z",
+  "status": "degraded",
   "published": true,
+  "coverage": {
+    "totalChecked": 16,
+    "totalMatched": 0,
+    "requiredTotal": 12,
+    "ratio": 0,
+    "providersPassed": false,
+    "publishable": true,
+    "instagramPlaybackChecked": 8,
+    "instagramPlaybackMatched": 8,
+    "instagramPlaybackComplete": true,
+    "counterPublishable": false
+  },
   "providers": [
     {
       "platform": "instagram",
       "checked": 8,
-      "matched": 8,
+      "matched": 0,
       "updated": 8,
-      "status": "success",
-      "errors": []
+      "requiredMatched": 6,
+      "coverage": 0,
+      "status": "failed",
+      "errors": [
+        "everything-hallelujah: compteur public non lie a cette identite audio",
+        "young-and-beautiful: compteur public non lie a cette identite audio",
+        "less-than-a-lover: compteur public non lie a cette identite audio",
+        "sweetly: compteur public non lie a cette identite audio",
+        "sirens-cinematic-tension: compteur public non lie a cette identite audio",
+        "odysseus-heroic-edit: compteur public non lie a cette identite audio",
+        "freaked-out-list: compteur public non lie a cette identite audio",
+        "stupid-song-montage: compteur public non lie a cette identite audio",
+        "couverture insuffisante: 0/8, minimum 6"
+      ]
     },
     {
       "platform": "tiktok",
       "checked": 8,
-      "matched": 8,
-      "updated": 8,
-      "status": "success",
-      "errors": []
+      "matched": 0,
+      "updated": 0,
+      "requiredMatched": 6,
+      "coverage": 0,
+      "status": "failed",
+      "errors": [
+        "pocketful-of-sunshine: compteur public non lie a cette identite audio",
+        "petal-soft-chaos: compteur public non lie a cette identite audio",
+        "baby-just-wanna-dance: compteur public non lie a cette identite audio",
+        "saxophones-getting-louder: compteur public non lie a cette identite audio",
+        "ghosting-you-montage: compteur public non lie a cette identite audio",
+        "te-extrano-motivation: compteur public non lie a cette identite audio",
+        "just-say-here-bro: compteur public non lie a cette identite audio",
+        "obsession-nice-date: compteur public non lie a cette identite audio",
+        "couverture insuffisante: 0/8, minimum 6"
+      ]
     },
     {
       "platform": "youtube",
       "checked": 0,
       "matched": 0,
       "updated": 0,
+      "requiredMatched": 0,
+      "coverage": 0,
       "status": "limited",
       "errors": [
-        "YouTube n’expose pas de compteur global d’utilisations audio comparable."
+        "YouTube n'expose pas de compteur global d'utilisations audio comparable."
       ]
     }
   ]

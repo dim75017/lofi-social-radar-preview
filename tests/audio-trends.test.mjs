@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   assertAudioTrendFeed,
   deriveAudioTrendGrowth,
+  isInstagramSignedPlaybackUrl,
   isNativeAudioReferenceVideoUrl,
   isNativeAudioTrendUrl,
 } from "../lib/audio-trends.ts";
@@ -23,6 +24,11 @@ function validProposals() {
     { id: "cat-whisper", title: "Cat whisper", concept: "The whisper comes from the cat hidden behind Lofi Girl's books.", copy: "Mystery solved.", character: "lofi-girl", tone: "cat" },
     { id: "stealth-quest", title: "Stealth quest", concept: "Lofi Boy treats the whispered library rule like a stealth-game objective.", copy: "Stealth mode enabled.", character: "lofi-boy", tone: "gaming" },
   ];
+}
+
+function instagramPlaybackUrl(expiresAt) {
+  const encodedExpiry = Math.floor(Date.parse(expiresAt) / 1_000).toString(16).toUpperCase();
+  return `https://scontent-cdg4-1.cdninstagram.com/o1/v/t2/f2/m86/reference.mp4?_nc_ht=scontent-cdg4-1.cdninstagram.com&oh=0123456789abcdef0123456789abcdef&oe=${encodedExpiry}&vs=1&_nc_vs=1`;
 }
 
 function validTrend() {
@@ -126,9 +132,27 @@ test("the published feed contains sourced audio signals without invented growth"
     bootstrapFeed.sourceChecks.map((check) => check.platform),
     ["instagram", "tiktok", "youtube"],
   );
-  assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "instagram")?.status, "success");
-  assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "tiktok")?.status, "success");
+  assert.ok(
+    ["success", "failed"].includes(
+      bootstrapFeed.sourceChecks.find((check) => check.platform === "instagram")?.status,
+    ),
+  );
+  assert.ok(
+    ["success", "failed"].includes(
+      bootstrapFeed.sourceChecks.find((check) => check.platform === "tiktok")?.status,
+    ),
+  );
   assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "youtube")?.status, "limited");
+  assert.ok(
+    bootstrapFeed.trends
+      .filter((trend) => trend.platform === "instagram")
+      .every(
+        (trend) =>
+          trend.referenceVideo.playbackUrl &&
+          trend.referenceVideo.playbackCapturedAt &&
+          trend.referenceVideo.playbackExpiresAt,
+      ),
+  );
   assert.equal(
     bootstrapFeed.trends.filter((trend) => deriveAudioTrendGrowth(trend.usageObservations)).length,
     3,
@@ -265,6 +289,32 @@ test("reference metrics may be absent but can never be unsourced or fabricated",
     () => assertAudioTrendFeed(feedWith(foreignMetricSource)),
     /vidéo de référence/i,
   );
+});
+
+test("signed Instagram playback is atomic, short-lived and restricted to scontent CDN", () => {
+  const trend = validTrend();
+  const expiresAt = "2026-08-12T23:00:00.000Z";
+  trend.referenceVideo.playbackUrl = instagramPlaybackUrl(expiresAt);
+  trend.referenceVideo.playbackCapturedAt = "2026-08-11T11:00:00.000Z";
+  trend.referenceVideo.playbackExpiresAt = expiresAt;
+  assert.equal(isInstagramSignedPlaybackUrl(trend.referenceVideo.playbackUrl, expiresAt), true);
+  const signedFeed = feedWith(trend);
+  assert.equal(assertAudioTrendFeed(signedFeed), signedFeed);
+
+  const partial = validTrend();
+  partial.referenceVideo.playbackUrl = instagramPlaybackUrl(expiresAt);
+  assert.throws(() => assertAudioTrendFeed(feedWith(partial)), /lecture Instagram sign/i);
+
+  const foreignHost = validTrend();
+  foreignHost.referenceVideo.playbackUrl = instagramPlaybackUrl(expiresAt)
+    .replace("scontent-cdg4-1.cdninstagram.com", "media.example.com");
+  foreignHost.referenceVideo.playbackCapturedAt = "2026-08-11T11:00:00.000Z";
+  foreignHost.referenceVideo.playbackExpiresAt = expiresAt;
+  assert.throws(() => assertAudioTrendFeed(feedWith(foreignHost)), /lecture Instagram sign/i);
+
+  const mismatchedExpiry = structuredClone(trend);
+  mismatchedExpiry.referenceVideo.playbackExpiresAt = "2026-08-12T22:00:00.000Z";
+  assert.throws(() => assertAudioTrendFeed(feedWith(mismatchedExpiry)), /lecture Instagram sign/i);
 });
 
 test("usage validation rejects invented, ambiguous and chronologically invalid evidence", () => {

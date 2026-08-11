@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildSocialInlineEmbedUrl } from "../lib/social-inline-player.ts";
+import {
+  buildSocialInlineEmbedUrl,
+  resolveFreshInstagramPlaybackUrl,
+} from "../lib/social-inline-player.ts";
 
 const hostOrigin = "https://dim75017.github.io";
 
@@ -42,6 +45,45 @@ test("keeps Instagram and X references inside their official embeds", () => {
       hostOrigin,
     ),
     "https://platform.twitter.com/embed/Tweet.html?id=1234567890123456789&theme=dark&dnt=true",
+  );
+});
+
+test("accepts only a fresh Instagram CDN MP4 whose signed expiry matches", () => {
+  const signedExpiresAt = Date.parse("2026-08-12T12:00:00.000Z");
+  const signedExpiry = Math.floor(signedExpiresAt / 1_000).toString(16);
+  const playbackUrl = `https://scontent.cdninstagram.com/v/t50.2886-16/reference.mp4?oh=signed-playback-token&oe=${signedExpiry}`;
+
+  assert.equal(
+    resolveFreshInstagramPlaybackUrl(
+      playbackUrl,
+      "2026-08-12T12:00:00.000Z",
+      Date.parse("2026-08-12T10:00:00.000Z"),
+    ),
+    playbackUrl,
+  );
+  assert.equal(
+    resolveFreshInstagramPlaybackUrl(
+      playbackUrl,
+      "2026-08-12T12:00:00.000Z",
+      signedExpiresAt,
+    ),
+    null,
+  );
+  assert.equal(
+    resolveFreshInstagramPlaybackUrl(
+      playbackUrl,
+      "2026-08-12T13:00:00.000Z",
+      Date.parse("2026-08-12T10:00:00.000Z"),
+    ),
+    null,
+  );
+  assert.equal(
+    resolveFreshInstagramPlaybackUrl(
+      `https://example.com/reference.mp4?oe=${signedExpiry}`,
+      "2026-08-12T12:00:00.000Z",
+      Date.parse("2026-08-12T10:00:00.000Z"),
+    ),
+    null,
   );
 });
 

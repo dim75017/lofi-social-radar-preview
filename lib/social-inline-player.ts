@@ -1,5 +1,49 @@
 export type SocialInlinePlatform = "youtube" | "instagram" | "tiktok" | "x";
 
+const INSTAGRAM_PLAYBACK_EXPIRY_GUARD_MS = 60_000;
+
+/**
+ * Instagram's public reel page exposes a short-lived, signed MP4 URL. Keep the
+ * checks fail-closed: stale or rewritten URLs must fall back to the inert
+ * Instagram preview instead of being handed to the browser as media.
+ */
+export function resolveFreshInstagramPlaybackUrl(
+  playbackUrl: string | null | undefined,
+  playbackExpiresAt: string | null | undefined,
+  now = Date.now(),
+) {
+  if (!playbackUrl || !playbackExpiresAt || !Number.isFinite(now)) return null;
+
+  try {
+    const url = new URL(playbackUrl);
+    const hostname = url.hostname.toLowerCase();
+    const expiresAt = Date.parse(playbackExpiresAt);
+    const encodedExpiry = url.searchParams.get("oe");
+    const signature = url.searchParams.get("oh");
+    const signedExpiresAt = encodedExpiry && /^[0-9a-f]+$/iu.test(encodedExpiry)
+      ? Number.parseInt(encodedExpiry, 16) * 1_000
+      : Number.NaN;
+
+    if (
+      url.protocol !== "https:" ||
+      !/^scontent(?:-[a-z0-9-]+)?\.cdninstagram\.com$/u.test(hostname) ||
+      !url.pathname.toLowerCase().endsWith(".mp4") ||
+      !signature ||
+      signature.length < 16 ||
+      !Number.isFinite(expiresAt) ||
+      !Number.isFinite(signedExpiresAt) ||
+      Math.abs(expiresAt - signedExpiresAt) >= 1_000 ||
+      expiresAt <= now + INSTAGRAM_PLAYBACK_EXPIRY_GUARD_MS
+    ) {
+      return null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 export function buildSocialInlineEmbedUrl(
   platform: SocialInlinePlatform,
   sourceUrl: string,

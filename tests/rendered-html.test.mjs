@@ -339,6 +339,18 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(socialInlinePlayer, /player\.setVolume\(100\)/);
   assert.match(socialInlinePlayer, /onAutoplayBlocked/);
   assert.match(socialInlinePlayer, /inline-player-sound-fallback/);
+  const directInstagramPlayer = socialInlinePlayer.slice(
+    socialInlinePlayer.indexOf('platform === "instagram" && useInstagramVideo'),
+    socialInlinePlayer.indexOf('if (platform === "instagram") {', socialInlinePlayer.indexOf('platform === "instagram" && useInstagramVideo') + 1),
+  );
+  assert.match(directInstagramPlayer, /<video/);
+  assert.match(directInstagramPlayer, /controls/);
+  assert.match(directInstagramPlayer, /playsInline/);
+  assert.doesNotMatch(directInstagramPlayer, /<iframe/);
+  assert.match(audioTrendView, /playbackUrl=\{trend\.referenceVideo\.playbackUrl\}/);
+  assert.match(audioTrendView, /playbackExpiresAt=\{trend\.referenceVideo\.playbackExpiresAt\}/);
+  assert.match(socialInlinePlayer, /is-instagram-preview-only/);
+  assert.match(styles, /is-instagram-preview-only iframe\s*\{[\s\S]*?pointer-events:\s*none/);
   assert.match(audioTrendModel, /usageObservations/);
   assert.match(audioTrendModel, /same canonical source/i);
   const parsedAudioTrendFeed = JSON.parse(audioTrendFeed);

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import {
   buildSocialInlineEmbedUrl,
+  resolveFreshInstagramPlaybackUrl,
   type SocialInlinePlatform,
 } from "../lib/social-inline-player";
 
@@ -45,27 +46,38 @@ export function SocialInlinePlayer({
   active,
   onClose,
   platform,
+  playbackExpiresAt,
+  playbackUrl,
   sourceUrl,
   title,
 }: {
   active: boolean;
   onClose: () => void;
   platform: SocialInlinePlatform;
+  playbackExpiresAt?: string | null;
+  playbackUrl?: string | null;
   sourceUrl: string;
   title: string;
 }) {
   const rawId = useId();
   const frameId = `social-inline-${rawId.replace(/[^A-Za-z0-9_-]/gu, "")}`;
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
   const fallbackTimerRef = useRef<number | null>(null);
   const hostOrigin = typeof window === "undefined" ? "" : window.location.origin;
   const [status, setStatus] = useState<PlaybackStatus>("loading");
+  const [failedPlaybackUrl, setFailedPlaybackUrl] = useState<string | null>(null);
 
   const embedUrl = useMemo(
     () => buildSocialInlineEmbedUrl(platform, sourceUrl, hostOrigin),
     [hostOrigin, platform, sourceUrl],
   );
+  const instagramPlaybackUrl = platform === "instagram"
+    ? resolveFreshInstagramPlaybackUrl(playbackUrl, playbackExpiresAt)
+    : null;
+  const useInstagramVideo = Boolean(instagramPlaybackUrl) &&
+    instagramPlaybackUrl !== failedPlaybackUrl;
 
   const clearFallbackTimer = useCallback(() => {
     if (fallbackTimerRef.current !== null) {
@@ -113,6 +125,24 @@ export function SocialInlinePlayer({
       setStatus("blocked");
     }
   }, [armFallbackTimer]);
+
+  const requestInstagramPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    video.volume = 1;
+    setStatus("loading");
+    void video.play()
+      .then(() => setStatus("playing"))
+      .catch(() => setStatus("blocked"));
+  }, []);
+
+  useEffect(() => {
+    if (!active || !useInstagramVideo) return;
+    requestInstagramPlayback();
+    const video = videoRef.current;
+    return () => video?.pause();
+  }, [active, instagramPlaybackUrl, requestInstagramPlayback, useInstagramVideo]);
 
   useEffect(() => {
     if (!active) return;
@@ -221,6 +251,8 @@ export function SocialInlinePlayer({
           { type: "pause", value: undefined, "x-tiktok-player": true },
           "https://www.tiktok.com",
         );
+      } else if (platform === "instagram") {
+        videoRef.current?.pause();
       }
     };
     document.addEventListener("visibilitychange", pauseWhenHidden);
@@ -233,6 +265,61 @@ export function SocialInlinePlayer({
     return (
       <div className="inline-video-frame social-inline-player-frame is-unavailable" role="status">
         <p>Lecture inline indisponible pour cette publication.</p>
+        <button className="inline-player-close" type="button" aria-label="Fermer le lecteur" onClick={onClose}>×</button>
+      </div>
+    );
+  }
+
+
+  if (platform === "instagram" && useInstagramVideo && instagramPlaybackUrl) {
+    return (
+      <div className={`inline-video-frame social-inline-player-frame is-direct-video status-${status}`}>
+        <video
+          ref={videoRef}
+          src={instagramPlaybackUrl}
+          title={title}
+          controls
+          playsInline
+          autoPlay
+          preload="auto"
+          muted={false}
+          onPlaying={() => setStatus("playing")}
+          onError={() => {
+            setStatus("blocked");
+            setFailedPlaybackUrl(instagramPlaybackUrl);
+          }}
+        />
+        {status === "blocked" ? (
+          <button
+            className="inline-player-sound-fallback"
+            type="button"
+            onClick={requestInstagramPlayback}
+          >
+            🔊 Lire avec le son
+          </button>
+        ) : null}
+        <button className="inline-player-close" type="button" aria-label="Fermer le lecteur" onClick={onClose}>×</button>
+      </div>
+    );
+  }
+
+  if (platform === "instagram") {
+    return (
+      <div className="inline-video-frame social-inline-player-frame is-instagram-preview-only" role="status">
+        <iframe
+          id={frameId}
+          ref={iframeRef}
+          src={embedUrl}
+          title={`${title} · aperçu indisponible`}
+          aria-hidden="true"
+          tabIndex={-1}
+          referrerPolicy="strict-origin-when-cross-origin"
+          loading="eager"
+        />
+        <div className="inline-instagram-refresh-message">
+          <b>Vidéo momentanément indisponible</b>
+          <span>Le lien de lecture sera renouvelé au prochain relevé.</span>
+        </div>
         <button className="inline-player-close" type="button" aria-label="Fermer le lecteur" onClick={onClose}>×</button>
       </div>
     );

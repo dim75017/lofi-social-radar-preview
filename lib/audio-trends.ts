@@ -40,6 +40,9 @@ export type AudioTrendReferenceVideo = {
   sourceUrl: string;
   exactness: AudioTrendExactness;
   metrics: AudioTrendPublicMetrics | null;
+  playbackUrl?: string | null;
+  playbackCapturedAt?: string | null;
+  playbackExpiresAt?: string | null;
 };
 
 export type AudioTrendUsageObservation = {
@@ -108,6 +111,8 @@ export type AudioTrendGrowth = {
 export const AUDIO_TREND_REFRESH_CADENCE_HOURS = 24;
 
 const HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
+const INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS = HOUR_IN_MILLISECONDS;
+const INSTAGRAM_PLAYBACK_MAX_VALIDITY_MS = 7 * 24 * HOUR_IN_MILLISECONDS;
 const METRIC_KEYS = ["views", "likes", "comments", "shares"] as const;
 const PLATFORMS: readonly AudioTrendPlatform[] = ["instagram", "tiktok", "youtube"];
 const VALID_PLATFORMS = new Set<AudioTrendPlatform>(PLATFORMS);
@@ -240,6 +245,38 @@ export function isNativeAudioReferenceVideoUrl(
   }
 }
 
+export function isInstagramSignedPlaybackUrl(
+  candidate: string,
+  declaredExpiresAt?: string,
+) {
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    const declaredHost = url.searchParams.get("_nc_ht")?.toLowerCase();
+    const signedExpiry = url.searchParams.get("oe");
+    const signature = url.searchParams.get("oh");
+    if (
+      url.protocol !== "https:" ||
+      !/^scontent(?:-[a-z0-9-]+)?\.cdninstagram\.com$/u.test(hostname) ||
+      declaredHost !== hostname ||
+      !url.pathname.toLowerCase().endsWith(".mp4") ||
+      !signature ||
+      signature.length < 16 ||
+      !signedExpiry ||
+      !/^[0-9a-f]{8,16}$/iu.test(signedExpiry)
+    ) {
+      return false;
+    }
+    if (declaredExpiresAt === undefined) return true;
+    if (!isTimestamp(declaredExpiresAt)) return false;
+    const encodedExpiryMs = Number.parseInt(signedExpiry, 16) * 1_000;
+    return Number.isSafeInteger(encodedExpiryMs) &&
+      Math.abs(encodedExpiryMs - Date.parse(declaredExpiresAt)) < 1_000;
+  } catch {
+    return false;
+  }
+}
+
 function isOfficialPlatformSourceUrl(
   candidate: string,
   platform: AudioTrendPlatform,
@@ -356,6 +393,9 @@ function assertReferenceVideo(
     "sourceUrl",
     "exactness",
     "metrics",
+    "playbackUrl",
+    "playbackCapturedAt",
+    "playbackExpiresAt",
   ], `la vidéo de référence ${trend.id}`);
   const reference = value as AudioTrendReferenceVideo;
   const capturedTimestamp = isTimestamp(reference.capturedAt)
@@ -395,6 +435,34 @@ function assertReferenceVideo(
       throw new Error(`Métriques audio inventées : ${trend.id}`);
     }
     assertMetrics(reference.metrics, trend.id);
+  }
+
+  const playbackFields = [
+    reference.playbackUrl,
+    reference.playbackCapturedAt,
+    reference.playbackExpiresAt,
+  ];
+  const playbackAbsent = playbackFields.every((field) => field === undefined || field === null);
+  if (!playbackAbsent) {
+    const playbackCapturedTimestamp = isTimestamp(reference.playbackCapturedAt)
+      ? Date.parse(reference.playbackCapturedAt)
+      : Number.NaN;
+    const playbackExpiresTimestamp = isTimestamp(reference.playbackExpiresAt)
+      ? Date.parse(reference.playbackExpiresAt)
+      : Number.NaN;
+    if (
+      trend.platform !== "instagram" ||
+      typeof reference.playbackUrl !== "string" ||
+      !isInstagramSignedPlaybackUrl(reference.playbackUrl, reference.playbackExpiresAt ?? undefined) ||
+      !Number.isFinite(playbackCapturedTimestamp) ||
+      !Number.isFinite(playbackExpiresTimestamp) ||
+      playbackCapturedTimestamp > feedCapturedTimestamp ||
+      playbackExpiresTimestamp <= feedCapturedTimestamp ||
+      playbackExpiresTimestamp - playbackCapturedTimestamp < INSTAGRAM_PLAYBACK_MIN_VALIDITY_MS ||
+      playbackExpiresTimestamp - playbackCapturedTimestamp > INSTAGRAM_PLAYBACK_MAX_VALIDITY_MS
+    ) {
+      throw new Error(`Lecture Instagram signée invalide : ${trend.id}`);
+    }
   }
 }
 
