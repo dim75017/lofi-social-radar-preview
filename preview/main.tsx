@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { SocialOS, type WorkspacePayload } from "../app/SocialOS";
 import "../app/globals.css";
 import audienceHistoryJson from "../data/audience-history.json";
+import audioTrendFeedJson from "../data/audio-trends/feed.json";
 import commentOpportunityFeedJson from "../data/comment-opportunities/feed.json";
 import publicHistorySummaryJson from "../data/public-history-summary.json";
 import trendFeedJson from "../data/trends/feed.json";
@@ -10,6 +11,10 @@ import {
   assertAudienceHistory,
   type AudienceHistory,
 } from "../lib/audience-metrics";
+import {
+  assertAudioTrendFeed,
+  type AudioTrendFeed,
+} from "../lib/audio-trends";
 import {
   assertCommentOpportunityFeed,
   type CommentOpportunityFeed,
@@ -38,11 +43,15 @@ const fallbackTrendFeed = assertSocialTrendFeed(
 const fallbackAudienceHistory = assertAudienceHistory(
   audienceHistoryJson as AudienceHistory,
 );
+const fallbackAudioTrendFeed = assertAudioTrendFeed(
+  audioTrendFeedJson as AudioTrendFeed,
+);
 const fallbackCommentOpportunityFeed = assertCommentOpportunityFeed(
   commentOpportunityFeedJson as CommentOpportunityFeed,
 );
 const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
 const RAW_TREND_FEED_URL = `${dataBaseUrl}/trends/feed.json`;
+const RAW_AUDIO_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/audio-trends/feed.json";
 const RAW_AUDIENCE_HISTORY_URL = `${dataBaseUrl}/audience-history.json`;
 const RAW_COMMENT_OPPORTUNITIES_URL = `${dataBaseUrl}/comment-opportunities/feed.json`;
 const emptySnapshot: PublicHistorySnapshot = {
@@ -66,6 +75,7 @@ const snapshotVersion = encodeURIComponent(
 function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [trendFeed, setTrendFeed] = useState(fallbackTrendFeed);
+  const [audioTrendFeed, setAudioTrendFeed] = useState(fallbackAudioTrendFeed);
   const [audienceHistory, setAudienceHistory] = useState(fallbackAudienceHistory);
   const [commentOpportunityFeed, setCommentOpportunityFeed] = useState(fallbackCommentOpportunityFeed);
   const [pendingPlatforms, setPendingPlatforms] = useState<SocialPlatform[]>([
@@ -112,6 +122,50 @@ function PublicPreview() {
 
     refreshTrendFeed();
     const hourlyRefresh = window.setInterval(refreshTrendFeed, 60 * 60 * 1_000);
+    document.addEventListener("visibilitychange", refreshOnReturn);
+
+    return () => {
+      active = false;
+      window.clearInterval(hourlyRefresh);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    const refreshAudioTrendFeed = () => {
+      void fetch(`${RAW_AUDIO_TREND_FEED_URL}?v=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Actualisation Trends audio impossible (${response.status}).`);
+          }
+          return assertAudioTrendFeed((await response.json()) as AudioTrendFeed);
+        })
+        .then((snapshot) => {
+          if (!active) return;
+          const incomingAt = Date.parse(snapshot.capturedAt);
+          if (!Number.isFinite(incomingAt)) return;
+          setAudioTrendFeed((current) => (
+            incomingAt >= Date.parse(current.capturedAt) ? snapshot : current
+          ));
+        })
+        .catch(() => {
+          // Le snapshot embarqué reste disponible si le relevé quotidien est indisponible.
+        });
+    };
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") refreshAudioTrendFeed();
+    };
+
+    refreshAudioTrendFeed();
+    const hourlyRefresh = window.setInterval(refreshAudioTrendFeed, 60 * 60 * 1_000);
     document.addEventListener("visibilitychange", refreshOnReturn);
 
     return () => {
@@ -297,6 +351,7 @@ function PublicPreview() {
     <SocialOS
       initialWorkspace={workspace as WorkspacePayload}
       initialTrendFeed={trendFeed}
+      initialAudioTrendFeed={audioTrendFeed}
       initialCommentOpportunityFeed={commentOpportunityFeed}
       initialAudienceHistory={audienceHistory}
       previewMode

@@ -1,0 +1,49 @@
+name: Refresh audio trends
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 5 * * *"
+    - cron: "27 17 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-audio-trends
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Refresh public audio counters
+        run: npm run audio-trends:refresh
+
+      - name: Validate the published feed
+        run: node --experimental-strip-types --test tests/audio-trends.test.mjs
+
+      - name: Publish the refreshed snapshot
+        run: |
+          if git diff --quiet -- data/audio-trends/feed.json data/audio-trends/refresh-status.json; then
+            echo "No validated audio changes to publish."
+            exit 0
+          fi
+          git config user.name "lofi-social-radar-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/audio-trends/feed.json data/audio-trends/refresh-status.json
+          git commit -m "Refresh audio trends"
+          for attempt in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((attempt * 5))
+          done
+          exit 1

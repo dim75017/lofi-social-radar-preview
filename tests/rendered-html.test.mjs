@@ -37,7 +37,8 @@ test("server-renders the live Social Radar shell", async () => {
   assert.match(html, /Tous les posts/);
   assert.match(html, /Commentaires/);
   assert.match(html, /Posts recommandés/);
-  assert.match(html, /Trends/);
+  assert.match(html, /Trends vid.os/);
+  assert.match(html, /Trends audio/);
   assert.match(html, /Recommandations/);
   assert.match(html, /Roadmap/);
   assert.match(html, /id="posts-platform-subnav"/);
@@ -73,6 +74,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     commentOpportunities,
     commentOpportunityModel,
     commentOpportunityFeed,
+    audioTrendView,
+    audioTrendModel,
+    audioTrendFeed,
   ] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -95,6 +99,9 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../app/CommentOpportunitiesView.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/comment-opportunities.ts", import.meta.url), "utf8"),
     readFile(new URL("../data/comment-opportunities/feed.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/AudioTrendFeedView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/audio-trends.ts", import.meta.url), "utf8"),
+    readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -151,7 +158,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   );
   assert.match(
     recommendationNavSource,
-    /id: "trends"[\s\S]*?id: "ideas"[\s\S]*?id: "comments"/,
+    /id: "trends"[\s\S]*?id: "audio-trends"[\s\S]*?id: "ideas"[\s\S]*?id: "comments"/,
   );
   assert.match(component, /posts-platform-subnav/);
   assert.match(component, /recommendations-subnav/);
@@ -185,6 +192,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /label: "Roadmap"/);
   assert.match(component, /view === "comments"[\s\S]*?<CommentOpportunitiesView/);
   assert.match(component, /view === "trends"[\s\S]*?<TrendFeedView/);
+  assert.match(component, /view === "audio-trends"[\s\S]*?<AudioTrendFeedView/);
+  assert.match(component, /view === "ideas" \|\| view === "comments" \|\| view === "trends" \|\| view === "audio-trends"/);
   assert.match(component, /workspace && view === "ideas"[\s\S]*?<h2>Posts recommandés<\/h2>/);
   assert.match(component, /className="reco-status-tabs"/);
   assert.match(component, /🟡 À valider/);
@@ -222,11 +231,14 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /cache: "force-cache"/);
   assert.match(previewEntry, /RAW_TREND_FEED_URL/);
   assert.match(previewEntry, /initialTrendFeed=\{trendFeed\}/);
+  assert.match(previewEntry, /initialAudioTrendFeed=\{audioTrendFeed\}/);
+  assert.match(previewEntry, /RAW_AUDIO_TREND_FEED_URL/);
+  assert.match(previewEntry, /window\.setInterval\(refreshAudioTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL/);
   assert.match(previewEntry, /initialAudienceHistory=\{audienceHistory\}/);
   assert.match(previewEntry, /refreshAudienceHistory/);
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL = `\$\{dataBaseUrl\}\/audience-history\.json`/);
-  assert.doesNotMatch(previewEntry, /raw\.githubusercontent\.com/);
+  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar\/main\/data\/audio-trends\/feed\.json/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
   assert.match(previewEntry, /RAW_COMMENT_OPPORTUNITIES_URL/);
@@ -267,12 +279,13 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /Plus d’informations/);
   assert.match(component, /Mesure au lancement/);
   assert.match(component, /metric_history/);
-  assert.match(component, /label: "Trends"/);
+  assert.match(component, /label: "Trends vid.os"/);
+  assert.match(component, /label: "Trends audio"/);
   assert.match(component, /TrendFeedView/);
   assert.match(component, /TrendReferenceMedia/);
   assert.match(component, /TrendDetailsModal/);
   assert.match(component, /trend-reference-card/);
-  assert.match(component, /50\+ trends vraiment exploitables/);
+  assert.match(component, /<h2>Trends vid.os<\/h2>/);
   assert.match(component, /Mise à jour quotidienne · focus Lofi Girl/);
   assert.match(component, /Repris par \{reuseCount\}\+ créateurs/);
   assert.match(component, /Vraie trend, pas simple post viral/);
@@ -293,6 +306,17 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.doesNotMatch(component, /Potentiel Lofi Girl|Adaptation Lofi Girl|Pourquoi Lofi Girl/);
   assert.match(component, /trend-duration-badge/);
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
+  assert.match(audioTrendView, /<h2>Trends audio<\/h2>/);
+  assert.match(audioTrendView, /deriveAudioTrendGrowth/);
+  assert.match(audioTrendView, /Ouvrir l.audio/);
+  assert.match(audioTrendView, /Croissance mesur.e d.s le prochain relev. comparable/);
+  assert.match(audioTrendView, /platforms\/\$\{trend\.platform\}\.svg/);
+  assert.match(audioTrendModel, /usageObservations/);
+  assert.match(audioTrendModel, /same canonical source/i);
+  const parsedAudioTrendFeed = JSON.parse(audioTrendFeed);
+  assert.equal(parsedAudioTrendFeed.trends.length, 16);
+  assert.equal(parsedAudioTrendFeed.trends.filter((trend) => trend.platform === "tiktok").length, 8);
+  assert.equal(parsedAudioTrendFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
   assert.match(component, /loading="lazy"/);
   assert.match(component, /Voir le post original/);
   assert.match(component, /hasMediaPreview \?/);

@@ -1,0 +1,304 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+import {
+  assertAudioTrendFeed,
+  deriveAudioTrendGrowth,
+  isNativeAudioReferenceVideoUrl,
+  isNativeAudioTrendUrl,
+} from "../lib/audio-trends.ts";
+
+const bootstrapFeed = JSON.parse(
+  await readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
+);
+
+function validTrend() {
+  return {
+    id: "instagram-library-whisper",
+    platform: "instagram",
+    type: "spoken",
+    title: "Library whisper",
+    author: "@quietcreator",
+    audioUrl: "https://www.instagram.com/reels/audio/123456789012345/",
+    source: {
+      capturedAt: "2026-08-11T11:00:00.000Z",
+      label: "Instagram · page audio native",
+      url: "https://www.instagram.com/reels/audio/123456789012345/",
+      exactness: "exact",
+    },
+    referenceVideo: {
+      author: "@quietcreator",
+      caption: "the library is never actually silent",
+      url: "https://www.instagram.com/reel/AbCdEfGhIjK/",
+      thumbnailUrl: "https://images.example.test/reference.webp",
+      durationSeconds: 12.4,
+      publishedAt: "2026-08-10T09:00:00.000Z",
+      capturedAt: "2026-08-11T11:00:00.000Z",
+      sourceLabel: "Instagram · vidéo et compteurs publics",
+      sourceUrl: "https://www.instagram.com/reel/AbCdEfGhIjK/",
+      exactness: "platform-estimate",
+      metrics: {
+        views: 800000,
+        likes: 90000,
+        comments: null,
+        shares: null,
+      },
+    },
+    usageObservations: [
+      {
+        capturedAt: "2026-08-10T11:00:00.000Z",
+        uses: 1000,
+        rank: null,
+        rankWindow: null,
+        sourceLabel: "Instagram · page audio native",
+        sourceUrl: "https://www.instagram.com/reels/audio/123456789012345/",
+        exactness: "exact",
+      },
+      {
+        capturedAt: "2026-08-11T11:00:00.000Z",
+        uses: 1300,
+        rank: null,
+        rankWindow: null,
+        sourceLabel: "Instagram · page audio native",
+        sourceUrl: "https://www.instagram.com/reels/audio/123456789012345/?locale=fr_FR",
+        exactness: "exact",
+      },
+    ],
+    lofiFitScore: 94,
+    lofiAngle: "Lofi Girl coupe sa musique une seconde pour identifier le chuchotement impossible au fond de la bibliothèque.",
+    lofiFitRationale: "Le dialogue court se transpose naturellement dans une scène de bibliothèque avec Lofi Girl.",
+  };
+}
+
+function feedWith(...trends) {
+  const feed = structuredClone(bootstrapFeed);
+  feed.sourceChecks[0] = {
+    id: "instagram-audio-native",
+    platform: "instagram",
+    status: "success",
+    checkedAt: "2026-08-11T11:00:00.000Z",
+    label: "Instagram Reels · pages audio natives",
+    sourceUrl: "https://www.instagram.com/reels/",
+  };
+  feed.trends = trends;
+  return feed;
+}
+
+test("the published feed contains sourced audio signals without invented growth", () => {
+  assert.equal(assertAudioTrendFeed(bootstrapFeed), bootstrapFeed);
+  assert.equal(bootstrapFeed.version, 1);
+  assert.equal(bootstrapFeed.cadenceHours, 24);
+  assert.equal(bootstrapFeed.trends.length, 16);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 8);
+  assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
+  assert.ok(bootstrapFeed.trends.every((trend) => trend.lofiAngle.length > 0));
+  assert.ok(bootstrapFeed.trends.every((trend) => !("growth" in trend)));
+  assert.deepEqual(
+    bootstrapFeed.sourceChecks.map((check) => check.platform),
+    ["instagram", "tiktok", "youtube"],
+  );
+  assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "instagram")?.status, "success");
+  assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "tiktok")?.status, "success");
+  assert.equal(bootstrapFeed.sourceChecks.find((check) => check.platform === "youtube")?.status, "limited");
+  assert.equal(
+    bootstrapFeed.trends.filter((trend) => deriveAudioTrendGrowth(trend.usageObservations)).length,
+    3,
+  );
+});
+
+test("growth is derived from two comparable usage counters, never stored", () => {
+  const trend = validTrend();
+  const feed = feedWith(trend);
+  assert.equal(assertAudioTrendFeed(feed), feed);
+  const growth = deriveAudioTrendGrowth(trend.usageObservations);
+  assert.deepEqual(growth, {
+    fromCapturedAt: "2026-08-10T11:00:00.000Z",
+    toCapturedAt: "2026-08-11T11:00:00.000Z",
+    fromUses: 1000,
+    toUses: 1300,
+    deltaUses: 300,
+    growthPercent: 30,
+    elapsedHours: 24,
+    usesPerDay: 300,
+    exactness: "exact",
+    sourceUrl: "https://www.instagram.com/reels/audio/123456789012345/",
+  });
+
+  const storedGrowth = structuredClone(feed);
+  storedGrowth.trends[0].growth = growth;
+  assert.throws(() => assertAudioTrendFeed(storedGrowth), /champ inattendu/i);
+});
+
+test("one counter, rank-only evidence and incomparable counters never imply growth", () => {
+  const trend = validTrend();
+  const [first, second] = trend.usageObservations;
+  assert.equal(deriveAudioTrendGrowth([first]), null);
+  assert.equal(deriveAudioTrendGrowth([
+    { ...first, uses: null, rank: 2, rankWindow: "7d" },
+    { ...second, uses: null, rank: 1, rankWindow: "7d" },
+  ]), null);
+  assert.equal(deriveAudioTrendGrowth([
+    first,
+    { ...second, sourceUrl: "https://www.instagram.com/reels/audio/999999999999999/" },
+  ]), null);
+  assert.equal(deriveAudioTrendGrowth([
+    first,
+    { ...second, exactness: "platform-estimate" },
+  ]), null);
+});
+
+test("rank and rankWindow can preserve Creative Center evidence without a usage count", () => {
+  const trend = validTrend();
+  trend.platform = "tiktok";
+  trend.id = "tiktok-study-desk-sound";
+  trend.type = "music";
+  trend.audioUrl = "https://www.tiktok.com/music/study-desk-7412345678901234567";
+  trend.source.url = trend.audioUrl;
+  trend.source.label = "TikTok · page musique native";
+  trend.referenceVideo.url = "https://www.tiktok.com/@deskcreator/video/7412345678901234567";
+  trend.referenceVideo.sourceUrl = trend.referenceVideo.url;
+  trend.usageObservations = [{
+    capturedAt: "2026-08-11T11:00:00.000Z",
+    uses: null,
+    rank: 4,
+    rankWindow: "7d",
+    sourceLabel: "TikTok Creative Center · Popular Music",
+    sourceUrl: "https://ads.tiktok.com/business/creativecenter/inspiration/popular/music/pc/en",
+    exactness: "exact",
+  }];
+  const feed = feedWith(trend);
+  feed.sourceChecks[0].status = "limited";
+  feed.sourceChecks[1] = {
+    id: "tiktok-creative-center",
+    platform: "tiktok",
+    status: "success",
+    checkedAt: "2026-08-11T11:00:00.000Z",
+    label: "TikTok Creative Center · Popular Music",
+    sourceUrl: "https://ads.tiktok.com/business/creativecenter/inspiration/popular/music/pc/en",
+  };
+  assert.equal(assertAudioTrendFeed(feed), feed);
+  assert.equal(deriveAudioTrendGrowth(trend.usageObservations), null);
+});
+
+test("native audio and video URLs are platform-bound", () => {
+  assert.equal(
+    isNativeAudioTrendUrl("https://www.instagram.com/reels/audio/123456789/", "instagram"),
+    true,
+  );
+  assert.equal(
+    isNativeAudioTrendUrl("https://www.tiktok.com/music/original-sound-7412345678901234567", "tiktok"),
+    true,
+  );
+  assert.equal(
+    isNativeAudioTrendUrl("https://www.youtube.com/source/AbCdEfGhI_j/shorts", "youtube"),
+    true,
+  );
+  assert.equal(
+    isNativeAudioReferenceVideoUrl("https://www.youtube.com/shorts/AbCdEfGhI_j", "youtube"),
+    true,
+  );
+  assert.equal(
+    isNativeAudioTrendUrl("https://example.com/audio/123", "instagram"),
+    false,
+  );
+  assert.equal(
+    isNativeAudioReferenceVideoUrl("https://www.youtube.com/shorts/AbCdEfGhI_j", "tiktok"),
+    false,
+  );
+});
+
+test("reference metrics may be absent but can never be unsourced or fabricated", () => {
+  const withoutMetrics = validTrend();
+  withoutMetrics.referenceVideo.metrics = null;
+  withoutMetrics.referenceVideo.exactness = "unavailable";
+  const withoutMetricsFeed = feedWith(withoutMetrics);
+  assert.equal(assertAudioTrendFeed(withoutMetricsFeed), withoutMetricsFeed);
+
+  const unavailableWithMetrics = validTrend();
+  unavailableWithMetrics.referenceVideo.exactness = "unavailable";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(unavailableWithMetrics)),
+    /inventées/i,
+  );
+
+  const emptyMetrics = validTrend();
+  emptyMetrics.referenceVideo.metrics = {
+    views: null,
+    likes: null,
+    comments: null,
+    shares: null,
+  };
+  assert.throws(() => assertAudioTrendFeed(feedWith(emptyMetrics)), /vides/i);
+
+  const foreignMetricSource = validTrend();
+  foreignMetricSource.referenceVideo.sourceUrl = "https://example.com/post/1";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(foreignMetricSource)),
+    /vidéo de référence/i,
+  );
+});
+
+test("usage validation rejects invented, ambiguous and chronologically invalid evidence", () => {
+  const unavailableWithUses = validTrend();
+  unavailableWithUses.usageObservations[0].exactness = "unavailable";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(unavailableWithUses)),
+    /observation d'usage/i,
+  );
+
+  const rankWithoutWindow = validTrend();
+  rankWithoutWindow.usageObservations[0].uses = null;
+  rankWithoutWindow.usageObservations[0].rank = 3;
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(rankWithoutWindow)),
+    /observation d'usage/i,
+  );
+
+  const negativeUses = validTrend();
+  negativeUses.usageObservations[0].uses = -1;
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(negativeUses)),
+    /observation d'usage/i,
+  );
+
+  const futureObservation = validTrend();
+  futureObservation.usageObservations[1].capturedAt = "2100-01-01T00:00:00.000Z";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(futureObservation)),
+    /observation d'usage/i,
+  );
+});
+
+test("metadata provenance, platform sources and native audio identities are strict", () => {
+  const foreignAudio = validTrend();
+  foreignAudio.audioUrl = "https://example.com/audio/123";
+  assert.throws(() => assertAudioTrendFeed(feedWith(foreignAudio)), /trend audio invalide/i);
+
+  const mismatchedProvenance = validTrend();
+  mismatchedProvenance.source.url = "https://www.instagram.com/reels/audio/999999999999999/";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(mismatchedProvenance)),
+    /provenance audio/i,
+  );
+
+  const duplicated = validTrend();
+  const copy = structuredClone(duplicated);
+  copy.id = "instagram-library-whisper-copy";
+  assert.throws(() => assertAudioTrendFeed(feedWith(duplicated, copy)), /dupliqué/i);
+
+  const pendingWithTimestamp = structuredClone(bootstrapFeed);
+  pendingWithTimestamp.sourceChecks[0].status = "pending";
+  pendingWithTimestamp.sourceChecks[0].checkedAt = bootstrapFeed.capturedAt;
+  assert.throws(
+    () => assertAudioTrendFeed(pendingWithTimestamp),
+    /contrôle de source/i,
+  );
+
+  const missingLofiAngle = validTrend();
+  missingLofiAngle.lofiAngle = "";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(missingLofiAngle)),
+    /trend audio invalide/i,
+  );
+});

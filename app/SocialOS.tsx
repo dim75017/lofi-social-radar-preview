@@ -73,10 +73,15 @@ import {
   assertCommentOpportunityFeed,
   type CommentOpportunityFeed,
 } from "../lib/comment-opportunities";
+import {
+  assertAudioTrendFeed,
+  type AudioTrendFeed,
+} from "../lib/audio-trends";
+import { AudioTrendFeedView } from "./AudioTrendFeedView";
 import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
-type View = "overview" | "top" | "comments" | "trends" | "ideas" | "planning" | "all" | "sources";
+type View = "overview" | "top" | "comments" | "trends" | "audio-trends" | "ideas" | "planning" | "all" | "sources";
 type IdeaStatusFilter = "all" | "pending" | IdeaDecision;
 type PostSort = "popular" | "recent";
 type TrendPlatformFilter = TrendPlatform | "all";
@@ -204,11 +209,12 @@ const NAV: Array<{
 ];
 
 const RECOMMENDATION_NAV: Array<{
-  id: Extract<View, "ideas" | "comments" | "trends">;
+  id: Extract<View, "ideas" | "comments" | "trends" | "audio-trends">;
   emoji: string;
   label: string;
 }> = [
-  { id: "trends", emoji: "🔥", label: "Trends" },
+  { id: "trends", emoji: "🔥", label: "Trends vidéos" },
+  { id: "audio-trends", emoji: "🎧", label: "Trends audio" },
   { id: "ideas", emoji: "📝", label: "Posts recommandés" },
   { id: "comments", emoji: "💬", label: "Commentaires" },
 ];
@@ -531,6 +537,7 @@ function formatTrendRefreshDate(value: string | null | undefined): string | null
 export function SocialOS({
   initialWorkspace = null,
   initialTrendFeed = null,
+  initialAudioTrendFeed = null,
   initialCommentOpportunityFeed = null,
   initialAudienceHistory = null,
   previewMode = false,
@@ -541,6 +548,7 @@ export function SocialOS({
 }: {
   initialWorkspace?: WorkspacePayload | null;
   initialTrendFeed?: SocialTrendFeed | null;
+  initialAudioTrendFeed?: AudioTrendFeed | null;
   initialCommentOpportunityFeed?: CommentOpportunityFeed | null;
   initialAudienceHistory?: AudienceHistory | null;
   previewMode?: boolean;
@@ -554,6 +562,9 @@ export function SocialOS({
   const [trendFeed, setTrendFeed] = useState<SocialTrendFeed | null>(initialTrendFeed);
   const [trendsLoading, setTrendsLoading] = useState(!previewMode && !initialTrendFeed);
   const [trendsError, setTrendsError] = useState("");
+  const [audioTrendFeed, setAudioTrendFeed] = useState<AudioTrendFeed | null>(initialAudioTrendFeed);
+  const [audioTrendsLoading, setAudioTrendsLoading] = useState(!previewMode && !initialAudioTrendFeed);
+  const [audioTrendsError, setAudioTrendsError] = useState("");
   const [commentOpportunityFeed, setCommentOpportunityFeed] = useState<CommentOpportunityFeed | null>(initialCommentOpportunityFeed);
   const [commentsLoading, setCommentsLoading] = useState(!previewMode && !initialCommentOpportunityFeed);
   const [commentsError, setCommentsError] = useState("");
@@ -624,6 +635,17 @@ export function SocialOS({
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
+      setAudioTrendFeed(initialAudioTrendFeed);
+      if (initialAudioTrendFeed || previewMode) {
+        setAudioTrendsLoading(false);
+        setAudioTrendsError("");
+      }
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [initialAudioTrendFeed, previewMode]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
       setCommentOpportunityFeed(initialCommentOpportunityFeed);
       if (initialCommentOpportunityFeed || previewMode) {
         setCommentsLoading(false);
@@ -664,6 +686,43 @@ export function SocialOS({
     };
 
     void loadTrendFeed();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [previewMode]);
+
+  useEffect(() => {
+    if (previewMode) return;
+    const controller = new AbortController();
+    let active = true;
+
+    const loadAudioTrendFeed = async () => {
+      setAudioTrendsLoading(true);
+      setAudioTrendsError("");
+      try {
+        const response = await fetch("/api/audio-trends", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as AudioTrendFeed & { error?: string };
+        if (!response.ok) {
+          throw new Error(payload.error || "Les trends audio ne sont pas disponibles pour le moment.");
+        }
+        if (active) setAudioTrendFeed(assertAudioTrendFeed(payload));
+      } catch (loadError) {
+        if (!active || controller.signal.aborted) return;
+        setAudioTrendsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Les trends audio ne sont pas disponibles pour le moment.",
+        );
+      } finally {
+        if (active) setAudioTrendsLoading(false);
+      }
+    };
+
+    void loadAudioTrendFeed();
     return () => {
       active = false;
       controller.abort();
@@ -1086,7 +1145,7 @@ export function SocialOS({
               {NAV.filter((item) => item.group === group).map((item) => {
                 const isPostsParent = item.id === "top";
                 const isRecommendationsParent = item.id === "ideas";
-                const isRecommendationsView = view === "ideas" || view === "comments" || view === "trends";
+                const isRecommendationsView = view === "ideas" || view === "comments" || view === "trends" || view === "audio-trends";
                 const isActive = isPostsParent
                   ? view === "all"
                   : !isRecommendationsParent && view === item.id;
@@ -1260,6 +1319,14 @@ export function SocialOS({
             feed={trendFeed}
             loading={trendsLoading}
             error={trendsError}
+          />
+        ) : null}
+
+        {view === "audio-trends" ? (
+          <AudioTrendFeedView
+            feed={audioTrendFeed}
+            loading={audioTrendsLoading}
+            error={audioTrendsError}
           />
         ) : null}
 
@@ -1927,7 +1994,7 @@ function TrendFeedView({
       <header className="trend-feed-heading">
         <div>
           <span className="section-kicker">Mise à jour quotidienne · focus Lofi Girl</span>
-          <h2>🔥 50+ trends vraiment exploitables</h2>
+          <h2>Trends vidéos</h2>
           <p>
             Un exemple performant par trend, uniquement si la même mécanique a été reprise par plusieurs créateurs. Lofi Girl reste prioritaire.
           </p>
@@ -1996,7 +2063,7 @@ function TrendFeedView({
         <div className="trend-feed-loading" role="status">
           <span aria-hidden="true">⏳</span>
           <div>
-            <b>Préparation du snapshot Trends</b>
+            <b>Préparation du snapshot Trends vidéos</b>
             <p>Les signaux et leurs sources sont en cours de chargement.</p>
           </div>
         </div>
