@@ -45,7 +45,26 @@ test("server-renders the live Social Radar shell", async () => {
 });
 
 test("keeps real social collection, post formats and persistence explicit", async () => {
-  const [hosting, schema, component, formats, durations, scanner, publicHistory, packageJson, styles, socialMedia, socialRanking, previewEntry, audienceMetrics, audienceHistory] = await Promise.all([
+  const [
+    hosting,
+    schema,
+    component,
+    formats,
+    durations,
+    scanner,
+    publicHistory,
+    packageJson,
+    styles,
+    socialMedia,
+    socialRanking,
+    previewEntry,
+    audienceMetrics,
+    audienceHistory,
+    youtubeLogo,
+    instagramLogo,
+    tiktokLogo,
+    xLogo,
+  ] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
@@ -60,6 +79,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../preview/main.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/audience-metrics.ts", import.meta.url), "utf8"),
     readFile(new URL("../data/audience-history.json", import.meta.url), "utf8"),
+    readFile(new URL("../public/platforms/youtube.svg", import.meta.url), "utf8"),
+    readFile(new URL("../public/platforms/instagram.svg", import.meta.url), "utf8"),
+    readFile(new URL("../public/platforms/tiktok.svg", import.meta.url), "utf8"),
+    readFile(new URL("../public/platforms/x.svg", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -79,6 +102,31 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /Évolution des followers/);
   assert.match(component, /Taux d’engagement/);
   assert.match(component, /className="audience-platform-grid"/);
+  const audienceDashboard = component.slice(
+    component.indexOf("function AudienceDashboard"),
+    component.indexOf("function formatAudienceFollowers"),
+  );
+  assert.match(audienceDashboard, /useState<AudiencePeriodKey>\("30d"\)/);
+  assert.match(audienceDashboard, /aria-label="P.riode du tableau de bord"/);
+  assert.match(audienceDashboard, /AUDIENCE_PERIODS\.map/);
+  assert.match(audienceDashboard, /engagementByPeriod\[periodKey\]/);
+  assert.match(
+    audienceDashboard,
+    /audienceGrowth\(platformHistory, \{[\s\S]*?days: period\.days/,
+  );
+  assert.match(
+    audienceDashboard,
+    /audiencePointsForPeriod\(platformHistory, latest, period\.days\)/,
+  );
+  assert.doesNotMatch(
+    audienceDashboard,
+    /\?\?\s*audienceGrowth\(platformHistory\)|\|\|\s*audienceGrowth\(platformHistory\)/,
+  );
+  assert.match(
+    audienceDashboard,
+    /<img src=\{`platforms\/\$\{platform\}\.svg`\} alt="" width="24" height="24" \/>/,
+  );
+  assert.doesNotMatch(audienceDashboard, /meta\.emoji/);
   assert.doesNotMatch(component, /Couverture maintenant|Analyse éditoriale|Posts à retenir|Comparaisons honnêtes/);
   assert.match(component, /top-platform-subnav/);
   assert.match(component, /Plateformes des meilleurs posts/);
@@ -137,11 +185,28 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
   assert.match(audienceMetrics, /mean\(likes\+comments\)\/followers\*100/);
-  assert.match(audienceMetrics, /AUDIENCE_ENGAGEMENT_WINDOW_SIZE = 30/);
+  assert.match(
+    audienceMetrics,
+    /key: "30d"[\s\S]*?label: "30 jours"[\s\S]*?key: "90d"[\s\S]*?label: "3 mois"[\s\S]*?key: "180d"[\s\S]*?label: "6 mois"[\s\S]*?key: "365d"[\s\S]*?label: "1 an"[\s\S]*?key: "all"[\s\S]*?label: "All time"/,
+  );
+  assert.doesNotMatch(audienceMetrics, /AUDIENCE_ENGAGEMENT_WINDOW_SIZE|toleranceDays/);
+  const audienceSnapshot = JSON.parse(audienceHistory);
+  assert.equal(audienceSnapshot.version, 2);
+  for (const platform of ["youtube", "instagram", "tiktok", "x"]) {
+    assert.deepEqual(
+      Object.keys(audienceSnapshot.platforms[platform].engagementByPeriod).sort(),
+      ["30d", "90d", "180d", "365d", "all"].sort(),
+    );
+  }
   assert.match(audienceHistory, /"youtube"/);
   assert.match(audienceHistory, /"instagram"/);
   assert.match(audienceHistory, /"tiktok"/);
   assert.match(audienceHistory, /"x"/);
+  for (const logo of [youtubeLogo, instagramLogo, tiktokLogo, xLogo]) {
+    assert.match(logo, /^<svg\b/i);
+    assert.match(logo, /<path\b/i);
+    assert.doesNotMatch(logo, /<script\b|<foreignObject\b/i);
+  }
   assert.match(component, /resolvedPlatformCounts/);
   assert.match(component, /Les vrais compteurs sont déjà affichés/);
   assert.match(component, /PostDetailsModal/);
@@ -218,6 +283,10 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(styles, /\.post-visual\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/);
   assert.match(styles, /\.inline-video-frame/);
   assert.match(styles, /\.post-details-modal/);
+  assert.match(styles, /\.audience-period-control\s*\{/);
+  assert.match(styles, /\.audience-period-tabs\s*\{/);
+  assert.match(styles, /\.audience-platform-logo\s*\{/);
+  assert.match(styles, /\.audience-platform-logo img\s*\{/);
   assert.match(styles, /\.reco-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(min\(380px,\s*100%\),\s*1fr\)\)/);
   assert.match(styles, /\.reco-card\s*\{[\s\S]*?content-visibility:\s*auto/);
   assert.match(styles, /\.reco-card-main\s*>\s*h3\s*\{[\s\S]*?font-size:\s*18px/);

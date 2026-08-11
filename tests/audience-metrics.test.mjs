@@ -3,9 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   AUDIENCE_ENGAGEMENT_FORMULA,
+  AUDIENCE_PERIODS,
   assertAudienceHistory,
   audienceGrowth,
   calculatePlatformEngagement,
+  emptyEngagementByPeriod,
   latestAudienceObservation,
   recalculateAudienceEngagement,
 } from "../lib/audience-metrics.ts";
@@ -21,8 +23,24 @@ const history = assertAudienceHistory(
 );
 const publicHistory = JSON.parse(await readFile(postsPath, "utf8"));
 
-test("validates the real version 1 seed and its 11 August follower totals", () => {
-  assert.equal(history.version, 1);
+test("validates the real version 2 seed, its five periods and 11 August follower totals", () => {
+  assert.equal(history.version, 2);
+  assert.deepEqual(
+    AUDIENCE_PERIODS.map(({ key, label, days }) => ({ key, label, days })),
+    [
+      { key: "30d", label: "30 jours", days: 30 },
+      { key: "90d", label: "3 mois", days: 90 },
+      { key: "180d", label: "6 mois", days: 180 },
+      { key: "365d", label: "1 an", days: 365 },
+      { key: "all", label: "All time", days: null },
+    ],
+  );
+  for (const platform of ["youtube", "instagram", "tiktok", "x"]) {
+    assert.deepEqual(
+      Object.keys(history.platforms[platform].engagementByPeriod).sort(),
+      AUDIENCE_PERIODS.map((period) => period.key).sort(),
+    );
+  }
   assertSeedObservation("youtube", 15_800_000, "platform-rounded");
   assertSeedObservation("instagram", 1_427_842, "exact");
   assertSeedObservation("tiktok", 1_548_859, "exact");
@@ -41,6 +59,10 @@ test("rejects invented zeroes, non-HTTPS sources and unknown precision", () => {
   const guessed = structuredClone(history);
   guessed.platforms.x.observations.at(-1).precision = "estimated";
   assert.throws(() => assertAudienceHistory(guessed), /precision/i);
+
+  const missingPeriod = structuredClone(history);
+  delete missingPeriod.platforms.youtube.engagementByPeriod["90d"];
+  assert.throws(() => assertAudienceHistory(missingPeriod), /90d/i);
 });
 
 test("finds the latest point without relying on array order", () => {
@@ -49,93 +71,150 @@ test("finds the latest point without relying on array order", () => {
   assert.equal(latestAudienceObservation(platform).followers, 260_800);
 });
 
-test("calculates growth from observed points and never interpolates a missing day", () => {
+test("compares the first and last real points inside the selected window", () => {
   const platform = {
     profileUrl: "https://example.com/profile",
-    engagement: null,
+    engagementByPeriod: emptyEngagementByPeriod(),
     observations: [
       observation("2026-07-01T00:00:00.000Z", 500),
       observation("2026-08-04T00:00:00.000Z", 1_000),
       observation("2026-08-11T00:00:00.000Z", 1_100),
     ],
   };
-  const weekly = audienceGrowth(platform, { days: 7, toleranceDays: 0 });
+  const weekly = audienceGrowth(platform, { days: 7 });
   assert.equal(weekly.followersDelta, 100);
   assert.equal(weekly.ratePercent, 10);
   assert.equal(weekly.elapsedDays, 7);
   assert.equal(weekly.from.followers, 1_000);
   assert.equal(weekly.to.followers, 1_100);
 
+  const monthly = audienceGrowth(platform, { days: 30 });
+  assert.equal(monthly.from.followers, 1_000);
+  assert.equal(monthly.to.followers, 1_100);
+  assert.equal(monthly.elapsedDays, 7);
   assert.equal(
-    audienceGrowth(platform, { days: 30, toleranceDays: 1 }),
+    audienceGrowth(platform, { days: 6 }),
     null,
-    "the 2026-07-01 milestone is not silently moved to the 30-day target",
+    "a one-point period must not fall back to an older all-time observation",
   );
   assert.equal(audienceGrowth(platform).from.followers, 500);
 });
 
-test("uses the latest 30 eligible posts and excludes owner YouTube comments", () => {
+test("uses every measurable post in each calendar period and defaults to 30 days", () => {
   const latest = observation("2026-08-11T00:00:00.000Z", 1_000, "exact");
-  const posts = Array.from({ length: 30 }, (_, index) => ({
+  const calculatedAt = "2026-08-11T12:00:00.000Z";
+  const calculatedTime = Date.parse(calculatedAt);
+  const daysAgo = (days) => new Date(
+    calculatedTime - days * 24 * 60 * 60 * 1_000,
+  ).toISOString();
+  const posts = Array.from({ length: 35 }, (_, index) => ({
     platform: "youtube",
     format: index % 2 ? "short" : "community_image",
-    publishedAt: new Date(Date.UTC(2026, 7, 10 - index)).toISOString(),
+    publishedAt: new Date(calculatedTime - (index + 1) * 12 * 60 * 60 * 1_000).toISOString(),
     likes: 9,
     comments: 1,
   }));
-  posts.push({
+  posts.push(...[30, 40, 120, 250, 500].map((days) => ({
     platform: "youtube",
     format: "short",
-    publishedAt: "2020-01-01T00:00:00.000Z",
-    likes: 999,
+    publishedAt: daysAgo(days),
+    likes: 9,
     comments: 1,
-  });
+  })));
   posts.push({
     platform: "youtube",
     format: "comment",
-    publishedAt: "2026-08-11T01:00:00.000Z",
+    publishedAt: daysAgo(1),
     likes: 50_000,
     comments: 50_000,
   });
   posts.push({
     platform: "youtube",
     format: "short",
-    publishedAt: "2026-08-11T02:00:00.000Z",
+    publishedAt: daysAgo(1),
     likes: null,
     comments: 4,
   });
+  posts.push({
+    platform: "youtube",
+    format: "short",
+    publishedAt: new Date(calculatedTime + 1_000).toISOString(),
+    likes: 50_000,
+    comments: 50_000,
+  });
 
-  const engagement = calculatePlatformEngagement(
-    "youtube",
-    posts,
-    latest,
-    "2026-08-11T03:00:00.000Z",
+  const expectedSampleSizes = {
+    "30d": 36,
+    "90d": 37,
+    "180d": 38,
+    "365d": 39,
+    all: 40,
+  };
+  const byPeriod = Object.fromEntries(
+    AUDIENCE_PERIODS.map((period) => [
+      period.key,
+      calculatePlatformEngagement(
+        "youtube",
+        posts,
+        latest,
+        calculatedAt,
+        period.key,
+      ),
+    ]),
   );
-  assert.equal(engagement.formula, AUDIENCE_ENGAGEMENT_FORMULA);
-  assert.equal(engagement.sampleSize, 30);
-  assert.equal(engagement.averageInteractions, 10);
-  assert.equal(engagement.ratePercent, 1);
-  assert.equal(engagement.followers, 1_000);
+
+  for (const period of AUDIENCE_PERIODS) {
+    const engagement = byPeriod[period.key];
+    assert.ok(engagement);
+    assert.equal(engagement.period, period.key);
+    assert.equal(engagement.formula, AUDIENCE_ENGAGEMENT_FORMULA);
+    assert.equal(engagement.sampleSize, expectedSampleSizes[period.key]);
+    assert.equal(engagement.averageInteractions, 10);
+    assert.equal(engagement.ratePercent, 1);
+    assert.equal(engagement.followers, 1_000);
+  }
+  assert.deepEqual(
+    calculatePlatformEngagement("youtube", posts, latest, calculatedAt),
+    byPeriod["30d"],
+    "the calculation must default to the last 30 calendar days",
+  );
 });
 
-test("precomputes engagement for every platform from the public history", () => {
+test("precomputes all five engagement periods for every platform", () => {
   const recalculated = recalculateAudienceEngagement(
     history,
     publicHistory.posts,
     history.generatedAt,
   );
   for (const platform of ["youtube", "instagram", "tiktok", "x"]) {
-    const engagement = recalculated.platforms[platform].engagement;
-    assert.ok(engagement, `${platform} should have an engagement sample`);
+    const sampleSizes = [];
+    for (const period of AUDIENCE_PERIODS) {
+      const engagement = recalculated.platforms[platform]
+        .engagementByPeriod[period.key];
+      assert.ok(
+        engagement,
+        `${platform}/${period.key} should have an engagement sample`,
+      );
+      assert.deepEqual(
+        history.platforms[platform].engagementByPeriod[period.key],
+        engagement,
+        `${platform}/${period.key} stored engagement must match the current public history`,
+      );
+      assert.equal(engagement.period, period.key);
+      assert.equal(engagement.formula, AUDIENCE_ENGAGEMENT_FORMULA);
+      assert.ok(engagement.averageInteractions >= 0);
+      assert.ok(engagement.ratePercent >= 0);
+      sampleSizes.push(engagement.sampleSize);
+    }
     assert.deepEqual(
-      history.platforms[platform].engagement,
-      engagement,
-      `${platform} stored engagement must match the current public history`,
+      sampleSizes,
+      sampleSizes.toSorted((left, right) => left - right),
+      `${platform} calendar samples must only grow as the period widens`,
     );
-    assert.equal(engagement.sampleSize, 30);
-    assert.equal(engagement.formula, AUDIENCE_ENGAGEMENT_FORMULA);
-    assert.ok(engagement.averageInteractions >= 0);
-    assert.ok(engagement.ratePercent >= 0);
+    assert.ok(
+      sampleSizes.at(-1) > 30,
+      `${platform} all-time engagement must not be capped to 30 posts`,
+    );
   }
 });
 

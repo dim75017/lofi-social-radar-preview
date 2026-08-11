@@ -4091,6 +4091,43 @@ a {
   white-space: nowrap;
 }
 
+.audience-period-control {
+  --platform-rgb: 154, 168, 255;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  margin: -2px 0 18px;
+  border-bottom: 1px solid rgba(var(--platform-rgb), 0.13);
+  padding: 0 2px 12px;
+}
+
+.audience-period-control > .section-kicker {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.audience-period-tabs {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.audience-period-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.audience-period-tabs button {
+  min-width: 86px;
+  flex: 0 0 auto;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .audience-platform-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -4124,6 +4161,27 @@ a {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 11px;
+}
+
+.audience-platform-logo {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid rgba(var(--platform-rgb), 0.24);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(var(--platform-rgb), 0.2), transparent 70%),
+    rgba(7, 9, 16, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.audience-platform-logo img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .audience-platform-head h3 {
@@ -4251,6 +4309,16 @@ a {
 
   .audience-platform-grid {
     grid-template-columns: 1fr;
+  }
+
+  .audience-period-control {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .audience-period-tabs {
+    width: 100%;
   }
 
   .audience-platform-card {

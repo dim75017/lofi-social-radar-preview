@@ -5,10 +5,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import {
+  AUDIENCE_PERIODS,
   audienceGrowth,
+  audiencePeriod,
   latestAudienceObservation,
   type AudienceHistory,
   type AudienceObservation,
+  type AudiencePeriodKey,
 } from "../lib/audience-metrics";
 
 import {
@@ -1597,6 +1600,9 @@ export function SocialOS({
 }
 
 function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
+  const [periodKey, setPeriodKey] = useState<AudiencePeriodKey>("30d");
+  const period = audiencePeriod(periodKey);
+
   return (
     <section className="audience-dashboard" aria-labelledby="audience-dashboard-title">
       <header className="audience-dashboard-heading">
@@ -1609,6 +1615,27 @@ function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
         </span>
       </header>
 
+      <div className="audience-period-control">
+        <span className="section-kicker">Durée</span>
+        <div
+          className="format-filter-tabs audience-period-tabs"
+          role="group"
+          aria-label="Période du tableau de bord"
+        >
+          {AUDIENCE_PERIODS.map((option) => (
+            <button
+              className={periodKey === option.key ? "active" : ""}
+              type="button"
+              aria-pressed={periodKey === option.key}
+              onClick={() => setPeriodKey(option.key)}
+              key={option.key}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="audience-platform-grid">
         {PLATFORM_ORDER.map((platform) => {
           const meta = PLATFORM_META[platform];
@@ -1617,11 +1644,16 @@ function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
             ? latestAudienceObservation(platformHistory)
             : null;
           const growth = platformHistory
-            ? audienceGrowth(platformHistory, { days: 30, toleranceDays: 7 })
-              ?? audienceGrowth(platformHistory)
+            ? period.days === null
+              ? audienceGrowth(platformHistory)
+              : audienceGrowth(platformHistory, {
+                  days: period.days,
+                })
             : null;
-          const engagement = platformHistory?.engagement ?? null;
-          const points = platformHistory?.observations.slice(-12) ?? [];
+          const engagement = platformHistory?.engagementByPeriod[periodKey] ?? null;
+          const points = sampleAudiencePoints(
+            audiencePointsForPeriod(platformHistory, latest, period.days),
+          );
           const values = points.map((point) => point.followers);
           const minimum = values.length ? Math.min(...values) : 0;
           const maximum = values.length ? Math.max(...values) : 0;
@@ -1629,7 +1661,9 @@ function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
           return (
             <article className={`audience-platform-card tone-${meta.tone}`} key={platform}>
               <header className="audience-platform-head">
-                <span className="source-logo large" aria-hidden="true">{meta.emoji}</span>
+                <span className="audience-platform-logo" aria-hidden="true">
+                  <img src={`platforms/${platform}.svg`} alt="" width="24" height="24" />
+                </span>
                 <div>
                   <span className="section-kicker">@{platform === "youtube" ? "LofiGirl" : "lofigirl"}</span>
                   <h3>{meta.label}</h3>
@@ -1677,21 +1711,23 @@ function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
                   {growth
                     ? `${formatAudiencePercent(growth.ratePercent)} depuis le ${formatAudienceDate(growth.from.capturedAt)}`
                     : latest
-                      ? `Suivi démarré le ${formatAudienceDate(latest.capturedAt)}`
+                      ? period.days === null
+                        ? `Suivi démarré le ${formatAudienceDate(latest.capturedAt)}`
+                        : `Historique ${period.label.toLowerCase()} en cours · ${points.length} relevé${points.length > 1 ? "s" : ""}`
                       : "Suivi pas encore démarré"}
                 </small>
               </div>
 
               <div
                 className="audience-engagement-block"
-                title="Moyenne des likes et commentaires des 30 derniers posts mesurables, divisée par le nombre actuel de followers."
+                title={`Moyenne des likes et commentaires des posts mesurables sur ${period.label.toLowerCase()}, divisée par le nombre actuel de followers.`}
               >
                 <span>Taux d’engagement</span>
                 <strong>{engagement ? formatAudiencePercent(engagement.ratePercent) : "—"}</strong>
                 <small>
                   {engagement
-                    ? `${engagement.sampleSize} derniers posts mesurables`
-                    : "Données publiques insuffisantes"}
+                    ? `${engagement.sampleSize} posts mesurables · ${period.label}`
+                    : `Aucun post mesurable · ${period.label}`}
                 </small>
               </div>
             </article>
@@ -1700,6 +1736,30 @@ function AudienceDashboard({ history }: { history: AudienceHistory | null }) {
       </div>
     </section>
   );
+}
+
+function audiencePointsForPeriod(
+  platformHistory: AudienceHistory["platforms"][Platform] | null,
+  latest: AudienceObservation | null,
+  days: number | null,
+) {
+  if (!platformHistory || !latest) return [];
+  const latestTime = Date.parse(latest.capturedAt);
+  const minimumTime = days === null
+    ? Number.NEGATIVE_INFINITY
+    : latestTime - days * 24 * 60 * 60 * 1_000;
+  return platformHistory.observations.filter((observation) => {
+    const capturedTime = Date.parse(observation.capturedAt);
+    return capturedTime >= minimumTime && capturedTime <= latestTime;
+  });
+}
+
+function sampleAudiencePoints(points: AudienceObservation[], maximum = 24) {
+  if (points.length <= maximum) return points;
+  return Array.from({ length: maximum }, (_, index) => {
+    const sourceIndex = Math.round((index * (points.length - 1)) / (maximum - 1));
+    return points[sourceIndex];
+  });
 }
 
 function formatAudienceFollowers(observation: AudienceObservation) {

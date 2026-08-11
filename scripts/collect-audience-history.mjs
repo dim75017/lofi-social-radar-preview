@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import {
   AUDIENCE_PLATFORMS,
   assertAudienceHistory,
+  emptyEngagementByPeriod,
   latestAudienceObservation,
   recalculateAudienceEngagement,
 } from "../lib/audience-metrics.ts";
@@ -327,14 +328,13 @@ function validateCollectedObservation(value) {
   const candidate = observation(value);
   // Reuse the complete validator without exporting a weaker partial contract.
   assertAudienceHistory({
-    version: 1,
+    version: 2,
     generatedAt: candidate.capturedAt,
-    engagementWindowSize: 30,
     platforms: Object.fromEntries(
       AUDIENCE_PLATFORMS.map((platform) => [platform, {
         profileUrl: PROFILE_URLS[platform],
         observations: [{ ...candidate }],
-        engagement: null,
+        engagementByPeriod: emptyEngagementByPeriod(),
       }]),
     ),
   });

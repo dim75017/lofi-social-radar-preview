@@ -5,11 +5,20 @@ export const AUDIENCE_PLATFORMS = [
   "x",
 ] as const;
 
-export const AUDIENCE_ENGAGEMENT_WINDOW_SIZE = 30 as const;
 export const AUDIENCE_ENGAGEMENT_FORMULA =
   "mean(likes+comments)/followers*100" as const;
 
+export const AUDIENCE_PERIODS = [
+  { key: "30d", label: "30 jours", days: 30 },
+  { key: "90d", label: "3 mois", days: 90 },
+  { key: "180d", label: "6 mois", days: 180 },
+  { key: "365d", label: "1 an", days: 365 },
+  { key: "all", label: "All time", days: null },
+] as const;
+
 export type AudiencePlatform = (typeof AUDIENCE_PLATFORMS)[number];
+export type AudiencePeriod = (typeof AUDIENCE_PERIODS)[number];
+export type AudiencePeriodKey = AudiencePeriod["key"];
 export type AudiencePrecision =
   | "exact"
   | "platform-rounded"
@@ -24,6 +33,7 @@ export type AudienceObservation = {
 };
 
 export type AudienceEngagement = {
+  period: AudiencePeriodKey;
   calculatedAt: string;
   formula: typeof AUDIENCE_ENGAGEMENT_FORMULA;
   followers: number;
@@ -39,13 +49,12 @@ export type AudienceEngagement = {
 export type AudiencePlatformHistory = {
   profileUrl: string;
   observations: AudienceObservation[];
-  engagement: AudienceEngagement | null;
+  engagementByPeriod: Record<AudiencePeriodKey, AudienceEngagement | null>;
 };
 
 export type AudienceHistory = {
-  version: 1;
+  version: 2;
   generatedAt: string;
-  engagementWindowSize: typeof AUDIENCE_ENGAGEMENT_WINDOW_SIZE;
   platforms: Record<AudiencePlatform, AudiencePlatformHistory>;
 };
 
@@ -59,7 +68,6 @@ export type AudienceGrowth = {
 
 export type AudienceGrowthOptions = {
   days?: number;
-  toleranceDays?: number;
 };
 
 export type AudiencePost = {
@@ -72,6 +80,9 @@ export type AudiencePost = {
 };
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
+const PERIOD_KEYS = new Set<AudiencePeriodKey>(
+  AUDIENCE_PERIODS.map((period) => period.key),
+);
 const PRECISIONS = new Set<AudiencePrecision>([
   "exact",
   "platform-rounded",
@@ -84,22 +95,17 @@ const PRECISIONS = new Set<AudiencePrecision>([
  */
 export function assertAudienceHistory(value: unknown): AudienceHistory {
   const history = record(value, "Le snapshot audience doit être un objet.");
-  if (history.version !== 1) {
-    throw new Error("Le snapshot audience doit utiliser la version 1.");
+  if (history.version !== 2) {
+    throw new Error("Le snapshot audience doit utiliser la version 2.");
   }
-  assertTimestamp(history.generatedAt, "generatedAt");
-  if (history.engagementWindowSize !== AUDIENCE_ENGAGEMENT_WINDOW_SIZE) {
-    throw new Error(
-      `engagementWindowSize doit valoir ${AUDIENCE_ENGAGEMENT_WINDOW_SIZE}.`,
-    );
-  }
+  const generatedAt = assertTimestamp(history.generatedAt, "generatedAt");
 
   const platforms = record(
     history.platforms,
     "platforms doit contenir les quatre comptes officiels.",
   );
   for (const platform of AUDIENCE_PLATFORMS) {
-    assertPlatformHistory(platform, platforms[platform]);
+    assertPlatformHistory(platform, platforms[platform], generatedAt);
   }
 
   return value as AudienceHistory;
@@ -122,8 +128,8 @@ export function latestAudienceObservation(
 }
 
 /**
- * Compare two observed points only. With `days`, the baseline must exist close
- * to the requested date; no value is interpolated between milestones.
+ * Compare the first and last real observations available in the selected
+ * period. No value is interpolated and no older fallback is used.
  */
 export function audienceGrowth(
   platform: AudiencePlatformHistory,
@@ -148,24 +154,16 @@ export function audienceGrowth(
     if (!Number.isFinite(options.days) || options.days <= 0) {
       throw new Error("La fenêtre de croissance doit être un nombre de jours positif.");
     }
-    const toleranceDays = options.toleranceDays ?? 1.5;
-    if (!Number.isFinite(toleranceDays) || toleranceDays < 0) {
-      throw new Error("La tolérance de croissance doit être positive ou nulle.");
-    }
-    const targetTime = latestTime - options.days * DAY_MS;
-    const withinTolerance = older.filter(
-      (observation) =>
-        Math.abs(Date.parse(observation.capturedAt) - targetTime) <=
-        toleranceDays * DAY_MS,
+    const minimumTime = latestTime - options.days * DAY_MS;
+    const withinPeriod = older.filter(
+      (observation) => Date.parse(observation.capturedAt) >= minimumTime,
     );
-    baseline = withinTolerance.reduce<AudienceObservation | null>(
-      (closest, observation) => {
-        if (!closest) return observation;
-        return Math.abs(Date.parse(observation.capturedAt) - targetTime) <
-          Math.abs(Date.parse(closest.capturedAt) - targetTime)
+    baseline = withinPeriod.reduce<AudienceObservation | null>(
+      (earliest, observation) =>
+        !earliest ||
+        Date.parse(observation.capturedAt) < Date.parse(earliest.capturedAt)
           ? observation
-          : closest;
-      },
+          : earliest,
       null,
     );
   }
@@ -185,16 +183,22 @@ export function audienceGrowth(
 
 /**
  * Engagement public comparable across platforms: mean(likes + comments) over
- * the 30 latest eligible account posts, divided by the latest follower count.
+ * every measurable post in the selected period, divided by the latest follower count.
  */
 export function calculatePlatformEngagement(
   platform: AudiencePlatform,
   posts: readonly AudiencePost[],
   latestObservation: AudienceObservation | null,
   calculatedAt = new Date().toISOString(),
+  period: AudiencePeriodKey = "30d",
 ): AudienceEngagement | null {
   if (!latestObservation) return null;
   assertTimestamp(calculatedAt, "calculatedAt");
+  const periodMeta = audiencePeriod(period);
+  const calculatedTime = Date.parse(calculatedAt);
+  const minimumPublishedTime = periodMeta.days === null
+    ? Number.NEGATIVE_INFINITY
+    : calculatedTime - periodMeta.days * DAY_MS;
 
   const eligible = posts
     .flatMap((post, inputIndex) => {
@@ -207,7 +211,13 @@ export function calculatePlatformEngagement(
       const publishedTime = publishedAt ? Date.parse(publishedAt) : Number.NaN;
       const likes = publicCount(post.likes);
       const comments = publicCount(post.comments);
-      if (!Number.isFinite(publishedTime) || likes === null || comments === null) {
+      if (
+        !Number.isFinite(publishedTime) ||
+        publishedTime > calculatedTime ||
+        publishedTime < minimumPublishedTime ||
+        likes === null ||
+        comments === null
+      ) {
         return [];
       }
       return [{
@@ -220,8 +230,7 @@ export function calculatePlatformEngagement(
     .sort((left, right) =>
       right.publishedTime - left.publishedTime ||
       left.inputIndex - right.inputIndex,
-    )
-    .slice(0, AUDIENCE_ENGAGEMENT_WINDOW_SIZE);
+    );
 
   if (eligible.length === 0) return null;
   const averageInteractions =
@@ -231,6 +240,7 @@ export function calculatePlatformEngagement(
   const oldestPostAt = eligible.at(-1)!.publishedAt;
 
   return {
+    period,
     calculatedAt: new Date(calculatedAt).toISOString(),
     formula: AUDIENCE_ENGAGEMENT_FORMULA,
     followers: latestObservation.followers,
@@ -260,7 +270,10 @@ export function recalculateAudienceEngagement(
     platforms: Object.fromEntries(
       AUDIENCE_PLATFORMS.map((platform) => [
         platform,
-        { ...history.platforms[platform], engagement: null },
+        {
+          ...history.platforms[platform],
+          engagementByPeriod: emptyEngagementByPeriod(),
+        },
       ]),
     ),
   });
@@ -275,21 +288,26 @@ export function recalculateAudienceEngagement(
           observations: current.observations.map((observation) => ({
             ...observation,
           })),
-          engagement: calculatePlatformEngagement(
-            platform,
-            posts,
-            latestAudienceObservation(current),
-            canonicalCalculatedAt,
-          ),
+          engagementByPeriod: Object.fromEntries(
+            AUDIENCE_PERIODS.map((period) => [
+              period.key,
+              calculatePlatformEngagement(
+                platform,
+                posts,
+                latestAudienceObservation(current),
+                canonicalCalculatedAt,
+                period.key,
+              ),
+            ]),
+          ) as Record<AudiencePeriodKey, AudienceEngagement | null>,
         },
       ];
     }),
   ) as Record<AudiencePlatform, AudiencePlatformHistory>;
 
   const next: AudienceHistory = {
-    version: 1,
+    version: 2,
     generatedAt: canonicalCalculatedAt,
-    engagementWindowSize: AUDIENCE_ENGAGEMENT_WINDOW_SIZE,
     platforms,
   };
   return assertAudienceHistory(next);
@@ -298,6 +316,7 @@ export function recalculateAudienceEngagement(
 function assertPlatformHistory(
   platform: AudiencePlatform,
   value: unknown,
+  generatedAt: string,
 ): void {
   const history = record(value, `${platform} doit être un objet.`);
   assertHttpsUrl(history.profileUrl, `${platform}.profileUrl`);
@@ -344,50 +363,93 @@ function assertPlatformHistory(
     }
   }
 
-  if (history.engagement === null) return;
-  const engagement = record(
-    history.engagement,
-    `${platform}.engagement doit être un objet ou null.`,
-  );
-  assertTimestamp(engagement.calculatedAt, `${platform}.engagement.calculatedAt`);
-  if (engagement.formula !== AUDIENCE_ENGAGEMENT_FORMULA) {
-    throw new Error(`${platform}.engagement.formula n’est pas reconnue.`);
-  }
   const latest = latestAudienceObservation(history as AudiencePlatformHistory)!;
-  if (
-    engagement.followers !== latest.followers ||
-    engagement.followersObservedAt !== latest.capturedAt ||
-    engagement.followersPrecision !== latest.precision
-  ) {
-    throw new Error(`${platform}.engagement doit utiliser le dernier relevé réel.`);
+  const byPeriod = record(
+    history.engagementByPeriod,
+    `${platform}.engagementByPeriod doit contenir les cinq périodes.`,
+  );
+  const unexpectedPeriods = Object.keys(byPeriod).filter(
+    (key) => !PERIOD_KEYS.has(key as AudiencePeriodKey),
+  );
+  if (unexpectedPeriods.length > 0) {
+    throw new Error(`${platform}.engagementByPeriod contient une période inconnue.`);
   }
-  if (
-    typeof engagement.sampleSize !== "number" ||
-    !Number.isInteger(engagement.sampleSize) ||
-    engagement.sampleSize < 1 ||
-    engagement.sampleSize > AUDIENCE_ENGAGEMENT_WINDOW_SIZE
-  ) {
-    throw new Error(`${platform}.engagement.sampleSize doit être compris entre 1 et 30.`);
+  for (const period of AUDIENCE_PERIODS) {
+    const candidate = byPeriod[period.key];
+    if (candidate === null) continue;
+    const engagement = record(
+      candidate,
+      `${platform}.engagementByPeriod.${period.key} doit être un objet ou null.`,
+    );
+    if (engagement.period !== period.key || !PERIOD_KEYS.has(engagement.period as AudiencePeriodKey)) {
+      throw new Error(`${platform}.${period.key}.period n’est pas cohérente.`);
+    }
+    const calculatedAt = assertTimestamp(
+      engagement.calculatedAt,
+      `${platform}.${period.key}.calculatedAt`,
+    );
+    if (calculatedAt !== generatedAt) {
+      throw new Error(`${platform}.${period.key} doit correspondre au snapshot courant.`);
+    }
+    if (engagement.formula !== AUDIENCE_ENGAGEMENT_FORMULA) {
+      throw new Error(`${platform}.${period.key}.formula n’est pas reconnue.`);
+    }
+    if (
+      engagement.followers !== latest.followers ||
+      engagement.followersObservedAt !== latest.capturedAt ||
+      engagement.followersPrecision !== latest.precision
+    ) {
+      throw new Error(`${platform}.${period.key} doit utiliser le dernier relevé réel.`);
+    }
+    if (
+      typeof engagement.sampleSize !== "number" ||
+      !Number.isInteger(engagement.sampleSize) ||
+      engagement.sampleSize < 1
+    ) {
+      throw new Error(`${platform}.${period.key}.sampleSize doit être un entier positif.`);
+    }
+    assertNonnegativeNumber(
+      engagement.averageInteractions,
+      `${platform}.${period.key}.averageInteractions`,
+    );
+    assertNonnegativeNumber(
+      engagement.ratePercent,
+      `${platform}.${period.key}.ratePercent`,
+    );
+    const oldest = assertTimestamp(
+      engagement.oldestPostAt,
+      `${platform}.${period.key}.oldestPostAt`,
+    );
+    const newest = assertTimestamp(
+      engagement.newestPostAt,
+      `${platform}.${period.key}.newestPostAt`,
+    );
+    if (Date.parse(oldest) > Date.parse(newest)) {
+      throw new Error(`${platform}.${period.key} a une fenêtre de posts inversée.`);
+    }
+    const calculatedTime = Date.parse(calculatedAt);
+    if (Date.parse(newest) > calculatedTime) {
+      throw new Error(`${platform}.${period.key} contient un post futur.`);
+    }
+    if (
+      period.days !== null &&
+      Date.parse(oldest) < calculatedTime - period.days * DAY_MS
+    ) {
+      throw new Error(`${platform}.${period.key} contient un post hors période.`);
+    }
   }
-  assertNonnegativeNumber(
-    engagement.averageInteractions,
-    `${platform}.engagement.averageInteractions`,
-  );
-  assertNonnegativeNumber(
-    engagement.ratePercent,
-    `${platform}.engagement.ratePercent`,
-  );
-  const oldest = assertTimestamp(
-    engagement.oldestPostAt,
-    `${platform}.engagement.oldestPostAt`,
-  );
-  const newest = assertTimestamp(
-    engagement.newestPostAt,
-    `${platform}.engagement.newestPostAt`,
-  );
-  if (Date.parse(oldest) > Date.parse(newest)) {
-    throw new Error(`${platform}.engagement a une fenêtre de posts inversée.`);
-  }
+}
+
+export function audiencePeriod(key: AudiencePeriodKey): AudiencePeriod {
+  const period = AUDIENCE_PERIODS.find((candidate) => candidate.key === key);
+  if (!period) throw new Error(`Période audience inconnue : ${key}.`);
+  return period;
+}
+
+export function emptyEngagementByPeriod(): Record<AudiencePeriodKey, null> {
+  return Object.fromEntries(
+    AUDIENCE_PERIODS.map((period) => [period.key, null]),
+  ) as Record<AudiencePeriodKey, null>;
 }
 
 function record(value: unknown, message: string): Record<string, unknown> {
