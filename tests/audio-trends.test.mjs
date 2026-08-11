@@ -13,6 +13,18 @@ const bootstrapFeed = JSON.parse(
   await readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
 );
 
+function validProposals() {
+  return [
+    { id: "quiet-start", title: "Quiet start", concept: "Lofi Girl follows the whisper with one precise library action.", copy: "Start quietly.", character: "lofi-girl", tone: "cozy" },
+    { id: "wrong-shelf", title: "Wrong shelf", concept: "The whispered line reveals that Lofi Girl studied the wrong shelf.", copy: "Wrong chapter.", character: "lofi-girl", tone: "funny" },
+    { id: "two-minute-rule", title: "Two-minute rule", concept: "The whisper cues Lofi Girl to begin with two minutes of reading.", copy: "Two minutes first.", character: "lofi-girl", tone: "smart" },
+    { id: "library-light", title: "Library light", concept: "Each whispered word turns on one pool of light around Lofi Girl.", copy: "Follow the light.", character: "lofi-girl", tone: "cinematic" },
+    { id: "silent-room", title: "Silent room", concept: "Lofi Girl hears every tiny sound once the whisper stops.", copy: "Libraries are never silent.", character: "lofi-girl", tone: "relatable" },
+    { id: "cat-whisper", title: "Cat whisper", concept: "The whisper comes from the cat hidden behind Lofi Girl's books.", copy: "Mystery solved.", character: "lofi-girl", tone: "cat" },
+    { id: "stealth-quest", title: "Stealth quest", concept: "Lofi Boy treats the whispered library rule like a stealth-game objective.", copy: "Stealth mode enabled.", character: "lofi-boy", tone: "gaming" },
+  ];
+}
+
 function validTrend() {
   return {
     id: "instagram-library-whisper",
@@ -68,6 +80,7 @@ function validTrend() {
     lofiFitScore: 94,
     lofiAngle: "Lofi Girl coupe sa musique une seconde pour identifier le chuchotement impossible au fond de la bibliothèque.",
     lofiFitRationale: "Le dialogue court se transpose naturellement dans une scène de bibliothèque avec Lofi Girl.",
+    proposals: validProposals(),
   };
 }
 
@@ -93,6 +106,21 @@ test("the published feed contains sourced audio signals without invented growth"
   assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "tiktok").length, 8);
   assert.equal(bootstrapFeed.trends.filter((trend) => trend.platform === "instagram").length, 8);
   assert.ok(bootstrapFeed.trends.every((trend) => trend.lofiAngle.length > 0));
+  assert.equal(
+    bootstrapFeed.trends.reduce((total, trend) => total + trend.proposals.length, 0),
+    112,
+  );
+  for (const trend of bootstrapFeed.trends) {
+    assert.equal(trend.proposals.length, 7, trend.id);
+    assert.equal(new Set(trend.proposals.map((proposal) => proposal.id)).size, 7, trend.id);
+    assert.equal(new Set(trend.proposals.map((proposal) => proposal.title)).size, 7, trend.id);
+    assert.equal(new Set(trend.proposals.map((proposal) => proposal.concept)).size, 7, trend.id);
+    assert.equal(new Set(trend.proposals.map((proposal) => proposal.copy)).size, 7, trend.id);
+    assert.ok(
+      trend.proposals.filter((proposal) => proposal.character === "lofi-girl").length >= 6,
+      trend.id,
+    );
+  }
   assert.ok(bootstrapFeed.trends.every((trend) => !("growth" in trend)));
   assert.deepEqual(
     bootstrapFeed.sourceChecks.map((check) => check.platform),
@@ -300,5 +328,35 @@ test("metadata provenance, platform sources and native audio identities are stri
   assert.throws(
     () => assertAudioTrendFeed(feedWith(missingLofiAngle)),
     /trend audio invalide/i,
+  );
+});
+
+test("audio editorial proposals require seven distinct concepts with a Lofi Girl focus", () => {
+  const missingProposal = validTrend();
+  missingProposal.proposals.pop();
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(missingProposal)),
+    /trend audio invalide/i,
+  );
+
+  const duplicateId = validTrend();
+  duplicateId.proposals[1].id = duplicateId.proposals[0].id;
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(duplicateId)),
+    /proposition audio invalide/i,
+  );
+
+  const invalidTone = validTrend();
+  invalidTone.proposals[0].tone = "generic";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(invalidTone)),
+    /proposition audio invalide/i,
+  );
+
+  const insufficientGirlFocus = validTrend();
+  insufficientGirlFocus.proposals[1].character = "lofi-boy";
+  assert.throws(
+    () => assertAudioTrendFeed(feedWith(insufficientGirlFocus)),
+    /focus Lofi Girl insuffisant/i,
   );
 });

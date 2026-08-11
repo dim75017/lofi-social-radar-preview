@@ -6,7 +6,9 @@ import {
   buildDailyTrendRefresh,
   countMatchedSignals,
   localDateKey,
+  nativeTrendVerificationRequest,
   normalizeSourceText,
+  verifyNativeTrendPost,
 } from "../scripts/refresh-social-trends.mjs";
 import {
   assertPublishableSocialTrendFeed,
@@ -23,7 +25,18 @@ const watchlists = JSON.parse(
 
 function successfulSourceFetch(url) {
   const source = watchlists.sources.find((candidate) => candidate.url === url);
-  assert.ok(source, `unexpected source ${url}`);
+  if (!source) {
+    const decoded = decodeURIComponent(url);
+    const marker = feed.trends
+      .flatMap((trend) => trend.reuseEvidence?.posts ?? [])
+      .map((post) => nativeTrendVerificationRequest(post).marker)
+      .find((candidate) => decoded.includes(candidate));
+    assert.ok(marker, `unexpected source ${url}`);
+    return Promise.resolve(new Response(
+      `<html><body>${marker}</body></html>`,
+      { status: 200, headers: { "content-type": "text/html" } },
+    ));
+  }
   const trendTerms = feed.trends
     .filter(isActionableSocialTrend)
     .slice(0, 8)
@@ -44,6 +57,28 @@ test("source text normalization and matching are deterministic", () => {
   assert.equal(normalizeSourceText("<h1>ÉTUDES&nbsp;&amp; Focus</h1>"), "etudes & focus");
   const actionable = feed.trends.filter(isActionableSocialTrend);
   assert.ok(countMatchedSignals(actionable[0].title, actionable) >= 1);
+});
+
+test("native post verification uses platform-owned endpoints and rejects identity drift", async () => {
+  const posts = feed.trends
+    .flatMap((trend) => trend.reuseEvidence?.posts ?? [])
+    .filter((post, index, all) =>
+      all.findIndex((candidate) => candidate.platform === post.platform) === index,
+    );
+  for (const post of posts) {
+    const request = nativeTrendVerificationRequest(post);
+    assert.match(request.url, /^https:\/\//);
+    assert.ok(request.marker.length >= 5);
+    await verifyNativeTrendPost(post, {
+      fetchImpl: async () => new Response(request.marker, { status: 200 }),
+    });
+    await assert.rejects(
+      verifyNativeTrendPost(post, {
+        fetchImpl: async () => new Response("different post", { status: 200 }),
+      }),
+      /identité du post absente/i,
+    );
+  }
 });
 
 test("a real parsed-source run refreshes metadata without altering native metrics", async () => {
@@ -74,10 +109,19 @@ test("a real parsed-source run refreshes metadata without altering native metric
     "an editorial source check must never rewrite native post metrics",
   );
   assert.deepEqual(
-    result.feed.trends.map((trend) => trend.reuseEvidence),
-    originalReuseEvidence,
-    "an editorial source check must never claim that native creator reuse was reverified",
+    result.feed.trends.map((trend) =>
+      trend.reuseEvidence?.posts.map(({ platform, author, url }) => ({ platform, author, url })) ?? null,
+    ),
+    originalReuseEvidence.map((evidence) =>
+      evidence?.posts.map(({ platform, author, url }) => ({ platform, author, url })) ?? null,
+    ),
+    "reverification may update timestamps but must never rewrite creator identities or URLs",
   );
+  const refreshedEvidence = result.feed.trends
+    .filter(isActionableSocialTrend)
+    .map((trend) => trend.reuseEvidence?.verifiedAt);
+  assert.ok(refreshedEvidence.length >= 50);
+  assert.ok(refreshedEvidence.every((verifiedAt) => verifiedAt === now));
   assert.equal(assertPublishableSocialTrendFeed(result.feed, { now }), result.feed);
 });
 
@@ -112,6 +156,9 @@ test("the daily publisher fails closed when multi-creator proof is stale", async
   for (const post of trend.reuseEvidence.posts) {
     post.capturedAt = staleVerifiedAt;
   }
+  const staleMarkers = trend.reuseEvidence.posts.map(
+    (post) => nativeTrendVerificationRequest(post).marker,
+  );
 
   await assert.rejects(
     buildDailyTrendRefresh({
@@ -119,7 +166,9 @@ test("the daily publisher fails closed when multi-creator proof is stale", async
       watchlists,
       now,
       force: true,
-      fetchImpl: successfulSourceFetch,
+      fetchImpl: (url) => staleMarkers.some((marker) => decodeURIComponent(url).includes(marker))
+        ? Promise.resolve(new Response("missing", { status: 404 }))
+        : successfulSourceFetch(url),
       xBearerToken: "test-token",
     }),
     /trop ancienne|72 h/i,

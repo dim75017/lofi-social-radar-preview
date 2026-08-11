@@ -77,6 +77,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     audioTrendView,
     audioTrendModel,
     audioTrendFeed,
+    socialInlinePlayer,
+    socialInlinePlayerModel,
   ] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -102,6 +104,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     readFile(new URL("../app/AudioTrendFeedView.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/audio-trends.ts", import.meta.url), "utf8"),
     readFile(new URL("../data/audio-trends/feed.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/SocialInlinePlayer.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/social-inline-player.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(hosting, /"d1"\s*:\s*"DB"/);
@@ -239,6 +243,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /refreshAudienceHistory/);
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL = `\$\{dataBaseUrl\}\/audience-history\.json`/);
   assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar\/main\/data\/audio-trends\/feed\.json/);
+  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar\/main\/data\/trends\/feed\.json/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
   assert.match(previewEntry, /RAW_COMMENT_OPPORTUNITIES_URL/);
@@ -293,7 +298,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /reuseEvidence\.posts\.map/);
   assert.match(component, /isActionableSocialTrend/);
   assert.match(component, /selectGirlFirstSocialTrends/);
-  assert.match(component, /feed\.refresh\.counts\.lofiGirl/);
+  assert.match(component, /referencePost\?\.mediaType === "video"/);
+  assert.match(component, /\{proposalCount\} propositions/);
+  assert.match(component, /trend\.proposals\.map/);
+  assert.match(component, /trend-proposal-tabs/);
+  assert.match(component, /dailyRotationIndex/);
   assert.match(component, /trend-card-source-title/);
   assert.match(component, /TREND_CHARACTER_FILTERS/);
   assert.match(component, /TREND_CHARACTER_META/);
@@ -308,9 +317,24 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(audioTrendView, /<h2>Trends audio<\/h2>/);
   assert.match(audioTrendView, /deriveAudioTrendGrowth/);
-  assert.match(audioTrendView, /Ouvrir l.audio/);
+  assert.match(audioTrendView, /\{proposalCount\} propositions/);
+  assert.match(audioTrendView, /trend\.proposals\.map/);
+  assert.match(audioTrendView, /audio-proposal-tabs/);
+  assert.match(audioTrendView, /dailyRotationIndex/);
+  assert.doesNotMatch(audioTrendView, /Ouvrir l.audio/);
   assert.match(audioTrendView, /Croissance mesur.e d.s le prochain relev. comparable/);
   assert.match(audioTrendView, /platforms\/\$\{trend\.platform\}\.svg/);
+  assert.match(audioTrendView, /activePlayerId/);
+  assert.match(audioTrendView, /<SocialInlinePlayer/);
+  assert.match(component, /activePlayerId/);
+  assert.match(component, /<SocialInlinePlayer/);
+  assert.match(socialInlinePlayerModel, /autoplay=1&muted=0/);
+  assert.match(socialInlinePlayerModel, /enablejsapi=1/);
+  assert.match(socialInlinePlayer, /event\.origin !== "https:\/\/www\.tiktok\.com"/);
+  assert.match(socialInlinePlayer, /type: "unMute"/);
+  assert.match(socialInlinePlayer, /player\.setVolume\(100\)/);
+  assert.match(socialInlinePlayer, /onAutoplayBlocked/);
+  assert.match(socialInlinePlayer, /inline-player-sound-fallback/);
   assert.match(audioTrendModel, /usageObservations/);
   assert.match(audioTrendModel, /same canonical source/i);
   const parsedAudioTrendFeed = JSON.parse(audioTrendFeed);
@@ -347,7 +371,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /TIKTOK_THUMBNAIL_REQUESTS/);
   assert.match(component, /sharedTikTokPreviewObserver/);
   assert.match(component, /IntersectionObserver/);
-  assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 2);
+  assert.equal((component.match(/new IntersectionObserver/g) ?? []).length, 1);
+  assert.match(socialInlinePlayer, /loading="lazy"/);
   assert.match(component, /role="dialog"/);
   assert.match(component, /event\.key !== "Tab"/);
   const postCard = component.slice(

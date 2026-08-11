@@ -7,6 +7,7 @@ import {
   assertPublishableSocialTrendFeed,
   assertSocialTrendFeed,
   isActionableSocialTrend,
+  MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
 } from "../lib/social-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -14,7 +15,121 @@ const feedPath = resolve(root, "data", "trends", "feed.json");
 const watchlistsPath = resolve(root, "data", "trends", "watchlists.json");
 const statusPath = resolve(root, "data", "trends", "refresh-status.json");
 const REQUEST_TIMEOUT_MS = 20_000;
+const NATIVE_POST_TIMEOUT_MS = 12_000;
+const NATIVE_POST_CONCURRENCY = 8;
 const PARIS_TIMEZONE = "Europe/Paris";
+
+export function nativeTrendVerificationRequest(post) {
+  const url = new URL(post.url);
+  if (post.platform === "tiktok") {
+    const id = url.pathname.match(/\/video\/(\d{12,24})/iu)?.[1];
+    if (!id) throw new Error("identifiant TikTok absent");
+    return {
+      url: `https://www.tiktok.com/oembed?url=${encodeURIComponent(post.url)}`,
+      marker: id,
+    };
+  }
+  if (post.platform === "youtube") {
+    const id = url.pathname.match(/\/(?:shorts|watch)\/([A-Za-z0-9_-]{11})/iu)?.[1]
+      ?? url.searchParams.get("v");
+    if (!id) throw new Error("identifiant YouTube absent");
+    return {
+      url: `https://www.youtube.com/oembed?url=${encodeURIComponent(post.url)}&format=json`,
+      marker: id,
+    };
+  }
+  if (post.platform === "x") {
+    const id = url.pathname.match(/\/status\/(\d+)/iu)?.[1];
+    if (!id) throw new Error("identifiant X absent");
+    return {
+      url: `https://publish.twitter.com/oembed?omit_script=true&dnt=true&url=${encodeURIComponent(post.url)}`,
+      marker: id,
+    };
+  }
+  const shortcode = url.pathname.match(/\/(?:p|reel|reels)\/([^/]+)/iu)?.[1];
+  if (!shortcode) throw new Error("identifiant Instagram absent");
+  return { url: post.url, marker: shortcode };
+}
+
+export async function verifyNativeTrendPost(post, options = {}) {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const request = nativeTrendVerificationRequest(post);
+  const response = await fetchImpl(request.url, {
+    headers: {
+      Accept: "text/html,application/json,application/xhtml+xml",
+      "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(NATIVE_POST_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const body = await response.text();
+  if (!body.includes(request.marker)) {
+    throw new Error("identité du post absente de la réponse");
+  }
+  return true;
+}
+
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker()),
+  );
+  return results;
+}
+
+export async function reverifyTrendReuseEvidence(trends, options = {}) {
+  const now = options.now ?? new Date().toISOString();
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const jobs = trends.flatMap((trend) =>
+    (trend.reuseEvidence?.posts ?? []).map((post) => ({ trend, post })),
+  );
+  const checks = await mapWithConcurrency(
+    jobs,
+    options.concurrency ?? NATIVE_POST_CONCURRENCY,
+    async ({ trend, post }) => {
+      try {
+        await verifyNativeTrendPost(post, { fetchImpl });
+        return { trendId: trend.id, url: post.url, ok: true };
+      } catch (error) {
+        return {
+          trendId: trend.id,
+          url: post.url,
+          ok: false,
+          error: error instanceof Error ? error.message : "échec inconnu",
+        };
+      }
+    },
+  );
+  const checksByTrend = Map.groupBy(checks, (check) => check.trendId);
+  let reverified = 0;
+  const failures = [];
+  for (const trend of trends) {
+    const trendChecks = checksByTrend.get(trend.id) ?? [];
+    if (
+      !trend.reuseEvidence ||
+      trendChecks.length !== trend.reuseEvidence.posts.length ||
+      trendChecks.some((check) => !check.ok)
+    ) {
+      failures.push(...trendChecks.filter((check) => !check.ok));
+      continue;
+    }
+    trend.reuseEvidence.verifiedAt = now;
+    for (const post of trend.reuseEvidence.posts) post.capturedAt = now;
+    trend.lastVerifiedAt = now;
+    reverified += 1;
+  }
+  return { reverified, checkedPosts: checks.length, failures };
+}
 
 export function normalizeSourceText(value) {
   return String(value ?? "")
@@ -173,6 +288,18 @@ export async function buildDailyTrendRefresh({
   if (checkedSources < watchlists.minimumParsedSources) {
     const error = new Error(
       `Seulement ${checkedSources}/${watchlists.sources.length} sources Trends ont été parsées; minimum ${watchlists.minimumParsedSources}.`,
+    );
+    error.refreshStatus = baseRefresh;
+    throw error;
+  }
+
+  const reuseVerification = await reverifyTrendReuseEvidence(actionable, {
+    now,
+    fetchImpl,
+  });
+  if (reuseVerification.reverified < MIN_PUBLISHABLE_ACTIONABLE_TRENDS) {
+    const error = new Error(
+      `Seulement ${reuseVerification.reverified}/${actionable.length} trends ont conservé trois reprises natives vérifiables; minimum ${MIN_PUBLISHABLE_ACTIONABLE_TRENDS}.`,
     );
     error.refreshStatus = baseRefresh;
     throw error;

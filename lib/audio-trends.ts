@@ -2,6 +2,24 @@ export type AudioTrendPlatform = "instagram" | "tiktok" | "youtube";
 export type AudioTrendType = "music" | "spoken" | "original";
 export type AudioTrendExactness = "exact" | "platform-estimate" | "unavailable";
 export type AudioTrendSourceStatus = "pending" | "success" | "limited" | "failed";
+export type AudioTrendProposalCharacter = "lofi-girl" | "lofi-boy";
+export type AudioTrendProposalTone =
+  | "cozy"
+  | "funny"
+  | "smart"
+  | "cinematic"
+  | "relatable"
+  | "cat"
+  | "gaming";
+
+export type AudioTrendProposal = {
+  id: string;
+  title: string;
+  concept: string;
+  copy: string;
+  character: AudioTrendProposalCharacter;
+  tone: AudioTrendProposalTone;
+};
 
 export type AudioTrendPublicMetrics = {
   views: number | null;
@@ -52,6 +70,7 @@ export type AudioTrend = {
   lofiFitScore: number;
   lofiAngle: string;
   lofiFitRationale: string;
+  proposals: AudioTrendProposal[];
 };
 
 export type AudioTrendSourceCheck = {
@@ -103,6 +122,19 @@ const VALID_SOURCE_STATUSES = new Set<AudioTrendSourceStatus>([
   "success",
   "limited",
   "failed",
+]);
+const VALID_PROPOSAL_CHARACTERS = new Set<AudioTrendProposalCharacter>([
+  "lofi-girl",
+  "lofi-boy",
+]);
+const VALID_PROPOSAL_TONES = new Set<AudioTrendProposalTone>([
+  "cozy",
+  "funny",
+  "smart",
+  "cinematic",
+  "relatable",
+  "cat",
+  "gaming",
 ]);
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -514,6 +546,7 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
       "lofiFitScore",
       "lofiAngle",
       "lofiFitRationale",
+      "proposals",
     ], "la trend audio");
     const trend = trendValue as AudioTrend;
     if (
@@ -530,6 +563,8 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
       /[\r\n]/u.test(trend.lofiAngle) ||
       !isText(trend.lofiFitRationale) ||
       trend.lofiFitRationale.length > 300 ||
+      !Array.isArray(trend.proposals) ||
+      trend.proposals.length !== 7 ||
       !Array.isArray(trend.usageObservations) ||
       trend.usageObservations.length === 0
     ) {
@@ -541,6 +576,57 @@ export function assertAudioTrendFeed(value: unknown): AudioTrendFeed {
       throw new Error(`Audio natif dupliqué : ${trend.audioUrl}`);
     }
     nativeAudioUrls.add(audioIdentity);
+
+    const proposalIds = new Set<string>();
+    const proposalTitles = new Set<string>();
+    const proposalConcepts = new Set<string>();
+    const proposalCopies = new Set<string>();
+    let lofiGirlProposalCount = 0;
+    for (const proposalValue of trend.proposals) {
+      if (!isObject(proposalValue)) {
+        throw new Error(`Proposition audio invalide : ${trend.id}`);
+      }
+      assertOnlyKeys(proposalValue, [
+        "id",
+        "title",
+        "concept",
+        "copy",
+        "character",
+        "tone",
+      ], `la proposition audio de ${trend.id}`);
+      const proposal = proposalValue as AudioTrendProposal;
+      const normalizedTitle = typeof proposal.title === "string"
+        ? proposal.title.trim().toLocaleLowerCase("fr")
+        : "";
+      const normalizedConcept = typeof proposal.concept === "string"
+        ? proposal.concept.trim().toLocaleLowerCase("fr")
+        : "";
+      const normalizedCopy = typeof proposal.copy === "string"
+        ? proposal.copy.trim().toLocaleLowerCase("fr")
+        : "";
+      if (
+        !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(proposal.id) ||
+        proposalIds.has(proposal.id) ||
+        !isText(proposal.title) ||
+        !isText(proposal.concept) ||
+        !isText(proposal.copy) ||
+        !VALID_PROPOSAL_CHARACTERS.has(proposal.character) ||
+        !VALID_PROPOSAL_TONES.has(proposal.tone) ||
+        proposalTitles.has(normalizedTitle) ||
+        proposalConcepts.has(normalizedConcept) ||
+        proposalCopies.has(normalizedCopy)
+      ) {
+        throw new Error(`Proposition audio invalide : ${trend.id}`);
+      }
+      proposalIds.add(proposal.id);
+      proposalTitles.add(normalizedTitle);
+      proposalConcepts.add(normalizedConcept);
+      proposalCopies.add(normalizedCopy);
+      if (proposal.character === "lofi-girl") lofiGirlProposalCount += 1;
+    }
+    if (lofiGirlProposalCount < 6) {
+      throw new Error(`Focus Lofi Girl insuffisant : ${trend.id}`);
+    }
 
     if (!isObject(trend.source)) {
       throw new Error(`Provenance audio invalide : ${trend.id}`);

@@ -77,8 +77,10 @@ import {
   assertAudioTrendFeed,
   type AudioTrendFeed,
 } from "../lib/audio-trends";
+import { dailyRotationIndex } from "../lib/daily-rotation";
 import { AudioTrendFeedView } from "./AudioTrendFeedView";
 import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
+import { SocialInlinePlayer } from "./SocialInlinePlayer";
 
 type Platform = "youtube" | "instagram" | "tiktok" | "x";
 type View = "overview" | "top" | "comments" | "trends" | "audio-trends" | "ideas" | "planning" | "all" | "sources";
@@ -1954,10 +1956,17 @@ function TrendFeedView({
   const [platformFilter, setPlatformFilter] = useState<TrendPlatformFilter>("all");
   const [characterFilter, setCharacterFilter] = useState<TrendCharacterFilter>("all");
   const [activeTrend, setActiveTrend] = useState<SocialTrend | null>(null);
+  const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
   const [refreshIsLate, setRefreshIsLate] = useState(false);
   const actionableTrends = useMemo(
-    () => (feed?.trends ?? []).filter(isActionableSocialTrend),
+    () => (feed?.trends ?? []).filter(
+      (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
+    ),
     [feed?.trends],
+  );
+  const proposalCount = useMemo(
+    () => actionableTrends.reduce((total, trend) => total + trend.proposals.length, 0),
+    [actionableTrends],
   );
   const visibleTrends = useMemo(
     () => {
@@ -2001,7 +2010,7 @@ function TrendFeedView({
         </div>
         {feed && refreshDate ? (
           <span className={`trend-snapshot-pill ${refreshIsLate ? "is-late" : ""}`}>
-            {refreshIsLate ? "⚠️" : "✅"} {refreshDate} · {actionableTrends.length} trends · {feed.refresh.counts.lofiGirl} Lofi Girl · {feed.refresh.counts.checkedSources} sources
+            {refreshIsLate ? "⚠️" : "✅"} {proposalCount} propositions · {actionableTrends.length} trends vidéo · {refreshDate}
           </span>
         ) : null}
       </header>
@@ -2022,7 +2031,10 @@ function TrendFeedView({
                 className={platformFilter === option.key ? "active" : ""}
                 type="button"
                 aria-pressed={platformFilter === option.key}
-                onClick={() => setPlatformFilter(option.key)}
+                onClick={() => {
+                  setActivePlayerId(null);
+                  setPlatformFilter(option.key);
+                }}
                 key={option.key}
               >
                 {option.emoji} {option.label}
@@ -2038,7 +2050,10 @@ function TrendFeedView({
                 className={characterFilter === option.key ? "active" : ""}
                 type="button"
                 aria-pressed={characterFilter === option.key}
-                onClick={() => setCharacterFilter(option.key)}
+                onClick={() => {
+                  setActivePlayerId(null);
+                  setCharacterFilter(option.key);
+                }}
                 key={option.key}
               >
                 {option.emoji} {option.label}
@@ -2073,8 +2088,15 @@ function TrendFeedView({
             <TrendFeedCard
               trend={trend}
               rank={index + 1}
-              onOpenDetails={setActiveTrend}
-              key={trend.id}
+              onOpenDetails={(selectedTrend) => {
+                setActivePlayerId(null);
+                setActiveTrend(selectedTrend);
+              }}
+              playerActive={activePlayerId === trend.id}
+              onActivatePlayer={() => setActivePlayerId(trend.id)}
+              onClosePlayer={() => setActivePlayerId(null)}
+              feedCapturedAt={feed.capturedAt}
+              key={`${trend.id}:${feed.capturedAt.slice(0, 10)}`}
             />
           ))}
         </div>
@@ -2087,6 +2109,7 @@ function TrendFeedView({
             className="button secondary"
             type="button"
             onClick={() => {
+              setActivePlayerId(null);
               setPlatformFilter("all");
               setCharacterFilter("all");
             }}
@@ -2109,23 +2132,40 @@ function TrendFeedCard({
   trend,
   rank,
   onOpenDetails,
+  playerActive,
+  onActivatePlayer,
+  onClosePlayer,
+  feedCapturedAt,
 }: {
   trend: SocialTrend;
   rank: number;
   onOpenDetails: (trend: SocialTrend) => void;
+  playerActive: boolean;
+  onActivatePlayer: () => void;
+  onClosePlayer: () => void;
+  feedCapturedAt: string;
 }) {
   const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
   const character = TREND_CHARACTER_META[trend.character];
   const referencePost = trend.referencePost;
+  const [activeProposalIndex, setActiveProposalIndex] = useState(() =>
+    dailyRotationIndex(trend.id, feedCapturedAt, trend.proposals.length),
+  );
   if (!referencePost) return null;
   const publishedDate = formatCardPublishedDate(referencePost.publishedAt);
   const footerMetrics = trendReferenceFooterMetrics(referencePost);
-  const lofiExecution = trend.proposals[0]?.concept ?? trend.whyLofi;
+  const activeProposal = trend.proposals[activeProposalIndex] ?? trend.proposals[0];
   const reuseCount = trend.reuseEvidence?.posts.length ?? 0;
 
   return (
     <article className={`social-post-card trend-reference-card has-media tone-${lifecycle.tone}`}>
-      <TrendReferenceMedia trend={trend} rank={rank} />
+      <TrendReferenceMedia
+        trend={trend}
+        rank={rank}
+        active={playerActive}
+        onActivate={onActivatePlayer}
+        onClose={onClosePlayer}
+      />
       <div className="post-card-body trend-card-body">
         <div className="trend-card-meta-line">
           <span>
@@ -2141,17 +2181,22 @@ function TrendFeedCard({
         <div className="post-card-title">
           <div className="post-media-caption">
             <span className="trend-card-source-title">{character.emoji} {character.label} · {trend.territory}</span>
-            <h3>
-              <a
-                href={referencePost.url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Voir l’exemple original de la trend ${trend.title}`}
-              >
-                {lofiExecution}
-              </a>
-            </h3>
+            <span className="trend-proposal-title">{activeProposal?.title ?? trend.title}</span>
+            <h3>{activeProposal?.concept ?? trend.whyLofi}</h3>
           </div>
+        </div>
+        <div className="trend-proposal-tabs" role="group" aria-label={`Choisir une proposition pour ${trend.title}`}>
+          {trend.proposals.map((proposal, index) => (
+            <button
+              className={activeProposalIndex === index ? "active" : ""}
+              type="button"
+              aria-pressed={activeProposalIndex === index}
+              onClick={() => setActiveProposalIndex(index)}
+              key={`${proposal.tone}:${index}`}
+            >
+              {proposal.label}
+            </button>
+          ))}
         </div>
         <footer>
           {publishedDate ? (
@@ -2177,11 +2222,21 @@ function TrendFeedCard({
   );
 }
 
-function TrendReferenceMedia({ trend, rank }: { trend: SocialTrend; rank: number }) {
+function TrendReferenceMedia({
+  trend,
+  rank,
+  active,
+  onActivate,
+  onClose,
+}: {
+  trend: SocialTrend;
+  rank: number;
+  active: boolean;
+  onActivate: () => void;
+  onClose: () => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
   const referencePost = trend.referencePost;
-  const embedUrl = referencePost ? trendReferenceEmbedUrl(referencePost) : null;
   const tiktokExternalId = referencePost?.platform === "tiktok"
     ? referencePost.url.match(/\/video\/(\d{12,24})/i)?.[1] ?? null
     : null;
@@ -2221,54 +2276,26 @@ function TrendReferenceMedia({ trend, rank }: { trend: SocialTrend; rank: number
     };
   }, [referencePost?.platform, thumbnail, tiktokExternalId, tiktokOEmbedUrl]);
 
-  useEffect(() => {
-    const node = containerRef.current;
-    if (
-      !node ||
-      !referencePost ||
-      !embedUrl ||
-      shouldLoad ||
-      referencePost.platform === "youtube" ||
-      referencePost.platform === "tiktok"
-    ) return;
-    if (typeof IntersectionObserver === "undefined") {
-      const fallbackTimer = globalThis.setTimeout(() => setShouldLoad(true), 0);
-      return () => globalThis.clearTimeout(fallbackTimer);
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        setShouldLoad(true);
-        observer.disconnect();
-      },
-      { rootMargin: "360px 0px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [embedUrl, referencePost, shouldLoad]);
-
   if (!referencePost) return null;
 
   return (
     <div
-      className={`post-visual trend-reference-visual platform-${referencePost.platform} ${embedUrl ? "is-playable" : "is-image"}`}
+      className={`post-visual trend-reference-visual platform-${referencePost.platform} is-playable ${active ? "is-playing" : ""}`}
       ref={containerRef}
     >
-      {shouldLoad && embedUrl ? (
-        <iframe
-          src={embedUrl}
+      {active ? (
+        <SocialInlinePlayer
+          active
+          platform={referencePost.platform}
+          sourceUrl={referencePost.url}
           title={`Post de référence pour ${trend.title}`}
-          loading="lazy"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
+          onClose={onClose}
         />
       ) : (
         <button
           className="post-visual-trigger"
           type="button"
-          onClick={() => embedUrl ? setShouldLoad(true) : undefined}
-          disabled={!embedUrl && !thumbnail}
+          onClick={onActivate}
           aria-label={`Lire le post de référence pour « ${trend.title} »`}
         >
           {thumbnail ? (
@@ -2288,7 +2315,7 @@ function TrendReferenceMedia({ trend, rank }: { trend: SocialTrend; rank: number
               <small>Post de référence</small>
             </span>
           )}
-          {embedUrl ? <span className="media-play-mark" aria-hidden="true">▶</span> : null}
+          <span className="media-play-mark" aria-hidden="true">▶</span>
         </button>
       )}
       <span className="post-rank">#{rank}</span>
@@ -2539,35 +2566,6 @@ function TrendDetailsModal({
       </section>
     </div>
   );
-}
-
-function trendReferenceEmbedUrl(referencePost: TrendReferencePost) {
-  try {
-    const url = new URL(referencePost.url);
-    const path = url.pathname.replace(/\/+$/, "");
-    if (referencePost.platform === "instagram") {
-      const match = path.match(/^\/(p|reel)\/([^/]+)$/i);
-      return match ? `https://www.instagram.com/${match[1]}/${match[2]}/embed/` : null;
-    }
-    if (referencePost.platform === "tiktok") {
-      const match = path.match(/^\/@[^/]+\/video\/(\d{12,24})$/i);
-      return match
-        ? `https://www.tiktok.com/player/v1/${match[1]}?autoplay=0&controls=1&description=0&music_info=0&rel=0`
-        : null;
-    }
-    if (referencePost.platform === "youtube") {
-      const match = path.match(/^\/shorts\/([A-Za-z0-9_-]{11})$/i);
-      return match
-        ? `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=0&playsinline=1&rel=0`
-        : null;
-    }
-    const match = path.match(/^\/[^/]+\/status\/(\d+)$/i);
-    return match
-      ? `https://platform.twitter.com/embed/Tweet.html?id=${match[1]}&theme=dark&dnt=true`
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 function trendPlatformLabel(platform: TrendPlatform) {

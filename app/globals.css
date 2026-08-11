@@ -5165,6 +5165,58 @@ a {
   border: 0;
 }
 
+.social-inline-player-frame {
+  display: grid;
+  place-items: center;
+}
+
+.social-inline-player-frame iframe {
+  display: block;
+  background: #05060a;
+}
+
+.inline-player-sound-fallback {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 14px;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(7, 8, 13, 0.94);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  padding: 9px 14px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 820;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.inline-player-sound-fallback:hover,
+.inline-player-sound-fallback:focus-visible {
+  border-color: rgba(154, 168, 255, 0.8);
+  background: rgba(28, 33, 57, 0.97);
+  outline: none;
+}
+
+.social-inline-player-frame.is-unavailable {
+  gap: 12px;
+  align-content: center;
+  padding: 28px;
+  color: #fff;
+  text-align: center;
+}
+
+.social-inline-player-frame.is-unavailable p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+}
+
 .inline-player-close {
   position: absolute;
   z-index: 5;
@@ -6818,7 +6870,7 @@ a {
 }
 
 .audio-card-title {
-  min-height: 108px !important;
+  min-height: 162px !important;
 }
 
 .audio-card-title h3 {
@@ -6830,6 +6882,22 @@ a {
   color: #f4f5ff;
   font-size: 15px;
   line-height: 1.4;
+}
+
+.audio-proposal-copy {
+  display: -webkit-box;
+  margin: 7px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.38;
+}
+
+.audio-proposal-tabs {
+  margin-top: -1px;
 }
 
 .audio-trend-footer {
@@ -6846,6 +6914,21 @@ a {
   line-height: 1.35;
 }
 
+.audio-proposal-character {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(154, 168, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(154, 168, 255, 0.08);
+  padding: 6px 9px;
+  color: #dfe3ff;
+  font-size: 11px;
+  font-weight: 840;
+  white-space: nowrap;
+}
+
 .audio-trend-footer a {
   display: inline-flex;
   min-height: 34px;
@@ -6860,6 +6943,59 @@ a {
   font-weight: 820;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.trend-proposal-title {
+  display: block;
+  margin-bottom: 4px;
+  overflow: hidden;
+  color: #dfe3ff;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-proposal-tabs {
+  display: flex;
+  min-width: 0;
+  min-height: 34px;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 1px 1px 4px;
+  scrollbar-width: none;
+}
+
+.trend-proposal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.trend-proposal-tabs button {
+  min-height: 29px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(154, 168, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(154, 168, 255, 0.055);
+  padding: 5px 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.trend-proposal-tabs button:hover,
+.trend-proposal-tabs button:focus-visible {
+  border-color: rgba(154, 168, 255, 0.52);
+  color: #fff;
+  outline: none;
+}
+
+.trend-proposal-tabs button.active {
+  border-color: rgba(94, 234, 212, 0.58);
+  background: rgba(94, 234, 212, 0.13);
+  color: #e7fffb;
 }
 
 .audio-trend-footer a:hover,

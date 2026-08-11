@@ -9,8 +9,11 @@ import {
   type AudioTrend,
   type AudioTrendFeed,
   type AudioTrendPlatform,
+  type AudioTrendProposalTone,
   type AudioTrendType,
 } from "../lib/audio-trends";
+import { dailyRotationIndex } from "../lib/daily-rotation";
+import { SocialInlinePlayer } from "./SocialInlinePlayer";
 
 type PlatformFilter = AudioTrendPlatform | "all";
 type TypeFilter = AudioTrendType | "all";
@@ -35,6 +38,16 @@ const TYPE_LABELS: Record<AudioTrendType, string> = {
   original: "Son original",
 };
 
+const PROPOSAL_TONE_LABELS: Record<AudioTrendProposalTone, string> = {
+  cozy: "Cozy",
+  funny: "Drôle",
+  smart: "Smart",
+  cinematic: "Ciné",
+  relatable: "Relatable",
+  cat: "Chat",
+  gaming: "Gaming",
+};
+
 export function AudioTrendFeedView({
   feed,
   loading,
@@ -46,6 +59,7 @@ export function AudioTrendFeedView({
 }) {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
   const visibleTrends = useMemo(() => {
     return [...(feed?.trends ?? [])]
       .filter((trend) => platformFilter === "all" || trend.platform === platformFilter)
@@ -63,6 +77,10 @@ export function AudioTrendFeedView({
         return right.lofiFitScore - left.lofiFitScore;
       });
   }, [feed?.trends, platformFilter, typeFilter]);
+  const proposalCount = useMemo(
+    () => (feed?.trends ?? []).reduce((total, trend) => total + trend.proposals.length, 0),
+    [feed?.trends],
+  );
   const refreshedAt = feed ? formatRefreshDate(feed.capturedAt) : null;
 
   return (
@@ -78,7 +96,7 @@ export function AudioTrendFeedView({
         </div>
         {feed && refreshedAt ? (
           <span className="trend-snapshot-pill">
-            Actualisé {refreshedAt} · {feed.trends.length} audios
+            {proposalCount} propositions · {feed.trends.length} audios · Actualisé {refreshedAt}
           </span>
         ) : null}
       </header>
@@ -92,7 +110,10 @@ export function AudioTrendFeedView({
                 className={platformFilter === option.key ? "active" : ""}
                 type="button"
                 aria-pressed={platformFilter === option.key}
-                onClick={() => setPlatformFilter(option.key)}
+                onClick={() => {
+                  setActivePlayerId(null);
+                  setPlatformFilter(option.key);
+                }}
                 key={option.key}
               >
                 {option.key !== "all" ? (
@@ -111,7 +132,10 @@ export function AudioTrendFeedView({
                 className={typeFilter === option.key ? "active" : ""}
                 type="button"
                 aria-pressed={typeFilter === option.key}
-                onClick={() => setTypeFilter(option.key)}
+                onClick={() => {
+                  setActivePlayerId(null);
+                  setTypeFilter(option.key);
+                }}
                 key={option.key}
               >
                 {option.label}
@@ -136,10 +160,18 @@ export function AudioTrendFeedView({
             <p>Les pages audio et leurs vidéos de référence sont en cours de validation.</p>
           </div>
         </div>
-      ) : visibleTrends.length ? (
+      ) : feed && visibleTrends.length ? (
         <div className="post-grid top-ranking-grid trend-shorts-grid audio-trend-grid">
           {visibleTrends.map((trend, index) => (
-            <AudioTrendCard trend={trend} rank={index + 1} key={trend.id} />
+            <AudioTrendCard
+              trend={trend}
+              rank={index + 1}
+              active={activePlayerId === trend.id}
+              onActivate={() => setActivePlayerId(trend.id)}
+              onClose={() => setActivePlayerId(null)}
+              feedCapturedAt={feed.capturedAt}
+              key={`${trend.id}:${feed.capturedAt.slice(0, 10)}`}
+            />
           ))}
         </div>
       ) : feed ? (
@@ -151,6 +183,7 @@ export function AudioTrendFeedView({
             className="button secondary"
             type="button"
             onClick={() => {
+              setActivePlayerId(null);
               setPlatformFilter("all");
               setTypeFilter("all");
             }}
@@ -163,29 +196,46 @@ export function AudioTrendFeedView({
   );
 }
 
-function AudioTrendCard({ trend, rank }: { trend: AudioTrend; rank: number }) {
-  const [playing, setPlaying] = useState(false);
+function AudioTrendCard({
+  trend,
+  rank,
+  active,
+  onActivate,
+  onClose,
+  feedCapturedAt,
+}: {
+  trend: AudioTrend;
+  rank: number;
+  active: boolean;
+  onActivate: () => void;
+  onClose: () => void;
+  feedCapturedAt: string;
+}) {
   const growth = deriveAudioTrendGrowth(trend.usageObservations);
   const uses = latestUses(trend);
   const rankSignal = latestRank(trend);
-  const embedUrl = referenceEmbedUrl(trend);
+  const [activeProposalIndex, setActiveProposalIndex] = useState(() =>
+    dailyRotationIndex(trend.id, feedCapturedAt, trend.proposals.length),
+  );
+  const activeProposal = trend.proposals[activeProposalIndex] ?? trend.proposals[0];
 
   return (
     <article className="social-post-card trend-reference-card audio-trend-card has-media">
       <div className={`trend-reference-visual audio-reference-visual platform-${trend.platform}`}>
-        {playing && embedUrl ? (
-          <iframe
-            src={embedUrl}
+        {active ? (
+          <SocialInlinePlayer
+            active
+            platform={trend.platform}
+            sourceUrl={trend.referenceVideo.url}
             title={`Vidéo de référence pour ${trend.title}`}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
+            onClose={onClose}
           />
         ) : (
           <button
             className="audio-reference-trigger"
             type="button"
             aria-label={`Lire la vidéo de référence de ${trend.title}`}
-            onClick={() => setPlaying(true)}
+            onClick={onActivate}
           >
             {trend.referenceVideo.thumbnailUrl ? (
               <img src={trend.referenceVideo.thumbnailUrl} alt="" loading="lazy" />
@@ -228,8 +278,24 @@ function AudioTrendCard({ trend, rank }: { trend: AudioTrend; rank: number }) {
         <div className="post-card-title audio-card-title">
           <div className="post-media-caption">
             <span className="trend-card-source-title">{trend.title} · {trend.author}</span>
-            <h3>{trend.lofiAngle}</h3>
+            <span className="trend-proposal-title">{activeProposal.title}</span>
+            <h3>{activeProposal.concept}</h3>
+            <p className="audio-proposal-copy">“{activeProposal.copy}”</p>
           </div>
+        </div>
+
+        <div className="trend-proposal-tabs audio-proposal-tabs" role="group" aria-label={`Choisir une proposition pour ${trend.title}`}>
+          {trend.proposals.map((proposal, index) => (
+            <button
+              className={activeProposalIndex === index ? "active" : ""}
+              type="button"
+              aria-pressed={activeProposalIndex === index}
+              onClick={() => setActiveProposalIndex(index)}
+              key={proposal.id}
+            >
+              {PROPOSAL_TONE_LABELS[proposal.tone]}
+            </button>
+          ))}
         </div>
 
         <footer className="audio-trend-footer">
@@ -238,9 +304,9 @@ function AudioTrendCard({ trend, rank }: { trend: AudioTrend; rank: number }) {
               ? `${formatCompact(Math.abs(growth.usesPerDay))} utilisations/jour`
               : "Croissance mesurée dès le prochain relevé comparable"}
           </span>
-          <a href={trend.audioUrl} target="_blank" rel="noreferrer">
-            Ouvrir l’audio
-          </a>
+          <span className="audio-proposal-character">
+            {activeProposal.character === "lofi-girl" ? "Lofi Girl" : "Lofi Boy"}
+          </span>
         </footer>
       </div>
     </article>
@@ -261,28 +327,6 @@ function latestRank(trend: AudioTrend) {
   return observation?.rank && observation.rankWindow
     ? { rank: observation.rank, window: observation.rankWindow }
     : null;
-}
-
-function referenceEmbedUrl(trend: AudioTrend) {
-  try {
-    const url = new URL(trend.referenceVideo.url);
-    if (trend.platform === "tiktok") {
-      const id = url.pathname.match(/\/video\/(\d{12,24})/u)?.[1];
-      return id
-        ? `https://www.tiktok.com/player/v1/${id}?autoplay=1&controls=1&description=0&music_info=0&rel=0`
-        : null;
-    }
-    if (trend.platform === "instagram") {
-      const code = url.pathname.match(/\/(?:reel|reels)\/([^/]+)/u)?.[1];
-      return code ? `https://www.instagram.com/reel/${code}/embed/` : null;
-    }
-    const id = url.pathname.match(/\/shorts\/([A-Za-z0-9_-]{11})/u)?.[1];
-    return id
-      ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 function formatCompact(value: number) {

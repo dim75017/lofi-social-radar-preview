@@ -11,6 +11,7 @@ import {
   MAX_TREND_VIDEO_DURATION_SECONDS,
   MIN_ACTIONABLE_TREND_LOFI_FIT,
   MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  MIN_PUBLISHABLE_VIDEO_PROPOSALS,
   MIN_PUBLISHABLE_LOFI_GIRL_SHARE,
   MIN_TREND_DISTINCT_CREATORS,
   MIN_TREND_VIDEO_LIKES,
@@ -271,6 +272,15 @@ test("the actionable feed keeps only strong, qualified Lofi-universe executions"
     ),
     "watch and unknown-media trends must stay outside the actionable feed",
   );
+  const videoTrends = actionable.filter(
+    (trend) => trend.referencePost?.mediaType === "video",
+  );
+  const videoProposalCount = videoTrends.reduce(
+    (total, trend) => total + trend.proposals.length,
+    0,
+  );
+  assert.ok(videoTrends.every((trend) => trend.proposals.length === 3));
+  assert.ok(videoProposalCount >= MIN_PUBLISHABLE_VIDEO_PROPOSALS);
 
   for (const rejectedId of [
     "back-to-school-study-reset",
