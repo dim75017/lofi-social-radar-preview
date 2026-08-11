@@ -39,7 +39,7 @@ Une métrique absente est retirée du calcul et les poids restants sont renormal
 
 Le Tableau de bord utilise la même méthode sur YouTube, Instagram, TikTok et X : moyenne des likes et commentaires des 30 derniers posts mesurables, divisée par le dernier nombre de followers réellement observé. Les commentaires YouTube publiés par Lofi Girl sont exclus de l’échantillon. Les partages et sauvegardes ne sont pas mélangés au calcul, car ils ne sont pas disponibles de façon comparable sur les quatre plateformes.
 
-Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. Si une source échoue, son dernier point valide est conservé ; aucune valeur n’est inventée. Les compteurs arrondis par une plateforme restent explicitement marqués comme tels. La preview publique recharge le fichier audience au démarrage, chaque heure et au retour sur l’onglet.
+Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. Si une source échoue, son dernier point valide est conservé ; aucune valeur n’est inventée. Les compteurs arrondis par une plateforme restent explicitement marqués comme tels. Le snapshot validé est copié dans le dépôt public de la maquette ; la preview le recharge depuis son propre dossier `data` au démarrage, chaque heure et au retour sur l’onglet.
 
 ## Analyse éditoriale
 

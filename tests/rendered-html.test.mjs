@@ -132,6 +132,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL/);
   assert.match(previewEntry, /initialAudienceHistory=\{audienceHistory\}/);
   assert.match(previewEntry, /refreshAudienceHistory/);
+  assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL = `\$\{dataBaseUrl\}\/audience-history\.json`/);
+  assert.doesNotMatch(previewEntry, /raw\.githubusercontent\.com/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
   assert.match(audienceMetrics, /mean\(likes\+comments\)\/followers\*100/);

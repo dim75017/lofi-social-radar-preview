@@ -33,10 +33,9 @@ const fallbackTrendFeed = assertSocialTrendFeed(
 const fallbackAudienceHistory = assertAudienceHistory(
   audienceHistoryJson as AudienceHistory,
 );
-const RAW_TREND_FEED_URL =
-  "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/trends/feed.json";
-const RAW_AUDIENCE_HISTORY_URL =
-  "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/audience-history.json";
+const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
+const RAW_TREND_FEED_URL = `${dataBaseUrl}/trends/feed.json`;
+const RAW_AUDIENCE_HISTORY_URL = `${dataBaseUrl}/audience-history.json`;
 const emptySnapshot: PublicHistorySnapshot = {
   generatedAt: publicHistorySummary.generatedAt,
   coverage: publicHistorySummary.coverage,
@@ -51,7 +50,6 @@ const initialWorkspace = mergeWorkspaceWithPublicHistory(
     accountCounts: publicHistorySummary.platformCounts,
   },
 );
-const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
 const snapshotVersion = encodeURIComponent(
   `${publicHistorySummary.generatedAt}:${publicHistorySummary.totalPostCount}:${JSON.stringify(publicHistorySummary.formatCounts)}`,
 );

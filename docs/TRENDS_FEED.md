@@ -33,7 +33,7 @@ Le script `scripts/refresh-social-trends.mjs` :
 5. refuse l’écriture si moins de trois sources ont été réellement parsées ou si le feed tombe sous ses quotas ;
 6. écrit le JSON de façon atomique, puis laisse les tests décider si le commit est autorisé.
 
-La preview GitHub Pages embarque le dernier snapshot de secours, puis recharge le feed brut du dépôt source au montage, toutes les heures et au retour sur l’onglet. Une mise à jour de données ne nécessite donc pas un redéploiement quotidien du site.
+La preview GitHub Pages embarque le dernier snapshot de secours, puis recharge `data/trends/feed.json` depuis le dépôt public de la maquette au montage, toutes les heures et au retour sur l’onglet. Une mise à jour quotidienne copie uniquement le feed validé dans ce dépôt ; elle ne nécessite pas de reconstruire le bundle du site.
 
 ## Niveaux de preuve
 
