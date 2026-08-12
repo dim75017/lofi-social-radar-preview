@@ -1,36 +1,36 @@
 {
   "version": 1,
-  "capturedAt": "2026-08-12T12:21:10.681Z",
-  "nextRefreshAt": "2026-08-12T18:21:10.681Z",
+  "capturedAt": "2026-08-12T20:58:06.679Z",
+  "nextRefreshAt": "2026-08-13T02:58:06.679Z",
   "cadenceHours": 6,
   "sourceChecks": [
     {
       "id": "instagram-reels-public",
       "platform": "instagram",
-      "status": "success",
+      "status": "limited",
       "checkedAt": "2026-08-12T12:21:10.681Z",
-      "label": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026"
+      "label": "Instagram · flux de consentement bloquant ; dernier bon relevé conservé"
     },
     {
       "id": "tiktok-native-public",
       "platform": "tiktok",
       "status": "success",
-      "checkedAt": "2026-08-12T12:14:43.687Z",
-      "label": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026"
+      "checkedAt": "2026-08-12T20:54:28.769Z",
+      "label": "TikTok · 9 itemStruct et compteurs publics natifs vérifiés le 12/08/2026"
     },
     {
       "id": "youtube-shorts-public",
       "platform": "youtube",
-      "status": "success",
-      "checkedAt": "2026-08-12T12:16:35.631Z",
-      "label": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026"
+      "status": "limited",
+      "checkedAt": "2026-08-12T20:58:06.679Z",
+      "label": "YouTube Shorts · vues et likes natifs vérifiés, compteur de commentaires indisponible ; dernier bon point complet conservé"
     },
     {
       "id": "x-native-public",
       "platform": "x",
-      "status": "success",
+      "status": "limited",
       "checkedAt": "2026-08-12T12:19:46.819Z",
-      "label": "X · données structurées publiques natives vérifiées le 12/08/2026"
+      "label": "X · dernier bon relevé conservé ; aucun nouveau contrôle natif complet"
     }
   ],
   "opportunities": [
@@ -497,7 +497,7 @@
       "durationSeconds": 15,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-08T12:00:46.000Z",
-      "capturedAt": "2026-08-12T12:14:38.426Z",
+      "capturedAt": "2026-08-12T20:54:20.917Z",
       "status": "surging",
       "lofiFitScore": 95,
       "commentabilityScore": 99,
@@ -508,10 +508,10 @@
         "note": "Humour quotidien, sans attaque envers le créateur."
       },
       "metrics": {
-        "views": 373400,
-        "likes": 76500,
-        "comments": 494,
-        "shares": 2083
+        "views": 385100,
+        "likes": 78200,
+        "comments": 499,
+        "shares": 2119
       },
       "observations": [
         {
@@ -553,6 +553,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:20.917Z",
+          "views": 385100,
+          "likes": 78200,
+          "comments": 499,
+          "shares": 2119,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -584,7 +594,7 @@
       "durationSeconds": 18,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-06T14:39:13.000Z",
-      "capturedAt": "2026-08-12T12:14:39.108Z",
+      "capturedAt": "2026-08-12T20:54:21.779Z",
       "status": "surging",
       "lofiFitScore": 98,
       "commentabilityScore": 93,
@@ -596,9 +606,9 @@
       },
       "metrics": {
         "views": 1600000,
-        "likes": 341100,
-        "comments": 2601,
-        "shares": 104400
+        "likes": 342200,
+        "comments": 2619,
+        "shares": 104700
       },
       "observations": [
         {
@@ -640,6 +650,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@limemation0/video/7670928215589817622",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:21.779Z",
+          "views": 1600000,
+          "likes": 342200,
+          "comments": 2619,
+          "shares": 104700,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@limemation0/video/7670928215589817622",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -671,7 +691,7 @@
       "durationSeconds": 12,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-05T09:01:45.000Z",
-      "capturedAt": "2026-08-12T12:14:39.780Z",
+      "capturedAt": "2026-08-12T20:54:22.697Z",
       "status": "surging",
       "lofiFitScore": 90,
       "commentabilityScore": 84,
@@ -682,10 +702,10 @@
         "note": "Réaction positive et contextuelle."
       },
       "metrics": {
-        "views": 5300000,
+        "views": 5400000,
         "likes": 1000000,
-        "comments": 2100,
-        "shares": 328600
+        "comments": 2163,
+        "shares": 336200
       },
       "observations": [
         {
@@ -727,6 +747,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:22.697Z",
+          "views": 5400000,
+          "likes": 1000000,
+          "comments": 2163,
+          "shares": 336200,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -758,7 +788,7 @@
       "durationSeconds": 12,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-04T21:02:50.000Z",
-      "capturedAt": "2026-08-12T12:14:40.418Z",
+      "capturedAt": "2026-08-12T20:54:23.632Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 98,
@@ -769,10 +799,10 @@
         "note": "Éviter toute blague sur l’alcool ou une éventuelle blessure."
       },
       "metrics": {
-        "views": 20000000,
+        "views": 20100000,
         "likes": 2900000,
-        "comments": 6723,
-        "shares": 934800
+        "comments": 6766,
+        "shares": 939600
       },
       "observations": [
         {
@@ -814,6 +844,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:23.632Z",
+          "views": 20100000,
+          "likes": 2900000,
+          "comments": 6766,
+          "shares": 939600,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -845,7 +885,7 @@
       "durationSeconds": 20,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-31T16:56:52.000Z",
-      "capturedAt": "2026-08-12T12:14:41.111Z",
+      "capturedAt": "2026-08-12T20:54:24.730Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 93,
@@ -856,10 +896,10 @@
         "note": "Confirmer l’histoire complète et l’état de l’animal avant publication."
       },
       "metrics": {
-        "views": 9200000,
-        "likes": 1700000,
-        "comments": 20900,
-        "shares": 132500
+        "views": 9400000,
+        "likes": 1800000,
+        "comments": 21300,
+        "shares": 135500
       },
       "observations": [
         {
@@ -901,6 +941,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:24.730Z",
+          "views": 9400000,
+          "likes": 1800000,
+          "comments": 21300,
+          "shares": 135500,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -932,7 +982,7 @@
       "durationSeconds": 20,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-31T14:01:00.000Z",
-      "capturedAt": "2026-08-12T12:14:41.748Z",
+      "capturedAt": "2026-08-12T20:54:25.731Z",
       "status": "surging",
       "lofiFitScore": 99,
       "commentabilityScore": 89,
@@ -944,9 +994,9 @@
       },
       "metrics": {
         "views": 3500000,
-        "likes": 304300,
-        "comments": 4157,
-        "shares": 10400
+        "likes": 307300,
+        "comments": 4193,
+        "shares": 10500
       },
       "observations": [
         {
@@ -988,6 +1038,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@cantu.setup/video/7668692002451574048",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:25.731Z",
+          "views": 3500000,
+          "likes": 307300,
+          "comments": 4193,
+          "shares": 10500,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@cantu.setup/video/7668692002451574048",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1019,7 +1079,7 @@
       "durationSeconds": 15,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T13:47:06Z",
-      "capturedAt": "2026-08-12T12:14:42.348Z",
+      "capturedAt": "2026-08-12T20:54:26.736Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 98,
@@ -1030,10 +1090,10 @@
         "note": "Réaction positive au travail créatif du grand-père."
       },
       "metrics": {
-        "views": 3100000,
-        "likes": 802300,
-        "comments": 1973,
-        "shares": 105200
+        "views": 3400000,
+        "likes": 862000,
+        "comments": 2163,
+        "shares": 110600
       },
       "observations": [
         {
@@ -1075,6 +1135,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@fastex3_/video/7672028037147397397",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:26.736Z",
+          "views": 3400000,
+          "likes": 862000,
+          "comments": 2163,
+          "shares": 110600,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@fastex3_/video/7672028037147397397",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1106,7 +1176,7 @@
       "durationSeconds": 16,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T19:57:19Z",
-      "capturedAt": "2026-08-12T12:14:42.990Z",
+      "capturedAt": "2026-08-12T20:54:27.728Z",
       "status": "surging",
       "lofiFitScore": 100,
       "commentabilityScore": 95,
@@ -1117,10 +1187,10 @@
         "note": "Moment cozy sans sujet sensible."
       },
       "metrics": {
-        "views": 322200,
-        "likes": 94600,
-        "comments": 136,
-        "shares": 6030
+        "views": 351000,
+        "likes": 102500,
+        "comments": 150,
+        "shares": 6588
       },
       "observations": [
         {
@@ -1162,6 +1232,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@isabellejadefox/video/7672123441377463574",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:27.728Z",
+          "views": 351000,
+          "likes": 102500,
+          "comments": 150,
+          "shares": 6588,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@isabellejadefox/video/7672123441377463574",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1193,7 +1273,7 @@
       "durationSeconds": 79,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T02:20:35Z",
-      "capturedAt": "2026-08-12T12:14:43.687Z",
+      "capturedAt": "2026-08-12T20:54:28.769Z",
       "status": "surging",
       "lofiFitScore": 91,
       "commentabilityScore": 94,
@@ -1204,10 +1284,10 @@
         "note": "Ne faire aucune affirmation sur une date de sortie."
       },
       "metrics": {
-        "views": 3000000,
-        "likes": 938500,
-        "comments": 1888,
-        "shares": 62500
+        "views": 3100000,
+        "likes": 958800,
+        "comments": 1918,
+        "shares": 66100
       },
       "observations": [
         {
@@ -1246,6 +1326,16 @@
           "likes": 938500,
           "comments": 1888,
           "shares": 62500,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@fabiiicruzzz/video/7671851124969835806",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T20:54:28.769Z",
+          "views": 3100000,
+          "likes": 958800,
+          "comments": 1918,
+          "shares": 66100,
           "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@fabiiicruzzz/video/7671851124969835806",
           "exactness": "exact"
