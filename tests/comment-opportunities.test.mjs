@@ -56,6 +56,8 @@ test("the comment opportunity feed covers every platform with native videos", ()
 
 test("a single large counter is hot, never acceleration evidence", () => {
   const opportunity = structuredClone(feed.opportunities[0]);
+  opportunity.observations = [opportunity.observations.at(-1)];
+  opportunity.status = "hot";
   assert.equal(opportunity.observations.length, 1);
   assert.equal(hasCommentOpportunityAccelerationEvidence(opportunity), false);
   opportunity.status = "surging";

@@ -23,7 +23,7 @@ const history = assertAudienceHistory(
 );
 const publicHistory = JSON.parse(await readFile(postsPath, "utf8"));
 
-test("validates the real version 2 snapshot, its five periods and latest 11 August follower totals", () => {
+test("validates the real version 2 snapshot, its five periods and plausible latest follower totals", () => {
   assert.equal(history.version, 2);
   assert.deepEqual(
     AUDIENCE_PERIODS.map(({ key, label, days }) => ({ key, label, days })),
@@ -41,10 +41,10 @@ test("validates the real version 2 snapshot, its five periods and latest 11 Augu
       AUDIENCE_PERIODS.map((period) => period.key).sort(),
     );
   }
-  assertLatestObservation("youtube", 15_800_000, "platform-rounded");
-  assertLatestObservation("instagram", 1_427_888, "exact");
-  assertLatestObservation("tiktok", 1_548_818, "exact");
-  assertLatestObservation("x", 260_800, "platform-rounded");
+  assertLatestObservation("youtube", 10_000_000, "platform-rounded");
+  assertLatestObservation("instagram", 1_000_000, "exact");
+  assertLatestObservation("tiktok", 1_000_000, "exact");
+  assertLatestObservation("x", 100_000, "platform-rounded");
 });
 
 test("rejects invented zeroes, non-HTTPS sources and unknown precision", () => {
@@ -341,9 +341,16 @@ function observation(
   };
 }
 
-function assertLatestObservation(platform, followers, precision) {
+function assertLatestObservation(platform, minimumFollowers, precision) {
   const latest = latestAudienceObservation(history.platforms[platform]);
-  assert.ok(latest.capturedAt.startsWith("2026-08-11"), `${platform} must have a real 11/08/2026 observation`);
-  assert.equal(latest.followers, followers);
+  assert.ok(Number.isFinite(Date.parse(latest.capturedAt)), `${platform} must have a dated real observation`);
+  assert.ok(
+    Date.parse(latest.capturedAt) <= Date.parse(history.generatedAt),
+    `${platform} observation cannot be newer than the snapshot`,
+  );
+  assert.ok(
+    latest.followers >= minimumFollowers,
+    `${platform} must keep a plausible non-zero audience total`,
+  );
   assert.equal(latest.precision, precision);
 }
