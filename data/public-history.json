@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T08:14:13.721Z",
+  "generatedAt": "2026-08-12T12:28:52.115Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -51,9 +51,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5155,
+      "itemCount": 5172,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-10T15:04:03.000Z",
+      "newestPublishedAt": "2026-08-12T07:21:36.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -74,12 +74,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2086475371919139247",
-          "startedAt": "2026-08-11T08:14:11.814Z",
-          "completedAt": "2026-08-11T08:14:13.721Z",
-          "apiRowsRead": 13,
-          "rowsInCheckpoint": 5155,
-          "importedAt": "2026-08-11T08:14:13.721Z"
+          "sinceId": "2086830946481815957",
+          "startedAt": "2026-08-12T12:28:49.928Z",
+          "completedAt": "2026-08-12T12:28:52.115Z",
+          "apiRowsRead": 18,
+          "rowsInCheckpoint": 5172,
+          "importedAt": "2026-08-12T12:28:52.115Z"
         }
       }
     },
@@ -118,6 +118,746 @@
     }
   ],
   "posts": [
+    {
+      "platform": "x",
+      "externalId": "2087439340062302277",
+      "url": "https://x.com/lofigirl/status/2087439340062302277",
+      "title": "@LunaDeNuit_ best feeling 🤭",
+      "text": "@LunaDeNuit_ best feeling 🤭",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:21:36.000Z",
+      "views": 199,
+      "likes": 2,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 199,
+          "like_count": 2,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 199,
+            "likes": 2,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087438971827622314",
+      "url": "https://x.com/lofigirl/status/2087438971827622314",
+      "title": "@g4na_xo got to love it 🥰",
+      "text": "@g4na_xo got to love it 🥰",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:20:08.000Z",
+      "views": 257,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 257,
+          "like_count": 1,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 257,
+            "likes": 1,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087437999654965459",
+      "url": "https://x.com/lofigirl/status/2087437999654965459",
+      "title": "@femiiiszn in every situation, music always helps 🥰",
+      "text": "@femiiiszn in every situation, music always helps 🥰",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:16:16.000Z",
+      "views": 311,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 311,
+          "like_count": 1,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 311,
+            "likes": 1,
+            "comments": 0,
+            "shares": 0,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087437893719429163",
+      "url": "https://x.com/lofigirl/status/2087437893719429163",
+      "title": "@AuthorGFAllen you got me 😬",
+      "text": "@AuthorGFAllen you got me 😬",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:15:51.000Z",
+      "views": 237,
+      "likes": 1,
+      "comments": 0,
+      "shares": 1,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 237,
+          "like_count": 1,
+          "quote_count": 1,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 237,
+            "likes": 1,
+            "comments": 0,
+            "shares": 1,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087437595340952054",
+      "url": "https://x.com/lofigirl/status/2087437595340952054",
+      "title": "@shattered8487 fr 🙌",
+      "text": "@shattered8487 fr 🙌",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:14:40.000Z",
+      "views": 42,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 42,
+          "like_count": 0,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 42,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087437504186044731",
+      "url": "https://x.com/lofigirl/status/2087437504186044731",
+      "title": "@theslowworlds absolutley!",
+      "text": "@theslowworlds absolutley!",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-12T07:14:18.000Z",
+      "views": 42,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 42,
+          "like_count": 0,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 42,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087275666915913958",
+      "url": "https://x.com/lofigirl/status/2087275666915913958",
+      "title": "this explains A LOT of things!! https://t.co/VcB3bMeIbe",
+      "text": "this explains A LOT of things!! https://t.co/VcB3bMeIbe",
+      "format": "video",
+      "thumbnailUrl": "https://pbs.twimg.com/ext_tw_video_thumb/2087275515757416448/pu/img/53q_53s9KuoAz7MS.jpg",
+      "publishedAt": "2026-08-11T20:31:13.000Z",
+      "views": 6810,
+      "likes": 112,
+      "comments": 1,
+      "shares": 9,
+      "saves": 8,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 8,
+          "impression_count": 6810,
+          "like_count": 112,
+          "quote_count": 1,
+          "reply_count": 1,
+          "retweet_count": 8
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "7_2087275515757416448",
+            "type": "video",
+            "url": null,
+            "previewImageUrl": "https://pbs.twimg.com/ext_tw_video_thumb/2087275515757416448/pu/img/53q_53s9KuoAz7MS.jpg",
+            "width": 1080,
+            "height": 1920,
+            "durationMs": 10494,
+            "altText": null,
+            "publicMetrics": {
+              "view_count": 1860
+            }
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 6810,
+            "likes": 112,
+            "comments": 1,
+            "shares": 9,
+            "saves": 8,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087238556192239851",
+      "url": "https://x.com/lofigirl/status/2087238556192239851",
+      "title": "have you ever considered this perspective? (kidding, i'm just in severe denial 💀) https://t.co/8SHbuF6GJN",
+      "text": "have you ever considered this perspective?\n(kidding, i'm just in severe denial 💀) https://t.co/8SHbuF6GJN",
+      "format": "static",
+      "thumbnailUrl": "https://pbs.twimg.com/media/HPdcSeGWoAAI4ZI.jpg",
+      "publishedAt": "2026-08-11T18:03:45.000Z",
+      "views": 7230,
+      "likes": 47,
+      "comments": 2,
+      "shares": 2,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 7230,
+          "like_count": 47,
+          "quote_count": 0,
+          "reply_count": 2,
+          "retweet_count": 2
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "3_2087238424696627200",
+            "type": "photo",
+            "url": "https://pbs.twimg.com/media/HPdcSeGWoAAI4ZI.jpg",
+            "previewImageUrl": null,
+            "width": 1080,
+            "height": 1350,
+            "durationMs": null,
+            "altText": null,
+            "publicMetrics": null
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 7230,
+            "likes": 47,
+            "comments": 2,
+            "shares": 2,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087196273870787021",
+      "url": "https://x.com/lofigirl/status/2087196273870787021",
+      "title": "the sound of leaves in the wind is underrated",
+      "text": "the sound of leaves in the wind is underrated",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T15:15:44.000Z",
+      "views": 7857,
+      "likes": 38,
+      "comments": 2,
+      "shares": 7,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 7857,
+          "like_count": 38,
+          "quote_count": 0,
+          "reply_count": 2,
+          "retweet_count": 7
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 7857,
+            "likes": 38,
+            "comments": 2,
+            "shares": 7,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087123420731376090",
+      "url": "https://x.com/lofigirl/status/2087123420731376090",
+      "title": "@_tooflyszn this makes so much sense 😆",
+      "text": "@_tooflyszn this makes so much sense 😆",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:26:15.000Z",
+      "views": 1342,
+      "likes": 8,
+      "comments": 0,
+      "shares": 1,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 1342,
+          "like_count": 8,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 1
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 1342,
+            "likes": 8,
+            "comments": 0,
+            "shares": 1,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087121938049077652",
+      "url": "https://x.com/lofigirl/status/2087121938049077652",
+      "title": "@Lyracutevibes hmm depends on the time of year🤭",
+      "text": "@Lyracutevibes hmm depends on the time of year🤭",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:20:21.000Z",
+      "views": 376,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 376,
+          "like_count": 1,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 376,
+            "likes": 1,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087121826035994972",
+      "url": "https://x.com/lofigirl/status/2087121826035994972",
+      "title": "@marvel_updat3s it's been 5 years?!",
+      "text": "@marvel_updat3s it's been 5 years?!",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:19:54.000Z",
+      "views": 538,
+      "likes": 6,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 538,
+          "like_count": 6,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 538,
+            "likes": 6,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087121331208818960",
+      "url": "https://x.com/lofigirl/status/2087121331208818960",
+      "title": "@ThebookishC still hits tho 🤷‍♀️😆",
+      "text": "@ThebookishC still hits tho 🤷‍♀️😆",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:17:56.000Z",
+      "views": 420,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 420,
+          "like_count": 0,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 420,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087121224300212560",
+      "url": "https://x.com/lofigirl/status/2087121224300212560",
+      "title": "@DevinRN88 honestly 😅",
+      "text": "@DevinRN88 honestly 😅",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:17:31.000Z",
+      "views": 381,
+      "likes": 4,
+      "comments": 0,
+      "shares": 1,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 381,
+          "like_count": 4,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 1
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 381,
+            "likes": 4,
+            "comments": 0,
+            "shares": 1,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087121144088338875",
+      "url": "https://x.com/lofigirl/status/2087121144088338875",
+      "title": "@ysljennii happens to the best of us 😬",
+      "text": "@ysljennii happens to the best of us 😬",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:17:12.000Z",
+      "views": 552,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 552,
+          "like_count": 1,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 552,
+            "likes": 1,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087120740365578526",
+      "url": "https://x.com/lofigirl/status/2087120740365578526",
+      "title": "@kidnamedayo probably happens to me once a week😭",
+      "text": "@kidnamedayo probably happens to me once a week😭",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:15:35.000Z",
+      "views": 756,
+      "likes": 4,
+      "comments": 1,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:50.238Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 756,
+          "like_count": 4,
+          "quote_count": 0,
+          "reply_count": 1,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:50.238Z",
+            "views": 756,
+            "likes": 4,
+            "comments": 1,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2087120605397008432",
+      "url": "https://x.com/lofigirl/status/2087120605397008432",
+      "title": "@rioserenity_ music 🎶",
+      "text": "@rioserenity_ music 🎶",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-11T10:15:03.000Z",
+      "views": 376,
+      "likes": 3,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-12T12:28:50.238Z",
+        "lastObservedAt": "2026-08-12T12:28:52.115Z",
+        "publicMetrics": {
+          "bookmark_count": 0,
+          "impression_count": 376,
+          "like_count": 3,
+          "quote_count": 0,
+          "reply_count": 0,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-12T12:28:52.115Z",
+            "views": 376,
+            "likes": 3,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
     {
       "platform": "x",
       "externalId": "2086830946481815957",
