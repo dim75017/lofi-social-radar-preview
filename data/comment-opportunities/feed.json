@@ -1,36 +1,36 @@
 {
   "version": 1,
-  "capturedAt": "2026-08-12T06:18:54.593Z",
-  "nextRefreshAt": "2026-08-12T12:18:54.593Z",
+  "capturedAt": "2026-08-12T12:21:10.681Z",
+  "nextRefreshAt": "2026-08-12T18:21:10.681Z",
   "cadenceHours": 6,
   "sourceChecks": [
     {
       "id": "instagram-reels-public",
       "platform": "instagram",
-      "status": "limited",
-      "checkedAt": "2026-08-12T06:16:41.000Z",
-      "label": "Instagram · accès public limité ; dernier bon relevé conservé sans nouvelle observation"
+      "status": "success",
+      "checkedAt": "2026-08-12T12:21:10.681Z",
+      "label": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026"
     },
     {
       "id": "tiktok-native-public",
       "platform": "tiktok",
       "status": "success",
-      "checkedAt": "2026-08-12T06:18:54.593Z",
-      "label": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026"
+      "checkedAt": "2026-08-12T12:14:43.687Z",
+      "label": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026"
     },
     {
       "id": "youtube-shorts-public",
       "platform": "youtube",
       "status": "success",
-      "checkedAt": "2026-08-12T06:18:54.593Z",
+      "checkedAt": "2026-08-12T12:16:35.631Z",
       "label": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026"
     },
     {
       "id": "x-native-public",
       "platform": "x",
       "status": "success",
-      "checkedAt": "2026-08-12T06:18:54.593Z",
-      "label": "X · page publique et compteurs natifs vérifiés le 12/08/2026"
+      "checkedAt": "2026-08-12T12:19:46.819Z",
+      "label": "X · données structurées publiques natives vérifiées le 12/08/2026"
     }
   ],
   "opportunities": [
@@ -45,7 +45,7 @@
       "durationSeconds": null,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-21",
-      "capturedAt": "2026-08-12T00:17:30.000Z",
+      "capturedAt": "2026-08-12T12:21:03.524Z",
       "status": "surging",
       "lofiFitScore": 94,
       "commentabilityScore": 98,
@@ -58,7 +58,7 @@
       "metrics": {
         "views": null,
         "likes": 4000000,
-        "comments": 19400,
+        "comments": 20000,
         "shares": null
       },
       "observations": [
@@ -79,6 +79,16 @@
           "comments": 19400,
           "shares": null,
           "sourceLabel": "Instagram · métadonnées et compteurs publics vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reels/DbFC6Dvx_Nx/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:03.524Z",
+          "views": null,
+          "likes": 4000000,
+          "comments": 20000,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.instagram.com/reels/DbFC6Dvx_Nx/",
           "exactness": "platform-estimate"
         }
@@ -112,7 +122,7 @@
       "durationSeconds": 9.333332,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-02T22:48:28.000Z",
-      "capturedAt": "2026-08-12T00:17:30.000Z",
+      "capturedAt": "2026-08-12T12:21:05.102Z",
       "status": "surging",
       "lofiFitScore": 91,
       "commentabilityScore": 90,
@@ -125,7 +135,7 @@
       "metrics": {
         "views": null,
         "likes": 60000,
-        "comments": 87,
+        "comments": 89,
         "shares": null
       },
       "observations": [
@@ -146,6 +156,16 @@
           "comments": 87,
           "shares": null,
           "sourceLabel": "Instagram · métadonnées et compteurs publics vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reel/DbjhcHjOZ8U/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:05.102Z",
+          "views": null,
+          "likes": 60000,
+          "comments": 89,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.instagram.com/reel/DbjhcHjOZ8U/",
           "exactness": "platform-estimate"
         }
@@ -179,7 +199,7 @@
       "durationSeconds": 16.283332,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-31",
-      "capturedAt": "2026-08-10T12:00:00+02:00",
+      "capturedAt": "2026-08-12T12:21:06.406Z",
       "status": "watch",
       "lofiFitScore": 88,
       "commentabilityScore": 94,
@@ -190,10 +210,10 @@
         "note": "Nostalgie douce, sans sujet sensible."
       },
       "metrics": {
-        "views": 2000000,
-        "likes": 153800,
-        "comments": 442,
-        "shares": 14500
+        "views": null,
+        "likes": 136000,
+        "comments": 363,
+        "shares": null
       },
       "observations": [
         {
@@ -204,6 +224,16 @@
           "shares": 14500,
           "sourceLabel": "Instagram · compteurs publics du post et de la page audio",
           "sourceUrl": "https://www.instagram.com/reels/audio/2195704350892729/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:06.406Z",
+          "views": null,
+          "likes": 136000,
+          "comments": 363,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reel/DbdAJCaMCpZ/",
           "exactness": "platform-estimate"
         }
       ],
@@ -236,7 +266,7 @@
       "durationSeconds": 14.133333,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-24T07:11:53.000Z",
-      "capturedAt": "2026-08-12T00:17:30.000Z",
+      "capturedAt": "2026-08-12T12:21:07.966Z",
       "status": "surging",
       "lofiFitScore": 89,
       "commentabilityScore": 96,
@@ -249,7 +279,7 @@
       "metrics": {
         "views": null,
         "likes": 315000,
-        "comments": 2133,
+        "comments": 2135,
         "shares": null
       },
       "observations": [
@@ -270,6 +300,16 @@
           "comments": 2133,
           "shares": null,
           "sourceLabel": "Instagram · métadonnées et compteurs publics vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reel/DbKrHAtB3VI/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:07.966Z",
+          "views": null,
+          "likes": 315000,
+          "comments": 2135,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.instagram.com/reel/DbKrHAtB3VI/",
           "exactness": "platform-estimate"
         }
@@ -303,7 +343,7 @@
       "durationSeconds": 14.280946,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-11",
-      "capturedAt": "2026-08-12T00:17:30.000Z",
+      "capturedAt": "2026-08-12T12:21:09.218Z",
       "status": "surging",
       "lofiFitScore": 88,
       "commentabilityScore": 95,
@@ -316,7 +356,7 @@
       "metrics": {
         "views": null,
         "likes": 1000000,
-        "comments": 3523,
+        "comments": 3529,
         "shares": null
       },
       "observations": [
@@ -337,6 +377,16 @@
           "comments": 3523,
           "shares": null,
           "sourceLabel": "Instagram · métadonnées et compteurs publics vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reel/Dap4mlSxHJb/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:09.218Z",
+          "views": null,
+          "likes": 1000000,
+          "comments": 3529,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.instagram.com/reel/Dap4mlSxHJb/",
           "exactness": "platform-estimate"
         }
@@ -370,7 +420,7 @@
       "durationSeconds": 106.56,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-06T18:22:30Z",
-      "capturedAt": "2026-08-12T00:17:30.000Z",
+      "capturedAt": "2026-08-12T12:21:10.681Z",
       "status": "surging",
       "lofiFitScore": 88,
       "commentabilityScore": 92,
@@ -382,8 +432,8 @@
       },
       "metrics": {
         "views": null,
-        "likes": 572000,
-        "comments": 5282,
+        "likes": 639000,
+        "comments": 5904,
         "shares": null
       },
       "observations": [
@@ -404,6 +454,16 @@
           "comments": 5282,
           "shares": null,
           "sourceLabel": "Instagram · métadonnées et compteurs publics vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.instagram.com/reel/DbtWH6YxAXw/",
+          "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:21:10.681Z",
+          "views": null,
+          "likes": 639000,
+          "comments": 5904,
+          "shares": null,
+          "sourceLabel": "Instagram · métadonnées et compteurs publics natifs vérifiés le 12/08/2026",
           "sourceUrl": "https://www.instagram.com/reel/DbtWH6YxAXw/",
           "exactness": "platform-estimate"
         }
@@ -434,10 +494,10 @@
       "caption": "A rapid montage of all the tiny things that delayed a reply.",
       "url": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
       "mediaType": "video",
-      "durationSeconds": 15.183,
+      "durationSeconds": 15,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-08T12:00:46.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:38.426Z",
       "status": "surging",
       "lofiFitScore": 95,
       "commentabilityScore": 99,
@@ -448,10 +508,10 @@
         "note": "Humour quotidien, sans attaque envers le créateur."
       },
       "metrics": {
-        "views": 367800,
-        "likes": 75600,
-        "comments": 491,
-        "shares": 2031
+        "views": 373400,
+        "likes": 76500,
+        "comments": 494,
+        "shares": 2083
       },
       "observations": [
         {
@@ -483,6 +543,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:38.426Z",
+          "views": 373400,
+          "likes": 76500,
+          "comments": 494,
+          "shares": 2083,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@nemzzz_/video/7671629552791112963",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -514,7 +584,7 @@
       "durationSeconds": 18,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-06T14:39:13.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:39.108Z",
       "status": "surging",
       "lofiFitScore": 98,
       "commentabilityScore": 93,
@@ -526,9 +596,9 @@
       },
       "metrics": {
         "views": 1600000,
-        "likes": 340300,
-        "comments": 2586,
-        "shares": 104200
+        "likes": 341100,
+        "comments": 2601,
+        "shares": 104400
       },
       "observations": [
         {
@@ -560,6 +630,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@limemation0/video/7670928215589817622",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:39.108Z",
+          "views": 1600000,
+          "likes": 341100,
+          "comments": 2601,
+          "shares": 104400,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@limemation0/video/7670928215589817622",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -588,10 +668,10 @@
       "caption": "#fyp #eurosummer",
       "url": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
       "mediaType": "video",
-      "durationSeconds": 12.466,
+      "durationSeconds": 12,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-05T09:01:45.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:39.780Z",
       "status": "surging",
       "lofiFitScore": 90,
       "commentabilityScore": 84,
@@ -602,10 +682,10 @@
         "note": "Réaction positive et contextuelle."
       },
       "metrics": {
-        "views": 5200000,
+        "views": 5300000,
         "likes": 1000000,
-        "comments": 2075,
-        "shares": 326800
+        "comments": 2100,
+        "shares": 328600
       },
       "observations": [
         {
@@ -637,6 +717,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:39.780Z",
+          "views": 5300000,
+          "likes": 1000000,
+          "comments": 2100,
+          "shares": 328600,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@elishaswong/video/7670470162360945938",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -665,10 +755,10 @@
       "caption": "was a good night at least minus me face planting the floor #fyp #party #nightout #eventful #drunktok",
       "url": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
       "mediaType": "video",
-      "durationSeconds": 12.559,
+      "durationSeconds": 12,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-04T21:02:50.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:40.418Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 98,
@@ -679,10 +769,10 @@
         "note": "Éviter toute blague sur l’alcool ou une éventuelle blessure."
       },
       "metrics": {
-        "views": 19900000,
+        "views": 20000000,
         "likes": 2900000,
-        "comments": 6701,
-        "shares": 932800
+        "comments": 6723,
+        "shares": 934800
       },
       "observations": [
         {
@@ -714,6 +804,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:40.418Z",
+          "views": 20000000,
+          "likes": 2900000,
+          "comments": 6723,
+          "shares": 934800,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@jazz13570/video/7670284900745973014",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -742,10 +842,10 @@
       "caption": "namanya minnie dia kucing liar datang sendiri kerumah…",
       "url": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
       "mediaType": "video",
-      "durationSeconds": 20.27,
+      "durationSeconds": 20,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-31T16:56:52.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:41.111Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 93,
@@ -756,10 +856,10 @@
         "note": "Confirmer l’histoire complète et l’état de l’animal avant publication."
       },
       "metrics": {
-        "views": 9100000,
+        "views": 9200000,
         "likes": 1700000,
-        "comments": 20700,
-        "shares": 130500
+        "comments": 20900,
+        "shares": 132500
       },
       "observations": [
         {
@@ -791,6 +891,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:41.111Z",
+          "views": 9200000,
+          "likes": 1700000,
+          "comments": 20900,
+          "shares": 132500,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@aikibem/video/7668737173033651477",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -822,7 +932,7 @@
       "durationSeconds": 20,
       "thumbnailUrl": null,
       "publishedAt": "2026-07-31T14:01:00.000Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:41.748Z",
       "status": "surging",
       "lofiFitScore": 99,
       "commentabilityScore": 89,
@@ -833,10 +943,10 @@
         "note": "Commentaire positif sur le setup, sans comparaison négative."
       },
       "metrics": {
-        "views": 3400000,
-        "likes": 302700,
-        "comments": 4123,
-        "shares": 10300
+        "views": 3500000,
+        "likes": 304300,
+        "comments": 4157,
+        "shares": 10400
       },
       "observations": [
         {
@@ -868,6 +978,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@cantu.setup/video/7668692002451574048",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:41.748Z",
+          "views": 3500000,
+          "likes": 304300,
+          "comments": 4157,
+          "shares": 10400,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@cantu.setup/video/7668692002451574048",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -896,10 +1016,10 @@
       "caption": "Une tour fantasy construite à la main, parfaite comme reading nook extrême.",
       "url": "https://www.tiktok.com/@fastex3_/video/7672028037147397397",
       "mediaType": "video",
-      "durationSeconds": 16.11,
+      "durationSeconds": 15,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T13:47:06Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:42.348Z",
       "status": "surging",
       "lofiFitScore": 96,
       "commentabilityScore": 98,
@@ -910,10 +1030,10 @@
         "note": "Réaction positive au travail créatif du grand-père."
       },
       "metrics": {
-        "views": 3000000,
-        "likes": 765700,
-        "comments": 1872,
-        "shares": 101500
+        "views": 3100000,
+        "likes": 802300,
+        "comments": 1973,
+        "shares": 105200
       },
       "observations": [
         {
@@ -945,6 +1065,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@fastex3_/video/7672028037147397397",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:42.348Z",
+          "views": 3100000,
+          "likes": 802300,
+          "comments": 1973,
+          "shares": 105200,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@fastex3_/video/7672028037147397397",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -973,10 +1103,10 @@
       "caption": "Une soirée londonienne calme, un livre ouvert et une bougie.",
       "url": "https://www.tiktok.com/@isabellejadefox/video/7672123441377463574",
       "mediaType": "video",
-      "durationSeconds": 16.53,
+      "durationSeconds": 16,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T19:57:19Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:42.990Z",
       "status": "surging",
       "lofiFitScore": 100,
       "commentabilityScore": 95,
@@ -987,10 +1117,10 @@
         "note": "Moment cozy sans sujet sensible."
       },
       "metrics": {
-        "views": 301400,
-        "likes": 87900,
-        "comments": 130,
-        "shares": 5579
+        "views": 322200,
+        "likes": 94600,
+        "comments": 136,
+        "shares": 6030
       },
       "observations": [
         {
@@ -1022,6 +1152,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@isabellejadefox/video/7672123441377463574",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:42.990Z",
+          "views": 322200,
+          "likes": 94600,
+          "comments": 136,
+          "shares": 6030,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@isabellejadefox/video/7672123441377463574",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1050,10 +1190,10 @@
       "caption": "Console vinyle et attente d’un nouvel album de Frank Ocean.",
       "url": "https://www.tiktok.com/@fabiiicruzzz/video/7671851124969835806",
       "mediaType": "video",
-      "durationSeconds": 79.76,
+      "durationSeconds": 79,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09T02:20:35Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:14:43.687Z",
       "status": "surging",
       "lofiFitScore": 91,
       "commentabilityScore": 94,
@@ -1064,10 +1204,10 @@
         "note": "Ne faire aucune affirmation sur une date de sortie."
       },
       "metrics": {
-        "views": 2900000,
-        "likes": 923100,
-        "comments": 1864,
-        "shares": 60800
+        "views": 3000000,
+        "likes": 938500,
+        "comments": 1888,
+        "shares": 62500
       },
       "observations": [
         {
@@ -1099,6 +1239,16 @@
           "sourceLabel": "TikTok · itemStruct et compteurs publics vérifiés le 12/08/2026",
           "sourceUrl": "https://www.tiktok.com/@fabiiicruzzz/video/7671851124969835806",
           "exactness": "platform-estimate"
+        },
+        {
+          "capturedAt": "2026-08-12T12:14:43.687Z",
+          "views": 3000000,
+          "likes": 938500,
+          "comments": 1888,
+          "shares": 62500,
+          "sourceLabel": "TikTok · itemStruct et compteurs publics natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.tiktok.com/@fabiiicruzzz/video/7671851124969835806",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1127,10 +1277,10 @@
       "caption": "#pov : Ton surnoms sur leurs téléphone... 🤣😱",
       "url": "https://www.youtube.com/shorts/sTnPryZ5tXQ",
       "mediaType": "video",
-      "durationSeconds": 60,
+      "durationSeconds": 59,
       "thumbnailUrl": "https://i.ytimg.com/vi/sTnPryZ5tXQ/hqdefault.jpg",
       "publishedAt": "2026-08-08T18:06:15Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:16:27.102Z",
       "status": "surging",
       "lofiFitScore": 93,
       "commentabilityScore": 98,
@@ -1141,9 +1291,9 @@
         "note": "Humour relationnel léger, sans viser une personne réelle."
       },
       "metrics": {
-        "views": 493521,
-        "likes": 17527,
-        "comments": 66,
+        "views": 516966,
+        "likes": 19189,
+        "comments": 69,
         "shares": null
       },
       "observations": [
@@ -1172,6 +1322,16 @@
           "views": 493521,
           "likes": 17527,
           "comments": 66,
+          "shares": null,
+          "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.youtube.com/shorts/sTnPryZ5tXQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:16:27.102Z",
+          "views": 516966,
+          "likes": 19189,
+          "comments": 69,
           "shares": null,
           "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
           "sourceUrl": "https://www.youtube.com/shorts/sTnPryZ5tXQ",
@@ -1207,7 +1367,7 @@
       "durationSeconds": 57,
       "thumbnailUrl": "https://i.ytimg.com/vi/Zavyy8jfSNE/hqdefault.jpg",
       "publishedAt": "2026-08-10T19:34:20Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:16:30.090Z",
       "status": "surging",
       "lofiFitScore": 85,
       "commentabilityScore": 94,
@@ -1218,8 +1378,8 @@
         "note": "Rester sur le trope de fiction et ne pas attaquer le personnage."
       },
       "metrics": {
-        "views": 211251,
-        "likes": 8034,
+        "views": 220756,
+        "likes": 8728,
         "comments": 29,
         "shares": null
       },
@@ -1248,6 +1408,16 @@
           "capturedAt": "2026-08-12T06:18:54.593Z",
           "views": 211251,
           "likes": 8034,
+          "comments": 29,
+          "shares": null,
+          "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.youtube.com/shorts/Zavyy8jfSNE",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:16:30.090Z",
+          "views": 220756,
+          "likes": 8728,
           "comments": 29,
           "shares": null,
           "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
@@ -1284,7 +1454,7 @@
       "durationSeconds": 9,
       "thumbnailUrl": "https://i.ytimg.com/vi/-3pnE1vdifw/hqdefault.jpg",
       "publishedAt": "2026-08-08T12:00:13Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:16:32.666Z",
       "status": "surging",
       "lofiFitScore": 100,
       "commentabilityScore": 96,
@@ -1295,7 +1465,7 @@
         "note": "Angle études et nourriture sans risque éditorial particulier."
       },
       "metrics": {
-        "views": 33307,
+        "views": 33312,
         "likes": 360,
         "comments": 13,
         "shares": null
@@ -1330,6 +1500,16 @@
           "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
           "sourceUrl": "https://www.youtube.com/shorts/-3pnE1vdifw",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:16:32.666Z",
+          "views": 33312,
+          "likes": 360,
+          "comments": 13,
+          "shares": null,
+          "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.youtube.com/shorts/-3pnE1vdifw",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1358,10 +1538,10 @@
       "caption": "so good! 😍 #studytok #studying #freenotes #hacks #ipad",
       "url": "https://www.youtube.com/shorts/UgOCgzFgYkg",
       "mediaType": "video",
-      "durationSeconds": 8,
+      "durationSeconds": 7,
       "thumbnailUrl": "https://i.ytimg.com/vi/UgOCgzFgYkg/hqdefault.jpg",
       "publishedAt": "2026-08-09T08:38:09Z",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:16:35.631Z",
       "status": "surging",
       "lofiFitScore": 98,
       "commentabilityScore": 92,
@@ -1372,8 +1552,8 @@
         "note": "Réaction positive sur le geste et non sur un produit précis."
       },
       "metrics": {
-        "views": 36377,
-        "likes": 500,
+        "views": 36425,
+        "likes": 501,
         "comments": 20,
         "shares": null
       },
@@ -1402,6 +1582,16 @@
           "capturedAt": "2026-08-12T06:18:54.593Z",
           "views": 36377,
           "likes": 500,
+          "comments": 20,
+          "shares": null,
+          "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
+          "sourceUrl": "https://www.youtube.com/shorts/UgOCgzFgYkg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:16:35.631Z",
+          "views": 36425,
+          "likes": 501,
           "comments": 20,
           "shares": null,
           "sourceLabel": "YouTube Shorts · player et compteurs publics exacts vérifiés le 12/08/2026",
@@ -1438,7 +1628,7 @@
       "durationSeconds": 15,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-10",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:19:41.720Z",
       "status": "surging",
       "lofiFitScore": 97,
       "commentabilityScore": 94,
@@ -1449,10 +1639,10 @@
         "note": "Rester empathique et ne pas minimiser une possible détresse réelle."
       },
       "metrics": {
-        "views": 1059997,
-        "likes": 106639,
-        "comments": 91,
-        "shares": 32186
+        "views": 1104734,
+        "likes": 111073,
+        "comments": 96,
+        "shares": 32999
       },
       "observations": [
         {
@@ -1482,6 +1672,16 @@
           "comments": 91,
           "shares": 32186,
           "sourceLabel": "X · page publique et compteurs natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://x.com/iJosephX2/status/2086833506315874441",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:19:41.720Z",
+          "views": 1104734,
+          "likes": 111073,
+          "comments": 96,
+          "shares": 32999,
+          "sourceLabel": "X · données structurées publiques natives vérifiées le 12/08/2026",
           "sourceUrl": "https://x.com/iJosephX2/status/2086833506315874441",
           "exactness": "exact"
         }
@@ -1515,7 +1715,7 @@
       "durationSeconds": 13,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-08",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:19:43.007Z",
       "status": "surging",
       "lofiFitScore": 99,
       "commentabilityScore": 99,
@@ -1526,10 +1726,10 @@
         "note": "Ne pas encourager la privation de sommeil ni valoriser l’ivresse."
       },
       "metrics": {
-        "views": 1373855,
+        "views": 1374727,
         "likes": 165147,
         "comments": 166,
-        "shares": 27767
+        "shares": 27110
       },
       "observations": [
         {
@@ -1559,6 +1759,16 @@
           "comments": 166,
           "shares": 27767,
           "sourceLabel": "X · page publique et compteurs natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://x.com/zzmaryy_/status/2085888296320712709",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:19:43.007Z",
+          "views": 1374727,
+          "likes": 165147,
+          "comments": 166,
+          "shares": 27110,
+          "sourceLabel": "X · données structurées publiques natives vérifiées le 12/08/2026",
           "sourceUrl": "https://x.com/zzmaryy_/status/2085888296320712709",
           "exactness": "exact"
         }
@@ -1592,7 +1802,7 @@
       "durationSeconds": 6,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-08",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:19:44.327Z",
       "status": "surging",
       "lofiFitScore": 100,
       "commentabilityScore": 100,
@@ -1603,10 +1813,10 @@
         "note": "Auto-dérision universelle, sans cibler une personne."
       },
       "metrics": {
-        "views": 677651,
-        "likes": 62446,
+        "views": 680775,
+        "likes": 62452,
         "comments": 73,
-        "shares": 20085
+        "shares": 19796
       },
       "observations": [
         {
@@ -1636,6 +1846,16 @@
           "comments": 73,
           "shares": 20085,
           "sourceLabel": "X · page publique et compteurs natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://x.com/mikasagrada/status/2086155480905416708",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:19:44.327Z",
+          "views": 680775,
+          "likes": 62452,
+          "comments": 73,
+          "shares": 19796,
+          "sourceLabel": "X · données structurées publiques natives vérifiées le 12/08/2026",
           "sourceUrl": "https://x.com/mikasagrada/status/2086155480905416708",
           "exactness": "exact"
         }
@@ -1669,7 +1889,7 @@
       "durationSeconds": 29,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-09",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:19:45.581Z",
       "status": "surging",
       "lofiFitScore": 95,
       "commentabilityScore": 99,
@@ -1680,10 +1900,10 @@
         "note": "Garder l’auto-dérision et éviter tout jugement financier."
       },
       "metrics": {
-        "views": 2201564,
-        "likes": 270507,
-        "comments": 168,
-        "shares": 50517
+        "views": 2221282,
+        "likes": 270781,
+        "comments": 169,
+        "shares": 49437
       },
       "observations": [
         {
@@ -1713,6 +1933,16 @@
           "comments": 168,
           "shares": 50517,
           "sourceLabel": "X · page publique et compteurs natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://x.com/yerayherr/status/2086486210038399450",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:19:45.581Z",
+          "views": 2221282,
+          "likes": 270781,
+          "comments": 169,
+          "shares": 49437,
+          "sourceLabel": "X · données structurées publiques natives vérifiées le 12/08/2026",
           "sourceUrl": "https://x.com/yerayherr/status/2086486210038399450",
           "exactness": "exact"
         }
@@ -1746,7 +1976,7 @@
       "durationSeconds": 21,
       "thumbnailUrl": null,
       "publishedAt": "2026-08-08",
-      "capturedAt": "2026-08-12T06:18:54.593Z",
+      "capturedAt": "2026-08-12T12:19:46.819Z",
       "status": "surging",
       "lofiFitScore": 98,
       "commentabilityScore": 99,
@@ -1757,10 +1987,10 @@
         "note": "Humour sur soi, sans encourager le harcèlement ou l’évitement."
       },
       "metrics": {
-        "views": 1346402,
-        "likes": 150552,
+        "views": 1347872,
+        "likes": 150550,
         "comments": 163,
-        "shares": 32032
+        "shares": 31590
       },
       "observations": [
         {
@@ -1790,6 +2020,16 @@
           "comments": 163,
           "shares": 32032,
           "sourceLabel": "X · page publique et compteurs natifs vérifiés le 12/08/2026",
+          "sourceUrl": "https://x.com/mikasagrada/status/2085903822912720912",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-12T12:19:46.819Z",
+          "views": 1347872,
+          "likes": 150550,
+          "comments": 163,
+          "shares": 31590,
+          "sourceLabel": "X · données structurées publiques natives vérifiées le 12/08/2026",
           "sourceUrl": "https://x.com/mikasagrada/status/2085903822912720912",
           "exactness": "exact"
         }

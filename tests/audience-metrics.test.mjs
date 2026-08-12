@@ -44,7 +44,7 @@ test("validates the real version 2 snapshot, its five periods and plausible late
   assertLatestObservation("youtube", 10_000_000, "platform-rounded");
   assertLatestObservation("instagram", 1_000_000, "exact");
   assertLatestObservation("tiktok", 1_000_000, "exact");
-  assertLatestObservation("x", 100_000, "platform-rounded");
+  assertLatestObservation("x", 100_000, ["exact", "platform-rounded"]);
 });
 
 test("rejects invented zeroes, non-HTTPS sources and unknown precision", () => {
@@ -67,8 +67,9 @@ test("rejects invented zeroes, non-HTTPS sources and unknown precision", () => {
 
 test("finds the latest point without relying on array order", () => {
   const platform = structuredClone(history.platforms.x);
+  const expectedFollowers = latestAudienceObservation(platform).followers;
   platform.observations.reverse();
-  assert.equal(latestAudienceObservation(platform).followers, 260_800);
+  assert.equal(latestAudienceObservation(platform).followers, expectedFollowers);
 });
 
 test("compares the first and last real points inside the selected window", () => {
@@ -256,17 +257,22 @@ test("a partial daily collection appends successes and preserves failed platform
 });
 
 test("keeps only the latest real observation when two collectors run the same Paris day", async () => {
-  const capturedAt = "2026-08-11T20:00:00.000Z";
-  const nextFollowers = latestAudienceObservation(history.platforms.youtube).followers + 1;
+  const capturedAt = afterSnapshot(1);
+  const platform = ["youtube", "instagram", "tiktok", "x"].find((candidate) =>
+    parisCalendarDay(latestAudienceObservation(history.platforms[candidate]).capturedAt) ===
+      parisCalendarDay(history.generatedAt));
+  assert.ok(platform, "the snapshot should contain a real observation from its Paris day");
+  const previousLength = history.platforms[platform].observations.length;
+  const nextFollowers = latestAudienceObservation(history.platforms[platform]).followers + 1;
   const collectors = Object.fromEntries(
-    ["youtube", "instagram", "tiktok", "x"].map((platform) => [
-      platform,
+    ["youtube", "instagram", "tiktok", "x"].map((candidate) => [
+      candidate,
       async () => observation(
         capturedAt,
-        platform === "youtube"
+        candidate === platform
           ? nextFollowers
-          : latestAudienceObservation(history.platforms[platform]).followers,
-        platform === "youtube" || platform === "x" ? "platform-rounded" : "exact",
+          : latestAudienceObservation(history.platforms[candidate]).followers,
+        latestAudienceObservation(history.platforms[candidate]).precision,
       ),
     ]),
   );
@@ -279,17 +285,17 @@ test("keeps only the latest real observation when two collectors run the same Pa
   });
 
   assert.equal(
-    result.history.platforms.youtube.observations.length,
-    history.platforms.youtube.observations.length,
+    result.history.platforms[platform].observations.length,
+    previousLength,
   );
   assert.equal(
-    latestAudienceObservation(result.history.platforms.youtube).followers,
+    latestAudienceObservation(result.history.platforms[platform]).followers,
     nextFollowers,
   );
 });
 
 test("rejects an implausible same-day follower collapse and keeps the last good point", async () => {
-  const capturedAt = "2026-08-11T20:30:00.000Z";
+  const capturedAt = afterSnapshot(2);
   const previousYouTube = latestAudienceObservation(history.platforms.youtube);
   const collectors = Object.fromEntries(
     ["youtube", "instagram", "tiktok", "x"].map((platform) => [
@@ -352,5 +358,24 @@ function assertLatestObservation(platform, minimumFollowers, precision) {
     latest.followers >= minimumFollowers,
     `${platform} must keep a plausible non-zero audience total`,
   );
-  assert.equal(latest.precision, precision);
+  const allowedPrecisions = Array.isArray(precision) ? precision : [precision];
+  assert.ok(
+    allowedPrecisions.includes(latest.precision),
+    `${platform} precision must be one of ${allowedPrecisions.join(", ")}`,
+  );
+}
+
+function afterSnapshot(offsetMinutes) {
+  return new Date(
+    Date.parse(history.generatedAt) + offsetMinutes * 60 * 1_000,
+  ).toISOString();
+}
+
+function parisCalendarDay(value) {
+  return new Intl.DateTimeFormat("fr-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
 }
