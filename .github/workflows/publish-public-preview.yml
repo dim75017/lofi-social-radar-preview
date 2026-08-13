@@ -5,6 +5,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      # The comment radar patches these two files on gh-pages itself, dozens of
+      # times a day. Rebuilding the whole site for a snapshot the dashboard
+      # already re-reads at runtime would cost far more than the scan does.
+      - "data/comment-opportunities/feed.json"
+      - "data/comment-opportunities/refresh-status.json"
 
 permissions:
   contents: write

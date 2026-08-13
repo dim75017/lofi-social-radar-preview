@@ -536,8 +536,15 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(commentOpportunityModel, /hasCommentOpportunityAccelerationEvidence/);
   assert.match(commentOpportunityModel, /comments\.length !== 3/);
   assert.match(commentOpportunityModel, /tones\.size !== VALID_TONES\.size/);
+  // The board is a decision surface, so the two things a CM reads before
+  // copying anything have to survive a refactor: how long the window stays
+  // open, and whether the proposals were written or are placeholders.
+  assert.match(commentOpportunities, /commentOpportunityGoldenWindow/);
+  assert.match(commentOpportunities, /commentsSource === "fallback"/);
+  assert.match(commentOpportunities, /drops en cours/);
   const commentSnapshot = JSON.parse(commentOpportunityFeed);
-  assert.equal(commentSnapshot.version, 1);
+  assert.equal(commentSnapshot.version, 2);
+  assert.ok(commentSnapshot.watchlistAccountCount > 0);
   assert.ok(commentSnapshot.opportunities.length >= 20);
   assert.deepEqual(
     [...new Set(commentSnapshot.opportunities.map((item) => item.platform))].sort(),

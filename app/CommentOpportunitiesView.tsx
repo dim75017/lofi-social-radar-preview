@@ -5,20 +5,30 @@
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  commentOpportunityGoldenWindow,
   commentOpportunityRankScore,
+  COMMENT_OPPORTUNITY_CATEGORY_LABELS,
+  COMMENT_OPPORTUNITY_MOMENT_TIER_LABELS,
   rankCommentOpportunities,
   type CommentOpportunity,
+  type CommentOpportunityCategory,
   type CommentOpportunityFeed,
-  type CommentOpportunityTone,
+  type CommentOpportunityGoldenWindow,
+  type CommentOpportunityMomentTier,
   type CommentOpportunityPlatform,
+  type CommentOpportunityTone,
 } from "../lib/comment-opportunities";
 
 type PlatformFilter = CommentOpportunityPlatform | "all";
-type OpportunitySort = "priority" | "recent";
+type TierFilter = CommentOpportunityMomentTier | "all";
+type CategoryFilter = CommentOpportunityCategory | "all";
+type OpportunitySort = "urgency" | "priority" | "recent";
 type QueueFilter = "pending" | "done" | "skipped";
 type QueueState = Exclude<QueueFilter, "pending">;
 
 const COMMENT_QUEUE_STORAGE_KEY = "lofi-social-radar:comment-opportunity-statuses:v1";
+/** The countdown has to move on its own, or nobody trusts it. */
+const CLOCK_TICK_MS = 30_000;
 
 const PLATFORM_OPTIONS: Array<{
   key: PlatformFilter;
@@ -30,6 +40,13 @@ const PLATFORM_OPTIONS: Array<{
   { key: "instagram", label: "Instagram", logo: "platforms/instagram.svg" },
   { key: "tiktok", label: "TikTok", logo: "platforms/tiktok.svg" },
   { key: "x", label: "X", logo: "platforms/x.svg" },
+];
+
+const TIER_OPTIONS: Array<{ key: TierFilter; label: string }> = [
+  { key: "all", label: "Tous les paliers" },
+  { key: "s", label: "Moments majeurs" },
+  { key: "a", label: "Gros buzz" },
+  { key: "b", label: "Veille" },
 ];
 
 const TONE_META: Record<CommentOpportunityTone, { label: string; marker: string }> = {
@@ -44,6 +61,12 @@ const STATUS_META: Record<CommentOpportunity["status"], { label: string; classNa
   watch: { label: "À surveiller", className: "watch" },
 };
 
+const VELOCITY_METRIC_LABELS: Record<"views" | "likes" | "comments", string> = {
+  views: "vues",
+  likes: "likes",
+  comments: "comm.",
+};
+
 export function CommentOpportunitiesView({
   feed,
   loading,
@@ -54,10 +77,20 @@ export function CommentOpportunitiesView({
   error: string;
 }) {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
-  const [sort, setSort] = useState<OpportunitySort>("priority");
+  const [tierFilter, setTierFilter] = useState<TierFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [sort, setSort] = useState<OpportunitySort>("urgency");
   const [queueFilter, setQueueFilter] = useState<QueueFilter>("pending");
   const [queueStates, setQueueStates] = useState<Record<string, QueueState>>({});
   const [queueReady, setQueueReady] = useState(false);
+  const [nowIso, setNowIso] = useState(() => feed?.capturedAt ?? new Date().toISOString());
+
+  useEffect(() => {
+    const syncClock = () => setNowIso(new Date().toISOString());
+    syncClock();
+    const ticker = window.setInterval(syncClock, CLOCK_TICK_MS);
+    return () => window.clearInterval(ticker);
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -92,6 +125,34 @@ export function CommentOpportunitiesView({
     () => rankCommentOpportunities(feed?.opportunities ?? [], feed?.capturedAt),
     [feed?.capturedAt, feed?.opportunities],
   );
+
+  const windows = useMemo(() => {
+    const map = new Map<string, CommentOpportunityGoldenWindow>();
+    for (const opportunity of ranked) {
+      map.set(opportunity.id, commentOpportunityGoldenWindow(opportunity, nowIso));
+    }
+    return map;
+  }, [nowIso, ranked]);
+
+  const availableCategories = useMemo(() => {
+    const present = new Set<CommentOpportunityCategory>();
+    for (const opportunity of ranked) present.add(opportunity.category);
+    return (Object.keys(COMMENT_OPPORTUNITY_CATEGORY_LABELS) as CommentOpportunityCategory[])
+      .filter((category) => present.has(category));
+  }, [ranked]);
+
+  /** The radar line: what is big and still open, right now. */
+  const liveDrops = useMemo(
+    () =>
+      ranked.filter((opportunity) => {
+        const window = windows.get(opportunity.id);
+        return !(opportunity.id in queueStates) &&
+          opportunity.momentTier !== "b" &&
+          (window?.state === "open" || window?.state === "closing");
+      }),
+    [queueStates, ranked, windows],
+  );
+
   const counts = useMemo(() => {
     const result = { pending: 0, done: 0, skipped: 0 };
     for (const opportunity of ranked) {
@@ -100,16 +161,40 @@ export function CommentOpportunitiesView({
     }
     return result;
   }, [queueStates, ranked]);
+
   const visibleOpportunities = useMemo(() => {
     const filtered = ranked.filter((opportunity) => {
       const state = queueStates[opportunity.id] ?? "pending";
-      return (platformFilter === "all" || opportunity.platform === platformFilter) && state === queueFilter;
+      return (platformFilter === "all" || opportunity.platform === platformFilter) &&
+        (tierFilter === "all" || opportunity.momentTier === tierFilter) &&
+        (categoryFilter === "all" || opportunity.category === categoryFilter) &&
+        state === queueFilter;
     });
     if (sort === "recent") {
-      return filtered.toSorted((a, b) => timestamp(b.publishedAt) - timestamp(a.publishedAt));
+      return filtered.toSorted((left, right) => timestamp(right.publishedAt) - timestamp(left.publishedAt));
+    }
+    if (sort === "urgency") {
+      // Still-open windows first, then the heaviest moment, then the least time
+      // left. Weighing the window before the tier would put a minor post that
+      // closes in ten minutes above a major drop that is still wide open.
+      return filtered.toSorted((left, right) => {
+        const leftWindow = windows.get(left.id);
+        const rightWindow = windows.get(right.id);
+        const openGap = windowGroup(leftWindow) - windowGroup(rightWindow);
+        if (openGap !== 0) return openGap;
+        const tierGap = TIER_URGENCY[left.momentTier] - TIER_URGENCY[right.momentTier];
+        if (tierGap !== 0) return tierGap;
+        const leftLeft = leftWindow?.remainingMinutes ?? Number.MAX_SAFE_INTEGER;
+        const rightLeft = rightWindow?.remainingMinutes ?? Number.MAX_SAFE_INTEGER;
+        if (leftLeft !== rightLeft) return leftLeft - rightLeft;
+        return (
+          commentOpportunityRankScore(right, feed?.capturedAt ?? right.capturedAt) -
+          commentOpportunityRankScore(left, feed?.capturedAt ?? left.capturedAt)
+        );
+      });
     }
     return filtered;
-  }, [platformFilter, queueFilter, queueStates, ranked, sort]);
+  }, [categoryFilter, feed?.capturedAt, platformFilter, queueFilter, queueStates, ranked, sort, tierFilter, windows]);
 
   const updateQueue = (id: string, state: QueueState | "pending") => {
     setQueueStates((current) => {
@@ -124,21 +209,51 @@ export function CommentOpportunitiesView({
 
   const refreshLabel = feed ? formatRefreshDate(feed.capturedAt) : null;
   const coveredPlatforms = feed?.sourceChecks.filter((item) => item.status !== "failed").length ?? 0;
+  const fastLaneLabel = feed?.fastLaneCheckedAt
+    ? formatElapsed(feed.fastLaneCheckedAt, nowIso)
+    : null;
 
   return (
     <div className="comment-opportunities-view">
       <header className="comment-feed-heading">
         <div>
-          <span className="section-kicker">Veille virale · toutes les 6 heures</span>
+          <span className="section-kicker">
+            Veille drops · watchlist toutes les {feed?.fastLaneMinutes ?? 15} min · veille large toutes les {feed?.cadenceHours ?? 6} h
+          </span>
           <h2>Commentaires à poster maintenant</h2>
-          <p>Une vidéo qui prend, trois réactions Lofi Girl prêtes à copier. Rien n’est publié automatiquement.</p>
+          <p>
+            Les contenus qui viennent de tomber, classés par temps qu’il reste pour être vu. Trois réactions
+            Lofi Girl prêtes à copier. Rien n’est publié automatiquement.
+          </p>
         </div>
         {feed && refreshLabel ? (
           <span className="comment-snapshot-pill">
             {refreshLabel} · {feed.opportunities.length} vidéos · {coveredPlatforms}/4 réseaux
+            {feed.watchlistAccountCount > 0 ? ` · ${feed.watchlistAccountCount} comptes suivis` : ""}
+            {fastLaneLabel ? ` · voie rapide ${fastLaneLabel}` : ""}
           </span>
         ) : null}
       </header>
+
+      {liveDrops.length > 0 ? (
+        <section className="comment-drops-strip" aria-label="Drops en cours">
+          <div className="comment-drops-head">
+            <span className="comment-drops-title">
+              <span aria-hidden="true">◉</span> {liveDrops.length} {liveDrops.length > 1 ? "drops en cours" : "drop en cours"}
+            </span>
+            <span className="comment-drops-hint">Fenêtre encore ouverte pour être lu en haut de section</span>
+          </div>
+          <div className="comment-drops-rail">
+            {liveDrops.slice(0, 6).map((opportunity) => (
+              <DropChip
+                opportunity={opportunity}
+                window={windows.get(opportunity.id)}
+                key={opportunity.id}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="comment-feed-toolbar">
         <div className="comment-platform-tabs" role="group" aria-label="Filtrer les commentaires par plateforme">
@@ -156,9 +271,42 @@ export function CommentOpportunitiesView({
           ))}
         </div>
         <div className="comment-sort-tabs" role="group" aria-label="Trier les opportunités de commentaires">
+          <button className={sort === "urgency" ? "active" : ""} type="button" aria-pressed={sort === "urgency"} onClick={() => setSort("urgency")}>Fenêtre</button>
           <button className={sort === "priority" ? "active" : ""} type="button" aria-pressed={sort === "priority"} onClick={() => setSort("priority")}>Potentiel</button>
           <button className={sort === "recent" ? "active" : ""} type="button" aria-pressed={sort === "recent"} onClick={() => setSort("recent")}>Plus récents</button>
         </div>
+      </div>
+
+      <div className="comment-facet-row">
+        <div className="comment-tier-tabs" role="group" aria-label="Filtrer par palier de moment">
+          {TIER_OPTIONS.map((option) => (
+            <button
+              className={tierFilter === option.key ? `active tier-${option.key}` : `tier-${option.key}`}
+              type="button"
+              aria-pressed={tierFilter === option.key}
+              onClick={() => setTierFilter(option.key)}
+              key={option.key}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {availableCategories.length > 1 ? (
+          <div className="comment-category-tabs" role="group" aria-label="Filtrer par thème">
+            <button className={categoryFilter === "all" ? "active" : ""} type="button" aria-pressed={categoryFilter === "all"} onClick={() => setCategoryFilter("all")}>Tous les thèmes</button>
+            {availableCategories.map((category) => (
+              <button
+                className={categoryFilter === category ? "active" : ""}
+                type="button"
+                aria-pressed={categoryFilter === category}
+                onClick={() => setCategoryFilter(category)}
+                key={category}
+              >
+                {COMMENT_OPPORTUNITY_CATEGORY_LABELS[category]}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="comment-queue-tabs" role="tablist" aria-label="État de la file de commentaires">
@@ -186,6 +334,7 @@ export function CommentOpportunitiesView({
               opportunity={opportunity}
               rank={index + 1}
               referenceAt={feed?.capturedAt ?? opportunity.capturedAt}
+              window={windows.get(opportunity.id)}
               queueState={queueStates[opportunity.id] ?? "pending"}
               onQueueChange={(state) => updateQueue(opportunity.id, state)}
               key={opportunity.id}
@@ -196,7 +345,7 @@ export function CommentOpportunitiesView({
         <div className="empty-state comment-feed-empty">
           <span aria-hidden="true">✓</span>
           <h3>{queueFilter === "pending" ? "La file est vide" : "Rien dans cette vue"}</h3>
-          <p>{queueFilter === "pending" ? "Les prochaines opportunités arriveront au prochain scan." : "Change de plateforme ou reviens à la file active."}</p>
+          <p>{queueFilter === "pending" ? "Les prochaines opportunités arriveront au prochain scan." : "Change de filtre ou reviens à la file active."}</p>
           {queueFilter !== "pending" ? <button className="button secondary" type="button" onClick={() => setQueueFilter("pending")}>Voir les commentaires à faire</button> : null}
         </div>
       ) : null}
@@ -204,16 +353,65 @@ export function CommentOpportunitiesView({
   );
 }
 
+function DropChip({
+  opportunity,
+  window: goldenWindow,
+}: {
+  opportunity: CommentOpportunity;
+  window: CommentOpportunityGoldenWindow | undefined;
+}) {
+  const thumbnail = commentOpportunityThumbnail(opportunity);
+  return (
+    <a
+      className={`comment-drop-chip tier-${opportunity.momentTier} ${goldenWindow?.state === "closing" ? "is-closing" : ""}`}
+      href={opportunity.url}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <span className="comment-drop-thumb">
+        {thumbnail ? <img src={thumbnail} alt="" loading="lazy" decoding="async" /> : <img src={`platforms/${opportunity.platform}.svg`} alt="" />}
+      </span>
+      <span className="comment-drop-body">
+        <b>{opportunity.author}</b>
+        <span className="comment-drop-title">{opportunity.title}</span>
+        <span className="comment-drop-meta">
+          <GoldenWindowLabel window={goldenWindow} />
+          {opportunity.velocity ? (
+            <em>+{formatCompactNumber(opportunity.velocity.perHour)} {VELOCITY_METRIC_LABELS[opportunity.velocity.metric]}/h</em>
+          ) : null}
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function GoldenWindowLabel({ window: goldenWindow }: { window: CommentOpportunityGoldenWindow | undefined }) {
+  if (!goldenWindow || goldenWindow.state === "unknown") {
+    return <span className="comment-window-pill unknown">Date non exposée</span>;
+  }
+  if (goldenWindow.state === "closed") {
+    return <span className="comment-window-pill closed">Fenêtre passée</span>;
+  }
+  return (
+    <span className={`comment-window-pill ${goldenWindow.state}`}>
+      {goldenWindow.state === "closing" ? "Ferme dans " : "Encore "}
+      {formatRemaining(goldenWindow.remainingMinutes ?? 0)}
+    </span>
+  );
+}
+
 function CommentOpportunityCard({
   opportunity,
   rank,
   referenceAt,
+  window: goldenWindow,
   queueState,
   onQueueChange,
 }: {
   opportunity: CommentOpportunity;
   rank: number;
   referenceAt: string;
+  window: CommentOpportunityGoldenWindow | undefined;
   queueState: QueueFilter;
   onQueueChange: (state: QueueState | "pending") => void;
 }) {
@@ -231,7 +429,11 @@ function CommentOpportunityCard({
   };
 
   return (
-    <article className={`social-post-card comment-opportunity-card has-media status-${status.className}`}>
+    <article
+      className={`social-post-card comment-opportunity-card has-media status-${status.className} tier-${opportunity.momentTier}${
+        goldenWindow?.state === "closing" ? " is-closing" : ""
+      }`}
+    >
       <CommentOpportunityMedia opportunity={opportunity} rank={rank} />
       <div className="post-card-body comment-opportunity-body">
         <div className="comment-card-meta-line">
@@ -244,12 +446,29 @@ function CommentOpportunityCard({
           </span>
         </div>
 
+        <div className="comment-signal-row">
+          <span className={`comment-tier-badge tier-${opportunity.momentTier}`}>
+            {COMMENT_OPPORTUNITY_MOMENT_TIER_LABELS[opportunity.momentTier]}
+          </span>
+          <span className="comment-category-badge">
+            {COMMENT_OPPORTUNITY_CATEGORY_LABELS[opportunity.category]}
+          </span>
+          <GoldenWindowLabel window={goldenWindow} />
+          {opportunity.velocity ? (
+            <span className="comment-velocity-badge" title={`Mesuré sur ${opportunity.velocity.windowHours} h`}>
+              ↑ {formatCompactNumber(opportunity.velocity.perHour)} {VELOCITY_METRIC_LABELS[opportunity.velocity.metric]}/h
+            </span>
+          ) : null}
+        </div>
+
         <div className="post-card-title comment-source-title">
           <div>
             <span>Potentiel {potentialScore}/100</span>
             <h3><a href={opportunity.url} target="_blank" rel="noreferrer">{opportunity.title || opportunity.caption}</a></h3>
           </div>
         </div>
+
+        <p className="comment-why-now">{opportunity.whyNow}</p>
 
         <div className="comment-tone-tabs" role="group" aria-label={`Choisir un ton pour ${opportunity.title}`}>
           {opportunity.comments.map((comment) => {
@@ -264,6 +483,11 @@ function CommentOpportunityCard({
         </div>
 
         {suggestion ? <blockquote className="comment-suggestion">{suggestion.text}</blockquote> : null}
+        {opportunity.commentsSource === "fallback" ? (
+          <p className="comment-source-warning">
+            Propositions génériques : la voix n’a pas encore tourné sur cette vidéo, à réécrire avant de poster.
+          </p>
+        ) : null}
 
         <button className="comment-copy-button" type="button" onClick={() => void copySuggestion()} aria-live="polite">
           {copyState === "copied" ? "✓ Commentaire copié" : copyState === "error" ? "Copie impossible" : "Copier le commentaire"}
@@ -324,6 +548,14 @@ function CommentOpportunityMedia({ opportunity, rank }: { opportunity: CommentOp
   );
 }
 
+const TIER_URGENCY: Record<CommentOpportunityMomentTier, number> = { s: 0, a: 1, b: 2 };
+
+function windowGroup(goldenWindow: CommentOpportunityGoldenWindow | undefined) {
+  if (goldenWindow?.state === "closing" || goldenWindow?.state === "open") return 0;
+  if (goldenWindow?.state === "unknown") return 1;
+  return 2;
+}
+
 function commentOpportunityEmbedUrl(opportunity: CommentOpportunity) {
   try {
     const url = new URL(opportunity.url);
@@ -371,6 +603,21 @@ function opportunityMetrics(opportunity: CommentOpportunity) {
 
 function formatCompactNumber(value: number) {
   return new Intl.NumberFormat("fr-FR", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+function formatRemaining(minutes: number) {
+  if (minutes < 60) return `${Math.max(1, minutes)} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours} h` : `${hours} h ${rest.toString().padStart(2, "0")}`;
+}
+
+function formatElapsed(from: string, to: string) {
+  const minutes = Math.round((Date.parse(to) - Date.parse(from)) / 60_000);
+  if (!Number.isFinite(minutes)) return null;
+  if (minutes < 1) return "à l’instant";
+  if (minutes < 60) return `il y a ${minutes} min`;
+  return `il y a ${Math.round(minutes / 60)} h`;
 }
 
 function formatCardDate(value: string) {

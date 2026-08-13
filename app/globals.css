@@ -9221,6 +9221,10 @@ a {
 
 .comment-opportunities-view {
   display: grid;
+  /* An implicit `1fr` track is `minmax(auto, 1fr)`, so one wide child stretches
+     the whole column past the viewport. Pinning the minimum to zero lets each
+     section shrink and scroll its own overflow instead. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
@@ -9617,5 +9621,358 @@ a {
 
   .comment-card-actions > .comment-skip-button {
     display: none;
+  }
+}
+
+/* --------------------------------------------------------------- Drops rail
+   The radar line above the board: what is big and still open. It is a strip
+   rather than a second grid so it never competes with the cards below. */
+
+.comment-drops-strip {
+  margin: 4px 0 14px;
+  border: 1px solid rgba(251, 191, 36, 0.26);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(251, 191, 36, 0.07), rgba(251, 191, 36, 0.015)),
+    var(--panel);
+  padding: 13px 14px 14px;
+}
+
+.comment-drops-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 11px;
+  flex-wrap: wrap;
+}
+
+.comment-drops-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #f7d488;
+  font-size: var(--fs-caption);
+  font-weight: 860;
+  letter-spacing: 0.02em;
+}
+
+.comment-drops-title > span {
+  color: var(--amber);
+  animation: comment-drop-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes comment-drop-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-drops-title > span { animation: none; }
+}
+
+.comment-drops-hint {
+  color: var(--dim);
+  font-size: var(--fs-micro);
+  font-weight: 650;
+}
+
+.comment-drops-rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.comment-drop-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 clamp(230px, 27%, 292px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+  padding: 8px 10px 8px 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.comment-drop-chip:hover,
+.comment-drop-chip:focus-visible {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.comment-drop-chip.tier-s {
+  border-color: rgba(251, 191, 36, 0.34);
+}
+
+.comment-drop-chip.is-closing {
+  border-color: rgba(251, 113, 133, 0.4);
+}
+
+.comment-drop-thumb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--panel-3);
+}
+
+.comment-drop-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-drop-thumb img[src$=".svg"] {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
+.comment-drop-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.comment-drop-body > b {
+  color: var(--muted);
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comment-drop-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text);
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  line-height: 1.32;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.comment-drop-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.comment-drop-meta em {
+  color: #a7f3d0;
+  font-size: var(--fs-micro);
+  font-style: normal;
+  font-weight: 800;
+}
+
+/* ------------------------------------------------------- Signals on a card */
+
+.comment-window-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--muted);
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.comment-window-pill.open {
+  border-color: rgba(74, 222, 128, 0.32);
+  background: var(--green-soft);
+  color: #b6f3cd;
+}
+
+.comment-window-pill.closing {
+  border-color: rgba(251, 113, 133, 0.42);
+  background: var(--red-soft);
+  color: #ffc3cd;
+}
+
+.comment-window-pill.closed,
+.comment-window-pill.unknown {
+  background: rgba(93, 100, 133, 0.12);
+  color: var(--dim);
+}
+
+.comment-signal-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 2px 0 8px;
+}
+
+.comment-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: var(--fs-micro);
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.comment-tier-badge.tier-s {
+  border-color: rgba(251, 191, 36, 0.42);
+  background: rgba(251, 191, 36, 0.13);
+  color: #ffd98a;
+}
+
+.comment-tier-badge.tier-a {
+  border-color: rgba(154, 168, 255, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent-2);
+}
+
+.comment-tier-badge.tier-b {
+  background: rgba(93, 100, 133, 0.12);
+  color: var(--dim);
+}
+
+.comment-category-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--muted);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.comment-velocity-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(94, 234, 212, 0.3);
+  border-radius: 999px;
+  background: rgba(94, 234, 212, 0.09);
+  padding: 3px 8px;
+  color: #a7f3d0;
+  font-size: var(--fs-micro);
+  font-weight: 830;
+  white-space: nowrap;
+}
+
+.comment-why-now {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+}
+
+.comment-source-warning {
+  margin: 8px 0 0;
+  border-left: 2px solid rgba(251, 191, 36, 0.45);
+  padding-left: 9px;
+  color: #f0cf95;
+  font-size: var(--fs-micro);
+  font-weight: 650;
+  line-height: 1.42;
+}
+
+.comment-opportunity-card.tier-s {
+  border-color: rgba(251, 191, 36, 0.26);
+}
+
+.comment-opportunity-card.is-closing {
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+/* --------------------------------------------------------------- Facet row */
+
+.comment-facet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.comment-tier-tabs,
+.comment-category-tabs {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.comment-tier-tabs button,
+.comment-category-tabs button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-2);
+  padding: 6px 12px;
+  color: var(--muted);
+  font-size: var(--fs-micro);
+  font-weight: 780;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.comment-tier-tabs button:hover,
+.comment-category-tabs button:hover,
+.comment-tier-tabs button:focus-visible,
+.comment-category-tabs button:focus-visible {
+  border-color: var(--border-2);
+  color: var(--text);
+}
+
+.comment-tier-tabs button.active,
+.comment-category-tabs button.active {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-2);
+}
+
+.comment-tier-tabs button.active.tier-s {
+  border-color: rgba(251, 191, 36, 0.46);
+  background: rgba(251, 191, 36, 0.13);
+  color: #ffd98a;
+}
+
+@media (max-width: 720px) {
+  .comment-drops-rail {
+    margin: 0 -14px;
+    padding: 0 14px 6px;
+  }
+
+  .comment-drop-chip {
+    flex-basis: 78%;
+  }
+
+  .comment-facet-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .comment-tier-tabs,
+  .comment-category-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .comment-tier-tabs button,
+  .comment-category-tabs button {
+    white-space: nowrap;
   }
 }
