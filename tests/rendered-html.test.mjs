@@ -242,8 +242,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /initialAudienceHistory=\{audienceHistory\}/);
   assert.match(previewEntry, /refreshAudienceHistory/);
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL = `\$\{dataBaseUrl\}\/audience-history\.json`/);
-  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar\/main\/data\/audio-trends\/feed\.json/);
-  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar\/main\/data\/trends\/feed\.json/);
+  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar-preview\/main\/data\/audio-trends\/feed\.json/);
+  assert.match(previewEntry, /raw\.githubusercontent\.com\/dim75017\/lofi-social-radar-preview\/main\/data\/trends\/feed\.json/);
   assert.match(previewEntry, /window\.setInterval\(refreshTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /visibilitychange/);
   assert.match(previewEntry, /RAW_COMMENT_OPPORTUNITIES_URL/);

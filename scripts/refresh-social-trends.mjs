@@ -58,7 +58,7 @@ export async function verifyNativeTrendPost(post, options = {}) {
     headers: {
       Accept: "text/html,application/json,application/xhtml+xml",
       "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
-      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar)",
+      "User-Agent": "Mozilla/5.0 (compatible; LofiSocialRadar/1.0; +https://github.com/dim75017/lofi-social-radar-preview)",
     },
     redirect: "follow",
     signal: AbortSignal.timeout(NATIVE_POST_TIMEOUT_MS),
@@ -181,7 +181,7 @@ export async function checkTrendSource(source, trends, options = {}) {
       headers: {
         Accept: source.kind === "x-api" ? "application/json" : "text/html,application/xhtml+xml",
         ...(source.kind === "x-api" ? { Authorization: `Bearer ${xBearerToken}` } : {}),
-        "User-Agent": "LofiSocialRadar/1.0 (+https://github.com/dim75017/lofi-social-radar)",
+        "User-Agent": "LofiSocialRadar/1.0 (+https://github.com/dim75017/lofi-social-radar-preview)",
       },
       redirect: "follow",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),

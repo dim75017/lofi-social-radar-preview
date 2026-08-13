@@ -50,8 +50,8 @@ const fallbackCommentOpportunityFeed = assertCommentOpportunityFeed(
   commentOpportunityFeedJson as CommentOpportunityFeed,
 );
 const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
-const RAW_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/trends/feed.json";
-const RAW_AUDIO_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar/main/data/audio-trends/feed.json";
+const RAW_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar-preview/main/data/trends/feed.json";
+const RAW_AUDIO_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar-preview/main/data/audio-trends/feed.json";
 const RAW_AUDIENCE_HISTORY_URL = `${dataBaseUrl}/audience-history.json`;
 const RAW_COMMENT_OPPORTUNITIES_URL = `${dataBaseUrl}/comment-opportunities/feed.json`;
 const emptySnapshot: PublicHistorySnapshot = {

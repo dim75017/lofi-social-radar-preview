@@ -4,6 +4,10 @@ Le **Social & Community Intelligence OS** de Lofi Girl analyse les contenus publ
 
 **Maquette publique :** https://dim75017.github.io/lofi-social-radar-preview/
 
+Le code source, les workflows et le site public vivent dans ce dépôt unique. La
+branche `main` contient l’application et les données validées ; la branche
+`gh-pages` contient uniquement l’export public servi à l’adresse ci-dessus.
+
 ## Fonctionnalités
 
 - Recommandations séparées en **Trends vidéos**, **Trends audio**, **Posts recommandés** et **Commentaires**. Le feed audio contient au minimum 50 sons distincts (41 TikTok, 6 Instagram et 3 YouTube), affiche un exemple vidéo lisible directement, le nombre public de vidéos utilisant le son lorsqu’il est disponible, la croissance réellement mesurée et un angle Lofi Girl concret. Il est contrôlé deux fois par jour ; un lot inférieur à 50 ou privé d’une seule miniature TikTok / lecture Instagram n’est pas publié.

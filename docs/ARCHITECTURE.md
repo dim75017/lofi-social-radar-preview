@@ -43,7 +43,15 @@ Le Tableau de bord applique un filtre commun à l’évolution des followers et 
 
 Pour chaque période, le taux d’engagement correspond à la moyenne des likes et commentaires de tous les posts mesurables publiés dans la fenêtre, divisée par le dernier nombre de followers réellement observé. Les commentaires YouTube publiés par Lofi Girl sont exclus de l’échantillon. Les partages et sauvegardes ne sont pas mélangés au calcul, car ils ne sont pas disponibles de façon comparable sur les quatre plateformes. L’évolution des followers s’appuie exclusivement sur les observations réelles disponibles dans la période sélectionnée, sans interpolation ni repli artificiel vers une autre période.
 
-Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. Si une source échoue, son dernier point valide est conservé ; aucune valeur n’est inventée. Les compteurs arrondis par une plateforme restent explicitement marqués comme tels. Le snapshot validé est copié dans le dépôt public de la maquette ; la preview le recharge depuis son propre dossier `data` au démarrage, chaque heure et au retour sur l’onglet.
+Un relevé quotidien ajoute uniquement les compteurs réellement récupérés. Si une source échoue, son dernier point valide est conservé ; aucune valeur n’est inventée. Les compteurs arrondis par une plateforme restent explicitement marqués comme tels. Le snapshot validé reste dans `main`, puis le workflow de publication reconstruit le site dans la branche `gh-pages` du même dépôt. La preview recharge son propre dossier `data` au démarrage, chaque heure et au retour sur l’onglet.
+
+## Dépôt et publication
+
+Le dashboard utilise un seul dépôt GitHub. `main` est la source de vérité pour
+le code, les tests, les workflows et les JSON validés. `gh-pages` conserve
+l’export statique public ainsi que le cache des miniatures Instagram. Chaque
+push sur `main` valide et reconstruit la preview, puis publie uniquement le
+résultat généré sur `gh-pages`. Aucun second dépôt miroir n’est nécessaire.
 
 ## Analyse éditoriale
 
