@@ -302,11 +302,16 @@ export function qualifiesForBoard(opportunity) {
 
 // ------------------------------------------------------------- Voice engine
 
-async function fillComments(opportunities, { apiKey, limit, fetchImpl, log }) {
-  const needsVoice = rankCommentOpportunities(opportunities).filter(
-    (opportunity) =>
-      opportunity.comments.length !== 3 || opportunity.commentsSource === "fallback",
-  );
+async function fillComments(opportunities, { apiKey, limit, fetchImpl, log, now }) {
+  const needsVoice = rankCommentOpportunities(opportunities).filter((opportunity) => {
+    const missing = opportunity.comments.length !== 3 ||
+      opportunity.commentsSource === "fallback";
+    if (!missing) return false;
+    // A card the engine keeps refusing would otherwise be retried on every
+    // pass, forever. Once its window is closed there is nothing left to write
+    // a punchline for, so the retries stop with it.
+    return commentOpportunityGoldenWindow(opportunity, now).state !== "closed";
+  });
   const targeted = apiKey ? needsVoice.slice(0, limit) : [];
   let generated = 0;
   let refused = 0;
@@ -541,6 +546,7 @@ export async function refreshCommentOpportunities(options = {}) {
     limit: MAX_VOICE_GENERATIONS[lane],
     fetchImpl,
     log,
+    now,
   });
 
   const youtubeCount = opportunities.filter((item) => item.platform === "youtube").length;
