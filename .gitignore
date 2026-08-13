@@ -47,3 +47,7 @@ next-env.d.ts
 # Authorized account-history imports remain local to the private dashboard.
 /data/private-youtube-comment-history.json
 /data/private-youtube-comment-metrics.json
+
+# Baseline readings for the comment radar fast lane. Restored from the
+# Actions cache between runs, never committed: it changes every 15 minutes.
+data/comment-opportunities/candidates.json
