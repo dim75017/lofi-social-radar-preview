@@ -458,9 +458,14 @@ test("reference thumbnails are restricted to official platform CDNs", () => {
 
 test("signed Instagram playback is atomic, short-lived and restricted to scontent CDN", () => {
   const trend = validTrend();
-  const expiresAt = "2026-08-12T23:00:00.000Z";
+  const capturedAt = new Date(
+    Date.parse(bootstrapFeed.capturedAt) - 60 * 60 * 1_000,
+  ).toISOString();
+  const expiresAt = new Date(
+    Date.parse(bootstrapFeed.capturedAt) + 24 * 60 * 60 * 1_000,
+  ).toISOString();
   trend.referenceVideo.playbackUrl = instagramPlaybackUrl(expiresAt);
-  trend.referenceVideo.playbackCapturedAt = "2026-08-11T11:00:00.000Z";
+  trend.referenceVideo.playbackCapturedAt = capturedAt;
   trend.referenceVideo.playbackExpiresAt = expiresAt;
   assert.equal(isInstagramSignedPlaybackUrl(trend.referenceVideo.playbackUrl, expiresAt), true);
   const signedFeed = feedWith(trend);
@@ -473,12 +478,14 @@ test("signed Instagram playback is atomic, short-lived and restricted to sconten
   const foreignHost = validTrend();
   foreignHost.referenceVideo.playbackUrl = instagramPlaybackUrl(expiresAt)
     .replace("scontent-cdg4-1.cdninstagram.com", "media.example.com");
-  foreignHost.referenceVideo.playbackCapturedAt = "2026-08-11T11:00:00.000Z";
+  foreignHost.referenceVideo.playbackCapturedAt = capturedAt;
   foreignHost.referenceVideo.playbackExpiresAt = expiresAt;
   assert.throws(() => assertAudioTrendFeed(feedWith(foreignHost)), /lecture Instagram sign/i);
 
   const mismatchedExpiry = structuredClone(trend);
-  mismatchedExpiry.referenceVideo.playbackExpiresAt = "2026-08-12T22:00:00.000Z";
+  mismatchedExpiry.referenceVideo.playbackExpiresAt = new Date(
+    Date.parse(expiresAt) - 60 * 60 * 1_000,
+  ).toISOString();
   assert.throws(() => assertAudioTrendFeed(feedWith(mismatchedExpiry)), /lecture Instagram sign/i);
 });
 
