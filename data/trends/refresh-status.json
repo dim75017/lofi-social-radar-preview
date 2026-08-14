@@ -1,19 +1,19 @@
 {
   "version": 1,
   "cadenceHours": 24,
-  "lastAttemptAt": "2026-08-13T18:13:33.492Z",
-  "lastSuccessfulAt": "2026-08-13T18:13:33.492Z",
-  "nextScheduledAt": "2026-08-14T18:13:33.492Z",
+  "lastAttemptAt": "2026-08-14T08:46:59.426Z",
+  "lastSuccessfulAt": "2026-08-14T08:46:59.426Z",
+  "nextScheduledAt": "2026-08-15T08:46:59.426Z",
   "status": "success",
-  "runId": "local-2026-08-13",
-  "runUrl": null,
+  "runId": "31785300595",
+  "runUrl": "https://github.com/dim75017/lofi-social-radar-preview/actions/runs/31785300595",
   "sourceChecks": [
     {
       "id": "buffer-tiktok",
       "label": "Buffer · TikTok",
       "platform": "tiktok",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 15
     },
     {
@@ -21,7 +21,7 @@
       "label": "Later · Instagram Reels",
       "platform": "instagram",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 16
     },
     {
@@ -29,7 +29,7 @@
       "label": "SocialPilot · TikTok",
       "platform": "tiktok",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 20
     },
     {
@@ -37,7 +37,7 @@
       "label": "SocialPilot · Instagram Reels",
       "platform": "instagram",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 21
     },
     {
@@ -45,7 +45,7 @@
       "label": "Tokchart · sons TikTok",
       "platform": "tiktok",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 1
     },
     {
@@ -53,20 +53,20 @@
       "label": "TrendVideosHub · YouTube Shorts",
       "platform": "youtube",
       "status": "success",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 8
     },
     {
       "id": "x-france-trends",
       "label": "X · tendances France",
       "platform": "x",
-      "status": "failed",
-      "checkedAt": "2026-08-13T18:13:33.492Z",
+      "status": "success",
+      "checkedAt": "2026-08-14T08:46:59.426Z",
       "candidatesMatched": 0
     }
   ],
   "counts": {
-    "checkedSources": 6,
+    "checkedSources": 7,
     "matchedSignals": 81,
     "actionable": 51,
     "lofiGirl": 44,
