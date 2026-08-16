@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-15T05:03:27.581Z",
+  "generatedAt": "2026-08-16T05:46:23.177Z",
   "coverage": [
     {
       "platform": "youtube",
@@ -51,9 +51,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5197,
+      "itemCount": 5199,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-14T18:14:03.000Z",
+      "newestPublishedAt": "2026-08-15T17:31:10.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -74,12 +74,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2088019291815677986",
-          "startedAt": "2026-08-15T05:03:25.540Z",
-          "completedAt": "2026-08-15T05:03:27.581Z",
-          "apiRowsRead": 9,
-          "rowsInCheckpoint": 5197,
-          "importedAt": "2026-08-15T05:03:27.581Z"
+          "sinceId": "2088328312321945907",
+          "startedAt": "2026-08-16T05:46:21.415Z",
+          "completedAt": "2026-08-16T05:46:23.177Z",
+          "apiRowsRead": 3,
+          "rowsInCheckpoint": 5199,
+          "importedAt": "2026-08-16T05:46:23.177Z"
         }
       }
     },
@@ -118,6 +118,104 @@
     }
   ],
   "posts": [
+    {
+      "platform": "x",
+      "externalId": "2088679906502750331",
+      "url": "https://x.com/lofigirl/status/2088679906502750331",
+      "title": "lofigirlcrying.gif 🎨 anya__anim, determinedartfreak, saliseburi (IG) https://t.co/zlnxi6ki5O",
+      "text": "lofigirlcrying.gif\n\n🎨 anya__anim, determinedartfreak, saliseburi (IG) https://t.co/zlnxi6ki5O",
+      "format": "video",
+      "thumbnailUrl": "https://pbs.twimg.com/ext_tw_video_thumb/2088679760180256768/pu/img/1RW6kdYYkjW7IKoR.jpg",
+      "publishedAt": "2026-08-15T17:31:10.000Z",
+      "views": 5729,
+      "likes": 32,
+      "comments": 1,
+      "shares": 0,
+      "saves": 2,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-16T05:46:21.649Z",
+        "lastObservedAt": "2026-08-16T05:46:21.649Z",
+        "publicMetrics": {
+          "bookmark_count": 2,
+          "impression_count": 5729,
+          "like_count": 32,
+          "quote_count": 0,
+          "reply_count": 1,
+          "retweet_count": 0
+        },
+        "publishedAtPrecision": "exact",
+        "media": [
+          {
+            "mediaKey": "7_2088679760180256768",
+            "type": "video",
+            "url": null,
+            "previewImageUrl": "https://pbs.twimg.com/ext_tw_video_thumb/2088679760180256768/pu/img/1RW6kdYYkjW7IKoR.jpg",
+            "width": 1080,
+            "height": 1920,
+            "durationMs": 4329,
+            "altText": null,
+            "publicMetrics": {
+              "view_count": 770
+            }
+          }
+        ],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-16T05:46:21.649Z",
+            "views": 5729,
+            "likes": 32,
+            "comments": 1,
+            "shares": 0,
+            "saves": 2,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "x",
+      "externalId": "2088641711933174034",
+      "url": "https://x.com/lofigirl/status/2088641711933174034",
+      "title": "i hope your iced coffee stays cold until the last sip ☕",
+      "text": "i hope your iced coffee stays cold until the last sip ☕",
+      "format": "text",
+      "thumbnailUrl": null,
+      "publishedAt": "2026-08-15T14:59:23.000Z",
+      "views": 6631,
+      "likes": 65,
+      "comments": 3,
+      "shares": 3,
+      "saves": 1,
+      "raw": {
+        "collector": "x-api-v2-full-archive",
+        "firstObservedAt": "2026-08-16T05:46:21.649Z",
+        "lastObservedAt": "2026-08-16T05:46:23.177Z",
+        "publicMetrics": {
+          "bookmark_count": 1,
+          "impression_count": 6631,
+          "like_count": 65,
+          "quote_count": 0,
+          "reply_count": 3,
+          "retweet_count": 3
+        },
+        "publishedAtPrecision": "exact",
+        "media": [],
+        "metricHistory": [
+          {
+            "capturedAt": "2026-08-16T05:46:23.177Z",
+            "views": 6631,
+            "likes": 65,
+            "comments": 3,
+            "shares": 3,
+            "saves": 1,
+            "pollVotes": null,
+            "source": "x-api-v2-full-archive"
+          }
+        ]
+      }
+    },
     {
       "platform": "x",
       "externalId": "2088328312321945907",

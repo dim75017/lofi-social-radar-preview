@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-15T05:03:27.581Z",
-  "totalPostCount": 12040,
+  "generatedAt": "2026-08-16T05:46:23.177Z",
+  "totalPostCount": 12042,
   "platformCounts": {
     "youtube": 4781,
     "instagram": 1676,
     "tiktok": 386,
-    "x": 5197
+    "x": 5199
   },
   "formatCounts": {
     "youtube": {
@@ -26,8 +26,8 @@
     },
     "x": {
       "static": 1156,
-      "video": 357,
-      "text": 3684
+      "video": 358,
+      "text": 3685
     }
   },
   "coverage": [
@@ -81,9 +81,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5197,
+      "itemCount": 5199,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-14T18:14:03.000Z",
+      "newestPublishedAt": "2026-08-15T17:31:10.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -104,12 +104,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2088019291815677986",
-          "startedAt": "2026-08-15T05:03:25.540Z",
-          "completedAt": "2026-08-15T05:03:27.581Z",
-          "apiRowsRead": 9,
-          "rowsInCheckpoint": 5197,
-          "importedAt": "2026-08-15T05:03:27.581Z"
+          "sinceId": "2088328312321945907",
+          "startedAt": "2026-08-16T05:46:21.415Z",
+          "completedAt": "2026-08-16T05:46:23.177Z",
+          "apiRowsRead": 3,
+          "rowsInCheckpoint": 5199,
+          "importedAt": "2026-08-16T05:46:23.177Z"
         }
       }
     },
