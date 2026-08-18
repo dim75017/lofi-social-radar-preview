@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-17T04:57:44.688Z",
-  "totalPostCount": 12047,
+  "generatedAt": "2026-08-18T04:51:37.016Z",
+  "totalPostCount": 12059,
   "platformCounts": {
     "youtube": 4781,
     "instagram": 1676,
     "tiktok": 386,
-    "x": 5204
+    "x": 5216
   },
   "formatCounts": {
     "youtube": {
@@ -25,9 +25,9 @@
       "comment": 0
     },
     "x": {
-      "static": 1157,
-      "video": 358,
-      "text": 3689
+      "static": 1158,
+      "video": 359,
+      "text": 3699
     }
   },
   "coverage": [
@@ -81,9 +81,9 @@
       "accountUrl": "https://x.com/lofigirl",
       "scope": "posts originaux et réponses publics de @lofigirl via X API v2 Full Archive, retweets exclus",
       "status": "complete-api-full-archive",
-      "itemCount": 5204,
+      "itemCount": 5216,
       "oldestPublishedAt": "2015-04-16T19:30:17.000Z",
-      "newestPublishedAt": "2026-08-16T18:03:18.000Z",
+      "newestPublishedAt": "2026-08-17T20:31:12.000Z",
       "limitations": [
         "Source officielle : X API v2 Full Archive (https://api.x.com/2/tweets/search/all), requête « from:lofigirl -is:retweet » depuis 2006-03-21T00:00:00Z.",
         "Les retweets sont exclus volontairement ; les posts originaux et les réponses publiés par @lofigirl sont inclus.",
@@ -104,12 +104,12 @@
           "provider": "x-api-v2-full-archive",
           "endpoint": "https://api.x.com/2/tweets/search/all",
           "query": "from:lofigirl -is:retweet",
-          "sinceId": "2088679906502750331",
-          "startedAt": "2026-08-17T04:57:42.923Z",
-          "completedAt": "2026-08-17T04:57:44.688Z",
-          "apiRowsRead": 6,
-          "rowsInCheckpoint": 5204,
-          "importedAt": "2026-08-17T04:57:44.688Z"
+          "sinceId": "2089050381477159182",
+          "startedAt": "2026-08-18T04:51:35.269Z",
+          "completedAt": "2026-08-18T04:51:37.016Z",
+          "apiRowsRead": 13,
+          "rowsInCheckpoint": 5216,
+          "importedAt": "2026-08-18T04:51:37.016Z"
         }
       }
     },
