@@ -75,8 +75,9 @@ const MAX_OBSERVATIONS = 24;
 const MAX_CANDIDATE_OBSERVATIONS = 8;
 const MAX_CANDIDATES = 900;
 const PRUNE_AFTER_DAYS = 14;
-const MAX_BOARD_CARDS = 45;
-const MAX_YOUTUBE_CARDS = 30;
+const MAX_BOARD_CARDS = 30;
+const MAX_YOUTUBE_CARDS = 18;
+const MIN_CARDS_PER_PLATFORM = 4;
 /** A daily series is one opportunity, not five. */
 const MAX_CARDS_PER_AUTHOR = 2;
 /** Bounds both the wall clock of a 15-minute lane and the monthly bill. */
@@ -384,8 +385,12 @@ function buildSourceChecks(previousChecks, youtubeCheck, opportunities, captured
  * YouTube a ceiling of its own since it produces far more candidates than the
  * other three platforms combined.
  */
-function selectBoard(opportunities, nowMs, referenceAt) {
+export function selectBoard(opportunities, nowMs, referenceAt) {
   const alive = opportunities.filter((opportunity) => {
+    // These automated lanes only re-check YouTube. Pruning another platform
+    // here would turn a source outage into silent data loss instead of keeping
+    // that platform's last verified snapshot.
+    if (opportunity.platform !== "youtube") return true;
     if (opportunity.publishedAt === null) return true;
     const publishedAt = Date.parse(opportunity.publishedAt);
     if (!Number.isFinite(publishedAt)) return true;
@@ -402,9 +407,28 @@ function selectBoard(opportunities, nowMs, referenceAt) {
     deduped.push(opportunity);
   }
 
-  const youtube = deduped.filter((item) => item.platform === "youtube").slice(0, MAX_YOUTUBE_CARDS);
-  const others = deduped.filter((item) => item.platform !== "youtube");
-  return rankCommentOpportunities([...youtube, ...others], referenceAt).slice(0, MAX_BOARD_CARDS);
+  const byPlatform = new Map(
+    PLATFORMS.map((platform) => [
+      platform,
+      deduped.filter((item) => item.platform === platform),
+    ]),
+  );
+  const selected = PLATFORMS.flatMap((platform) =>
+    (byPlatform.get(platform) ?? []).slice(0, MIN_CARDS_PER_PLATFORM)
+  );
+  const selectedIds = new Set(selected.map((item) => item.id));
+  let youtubeCount = selected.filter((item) => item.platform === "youtube").length;
+
+  for (const opportunity of rankCommentOpportunities(deduped, referenceAt)) {
+    if (selected.length >= MAX_BOARD_CARDS) break;
+    if (selectedIds.has(opportunity.id)) continue;
+    if (opportunity.platform === "youtube" && youtubeCount >= MAX_YOUTUBE_CARDS) continue;
+    selected.push(opportunity);
+    selectedIds.add(opportunity.id);
+    if (opportunity.platform === "youtube") youtubeCount += 1;
+  }
+
+  return rankCommentOpportunities(selected, referenceAt);
 }
 
 // --------------------------------------------------------------------- Main

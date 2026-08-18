@@ -9,6 +9,7 @@ import {
   parseAtomEntries,
   qualifiesForBoard,
   refreshCommentOpportunities,
+  selectBoard,
 } from "../scripts/refresh-comment-opportunities.mjs";
 import { assertCommentOpportunityFeed } from "../lib/comment-opportunities.ts";
 
@@ -261,4 +262,31 @@ test("the same video seen twice in one run does not create two cards", async () 
   });
   assert.equal(result.feed.opportunities.length, 1);
   assert.equal(assertCommentOpportunityFeed(result.feed), result.feed);
+});
+
+test("a YouTube-only lane preserves the last verified cards from every other platform", async () => {
+  const currentFeed = JSON.parse(
+    await readFile(new URL("../data/comment-opportunities/feed.json", import.meta.url), "utf8"),
+  );
+  const opportunities = currentFeed.opportunities.map((opportunity) => ({
+    ...structuredClone(opportunity),
+    publishedAt:
+      opportunity.platform === "youtube"
+        ? "2026-08-18T12:00:00.000Z"
+        : "2026-07-01T12:00:00.000Z",
+  }));
+
+  const selected = selectBoard(
+    opportunities,
+    Date.parse("2026-08-18T18:00:00.000Z"),
+    "2026-08-18T18:00:00.000Z",
+  );
+
+  assert.ok(selected.length <= 30);
+  for (const platform of ["youtube", "instagram", "tiktok", "x"]) {
+    assert.ok(
+      selected.filter((item) => item.platform === platform).length >= 4,
+      `missing preserved ${platform} cards`,
+    );
+  }
 });

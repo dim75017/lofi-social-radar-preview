@@ -28,7 +28,8 @@ test("the comment opportunity feed is a valid v2 snapshot with every platform ch
   assert.ok(feed.watchlistAccountCount > 0);
   assert.ok(Date.parse(feed.nextRefreshAt) > Date.parse(feed.capturedAt));
   assert.equal(feed.sourceChecks.length, 4);
-  assert.ok(feed.opportunities.length >= 12, "the board should not be nearly empty");
+  assert.ok(feed.opportunities.length >= 20, "the board should not be nearly empty");
+  assert.ok(feed.opportunities.length <= 30, "the board should remain immediately readable");
 
   for (const platform of ["youtube", "instagram", "tiktok", "x"]) {
     const check = feed.sourceChecks.find((item) => item.platform === platform);
@@ -36,6 +37,7 @@ test("the comment opportunity feed is a valid v2 snapshot with every platform ch
     // A platform is only allowed to claim success when it actually produced
     // something, and only allowed to show cards when it did not fail.
     const count = feed.opportunities.filter((item) => item.platform === platform).length;
+    assert.ok(count >= 4, `${platform} needs at least four verified opportunities`);
     if (check.status === "success") assert.ok(count > 0, `${platform} claims success with no card`);
     if (check.status === "failed") assert.equal(count, 0, `${platform} failed yet published cards`);
   }
