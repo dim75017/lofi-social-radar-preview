@@ -1,31 +1,31 @@
 {
   "lane": "fast",
-  "ranAt": "2026-08-18T12:29:49.517Z",
+  "ranAt": "2026-08-18T13:25:07.540Z",
   "watchedAccounts": 97,
   "reachedChannels": 97,
   "failedChannels": [],
-  "discovered": 6,
-  "remeasured": 471,
-  "promoted": 65,
+  "discovered": 12,
+  "remeasured": 140,
+  "promoted": 67,
   "trackedCandidates": 900,
   "published": 39,
   "tierCounts": {
-    "a": 9,
-    "b": 30
+    "a": 11,
+    "b": 28
   },
   "categoryCounts": {
-    "internet": 5,
     "music": 6,
-    "gaming": 8,
     "cinema": 7,
-    "tech": 5,
+    "internet": 5,
+    "gaming": 9,
+    "tech": 4,
     "other": 8
   },
   "voice": {
     "generated": 0,
     "refused": 0,
-    "pending": 22,
-    "candidates": 22,
+    "pending": 20,
+    "candidates": 20,
     "engine": "absent"
   }
 }
