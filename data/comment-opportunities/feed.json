@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "capturedAt": "2026-08-18T23:56:36.414Z",
-  "nextRefreshAt": "2026-08-19T05:56:36.414Z",
+  "capturedAt": "2026-08-19T02:33:39.734Z",
+  "nextRefreshAt": "2026-08-19T08:33:39.734Z",
   "cadenceHours": 6,
   "fastLaneMinutes": 15,
-  "fastLaneCheckedAt": "2026-08-18T23:56:36.414Z",
+  "fastLaneCheckedAt": "2026-08-19T02:33:39.734Z",
   "watchlistAccountCount": 97,
   "sourceChecks": [
     {
       "id": "youtube-watchlist-atom",
       "platform": "youtube",
-      "status": "success",
-      "checkedAt": "2026-08-18T23:56:36.414Z",
-      "label": "YouTube · 97/97 flux Atom de la watchlist lus"
+      "status": "limited",
+      "checkedAt": "2026-08-19T02:33:39.734Z",
+      "label": "YouTube · 9/97 flux Atom de la watchlist lus, 88 injoignables"
     },
     {
       "id": "instagram-reels-public",
@@ -37,6 +37,89 @@
     }
   ],
   "opportunities": [
+    {
+      "id": "yt-cravr5lktla-8a3b85",
+      "platform": "youtube",
+      "category": "cinema",
+      "author": "Crunchyroll",
+      "title": "Please Excuse My Younger Brothers Opening \"Aikotoba\" by DISH//",
+      "caption": "Please Excuse My Younger Brothers OP \"Aikotoba\" by DISH//. Watch Please Excuse My Younger Brothers on Crunchyroll! https://got.cr/cc-pemybop\n\nABOUT PLEASE EXCUSE MY YOUNGER BROTHERS\nHigh school sophomore Ito was excited for a new dad when her mom remarried, but she may have gained more than she bargained for when she found four younger stepbrothers waiting at home. There’s blunt but secretly caring Gen, calm Raku, reclusive Syu, and cheerful little Rui. Now, Ito must go from the quiet of being an only child to learning how to be the eldest sister of a lively household.\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best moments in anime, subbed and dubbed!\n\n▶ WATCH FULL ANIME EPISODES ON YOUTUBE: https://got.cr/cc-pt\n\n🔶 GET YOUR FREE 7-DAY CRUNCHYROLL TRIAL: https",
+      "url": "https://www.youtube.com/watch?v=CRaVR5LKTlA",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i4.ytimg.com/vi/CRaVR5LKTlA/hqdefault.jpg",
+      "publishedAt": "2026-08-18T23:00:07.000Z",
+      "capturedAt": "2026-08-18T23:56:36.414Z",
+      "status": "surging",
+      "momentTier": "b",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@Crunchyroll",
+        "accountTier": "s"
+      },
+      "velocity": {
+        "metric": "views",
+        "perHour": 421,
+        "windowHours": 0.3,
+        "fromCapturedAt": "2026-08-18T23:38:46.487Z",
+        "toCapturedAt": "2026-08-18T23:56:36.414Z"
+      },
+      "lofiFitScore": 82,
+      "commentabilityScore": 69,
+      "priorityScore": 76,
+      "whyNow": "Publié par Crunchyroll il y a 56 min. +421 vues/h mesurés sur 0.3 h.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 459,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-18T23:38:46.487Z",
+          "views": 334,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T23:56:36.414Z",
+          "views": 459,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "i have an essay due and now i have plans"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "the pacing here is doing most of the work"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "eight years at this desk and still here for these"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
     {
       "id": "yt-thxjg80mywk-446040",
       "platform": "youtube",
@@ -410,89 +493,6 @@
           "shares": null,
           "sourceLabel": "YouTube · flux Atom public de Fortnite",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UClG8odDC8TS6Zpqk9CGVQiQ",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "i have an essay due and now i have plans"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "the pacing here is doing most of the work"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "eight years at this desk and still here for these"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-cravr5lktla-8a3b85",
-      "platform": "youtube",
-      "category": "cinema",
-      "author": "Crunchyroll",
-      "title": "Please Excuse My Younger Brothers Opening \"Aikotoba\" by DISH//",
-      "caption": "Please Excuse My Younger Brothers OP \"Aikotoba\" by DISH//. Watch Please Excuse My Younger Brothers on Crunchyroll! https://got.cr/cc-pemybop\n\nABOUT PLEASE EXCUSE MY YOUNGER BROTHERS\nHigh school sophomore Ito was excited for a new dad when her mom remarried, but she may have gained more than she bargained for when she found four younger stepbrothers waiting at home. There’s blunt but secretly caring Gen, calm Raku, reclusive Syu, and cheerful little Rui. Now, Ito must go from the quiet of being an only child to learning how to be the eldest sister of a lively household.\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best moments in anime, subbed and dubbed!\n\n▶ WATCH FULL ANIME EPISODES ON YOUTUBE: https://got.cr/cc-pt\n\n🔶 GET YOUR FREE 7-DAY CRUNCHYROLL TRIAL: https",
-      "url": "https://www.youtube.com/watch?v=CRaVR5LKTlA",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i4.ytimg.com/vi/CRaVR5LKTlA/hqdefault.jpg",
-      "publishedAt": "2026-08-18T23:00:07.000Z",
-      "capturedAt": "2026-08-18T23:56:36.414Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@Crunchyroll",
-        "accountTier": "s"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 421,
-        "windowHours": 0.3,
-        "fromCapturedAt": "2026-08-18T23:38:46.487Z",
-        "toCapturedAt": "2026-08-18T23:56:36.414Z"
-      },
-      "lofiFitScore": 82,
-      "commentabilityScore": 69,
-      "priorityScore": 76,
-      "whyNow": "Publié par Crunchyroll il y a 56 min. +421 vues/h mesurés sur 0.3 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 459,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-18T23:38:46.487Z",
-          "views": 334,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T23:56:36.414Z",
-          "views": 459,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         }
       ],
@@ -1076,6 +1076,289 @@
       "alertedAt": null
     },
     {
+      "id": "yt-xjvbqgx3vi-ed7c0c",
+      "platform": "youtube",
+      "category": "music",
+      "author": "BANGTANTV",
+      "title": "A Love Letter to New York | THE CITY ARIRANG NEW YORK",
+      "caption": "#방탄소년단 #BTS #BTS_THECITY_ARIRANG\n#BTS_THECITY_ARIRANG_NEWYORK\n\nConnect with BTS:\nhttps://ibighit.com/bts\nhttps://x.com/bts_bighit\nhttps://x.com/BTS_twt\nhttp://www.facebook.com/bangtan.official\nhttps://www.youtube.com/user/BANGTANTV\nhttp://instagram.com/BTS.bighitofficial\nhttps://www.tiktok.com/@bts_official_bighit\nhttps://go.weverse.io/qt3S/ti7qve0j\nhttps://www.weibo.com/BTSbighit",
+      "url": "https://www.youtube.com/watch?v=x-jvBQgx3vI",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i1.ytimg.com/vi/x-jvBQgx3vI/hqdefault.jpg",
+      "publishedAt": "2026-08-18T13:00:00.000Z",
+      "capturedAt": "2026-08-18T23:56:36.414Z",
+      "status": "surging",
+      "momentTier": "b",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@BTS",
+        "accountTier": "a"
+      },
+      "velocity": {
+        "metric": "views",
+        "perHour": 12618,
+        "windowHours": 0.3,
+        "fromCapturedAt": "2026-08-18T23:38:46.487Z",
+        "toCapturedAt": "2026-08-18T23:56:36.414Z"
+      },
+      "lofiFitScore": 88,
+      "commentabilityScore": 63,
+      "priorityScore": 77,
+      "whyNow": "Publié par BANGTANTV il y a 11 h. +12 618 vues/h mesurés sur 0.3 h.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 284600,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-18T13:25:07.540Z",
+          "views": 47909,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T14:02:04.551Z",
+          "views": 71328,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T14:50:39.976Z",
+          "views": 89223,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T15:23:20.806Z",
+          "views": 100563,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T15:55:11.577Z",
+          "views": 122277,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T16:22:41.684Z",
+          "views": 134198,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T16:56:12.898Z",
+          "views": 152771,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T17:21:20.175Z",
+          "views": 165598,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T17:51:51.121Z",
+          "views": 184571,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T18:11:25.723Z",
+          "views": 189949,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T18:29:46.586Z",
+          "views": 207153,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T19:06:31.680Z",
+          "views": 220891,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T19:42:59.377Z",
+          "views": 232222,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T20:17:38.981Z",
+          "views": 240466,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T20:46:37.103Z",
+          "views": 244808,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T21:15:47.122Z",
+          "views": 250439,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T21:50:01.742Z",
+          "views": 257425,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T22:29:05.814Z",
+          "views": 269022,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T22:52:35.596Z",
+          "views": 272011,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T23:14:59.048Z",
+          "views": 275646,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T23:38:46.487Z",
+          "views": 280850,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-18T23:56:36.414Z",
+          "views": 284600,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de BTS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "closing the notebook, purely for research"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "everyone will remember the last ten seconds"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "the comment section is about to be unreadable, in a good way"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
       "id": "yt-w9buvxe1ve-7f8bb7",
       "platform": "youtube",
       "category": "cinema",
@@ -1459,289 +1742,6 @@
           "tone": "complice",
           "label": "Complice",
           "text": "showing up early for this one"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-xjvbqgx3vi-ed7c0c",
-      "platform": "youtube",
-      "category": "music",
-      "author": "BANGTANTV",
-      "title": "A Love Letter to New York | THE CITY ARIRANG NEW YORK",
-      "caption": "#방탄소년단 #BTS #BTS_THECITY_ARIRANG\n#BTS_THECITY_ARIRANG_NEWYORK\n\nConnect with BTS:\nhttps://ibighit.com/bts\nhttps://x.com/bts_bighit\nhttps://x.com/BTS_twt\nhttp://www.facebook.com/bangtan.official\nhttps://www.youtube.com/user/BANGTANTV\nhttp://instagram.com/BTS.bighitofficial\nhttps://www.tiktok.com/@bts_official_bighit\nhttps://go.weverse.io/qt3S/ti7qve0j\nhttps://www.weibo.com/BTSbighit",
-      "url": "https://www.youtube.com/watch?v=x-jvBQgx3vI",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i1.ytimg.com/vi/x-jvBQgx3vI/hqdefault.jpg",
-      "publishedAt": "2026-08-18T13:00:00.000Z",
-      "capturedAt": "2026-08-18T23:56:36.414Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@BTS",
-        "accountTier": "a"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 12618,
-        "windowHours": 0.3,
-        "fromCapturedAt": "2026-08-18T23:38:46.487Z",
-        "toCapturedAt": "2026-08-18T23:56:36.414Z"
-      },
-      "lofiFitScore": 88,
-      "commentabilityScore": 63,
-      "priorityScore": 77,
-      "whyNow": "Publié par BANGTANTV il y a 11 h. +12 618 vues/h mesurés sur 0.3 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 284600,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-18T13:25:07.540Z",
-          "views": 47909,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T14:02:04.551Z",
-          "views": 71328,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T14:50:39.976Z",
-          "views": 89223,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T15:23:20.806Z",
-          "views": 100563,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T15:55:11.577Z",
-          "views": 122277,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T16:22:41.684Z",
-          "views": 134198,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T16:56:12.898Z",
-          "views": 152771,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T17:21:20.175Z",
-          "views": 165598,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T17:51:51.121Z",
-          "views": 184571,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T18:11:25.723Z",
-          "views": 189949,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T18:29:46.586Z",
-          "views": 207153,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T19:06:31.680Z",
-          "views": 220891,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T19:42:59.377Z",
-          "views": 232222,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T20:17:38.981Z",
-          "views": 240466,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T20:46:37.103Z",
-          "views": 244808,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T21:15:47.122Z",
-          "views": 250439,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T21:50:01.742Z",
-          "views": 257425,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T22:29:05.814Z",
-          "views": 269022,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T22:52:35.596Z",
-          "views": 272011,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T23:14:59.048Z",
-          "views": 275646,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T23:38:46.487Z",
-          "views": 280850,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-18T23:56:36.414Z",
-          "views": 284600,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de BTS",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLkAepWjdylmXSltofFvsYQ",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "closing the notebook, purely for research"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "everyone will remember the last ten seconds"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "the comment section is about to be unreadable, in a good way"
         }
       ],
       "commentsSource": "fallback",
