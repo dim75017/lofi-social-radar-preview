@@ -1,8 +1,8 @@
 {
-  "lane": "deep",
-  "ranAt": "2026-08-19T02:33:39.734Z",
+  "lane": "fast",
+  "ranAt": "2026-08-19T05:53:32.545Z",
   "watchedAccounts": 97,
-  "reachedChannels": 9,
+  "reachedChannels": 6,
   "failedChannels": [
     {
       "handle": "@A24",
@@ -42,15 +42,15 @@
     },
     {
       "handle": "@Marvel",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@NEONrated",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@Netflix",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@ParamountPictures",
@@ -62,10 +62,14 @@
     },
     {
       "handle": "@PrimeVideo",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@sonypictures",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@StarWars",
       "reason": "HTTP 404"
     },
     {
@@ -78,7 +82,7 @@
     },
     {
       "handle": "@warnerbros",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@annapurnainteractive",
@@ -98,7 +102,7 @@
     },
     {
       "handle": "@devolverdigital",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@EA",
@@ -118,19 +122,15 @@
     },
     {
       "handle": "@larianstudios",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@LeagueofLegends",
       "reason": "HTTP 404"
     },
     {
-      "handle": "@minecraft",
-      "reason": "HTTP 404"
-    },
-    {
       "handle": "@NintendoAmerica",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@PlayStation",
@@ -145,7 +145,7 @@
       "reason": "HTTP 404"
     },
     {
-      "handle": "@rockstargames",
+      "handle": "@SEGA",
       "reason": "HTTP 404"
     },
     {
@@ -157,11 +157,11 @@
       "reason": "HTTP 404"
     },
     {
-      "handle": "@ThePokemonCompany",
+      "handle": "@ubisoft",
       "reason": "HTTP 404"
     },
     {
-      "handle": "@ubisoft",
+      "handle": "@Valve",
       "reason": "HTTP 404"
     },
     {
@@ -170,7 +170,7 @@
     },
     {
       "handle": "@DudePerfect",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@IShowSpeed",
@@ -182,7 +182,7 @@
     },
     {
       "handle": "@Jerma985",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@KaiCenat",
@@ -202,15 +202,11 @@
     },
     {
       "handle": "@Mrwhosetheboss",
-      "reason": "HTTP 500"
-    },
-    {
-      "handle": "@PewDiePie",
       "reason": "HTTP 404"
     },
     {
       "handle": "@ryan",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@Sidemen",
@@ -218,19 +214,19 @@
     },
     {
       "handle": "@ArianaGrande",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@BillieEilish",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@BLACKPINK",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@boilerroom",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@BTS",
@@ -250,6 +246,10 @@
     },
     {
       "handle": "@Genius",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@grammys",
       "reason": "HTTP 404"
     },
     {
@@ -285,20 +285,16 @@
       "reason": "HTTP 404"
     },
     {
-      "handle": "@tylerthecreator",
-      "reason": "HTTP 500"
-    },
-    {
       "handle": "@FIFA",
       "reason": "HTTP 404"
     },
     {
       "handle": "@Formula1",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@NBA",
-      "reason": "HTTP 404"
+      "reason": "HTTP 500"
     },
     {
       "handle": "@NFL",
@@ -317,15 +313,27 @@
       "reason": "HTTP 404"
     },
     {
+      "handle": "@Apple",
+      "reason": "HTTP 404"
+    },
+    {
       "handle": "@BostonDynamics",
       "reason": "HTTP 404"
     },
     {
       "handle": "@Google",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@kurzgesagt",
+      "reason": "HTTP 500"
+    },
+    {
+      "handle": "@LinusTechTips",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@mkbhd",
       "reason": "HTTP 404"
     },
     {
@@ -342,14 +350,18 @@
     },
     {
       "handle": "@Samsung",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@SpaceX",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@Tesla",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@veritasium",
       "reason": "HTTP 404"
     },
     {
@@ -357,27 +369,27 @@
       "reason": "HTTP 404"
     }
   ],
-  "discovered": 4,
-  "remeasured": 42,
+  "discovered": 0,
+  "remeasured": 5,
   "promoted": 60,
   "trackedCandidates": 900,
   "published": 30,
   "tierCounts": {
-    "b": 24,
-    "a": 6
+    "b": 25,
+    "a": 5
   },
   "categoryCounts": {
     "cinema": 8,
-    "gaming": 9,
-    "music": 1,
+    "gaming": 8,
+    "music": 2,
     "internet": 1,
     "other": 11
   },
   "voice": {
     "generated": 0,
     "refused": 0,
-    "pending": 15,
-    "candidates": 15,
+    "pending": 14,
+    "candidates": 14,
     "engine": "absent"
   }
 }
