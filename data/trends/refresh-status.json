@@ -1,76 +1,19 @@
 {
   "version": 1,
   "cadenceHours": 24,
-  "lastAttemptAt": "2026-08-19T04:54:32.018Z",
+  "lastAttemptAt": "2026-08-20T04:55:42.063Z",
   "lastSuccessfulAt": "2026-08-19T04:54:32.018Z",
-  "nextScheduledAt": "2026-08-20T04:54:32.018Z",
-  "status": "success",
-  "runId": "32217429367",
-  "runUrl": "https://github.com/dim75017/lofi-social-radar-preview/actions/runs/32217429367",
-  "sourceChecks": [
-    {
-      "id": "buffer-tiktok",
-      "label": "Buffer · TikTok",
-      "platform": "tiktok",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 15
-    },
-    {
-      "id": "later-instagram",
-      "label": "Later · Instagram Reels",
-      "platform": "instagram",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 16
-    },
-    {
-      "id": "socialpilot-tiktok",
-      "label": "SocialPilot · TikTok",
-      "platform": "tiktok",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 18
-    },
-    {
-      "id": "socialpilot-instagram",
-      "label": "SocialPilot · Instagram Reels",
-      "platform": "instagram",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 17
-    },
-    {
-      "id": "tokchart-public",
-      "label": "Tokchart · sons TikTok",
-      "platform": "tiktok",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 1
-    },
-    {
-      "id": "youtube-shorts-daily",
-      "label": "TrendVideosHub · YouTube Shorts",
-      "platform": "youtube",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 6
-    },
-    {
-      "id": "x-france-trends",
-      "label": "X · tendances France",
-      "platform": "x",
-      "status": "success",
-      "checkedAt": "2026-08-19T04:54:32.018Z",
-      "candidatesMatched": 0
-    }
-  ],
+  "nextScheduledAt": "2026-08-20T16:55:42.063Z",
+  "status": "degraded",
+  "runId": "32333641291",
+  "runUrl": "https://github.com/dim75017/lofi-social-radar-preview/actions/runs/32333641291",
+  "sourceChecks": [],
   "counts": {
-    "checkedSources": 7,
-    "matchedSignals": 73,
-    "actionable": 51,
-    "lofiGirl": 44,
-    "lofiBoy": 7
+    "checkedSources": 0,
+    "matchedSignals": 0,
+    "actionable": 0,
+    "lofiGirl": 0,
+    "lofiBoy": 0
   },
-  "message": "Rafraîchissement quotidien publié après validation complète."
+  "message": "Trend trop ancienne : gaming-setup-night-reveal (vÃ©rification > 72 h)."
 }
