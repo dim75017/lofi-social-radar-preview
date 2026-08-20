@@ -1,8 +1,8 @@
 {
   "lane": "fast",
-  "ranAt": "2026-08-20T05:54:13.320Z",
+  "ranAt": "2026-08-20T06:31:54.061Z",
   "watchedAccounts": 97,
-  "reachedChannels": 4,
+  "reachedChannels": 3,
   "failedChannels": [
     {
       "handle": "@A24",
@@ -30,7 +30,7 @@
     },
     {
       "handle": "@focusfeatures",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@hbomax",
@@ -106,7 +106,7 @@
     },
     {
       "handle": "@devolverdigital",
-      "reason": "HTTP 500"
+      "reason": "HTTP 404"
     },
     {
       "handle": "@EA",
@@ -118,6 +118,10 @@
     },
     {
       "handle": "@HoYoverse",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@IGN",
       "reason": "HTTP 404"
     },
     {
@@ -217,6 +221,10 @@
       "reason": "HTTP 404"
     },
     {
+      "handle": "@PewDiePie",
+      "reason": "HTTP 404"
+    },
+    {
       "handle": "@ryan",
       "reason": "HTTP 404"
     },
@@ -253,15 +261,15 @@
       "reason": "HTTP 404"
     },
     {
+      "handle": "@DualLipa",
+      "reason": "HTTP 404"
+    },
+    {
       "handle": "@Genius",
       "reason": "HTTP 404"
     },
     {
       "handle": "@grammys",
-      "reason": "HTTP 404"
-    },
-    {
-      "handle": "@HYBELABELS",
       "reason": "HTTP 404"
     },
     {
@@ -298,6 +306,10 @@
     },
     {
       "handle": "@FIFA",
+      "reason": "HTTP 404"
+    },
+    {
+      "handle": "@Formula1",
       "reason": "HTTP 404"
     },
     {
@@ -353,10 +365,6 @@
       "reason": "HTTP 404"
     },
     {
-      "handle": "@OpenAI",
-      "reason": "HTTP 404"
-    },
-    {
       "handle": "@Samsung",
       "reason": "HTTP 404"
     },
@@ -371,14 +379,10 @@
     {
       "handle": "@veritasium",
       "reason": "HTTP 404"
-    },
-    {
-      "handle": "@Vsauce",
-      "reason": "HTTP 404"
     }
   ],
-  "discovered": 5,
-  "remeasured": 25,
+  "discovered": 0,
+  "remeasured": 17,
   "promoted": 63,
   "trackedCandidates": 900,
   "published": 30,
@@ -398,8 +402,8 @@
   "voice": {
     "generated": 0,
     "refused": 0,
-    "pending": 15,
-    "candidates": 15,
+    "pending": 14,
+    "candidates": 14,
     "engine": "absent"
   }
 }
