@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "capturedAt": "2026-08-20T06:31:54.061Z",
-  "nextRefreshAt": "2026-08-20T12:31:54.061Z",
+  "capturedAt": "2026-08-20T07:26:09.829Z",
+  "nextRefreshAt": "2026-08-20T13:26:09.829Z",
   "cadenceHours": 6,
   "fastLaneMinutes": 15,
-  "fastLaneCheckedAt": "2026-08-20T06:31:54.061Z",
+  "fastLaneCheckedAt": "2026-08-20T07:26:09.829Z",
   "watchlistAccountCount": 97,
   "sourceChecks": [
     {
       "id": "youtube-watchlist-atom",
       "platform": "youtube",
-      "status": "limited",
-      "checkedAt": "2026-08-20T06:31:54.061Z",
-      "label": "YouTube · 3/97 flux Atom de la watchlist lus, 94 injoignables"
+      "status": "success",
+      "checkedAt": "2026-08-20T07:26:09.829Z",
+      "label": "YouTube · 97/97 flux Atom de la watchlist lus"
     },
     {
       "id": "instagram-reels-public",
@@ -38,6 +38,73 @@
   ],
   "opportunities": [
     {
+      "id": "yt-72qmf7cshg-645e0c",
+      "platform": "youtube",
+      "category": "cinema",
+      "author": "Netflix",
+      "title": "“we just wanted to have a good time, all the time” The final season of OBX is now playing",
+      "caption": "“we just wanted to have a good time, all the time”&#13;\n&#13;\nWatch on Netflix: https://www.netflix.com/title/81706626&#13;\n&#13;\nAbout Netflix:&#13;\nNetflix is one of the world’s leading entertainment services offering TV series, films, games and live programming across a wide variety of genres and languages. Members can play, pause and resume watching as much as they want, anytime, anywhere, and can change their plans at any time. &#13;\n&#13;\n“we just wanted to have a good time, all the time” The final season of OBX is now playing&#13;\nhttps://www.youtube.com/@Netflix&#13;\n&#13;\nAfter losing one of their own, the Pogues chase revenge and redemption as they pursue a stolen artifact with the power to change their fortunes.",
+      "url": "https://www.youtube.com/watch?v=72qMf7c-shg",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i4.ytimg.com/vi/72qMf7c-shg/hqdefault.jpg",
+      "publishedAt": "2026-08-20T07:00:00.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "hot",
+      "momentTier": "a",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@Netflix",
+        "accountTier": "s"
+      },
+      "velocity": null,
+      "lofiFitScore": 72,
+      "commentabilityScore": 69,
+      "priorityScore": 71,
+      "whyNow": "Publié par Netflix il y a 26 min. 1 412 vues au premier relevé, accélération pas encore mesurée.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 1412,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 1412,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Netflix",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "i have an essay due and now i have plans"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "the pacing here is doing most of the work"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "eight years at this desk and still here for these"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
       "id": "yt-qefvhw4ynbm-c00269",
       "platform": "youtube",
       "category": "gaming",
@@ -49,7 +116,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i2.ytimg.com/vi/qeFVhw4YNbM/hqdefault.jpg",
       "publishedAt": "2026-08-19T12:03:57.000Z",
-      "capturedAt": "2026-08-19T23:16:00.533Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "s",
       "discovery": {
@@ -59,21 +126,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 5725266,
-        "windowHours": 1.43,
-        "fromCapturedAt": "2026-08-19T21:50:25.806Z",
-        "toCapturedAt": "2026-08-19T23:16:00.533Z"
+        "perHour": 587942,
+        "windowHours": 8.17,
+        "fromCapturedAt": "2026-08-19T23:16:00.533Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 75,
-      "commentabilityScore": 75,
-      "priorityScore": 75,
-      "whyNow": "Publié par Call of Duty il y a 11 h. +5 725 266 vues/h mesurés sur 1.43 h. La section va saturer vite.",
+      "commentabilityScore": 67,
+      "priorityScore": 71,
+      "whyNow": "Publié par Call of Duty il y a 19 h. +587 942 vues/h mesurés sur 8.17 h. La section va saturer vite.",
       "risk": {
         "level": "medium",
         "note": "Sujet potentiellement sensible détecté dans le titre ou la description : relire avant de poster."
       },
       "metrics": {
-        "views": 22665997,
+        "views": 27469040,
         "likes": null,
         "comments": null,
         "shares": null
@@ -218,6 +285,16 @@
           "sourceLabel": "YouTube · flux Atom public de Call of Duty",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC9YydG57epLqxA9cTzZXSeQ",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 27469040,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Call of Duty",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC9YydG57epLqxA9cTzZXSeQ",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -241,6 +318,73 @@
       "alertedAt": null
     },
     {
+      "id": "yt-svt3dxuguy4-7fc9fa",
+      "platform": "youtube",
+      "category": "gaming",
+      "author": "thegameawards",
+      "title": "BLACK MYTH: Zhong Kui 15 Minute Gameplay Demo",
+      "caption": "From the creators of Black Myth: Wukong, comes the next game in the series -- Black Myth: Zhong Kui \n\nSubscribe to Watch more The Game Awards:  http://bit.ly/tga18sub\n\nFollow The Game Awards on X: http://www.x.com/thegameawards\n\nFollow The Game Awards on Instagram:\nhttp://www.instagram.com/thegameawards\n\nFollow Geoff Keighley on X:\nhttp://www.x.com/geoffkeighley\n\n#thegameawards #gameoftheyear",
+      "url": "https://www.youtube.com/watch?v=SvT3dxUGuy4",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i4.ytimg.com/vi/SvT3dxUGuy4/hqdefault.jpg",
+      "publishedAt": "2026-08-20T04:58:41.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "hot",
+      "momentTier": "a",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@thegameawards",
+        "accountTier": "s"
+      },
+      "velocity": null,
+      "lofiFitScore": 70,
+      "commentabilityScore": 69,
+      "priorityScore": 70,
+      "whyNow": "Publié par thegameawards il y a 2 h. 5 233 vues au premier relevé, accélération pas encore mesurée.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 5233,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 5233,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de The Game Awards",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCqDS7KWjAPKv-7ZSlro9OiQ",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "closing the notebook, purely for research"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "everyone will remember the last ten seconds"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "the comment section is about to be unreadable, in a good way"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
       "id": "yt-gsk0pabxogo-4b69e9",
       "platform": "youtube",
       "category": "gaming",
@@ -252,7 +396,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i4.ytimg.com/vi/GsK0PAbXogo/hqdefault.jpg",
       "publishedAt": "2026-08-19T23:03:45.000Z",
-      "capturedAt": "2026-08-20T00:00:02.204Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
@@ -262,21 +406,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 1200,
-        "windowHours": 0.26,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T00:00:02.204Z"
+        "perHour": 998,
+        "windowHours": 7.44,
+        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 80,
-      "commentabilityScore": 69,
-      "priorityScore": 75,
-      "whyNow": "Publié par XBOX il y a 56 min. +1 200 vues/h mesurés sur 0.26 h.",
+      "commentabilityScore": 63,
+      "priorityScore": 72,
+      "whyNow": "Publié par XBOX il y a 8 h. +998 vues/h mesurés sur 7.44 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 1760,
+        "views": 9182,
         "likes": null,
         "comments": null,
         "shares": null
@@ -305,6 +449,16 @@
         {
           "capturedAt": "2026-08-20T00:00:02.204Z",
           "views": 1760,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Xbox",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 9182,
           "likes": null,
           "comments": null,
           "shares": null,
@@ -345,7 +499,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i1.ytimg.com/vi/d04t4_xKVcg/hqdefault.jpg",
       "publishedAt": "2026-08-19T18:03:06.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "a",
       "discovery": {
@@ -355,21 +509,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 63568,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
+        "perHour": 57978,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 74,
-      "commentabilityScore": 67,
-      "priorityScore": 71,
-      "whyNow": "Publié par Markiplier il y a 8 h. +63 568 vues/h mesurés sur 2.54 h.",
+      "commentabilityScore": 59,
+      "priorityScore": 67,
+      "whyNow": "Publié par Markiplier il y a 13 h. +57 978 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 455212,
+        "views": 739217,
         "likes": null,
         "comments": null,
         "shares": null
@@ -514,6 +668,16 @@
           "sourceLabel": "YouTube · flux Atom public de Markiplier",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC7_YxT-KID8kRbqZo7MyscQ",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 739217,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Markiplier",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC7_YxT-KID8kRbqZo7MyscQ",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -548,7 +712,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i3.ytimg.com/vi/6ubPg36ZQJI/hqdefault.jpg",
       "publishedAt": "2026-08-19T21:42:13.000Z",
-      "capturedAt": "2026-08-20T00:00:02.204Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
@@ -558,21 +722,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 255,
-        "windowHours": 0.26,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T00:00:02.204Z"
+        "perHour": 185,
+        "windowHours": 7.44,
+        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 77,
-      "commentabilityScore": 69,
-      "priorityScore": 73,
-      "whyNow": "Publié par A24 il y a 2 h. +255 vues/h mesurés sur 0.26 h.",
+      "commentabilityScore": 63,
+      "priorityScore": 71,
+      "whyNow": "Publié par A24 il y a 10 h. +185 vues/h mesurés sur 7.44 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 624,
+        "views": 2001,
         "likes": null,
         "comments": null,
         "shares": null
@@ -627,6 +791,16 @@
           "sourceLabel": "YouTube · flux Atom public de A24",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCuPivVjnfNo4mb3Oog_frZg",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 2001,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de A24",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCuPivVjnfNo4mb3Oog_frZg",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -650,199 +824,6 @@
       "alertedAt": null
     },
     {
-      "id": "yt-gywstaoy6qk-05a0bc",
-      "platform": "youtube",
-      "category": "cinema",
-      "author": "Crunchyroll",
-      "title": "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life | Official Teaser | Crunchyroll",
-      "caption": "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life is coming to Crunchyroll this October!\n\nABOUT THE LAID-OFF CHEAT-GRANTING MAGE ENJOYS A SECOND LEASE ON LIFE\nRein the Enchanter is a support mage with the ability to enhance weapons and armor. But when he gets fired from his guild for the simple reason that he's already enchanted everything they own, he decides to take the power back into his own hands—literally! Rein recalls every enchantment he ever put on his guildmates' gear, retrieving the bonus points for himself. But does he really not have anything better to enchant with them than some Plain Clothes and a Copper Sword…? Come along on a cheat-tier journey from the most common of common origins!\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best ",
-      "url": "https://www.youtube.com/watch?v=GyWstaOY6qk",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i4.ytimg.com/vi/GyWstaOY6qk/hqdefault.jpg",
-      "publishedAt": "2026-08-19T18:00:24.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@Crunchyroll",
-        "accountTier": "s"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 629,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
-      },
-      "lofiFitScore": 82,
-      "commentabilityScore": 63,
-      "priorityScore": 73,
-      "whyNow": "Publié par Crunchyroll il y a 9 h. +629 vues/h mesurés sur 2.54 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 7407,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 1170,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 1500,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 1732,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 2216,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 2769,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 3291,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 3643,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 4161,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 4620,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 5026,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 5530,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 5811,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 7407,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "i have an essay due and now i have plans"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "the pacing here is doing most of the work"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "eight years at this desk and still here for these"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
       "id": "yt-ekvzwlqgl0s-02cb22",
       "platform": "youtube",
       "category": "music",
@@ -854,7 +835,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i2.ytimg.com/vi/EKvZWLqgl0s/hqdefault.jpg",
       "publishedAt": "2026-08-19T21:10:36.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
@@ -864,21 +845,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 2373,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
+        "perHour": 2070,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 78,
       "commentabilityScore": 63,
       "priorityScore": 71,
-      "whyNow": "Publié par Billie Eilish il y a 5 h. +2 373 vues/h mesurés sur 2.54 h.",
+      "whyNow": "Publié par Billie Eilish il y a 10 h. +2 070 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 15390,
+        "views": 25530,
         "likes": null,
         "comments": null,
         "shares": null
@@ -963,6 +944,16 @@
           "sourceLabel": "YouTube · flux Atom public de Billie Eilish",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCiGm_E4ZwYSHV3bcW1pnSeQ",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 25530,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Billie Eilish",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCiGm_E4ZwYSHV3bcW1pnSeQ",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -986,245 +977,115 @@
       "alertedAt": null
     },
     {
-      "id": "yt-fnj7ykvewge-8f6e00",
+      "id": "yt-8ijyu10bq2m-c24623",
       "platform": "youtube",
-      "category": "cinema",
-      "author": "Marvel Entertainment",
-      "title": "Tony Stark and Nick Fury - The Avenger Initiative | Iron Man | Official Clip",
-      "caption": "The moment that started it all. Marvel Studios' Iron Man is now streaming on @disneyplus \n\n► SUBSCRIBE to the channel to get notified when new Marvel videos are posted: https://www.youtube.com/marvel?sub_confirmation=1\n\n► SUBSCRIBE to Disney+ to stream all of your favorite Marvel shows and movies: https://www.disneyplus.com/\n\nFollow on social media to get the latest news and announcements from Marvel:\n\nTikTok: https://www.tiktok.com/@marvel\nInstagram: https://www.instagram.com/marvel\nFacebook: https://www.facebook.com/Marvel\nX: https://x.com/marvel\n\nExperience more stories by subscribing: \n\n@Disney \n@StarWars \n@pixar \n@disneyplus",
-      "url": "https://www.youtube.com/watch?v=fNj7ykvewGE",
+      "category": "gaming",
+      "author": "Nintendo of America",
+      "title": "Teenage Mutant Ninja Turtles: Splintered Fate – King's Gambit Update – Nintendo Switch 2",
+      "caption": "Play the King's Gambit update in Teenage Mutant Ninja Turtles: Splintered Fate, now on Nintendo Switch 2 and Nintendo Switch: https://ninten.do/6005aJMHN\n\nTeenage Mutant Ninja Turtles: Splintered Fate's biggest update is live on Nintendo Switch 2 and Nintendo Switch—free for everyone! Explore new levels, fight epic bosses, and say hello to a cute new ally. \n\nWant more? Check out the Slash and Samurai Armor Pack DLCs, available now! \n\n#TeenageMutantNinjaTurtles \n\nVisit Nintendo.com for more info: https://ninten.do/6008Spp2s\n\nSubscribe for more Nintendo fun: https://goo.gl/HYYsot\n\nFollow Nintendo of America\nX/Twitter: https://twitter.com/NintendoAmerica\nFacebook: https://www.facebook.com/NintendoAmerica\nInstagram: https://www.instagram.com/nintendoamerica\nTwitch: https://www.twitch.tv/nintendo",
+      "url": "https://www.youtube.com/watch?v=8IJYu10bQ2M",
       "mediaType": "video",
       "durationSeconds": null,
-      "thumbnailUrl": "https://i3.ytimg.com/vi/fNj7ykvewGE/hqdefault.jpg",
-      "publishedAt": "2026-08-19T14:00:37.000Z",
-      "capturedAt": "2026-08-20T00:00:02.204Z",
+      "thumbnailUrl": "https://i1.ytimg.com/vi/8IJYu10bQ2M/hqdefault.jpg",
+      "publishedAt": "2026-08-19T22:00:03.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
         "source": "watchlist",
-        "accountHandle": "@Marvel",
+        "accountHandle": "@NintendoAmerica",
         "accountTier": "s"
       },
       "velocity": {
         "metric": "views",
-        "perHour": 2079,
-        "windowHours": 0.26,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T00:00:02.204Z"
+        "perHour": 2389,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
-      "lofiFitScore": 82,
+      "lofiFitScore": 75,
       "commentabilityScore": 63,
-      "priorityScore": 73,
-      "whyNow": "Publié par Marvel Entertainment il y a 10 h. +2 079 vues/h mesurés sur 0.26 h.",
+      "priorityScore": 70,
+      "whyNow": "Publié par Nintendo of America il y a 9 h. +2 389 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 82315,
+        "views": 25316,
         "likes": null,
         "comments": null,
         "shares": null
       },
       "observations": [
         {
-          "capturedAt": "2026-08-19T14:51:42.188Z",
-          "views": 12473,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T15:23:08.141Z",
-          "views": 15703,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T15:55:15.251Z",
-          "views": 19452,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T16:21:44.758Z",
-          "views": 24926,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T16:54:46.287Z",
-          "views": 28714,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T17:20:04.620Z",
-          "views": 37116,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T17:49:08.001Z",
-          "views": 43568,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T18:22:11.458Z",
-          "views": 48639,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 52649,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 62288,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 63554,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 67626,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 69753,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 72507,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 75228,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
-          "exactness": "exact"
-        },
-        {
           "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 76522,
+          "views": 1635,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 78668,
+          "views": 3478,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 80610,
+          "views": 4343,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 81776,
+          "views": 5152,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 82315,
+          "views": 5268,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T02:32:15.138Z",
+          "views": 13612,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 25316,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
           "exactness": "exact"
         }
       ],
@@ -1232,17 +1093,17 @@
         {
           "tone": "funny",
           "label": "Drôle",
-          "text": "i have an essay due and now i have plans"
+          "text": "closing the notebook, purely for research"
         },
         {
           "tone": "smart",
           "label": "Smart",
-          "text": "the pacing here is doing most of the work"
+          "text": "everyone will remember the last ten seconds"
         },
         {
           "tone": "complice",
           "label": "Complice",
-          "text": "eight years at this desk and still here for these"
+          "text": "the comment section is about to be unreadable, in a good way"
         }
       ],
       "commentsSource": "fallback",
@@ -1260,7 +1121,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i1.ytimg.com/vi/t2bjOLxNvuw/hqdefault.jpg",
       "publishedAt": "2026-08-19T13:00:01.000Z",
-      "capturedAt": "2026-08-20T06:31:54.061Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
@@ -1270,21 +1131,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 14593,
-        "windowHours": 6.53,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T06:31:54.061Z"
+        "perHour": 11571,
+        "windowHours": 0.9,
+        "fromCapturedAt": "2026-08-20T06:31:54.061Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 88,
       "commentabilityScore": 55,
       "priorityScore": 73,
-      "whyNow": "Publié par HYBE LABELS il y a 18 h. +14 593 vues/h mesurés sur 6.53 h.",
+      "whyNow": "Publié par HYBE LABELS il y a 18 h. +11 571 vues/h mesurés sur 0.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 544069,
+        "views": 554534,
         "likes": null,
         "comments": null,
         "shares": null
@@ -1519,6 +1380,16 @@
           "sourceLabel": "YouTube · flux Atom public de HYBE LABELS",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC3IZKseVpdzPSBaWxBxundA",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 554534,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de HYBE LABELS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC3IZKseVpdzPSBaWxBxundA",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -1542,511 +1413,49 @@
       "alertedAt": null
     },
     {
-      "id": "yt-8ijyu10bq2m-c24623",
+      "id": "yt-igzhnw14jek-db013a",
       "platform": "youtube",
       "category": "gaming",
-      "author": "Nintendo of America",
-      "title": "Teenage Mutant Ninja Turtles: Splintered Fate – King's Gambit Update – Nintendo Switch 2",
-      "caption": "Play the King's Gambit update in Teenage Mutant Ninja Turtles: Splintered Fate, now on Nintendo Switch 2 and Nintendo Switch: https://ninten.do/6005aJMHN\n\nTeenage Mutant Ninja Turtles: Splintered Fate's biggest update is live on Nintendo Switch 2 and Nintendo Switch—free for everyone! Explore new levels, fight epic bosses, and say hello to a cute new ally. \n\nWant more? Check out the Slash and Samurai Armor Pack DLCs, available now! \n\n#TeenageMutantNinjaTurtles \n\nVisit Nintendo.com for more info: https://ninten.do/6008Spp2s\n\nSubscribe for more Nintendo fun: https://goo.gl/HYYsot\n\nFollow Nintendo of America\nX/Twitter: https://twitter.com/NintendoAmerica\nFacebook: https://www.facebook.com/NintendoAmerica\nInstagram: https://www.instagram.com/nintendoamerica\nTwitch: https://www.twitch.tv/nintendo",
-      "url": "https://www.youtube.com/watch?v=8IJYu10bQ2M",
+      "author": "PlayStation",
+      "title": "Grim Trials - Launch Trailer | PS5 Games",
+      "caption": "https://store.playstation.com/en-us/concept/10016444\n\nGrim Trials is a heavy metal action roguelite where you craft and customize your own weapons and equipment to embrace Death your own way.\n\nPlay as Avelin, a young woman who has met an untimely end, and found herself recruited as one of Death’s many Reapers. Tasked to hunt down impure souls, face her demons, and fight her way through an underworld of her own making, Avelin must endure these trials to become a full-fledged Reaper and see her still-living love once again.\n\nAvailable Now on PlayStation 5 consoles\n\n#ps5 #ps5games #grimtrials",
+      "url": "https://www.youtube.com/watch?v=IGzhNw14JEk",
       "mediaType": "video",
       "durationSeconds": null,
-      "thumbnailUrl": "https://i1.ytimg.com/vi/8IJYu10bQ2M/hqdefault.jpg",
-      "publishedAt": "2026-08-19T22:00:03.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
-      "status": "surging",
-      "momentTier": "b",
+      "thumbnailUrl": "https://i2.ytimg.com/vi/IGzhNw14JEk/hqdefault.jpg",
+      "publishedAt": "2026-08-20T07:00:24.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "hot",
+      "momentTier": "a",
       "discovery": {
         "source": "watchlist",
-        "accountHandle": "@NintendoAmerica",
+        "accountHandle": "@PlayStation",
         "accountTier": "s"
       },
-      "velocity": {
-        "metric": "views",
-        "perHour": 3289,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
-      },
-      "lofiFitScore": 75,
-      "commentabilityScore": 63,
+      "velocity": null,
+      "lofiFitScore": 70,
+      "commentabilityScore": 69,
       "priorityScore": 70,
-      "whyNow": "Publié par Nintendo of America il y a 5 h. +3 289 vues/h mesurés sur 2.54 h.",
+      "whyNow": "Publié par PlayStation il y a 26 min. 468 vues au premier relevé, accélération pas encore mesurée.",
       "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+        "level": "medium",
+        "note": "Sujet potentiellement sensible détecté dans le titre ou la description : relire avant de poster."
       },
       "metrics": {
-        "views": 13612,
+        "views": 468,
         "likes": null,
         "comments": null,
         "shares": null
       },
       "observations": [
         {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 1635,
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 468,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 3478,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 4343,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 5152,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 5268,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 13612,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "closing the notebook, purely for research"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "everyone will remember the last ten seconds"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "the comment section is about to be unreadable, in a good way"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-ucljv6fpd8w-96e9a1",
-      "platform": "youtube",
-      "category": "cinema",
-      "author": "Crunchyroll",
-      "title": "Fanfiction Writes Itself in Real Time | Young Ladies Don't Play Fighting Games",
-      "caption": "Episode 2: She built a whole cinematic universe from a sleeve.  Watch Young Ladies Don't Play Fighting Games on Crunchyroll! https://got.cr/cc-yldpfg\n\nABOUT YOUNG LADIES DON'T PLAY FIGHTING GAMES\nMitsuki Aya has one goal at the elite Kuromi Girls’ Academy: to become a refined young lady like the school’s flawless “White Lily,” Yorue Mio. But her image of Mio shatters when Aya accidentally catches her...playing fighting games?! Turns out, the elegant Mio is actually a hardcore gamer—and she wants to duel Aya! The battle (and their friendship) begins.\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best moments in anime, subbed and dubbed!\n\n▶ WATCH FULL ANIME EPISODES ON YOUTUBE: https://got.cr/cc-pt\n\n🔶 GET YOUR FREE 7-DAY CRUNCHYROLL TRIAL: https://got.cr/cc-7days\n\n",
-      "url": "https://www.youtube.com/watch?v=uCLJV6fpd8w",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i2.ytimg.com/vi/uCLJV6fpd8w/hqdefault.jpg",
-      "publishedAt": "2026-08-19T17:00:28.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@Crunchyroll",
-        "accountTier": "s"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 337,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
-      },
-      "lofiFitScore": 77,
-      "commentabilityScore": 63,
-      "priorityScore": 71,
-      "whyNow": "Publié par Crunchyroll il y a 10 h. +337 vues/h mesurés sur 2.54 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 8208,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-19T17:20:04.620Z",
-          "views": 754,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T17:49:08.001Z",
-          "views": 1284,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T18:22:11.458Z",
-          "views": 1887,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 2468,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 3295,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 3907,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 4517,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 5254,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 5785,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 6096,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 6425,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 6739,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 6963,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 7211,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 7354,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 8208,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "closing the notebook, purely for research"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "everyone will remember the last ten seconds"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "the comment section is about to be unreadable, in a good way"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-jhfpdeye2yi-8d82f2",
-      "platform": "youtube",
-      "category": "gaming",
-      "author": "XBOX",
-      "title": "RuneScape: Dragonwilds is coming to XBOX Game Pass | 15 September",
-      "caption": "RuneScape: Dragonwilds will be available day one with XBOX Game Pass on September 15. \n\nOn RuneScape's forgotten continent of Ashenfall, dragons have awoken. Gather, build, skill and craft in this co-operative survival adventure. Only by mastering survival and uncovering ancient secrets can you hope to face the ferocious Dragon Queen.\n\nRuneScape: Dragonwilds, the breakout open-world survival crafting game from Jagex: The RuneScape Company is coming to XBOX Series X|S. The release marks the first time in the RuneScape franchise’s 25-year history that a RuneScape title has launched on console!\n\nhttps://www.xbox.com/games/store/runescape-dragonwilds/9p402rwr63h4\n\nSUBSCRIBE TO XBOX: https://xbx.lv/2EEjmaR \n\nFOLLOW XBOX \nhttps://twitter.com/xbox \nhttps://www.facebook.com/xbox \nhttps://www.instagram.com/xbox/ \nhttps://www.tiktok.com/@xbox\nhttps://www.threads.net/@xbox\nhttps://bsky.app/profile/",
-      "url": "https://www.youtube.com/watch?v=JhfpDEYe2YI",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i3.ytimg.com/vi/JhfpDEYe2YI/hqdefault.jpg",
-      "publishedAt": "2026-08-19T18:22:31.000Z",
-      "capturedAt": "2026-08-20T00:00:02.204Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@Xbox",
-        "accountTier": "s"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 1859,
-        "windowHours": 0.26,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T00:00:02.204Z"
-      },
-      "lofiFitScore": 75,
-      "commentabilityScore": 63,
-      "priorityScore": 70,
-      "whyNow": "Publié par XBOX il y a 6 h. +1 859 vues/h mesurés sur 0.26 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 10820,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 1743,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 2751,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 3033,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 3769,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 4302,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 5916,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 6909,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 7617,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 8656,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 9393,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 10338,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 10820,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Xbox",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjBp_7RuDBUYbd1LegWEJ8g",
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
           "exactness": "exact"
         }
       ],
@@ -2071,185 +1480,185 @@
       "alertedAt": null
     },
     {
-      "id": "yt-g6tqm8pefwc-e5d427",
+      "id": "yt-gywstaoy6qk-05a0bc",
       "platform": "youtube",
-      "category": "gaming",
-      "author": "Nintendo of America",
-      "title": "NBA 2K27 – Gameplay Trailer – Nintendo Switch 2",
-      "caption": "NBA 2K27 releases September 4, 2026 on Nintendo Switch 2! Wishlist today: https://ninten.do/6000azkaE \n\nPlay as the best NBA and WNBA stars and create your own clutch moments in NBA 2K27! \n\n#NBA2K27 \n\nVisit Nintendo.com for more info: https://ninten.do/6008Spp2s\n\nSubscribe for more Nintendo fun: https://goo.gl/HYYsot\n\nFollow Nintendo of America\nX/Twitter: https://twitter.com/NintendoAmerica\nFacebook: https://www.facebook.com/NintendoAmerica\nInstagram: https://www.instagram.com/nintendoamerica\nTwitch: https://www.twitch.tv/nintendo",
-      "url": "https://www.youtube.com/watch?v=g6tQM8PeFWc",
+      "category": "cinema",
+      "author": "Crunchyroll",
+      "title": "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life | Official Teaser | Crunchyroll",
+      "caption": "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life is coming to Crunchyroll this October!\n\nABOUT THE LAID-OFF CHEAT-GRANTING MAGE ENJOYS A SECOND LEASE ON LIFE\nRein the Enchanter is a support mage with the ability to enhance weapons and armor. But when he gets fired from his guild for the simple reason that he's already enchanted everything they own, he decides to take the power back into his own hands—literally! Rein recalls every enchantment he ever put on his guildmates' gear, retrieving the bonus points for himself. But does he really not have anything better to enchant with them than some Plain Clothes and a Copper Sword…? Come along on a cheat-tier journey from the most common of common origins!\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best ",
+      "url": "https://www.youtube.com/watch?v=GyWstaOY6qk",
       "mediaType": "video",
       "durationSeconds": null,
-      "thumbnailUrl": "https://i4.ytimg.com/vi/g6tQM8PeFWc/hqdefault.jpg",
-      "publishedAt": "2026-08-19T17:59:25.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
+      "thumbnailUrl": "https://i4.ytimg.com/vi/GyWstaOY6qk/hqdefault.jpg",
+      "publishedAt": "2026-08-19T18:00:24.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
         "source": "watchlist",
-        "accountHandle": "@NintendoAmerica",
+        "accountHandle": "@Crunchyroll",
         "accountTier": "s"
       },
       "velocity": {
         "metric": "views",
-        "perHour": 1050,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
+        "perHour": 514,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
-      "lofiFitScore": 75,
-      "commentabilityScore": 63,
+      "lofiFitScore": 82,
+      "commentabilityScore": 55,
       "priorityScore": 70,
-      "whyNow": "Publié par Nintendo of America il y a 9 h. +1 050 vues/h mesurés sur 2.54 h.",
+      "whyNow": "Publié par Crunchyroll il y a 13 h. +514 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 14088,
+        "views": 9926,
         "likes": null,
         "comments": null,
         "shares": null
       },
       "observations": [
         {
-          "capturedAt": "2026-08-19T18:22:11.458Z",
-          "views": 1663,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
-          "exactness": "exact"
-        },
-        {
           "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 2762,
+          "views": 1170,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 3758,
+          "views": 1500,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 4344,
+          "views": 1732,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 4918,
+          "views": 2216,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 6350,
+          "views": 2769,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 7326,
+          "views": 3291,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 8092,
+          "views": 3643,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 8785,
+          "views": 4161,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 9905,
+          "views": 4620,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 10339,
+          "views": 5026,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 11276,
+          "views": 5530,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 11425,
+          "views": 5811,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 14088,
+          "views": 7407,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Nintendo of America",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGIY_O-8vW4rfX98KlMkvRg",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 9926,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         }
       ],
@@ -2257,17 +1666,17 @@
         {
           "tone": "funny",
           "label": "Drôle",
-          "text": "pocky and i have cleared the evening"
+          "text": "i have an essay due and now i have plans"
         },
         {
           "tone": "smart",
           "label": "Smart",
-          "text": "quiet start, and that is exactly why it lands"
+          "text": "the pacing here is doing most of the work"
         },
         {
           "tone": "complice",
           "label": "Complice",
-          "text": "showing up early for this one"
+          "text": "eight years at this desk and still here for these"
         }
       ],
       "commentsSource": "fallback",
@@ -2478,7 +1887,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i2.ytimg.com/vi/mZbJxpYHLuI/hqdefault.jpg",
       "publishedAt": "2026-08-18T12:59:53.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "a",
       "discovery": {
@@ -2488,36 +1897,26 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 120502,
-        "windowHours": 2.8,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
+        "perHour": 122886,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 87,
       "commentabilityScore": 59,
       "priorityScore": 74,
-      "whyNow": "Publié par Apple TV il y a 38 h. +120 502 vues/h mesurés sur 2.8 h.",
+      "whyNow": "Publié par Apple TV il y a 42 h. +122 886 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 2704687,
+        "views": 3306646,
         "likes": null,
         "comments": null,
         "shares": null
       },
       "observations": [
-        {
-          "capturedAt": "2026-08-18T19:42:59.377Z",
-          "views": 507086,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Apple TV",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC1Myj674wRVXB9I4c6Hm5zA",
-          "exactness": "exact"
-        },
         {
           "capturedAt": "2026-08-18T20:17:38.981Z",
           "views": 536280,
@@ -2747,6 +2146,795 @@
           "sourceLabel": "YouTube · flux Atom public de Apple TV",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC1Myj674wRVXB9I4c6Hm5zA",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 3306646,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Apple TV",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC1Myj674wRVXB9I4c6Hm5zA",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "i have an essay due and now i have plans"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "the pacing here is doing most of the work"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "eight years at this desk and still here for these"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
+      "id": "yt-fnj7ykvewge-8f6e00",
+      "platform": "youtube",
+      "category": "cinema",
+      "author": "Marvel Entertainment",
+      "title": "Tony Stark and Nick Fury - The Avenger Initiative | Iron Man | Official Clip",
+      "caption": "The moment that started it all. Marvel Studios' Iron Man is now streaming on @disneyplus \n\n► SUBSCRIBE to the channel to get notified when new Marvel videos are posted: https://www.youtube.com/marvel?sub_confirmation=1\n\n► SUBSCRIBE to Disney+ to stream all of your favorite Marvel shows and movies: https://www.disneyplus.com/\n\nFollow on social media to get the latest news and announcements from Marvel:\n\nTikTok: https://www.tiktok.com/@marvel\nInstagram: https://www.instagram.com/marvel\nFacebook: https://www.facebook.com/Marvel\nX: https://x.com/marvel\n\nExperience more stories by subscribing: \n\n@Disney \n@StarWars \n@pixar \n@disneyplus",
+      "url": "https://www.youtube.com/watch?v=fNj7ykvewGE",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i3.ytimg.com/vi/fNj7ykvewGE/hqdefault.jpg",
+      "publishedAt": "2026-08-19T14:00:37.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "surging",
+      "momentTier": "b",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@Marvel",
+        "accountTier": "s"
+      },
+      "velocity": {
+        "metric": "views",
+        "perHour": 2702,
+        "windowHours": 7.44,
+        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
+      },
+      "lofiFitScore": 82,
+      "commentabilityScore": 55,
+      "priorityScore": 70,
+      "whyNow": "Publié par Marvel Entertainment il y a 17 h. +2 702 vues/h mesurés sur 7.44 h.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 102404,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-19T14:51:42.188Z",
+          "views": 12473,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T15:23:08.141Z",
+          "views": 15703,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T15:55:15.251Z",
+          "views": 19452,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T16:21:44.758Z",
+          "views": 24926,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T16:54:46.287Z",
+          "views": 28714,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T17:20:04.620Z",
+          "views": 37116,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T17:49:08.001Z",
+          "views": 43568,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T18:22:11.458Z",
+          "views": 48639,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:00:59.342Z",
+          "views": 52649,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:39:34.566Z",
+          "views": 62288,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:57:44.475Z",
+          "views": 63554,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:25:44.671Z",
+          "views": 67626,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:52:24.317Z",
+          "views": 69753,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:23:33.903Z",
+          "views": 72507,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:50:25.806Z",
+          "views": 75228,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:16:46.392Z",
+          "views": 76522,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:48:55.562Z",
+          "views": 78668,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:16:00.533Z",
+          "views": 80610,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:44:28.897Z",
+          "views": 81776,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T00:00:02.204Z",
+          "views": 82315,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 102404,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Marvel Entertainment",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCvC4D8onUfXzvjTOM-dBfEA",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "i have an essay due and now i have plans"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "the pacing here is doing most of the work"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "eight years at this desk and still here for these"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
+      "id": "yt-efp07sswgqg-09ed37",
+      "platform": "youtube",
+      "category": "gaming",
+      "author": "PlayStation",
+      "title": "Hunting Simulator 3 - Release Date Trailer | PS5 Games",
+      "caption": "https://store.playstation.com/concept/10010914\n\nMark your calendar!\n\nHunting Simulator 3 is coming to PlayStation 5 on October 29, 2026!\n\nEmbark on an all-new hunting adventure across the breathtaking landscapes of Colorado and Texas. Track a wide variety of animals unique to each region, explore the wilderness, and team up with your loyal hunting dog as you set out on the perfect hunt.\n\nAdd Hunting Simulator 3 to your wishlist today!\n\n#ps5 #ps5games #huntingsimulator",
+      "url": "https://www.youtube.com/watch?v=eFP07SswgQg",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i2.ytimg.com/vi/eFP07SswgQg/hqdefault.jpg",
+      "publishedAt": "2026-08-19T15:15:07.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "surging",
+      "momentTier": "b",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@PlayStation",
+        "accountTier": "s"
+      },
+      "velocity": {
+        "metric": "views",
+        "perHour": 310,
+        "windowHours": 2.05,
+        "fromCapturedAt": "2026-08-20T05:23:04.543Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
+      },
+      "lofiFitScore": 80,
+      "commentabilityScore": 55,
+      "priorityScore": 69,
+      "whyNow": "Publié par PlayStation il y a 16 h. +310 vues/h mesurés sur 2.05 h.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 10677,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-19T15:55:15.251Z",
+          "views": 967,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T16:21:44.758Z",
+          "views": 1356,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T16:54:46.287Z",
+          "views": 1557,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T17:20:04.620Z",
+          "views": 1787,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T17:49:08.001Z",
+          "views": 2406,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T18:22:11.458Z",
+          "views": 3209,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:00:59.342Z",
+          "views": 3679,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:39:34.566Z",
+          "views": 4559,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:57:44.475Z",
+          "views": 4740,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:25:44.671Z",
+          "views": 5138,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:52:24.317Z",
+          "views": 5600,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:23:33.903Z",
+          "views": 6024,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:50:25.806Z",
+          "views": 6302,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:16:46.392Z",
+          "views": 6478,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:48:55.562Z",
+          "views": 6787,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:16:00.533Z",
+          "views": 7111,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:44:28.897Z",
+          "views": 7293,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T00:00:02.204Z",
+          "views": 7347,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T05:23:04.543Z",
+          "views": 10042,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 10677,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de PlayStation",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "exactness": "exact"
+        }
+      ],
+      "comments": [
+        {
+          "tone": "funny",
+          "label": "Drôle",
+          "text": "closing the notebook, purely for research"
+        },
+        {
+          "tone": "smart",
+          "label": "Smart",
+          "text": "everyone will remember the last ten seconds"
+        },
+        {
+          "tone": "complice",
+          "label": "Complice",
+          "text": "the comment section is about to be unreadable, in a good way"
+        }
+      ],
+      "commentsSource": "fallback",
+      "alertedAt": null
+    },
+    {
+      "id": "yt-ahp423jqilc-532634",
+      "platform": "youtube",
+      "category": "tech",
+      "author": "Linus Tech Tips",
+      "title": "$5 vs $500 Guitar Hero Controller",
+      "caption": "Wherever today takes you, go comfortably with Vessi Weekend Chelsea—made for exploring, rain or shine. One pair. Countless adventures.\n\n✨ Grab 15% off your first pair here: https://vessi.com/ltt\n• Free shipping • 30‑day returns • 1‑year warranty\n\nThe nostalgia cycle has sent Guitar Hero controller prices through the roof, but you don't need to break the bank to relive the glory days. From $5 keyboard setups to $500 custom builds, we’re testing every budget option to find the best way to shred. \n\nDiscuss on the forum: https://linustechtips.com/topic/1641977-5-vs-500-guitar-hero-controller/\n\nPS2 controller to USB adapter - https://lmg.gg/tqm3A\nRetroCultMods V3 Adapter - https://lmg.gg/QkdyP\nSolderless Revival Kit - https://lmg.gg/keodu \nCRKD guitar - https://lmg.gg/CXStL\nHammer-On Guitars - https://lmg.gg/MYXlh\n\nCheck out our Channel Partners:\nSecretlab - Grab a TITAN Evo ergonomic gaming ",
+      "url": "https://www.youtube.com/watch?v=AHP423JqiLc",
+      "mediaType": "video",
+      "durationSeconds": null,
+      "thumbnailUrl": "https://i2.ytimg.com/vi/AHP423JqiLc/hqdefault.jpg",
+      "publishedAt": "2026-08-19T17:00:11.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
+      "status": "surging",
+      "momentTier": "b",
+      "discovery": {
+        "source": "watchlist",
+        "accountHandle": "@LinusTechTips",
+        "accountTier": "b"
+      },
+      "velocity": {
+        "metric": "views",
+        "perHour": 5423,
+        "windowHours": 2.05,
+        "fromCapturedAt": "2026-08-20T05:23:04.543Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
+      },
+      "lofiFitScore": 78,
+      "commentabilityScore": 55,
+      "priorityScore": 68,
+      "whyNow": "Publié par Linus Tech Tips il y a 14 h. +5 423 vues/h mesurés sur 2.05 h.",
+      "risk": {
+        "level": "low",
+        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
+      },
+      "metrics": {
+        "views": 184723,
+        "likes": null,
+        "comments": null,
+        "shares": null
+      },
+      "observations": [
+        {
+          "capturedAt": "2026-08-19T17:20:04.620Z",
+          "views": 2025,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T17:49:08.001Z",
+          "views": 15209,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T18:22:11.458Z",
+          "views": 28283,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:00:59.342Z",
+          "views": 33706,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:39:34.566Z",
+          "views": 45507,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T19:57:44.475Z",
+          "views": 51495,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:25:44.671Z",
+          "views": 59747,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T20:52:24.317Z",
+          "views": 70030,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:23:33.903Z",
+          "views": 81612,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T21:50:25.806Z",
+          "views": 88534,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:16:46.392Z",
+          "views": 92916,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T22:48:55.562Z",
+          "views": 102842,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:16:00.533Z",
+          "views": 110818,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-19T23:44:28.897Z",
+          "views": 119392,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T00:00:02.204Z",
+          "views": 123821,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T02:32:15.138Z",
+          "views": 152212,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T05:23:04.543Z",
+          "views": 173598,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 184723,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -2781,7 +2969,7 @@
       "durationSeconds": null,
       "thumbnailUrl": "https://i4.ytimg.com/vi/GMf9loM-RCg/hqdefault.jpg",
       "publishedAt": "2026-08-19T13:30:22.000Z",
-      "capturedAt": "2026-08-20T00:00:02.204Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
@@ -2791,21 +2979,21 @@
       },
       "velocity": {
         "metric": "views",
-        "perHour": 760,
-        "windowHours": 0.26,
-        "fromCapturedAt": "2026-08-19T23:44:28.897Z",
-        "toCapturedAt": "2026-08-20T00:00:02.204Z"
+        "perHour": 548,
+        "windowHours": 7.44,
+        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
       "lofiFitScore": 78,
-      "commentabilityScore": 63,
-      "priorityScore": 71,
-      "whyNow": "Publié par COLORS il y a 10 h. +760 vues/h mesurés sur 0.26 h.",
+      "commentabilityScore": 55,
+      "priorityScore": 68,
+      "whyNow": "Publié par COLORS il y a 18 h. +548 vues/h mesurés sur 7.44 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 5877,
+        "views": 9950,
         "likes": null,
         "comments": null,
         "shares": null
@@ -3020,6 +3208,16 @@
           "sourceLabel": "YouTube · flux Atom public de COLORS",
           "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Qw1dzXDBAZPwS7zm37g8g",
           "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 9950,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de COLORS",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC2Qw1dzXDBAZPwS7zm37g8g",
+          "exactness": "exact"
         }
       ],
       "comments": [
@@ -3043,418 +3241,215 @@
       "alertedAt": null
     },
     {
-      "id": "yt-odgzblw3qow-53fb51",
+      "id": "yt-ucljv6fpd8w-96e9a1",
       "platform": "youtube",
       "category": "cinema",
-      "author": "Netflix",
-      "title": "that sounds more like it #outerbanks",
-      "caption": "that sounds more like it #outerbanks&#13;\n&#13;\nWatch on Netflix: https://www.netflix.com/title/81706626&#13;\n&#13;\nAbout Netflix:&#13;\nNetflix is one of the world’s leading entertainment services offering TV series, films, games and live programming across a wide variety of genres and languages. Members can play, pause and resume watching as much as they want, anytime, anywhere, and can change their plans at any time.&#13;\n&#13;\nthat sounds more like it #outerbanks&#13;\nhttps://www.youtube.com/@Netflix&#13;\n&#13;\nAfter losing one of their own, the Pogues chase revenge and redemption as they pursue a stolen artifact with the power to change their fortunes.",
-      "url": "https://www.youtube.com/watch?v=ODGZBLW3Qow",
+      "author": "Crunchyroll",
+      "title": "Fanfiction Writes Itself in Real Time | Young Ladies Don't Play Fighting Games",
+      "caption": "Episode 2: She built a whole cinematic universe from a sleeve.  Watch Young Ladies Don't Play Fighting Games on Crunchyroll! https://got.cr/cc-yldpfg\n\nABOUT YOUNG LADIES DON'T PLAY FIGHTING GAMES\nMitsuki Aya has one goal at the elite Kuromi Girls’ Academy: to become a refined young lady like the school’s flawless “White Lily,” Yorue Mio. But her image of Mio shatters when Aya accidentally catches her...playing fighting games?! Turns out, the elegant Mio is actually a hardcore gamer—and she wants to duel Aya! The battle (and their friendship) begins.\n\nABOUT CRUNCHYROLL\nCrunchyroll is the place to watch all your favorite anime! Stream new anime, full episodes, movies, OVAs, music, openings, endings, trailers and all the best moments in anime, subbed and dubbed!\n\n▶ WATCH FULL ANIME EPISODES ON YOUTUBE: https://got.cr/cc-pt\n\n🔶 GET YOUR FREE 7-DAY CRUNCHYROLL TRIAL: https://got.cr/cc-7days\n\n",
+      "url": "https://www.youtube.com/watch?v=uCLJV6fpd8w",
       "mediaType": "video",
       "durationSeconds": null,
-      "thumbnailUrl": "https://i4.ytimg.com/vi/ODGZBLW3Qow/hqdefault.jpg",
-      "publishedAt": "2026-08-19T19:00:00.000Z",
-      "capturedAt": "2026-08-20T02:32:15.138Z",
+      "thumbnailUrl": "https://i2.ytimg.com/vi/uCLJV6fpd8w/hqdefault.jpg",
+      "publishedAt": "2026-08-19T17:00:28.000Z",
+      "capturedAt": "2026-08-20T07:26:09.829Z",
       "status": "surging",
       "momentTier": "b",
       "discovery": {
         "source": "watchlist",
-        "accountHandle": "@Netflix",
+        "accountHandle": "@Crunchyroll",
         "accountTier": "s"
       },
       "velocity": {
         "metric": "views",
-        "perHour": 2635,
-        "windowHours": 2.54,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T02:32:15.138Z"
+        "perHour": 262,
+        "windowHours": 4.9,
+        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
+        "toCapturedAt": "2026-08-20T07:26:09.829Z"
       },
-      "lofiFitScore": 72,
-      "commentabilityScore": 63,
-      "priorityScore": 68,
-      "whyNow": "Publié par Netflix il y a 8 h. +2 635 vues/h mesurés sur 2.54 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 21163,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 3056,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 4211,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 5725,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 6559,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 7368,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 8879,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 10735,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 11717,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 13095,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 14252,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 14479,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 21163,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Netflix",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWOA1ZGywLbqmigxE4Qlvuw",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "pocky and i have cleared the evening"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "quiet start, and that is exactly why it lands"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "showing up early for this one"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-efp07sswgqg-09ed37",
-      "platform": "youtube",
-      "category": "gaming",
-      "author": "PlayStation",
-      "title": "Hunting Simulator 3 - Release Date Trailer | PS5 Games",
-      "caption": "https://store.playstation.com/concept/10010914\n\nMark your calendar!\n\nHunting Simulator 3 is coming to PlayStation 5 on October 29, 2026!\n\nEmbark on an all-new hunting adventure across the breathtaking landscapes of Colorado and Texas. Track a wide variety of animals unique to each region, explore the wilderness, and team up with your loyal hunting dog as you set out on the perfect hunt.\n\nAdd Hunting Simulator 3 to your wishlist today!\n\n#ps5 #ps5games #huntingsimulator",
-      "url": "https://www.youtube.com/watch?v=eFP07SswgQg",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i2.ytimg.com/vi/eFP07SswgQg/hqdefault.jpg",
-      "publishedAt": "2026-08-19T15:15:07.000Z",
-      "capturedAt": "2026-08-20T05:23:04.543Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@PlayStation",
-        "accountTier": "s"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 501,
-        "windowHours": 5.38,
-        "fromCapturedAt": "2026-08-20T00:00:02.204Z",
-        "toCapturedAt": "2026-08-20T05:23:04.543Z"
-      },
-      "lofiFitScore": 80,
+      "lofiFitScore": 77,
       "commentabilityScore": 55,
-      "priorityScore": 69,
-      "whyNow": "Publié par PlayStation il y a 14 h. +501 vues/h mesurés sur 5.38 h.",
+      "priorityScore": 67,
+      "whyNow": "Publié par Crunchyroll il y a 14 h. +262 vues/h mesurés sur 4.9 h.",
       "risk": {
         "level": "low",
         "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
       },
       "metrics": {
-        "views": 10042,
+        "views": 9491,
         "likes": null,
         "comments": null,
         "shares": null
       },
       "observations": [
-        {
-          "capturedAt": "2026-08-19T15:55:15.251Z",
-          "views": 967,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T16:21:44.758Z",
-          "views": 1356,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T16:54:46.287Z",
-          "views": 1557,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
-          "exactness": "exact"
-        },
         {
           "capturedAt": "2026-08-19T17:20:04.620Z",
-          "views": 1787,
+          "views": 754,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T17:49:08.001Z",
-          "views": 2406,
+          "views": 1284,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T18:22:11.458Z",
-          "views": 3209,
+          "views": 1887,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 3679,
+          "views": 2468,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 4559,
+          "views": 3295,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 4740,
+          "views": 3907,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 5138,
+          "views": 4517,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 5600,
+          "views": 5254,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 6024,
+          "views": 5785,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 6302,
+          "views": 6096,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 6478,
+          "views": 6425,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 6787,
+          "views": 6739,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 7111,
+          "views": 6963,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 7293,
+          "views": 7211,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
           "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 7347,
+          "views": 7354,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         },
         {
-          "capturedAt": "2026-08-20T05:23:04.543Z",
-          "views": 10042,
+          "capturedAt": "2026-08-20T02:32:15.138Z",
+          "views": 8208,
           "likes": null,
           "comments": null,
           "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de PlayStation",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC-2Y8dQb0S6DtpxNgAKoJKA",
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
+          "exactness": "exact"
+        },
+        {
+          "capturedAt": "2026-08-20T07:26:09.829Z",
+          "views": 9491,
+          "likes": null,
+          "comments": null,
+          "shares": null,
+          "sourceLabel": "YouTube · flux Atom public de Crunchyroll",
+          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6pGDc4bFGD1_36IKv3FnYg",
           "exactness": "exact"
         }
       ],
@@ -3473,239 +3468,6 @@
           "tone": "complice",
           "label": "Complice",
           "text": "the comment section is about to be unreadable, in a good way"
-        }
-      ],
-      "commentsSource": "fallback",
-      "alertedAt": null
-    },
-    {
-      "id": "yt-ahp423jqilc-532634",
-      "platform": "youtube",
-      "category": "tech",
-      "author": "Linus Tech Tips",
-      "title": "$5 vs $500 Guitar Hero Controller",
-      "caption": "Wherever today takes you, go comfortably with Vessi Weekend Chelsea—made for exploring, rain or shine. One pair. Countless adventures.\n\n✨ Grab 15% off your first pair here: https://vessi.com/ltt\n• Free shipping • 30‑day returns • 1‑year warranty\n\nThe nostalgia cycle has sent Guitar Hero controller prices through the roof, but you don't need to break the bank to relive the glory days. From $5 keyboard setups to $500 custom builds, we’re testing every budget option to find the best way to shred. \n\nDiscuss on the forum: https://linustechtips.com/topic/1641977-5-vs-500-guitar-hero-controller/\n\nPS2 controller to USB adapter - https://lmg.gg/tqm3A\nRetroCultMods V3 Adapter - https://lmg.gg/QkdyP\nSolderless Revival Kit - https://lmg.gg/keodu \nCRKD guitar - https://lmg.gg/CXStL\nHammer-On Guitars - https://lmg.gg/MYXlh\n\nCheck out our Channel Partners:\nSecretlab - Grab a TITAN Evo ergonomic gaming ",
-      "url": "https://www.youtube.com/watch?v=AHP423JqiLc",
-      "mediaType": "video",
-      "durationSeconds": null,
-      "thumbnailUrl": "https://i2.ytimg.com/vi/AHP423JqiLc/hqdefault.jpg",
-      "publishedAt": "2026-08-19T17:00:11.000Z",
-      "capturedAt": "2026-08-20T05:23:04.543Z",
-      "status": "surging",
-      "momentTier": "b",
-      "discovery": {
-        "source": "watchlist",
-        "accountHandle": "@LinusTechTips",
-        "accountTier": "b"
-      },
-      "velocity": {
-        "metric": "views",
-        "perHour": 7512,
-        "windowHours": 2.85,
-        "fromCapturedAt": "2026-08-20T02:32:15.138Z",
-        "toCapturedAt": "2026-08-20T05:23:04.543Z"
-      },
-      "lofiFitScore": 78,
-      "commentabilityScore": 55,
-      "priorityScore": 68,
-      "whyNow": "Publié par Linus Tech Tips il y a 12 h. +7 512 vues/h mesurés sur 2.85 h.",
-      "risk": {
-        "level": "low",
-        "note": "Aucun sujet sensible détecté dans les métadonnées publiques."
-      },
-      "metrics": {
-        "views": 173598,
-        "likes": null,
-        "comments": null,
-        "shares": null
-      },
-      "observations": [
-        {
-          "capturedAt": "2026-08-19T17:20:04.620Z",
-          "views": 2025,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T17:49:08.001Z",
-          "views": 15209,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T18:22:11.458Z",
-          "views": 28283,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:00:59.342Z",
-          "views": 33706,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:39:34.566Z",
-          "views": 45507,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T19:57:44.475Z",
-          "views": 51495,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:25:44.671Z",
-          "views": 59747,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T20:52:24.317Z",
-          "views": 70030,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:23:33.903Z",
-          "views": 81612,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T21:50:25.806Z",
-          "views": 88534,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:16:46.392Z",
-          "views": 92916,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T22:48:55.562Z",
-          "views": 102842,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:16:00.533Z",
-          "views": 110818,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-19T23:44:28.897Z",
-          "views": 119392,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T00:00:02.204Z",
-          "views": 123821,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T02:32:15.138Z",
-          "views": 152212,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        },
-        {
-          "capturedAt": "2026-08-20T05:23:04.543Z",
-          "views": 173598,
-          "likes": null,
-          "comments": null,
-          "shares": null,
-          "sourceLabel": "YouTube · flux Atom public de Linus Tech Tips",
-          "sourceUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
-          "exactness": "exact"
-        }
-      ],
-      "comments": [
-        {
-          "tone": "funny",
-          "label": "Drôle",
-          "text": "i have an essay due and now i have plans"
-        },
-        {
-          "tone": "smart",
-          "label": "Smart",
-          "text": "the pacing here is doing most of the work"
-        },
-        {
-          "tone": "complice",
-          "label": "Complice",
-          "text": "eight years at this desk and still here for these"
         }
       ],
       "commentsSource": "fallback",
