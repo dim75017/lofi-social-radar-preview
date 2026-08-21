@@ -295,7 +295,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /TrendDetailsModal/);
   assert.match(component, /trend-reference-card/);
   assert.match(component, /<h2>Trends vid.os<\/h2>/);
-  assert.match(component, /Mise à jour quotidienne · focus Lofi Girl/);
+  assert.match(component, /Veille éditoriale quotidienne · focus Lofi Girl/);
   assert.match(component, /Repris par \{reuseCount\}\+ créateurs/);
   assert.match(component, /Vraie trend, pas simple post viral/);
   assert.match(component, /Preuve de reprise par plusieurs créateurs/);
@@ -550,4 +550,52 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     [...new Set(commentSnapshot.opportunities.map((item) => item.platform))].sort(),
     ["instagram", "tiktok", "x", "youtube"],
   );
+});
+
+test("makes editorial trend freshness visible and checks it without reading media", async () => {
+  const [
+    socialComponent,
+    audioTrendView,
+    trendHealthModel,
+    healthScript,
+    healthWorkflow,
+    videoRefreshWorkflow,
+    audioRefreshWorkflow,
+  ] = await Promise.all([
+    readFile(new URL("../app/SocialOS.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/AudioTrendFeedView.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/trend-health.ts", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/check-trends-health.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/check-trends-health.yml", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/refresh-social-trends.yml", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/refresh-audio-trends.yml", import.meta.url), "utf8"),
+  ]);
+
+  const videoTrendView = socialComponent.slice(
+    socialComponent.indexOf("function TrendFeedView"),
+    socialComponent.indexOf("function TrendDetailsModal"),
+  );
+  for (const view of [videoTrendView, audioTrendView]) {
+    assert.match(view, /isTrendEditorialScanLate/);
+    assert.match(view, /feed\?\.capturedAt|feed\.capturedAt/);
+    assert.match(view, /Dernier feed qualifié/);
+    assert.match(view, /feed qualifié dépasse 26 h/);
+    assert.match(view, /scan candidat/);
+    assert.doesNotMatch(view, /Actualisé/);
+  }
+  assert.match(trendHealthModel, /TREND_EDITORIAL_SCAN_MAX_AGE_HOURS = 26/);
+  assert.match(healthScript, /discoveryAudit\.candidateCount doit être >=/);
+  assert.match(healthScript, /discoveryAudit\.qualifiedInventoryCount doit être >=/);
+  assert.match(healthScript, /discoveryAudit incomplet/);
+  assert.match(healthScript, /feed\.capturedAt ne correspond pas au scan qualifié publié/);
+  assert.match(healthScript, /pool .*inchangé/);
+  assert.doesNotMatch(healthScript, /\bfetch\s*\(|thumbnail|playback|<video|SocialInlinePlayer/i);
+  assert.match(healthWorkflow, /cron: "7 \*\/6 \* \* \*"/);
+  assert.match(healthWorkflow, /contents: read/);
+  assert.doesNotMatch(healthWorkflow, /contents: write|actions: write|git push|workflow run/i);
+  for (const workflow of [videoRefreshWorkflow, audioRefreshWorkflow]) {
+    assert.match(workflow, /actions: write/);
+    assert.match(workflow, /gh workflow run publish-public-preview\.yml --ref main/);
+    assert.match(workflow, /steps\.commit\.outputs\.changed == 'true'/);
+  }
 });

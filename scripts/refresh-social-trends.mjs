@@ -8,6 +8,8 @@ import {
   assertSocialTrendFeed,
   isActionableSocialTrend,
   MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+  MIN_TREND_DISCOVERY_CANDIDATE_URLS,
+  MIN_TREND_DISCOVERY_PARSED_SOURCES,
 } from "../lib/social-trends.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -18,6 +20,58 @@ const REQUEST_TIMEOUT_MS = 20_000;
 const NATIVE_POST_TIMEOUT_MS = 12_000;
 const NATIVE_POST_CONCURRENCY = 8;
 const PARIS_TIMEZONE = "Europe/Paris";
+const MAX_DISCOVERY_CANDIDATE_URLS = 200;
+const MAX_SOURCE_CANDIDATE_URLS = 60;
+
+function cleanExtractedUrl(value) {
+  return String(value ?? "")
+    .replace(/&amp;/giu, "&")
+    .replace(/&#0*38;/giu, "&")
+    .replace(/[),.;!?\]}]+$/u, "");
+}
+
+export function canonicalNativeTrendCandidateUrl(value) {
+  try {
+    const url = new URL(cleanExtractedUrl(value));
+    const host = url.hostname.toLowerCase().replace(/^www\./u, "").replace(/^m\./u, "");
+    const path = url.pathname.replace(/\/+$/u, "");
+
+    if (host === "tiktok.com") {
+      const match = path.match(/^\/@([^/]+)\/video\/(\d{12,24})$/iu);
+      return match ? `https://www.tiktok.com/@${match[1]}/video/${match[2]}` : null;
+    }
+    if (host === "instagram.com") {
+      const match = path.match(/^\/(reel|reels|p)\/([A-Za-z0-9_-]{5,})$/u);
+      if (!match) return null;
+      const kind = match[1].toLowerCase() === "reels" ? "reel" : match[1].toLowerCase();
+      return `https://www.instagram.com/${kind}/${match[2]}/`;
+    }
+    if (host === "youtube.com") {
+      const shortsId = path.match(/^\/shorts\/([A-Za-z0-9_-]{11})$/u)?.[1];
+      if (shortsId) return `https://www.youtube.com/shorts/${shortsId}`;
+      const watchId = path === "/watch" ? url.searchParams.get("v") : null;
+      return /^[A-Za-z0-9_-]{11}$/u.test(watchId ?? "")
+        ? `https://www.youtube.com/watch?v=${watchId}`
+        : null;
+    }
+    if (host === "x.com" || host === "twitter.com") {
+      const match = path.match(/^\/([^/]+)\/status\/(\d+)$/iu);
+      return match ? `https://x.com/${match[1]}/status/${match[2]}` : null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function extractNativeTrendCandidateUrls(sourceText) {
+  const decoded = String(sourceText ?? "")
+    .replace(/\\u002f/giu, "/")
+    .replace(/\\\//gu, "/")
+    .replace(/&quot;|&#0*34;/giu, '"');
+  const urls = decoded.match(/https?:\/\/[^\s"'<>\\]+/giu) ?? [];
+  return [...new Set(urls.map(canonicalNativeTrendCandidateUrl).filter(Boolean))].sort();
+}
 
 export function nativeTrendVerificationRequest(post) {
   const url = new URL(post.url);
@@ -87,7 +141,7 @@ async function mapWithConcurrency(items, limit, mapper) {
   return results;
 }
 
-export async function reverifyTrendReuseEvidence(trends, options = {}) {
+export async function auditTrendReuseEvidenceReachability(trends, options = {}) {
   const now = options.now ?? new Date().toISOString();
   const fetchImpl = options.fetchImpl ?? fetch;
   const jobs = trends.flatMap((trend) =>
@@ -111,24 +165,33 @@ export async function reverifyTrendReuseEvidence(trends, options = {}) {
     },
   );
   const checksByTrend = Map.groupBy(checks, (check) => check.trendId);
-  let reverified = 0;
-  const failures = [];
+  const availableTrendIds = [];
   for (const trend of trends) {
     const trendChecks = checksByTrend.get(trend.id) ?? [];
     if (
-      !trend.reuseEvidence ||
-      trendChecks.length !== trend.reuseEvidence.posts.length ||
-      trendChecks.some((check) => !check.ok)
+      trend.reuseEvidence &&
+      trendChecks.length === trend.reuseEvidence.posts.length &&
+      trendChecks.every((check) => check.ok)
     ) {
-      failures.push(...trendChecks.filter((check) => !check.ok));
-      continue;
+      availableTrendIds.push(trend.id);
     }
-    trend.reuseEvidence.verifiedAt = now;
-    for (const post of trend.reuseEvidence.posts) post.capturedAt = now;
-    trend.lastVerifiedAt = now;
-    reverified += 1;
   }
-  return { reverified, checkedPosts: checks.length, failures };
+  const failures = checks.filter((check) => !check.ok);
+  return {
+    reachabilityCheckedAt: now,
+    checkedPosts: checks.length,
+    availablePosts: checks.length - failures.length,
+    unavailablePosts: failures.length,
+    availableTrends: availableTrendIds.length,
+    availableTrendIds,
+    failures,
+  };
+}
+
+// Kept as a compatibility export for callers that used the old name. Despite
+// that historical name, this function is now a read-only reachability audit.
+export async function reverifyTrendReuseEvidence(trends, options = {}) {
+  return auditTrendReuseEvidenceReachability(trends, options);
 }
 
 export function normalizeSourceText(value) {
@@ -162,11 +225,14 @@ export function trendSearchTerms(trend) {
 }
 
 export function countMatchedSignals(sourceText, trends) {
+  return matchedTrendIdsFromSource(sourceText, trends).length;
+}
+
+export function matchedTrendIdsFromSource(sourceText, trends) {
   const normalized = normalizeSourceText(sourceText);
-  return trends.reduce((count, trend) => {
-    const matched = trendSearchTerms(trend).some((term) => normalized.includes(term));
-    return count + (matched ? 1 : 0);
-  }, 0);
+  return trends
+    .filter((trend) => trendSearchTerms(trend).some((term) => normalized.includes(term)))
+    .map((trend) => trend.id);
 }
 
 export async function checkTrendSource(source, trends, options = {}) {
@@ -194,14 +260,19 @@ export async function checkTrendSource(source, trends, options = {}) {
         .map((item) => typeof item?.trend_name === "string" ? item.trend_name : "")
         .filter(Boolean);
       if (!trendNames.length) throw new Error("aucune tendance X parsée");
-      const normalizedNames = normalizeSourceText(trendNames.join(" "));
+      const sourceText = trendNames.join(" ");
+      const normalizedNames = normalizeSourceText(sourceText);
+      const candidateUrls = extractNativeTrendCandidateUrls(JSON.stringify(payload));
+      const matchedTrendIds = matchedTrendIdsFromSource(sourceText, trends);
       return {
         id: source.id,
         label: source.label,
         platform: source.platform,
         status: "success",
         checkedAt,
-        candidatesMatched: countMatchedSignals(normalizedNames, trends),
+        candidatesMatched: matchedTrendIds.length,
+        candidateUrls,
+        matchedTrendIds,
         signature: createHash("sha256").update(normalizedNames).digest("hex").slice(0, 16),
       };
     }
@@ -211,13 +282,20 @@ export async function checkTrendSource(source, trends, options = {}) {
     if (!markers.every((marker) => normalized.includes(marker))) {
       throw new Error("structure reconnue absente");
     }
+    const candidateUrls = extractNativeTrendCandidateUrls(body);
+    if (!candidateUrls.length) {
+      throw new Error("aucune URL native candidate parsée");
+    }
+    const matchedTrendIds = matchedTrendIdsFromSource(body, trends);
     return {
       id: source.id,
       label: source.label,
       platform: source.platform,
       status: "success",
       checkedAt,
-      candidatesMatched: countMatchedSignals(body, trends),
+      candidatesMatched: matchedTrendIds.length,
+      candidateUrls,
+      matchedTrendIds,
       signature: createHash("sha256").update(normalized).digest("hex").slice(0, 16),
     };
   } catch (error) {
@@ -228,9 +306,71 @@ export async function checkTrendSource(source, trends, options = {}) {
       status: "failed",
       checkedAt,
       candidatesMatched: 0,
+      candidateUrls: [],
+      matchedTrendIds: [],
       error: error instanceof Error ? error.message : "échec inconnu",
     };
   }
+}
+
+export function buildTrendDiscoveryAudit({
+  previousAudit,
+  checks,
+  reachability,
+  now,
+}) {
+  const successfulChecks = checks.filter((check) => check.status === "success");
+  const candidateUrls = [...new Set(
+    successfulChecks.flatMap((check) => check.candidateUrls ?? []),
+  )].sort();
+  const matchedTrendIds = [...new Set(
+    successfulChecks.flatMap((check) => check.matchedTrendIds ?? []),
+  )].sort();
+  const availableTrendIds = new Set(reachability.availableTrendIds ?? []);
+  const qualifiedTrendIds = matchedTrendIds.filter((id) => availableTrendIds.has(id));
+  const previousCandidateUrls = new Set(
+    (previousAudit?.candidateUrls ?? [])
+      .map(canonicalNativeTrendCandidateUrl)
+      .filter(Boolean),
+  );
+  const currentCandidateUrls = new Set(candidateUrls);
+  const retained = candidateUrls.filter((url) => previousCandidateUrls.has(url)).length;
+  const added = candidateUrls.length - retained;
+  const removed = [...previousCandidateUrls]
+    .filter((url) => !currentCandidateUrls.has(url))
+    .length;
+
+  return {
+    scannedAt: now,
+    complete:
+      checks.filter((check) => check.status === "success").length >=
+        MIN_TREND_DISCOVERY_PARSED_SOURCES &&
+      candidateUrls.length >= MIN_TREND_DISCOVERY_CANDIDATE_URLS &&
+      qualifiedTrendIds.length >= MIN_PUBLISHABLE_ACTIONABLE_TRENDS,
+    candidateCount: candidateUrls.length,
+    qualifiedInventoryCount: qualifiedTrendIds.length,
+    currentMatchedCount: matchedTrendIds.length,
+    added,
+    removed,
+    retained,
+    candidateUrls: candidateUrls.slice(0, MAX_DISCOVERY_CANDIDATE_URLS),
+    matchedTrendIds,
+    sourceBreakdown: checks.map((check) => ({
+      id: check.id,
+      label: check.label,
+      platform: check.platform,
+      status: check.status,
+      candidateCount: (check.candidateUrls ?? []).length,
+      matchedTrendIds: check.matchedTrendIds ?? [],
+      candidateUrls: (check.candidateUrls ?? []).slice(0, MAX_SOURCE_CANDIDATE_URLS),
+    })),
+    reachabilityCheckedAt: reachability.reachabilityCheckedAt,
+    availablePosts: reachability.availablePosts,
+    unavailablePosts: reachability.unavailablePosts,
+    unavailablePostUrls: reachability.failures
+      .map((failure) => failure.url)
+      .slice(0, MAX_SOURCE_CANDIDATE_URLS),
+  };
 }
 
 export async function buildDailyTrendRefresh({
@@ -247,11 +387,14 @@ export async function buildDailyTrendRefresh({
   }
 
   const actionable = current.trends.filter(isActionableSocialTrend);
-  const checks = await Promise.all(
-    watchlists.sources.map((source) =>
-      checkTrendSource(source, actionable, { fetchImpl, now, xBearerToken }),
+  const [checks, reachability] = await Promise.all([
+    Promise.all(
+      watchlists.sources.map((source) =>
+        checkTrendSource(source, actionable, { fetchImpl, now, xBearerToken }),
+      ),
     ),
-  );
+    auditTrendReuseEvidenceReachability(actionable, { now, fetchImpl }),
+  ]);
   const successfulChecks = checks.filter((check) => check.status === "success");
   const checkedSources = successfulChecks.length;
   const matchedSignals = successfulChecks.reduce(
@@ -260,6 +403,12 @@ export async function buildDailyTrendRefresh({
   );
   const lofiGirl = actionable.filter((trend) => trend.character === "lofi-girl").length;
   const lofiBoy = actionable.filter((trend) => trend.character === "lofi-boy").length;
+  const discoveryAudit = buildTrendDiscoveryAudit({
+    previousAudit: current.refresh.discoveryAudit,
+    checks,
+    reachability,
+    now,
+  });
   const baseRefresh = {
     cadenceHours: 24,
     lastAttemptAt: now,
@@ -268,6 +417,7 @@ export async function buildDailyTrendRefresh({
     status: "degraded",
     runId: process.env.GITHUB_RUN_ID ?? `local-${localDateKey(now)}`,
     runUrl: process.env.GITHUB_RUN_URL ?? null,
+    discoveryAudit,
     sourceChecks: checks.map((check) => ({
       id: check.id,
       label: check.label,
@@ -285,21 +435,29 @@ export async function buildDailyTrendRefresh({
     },
   };
 
-  if (checkedSources < watchlists.minimumParsedSources) {
+  const minimumParsedSources = Math.max(
+    MIN_TREND_DISCOVERY_PARSED_SOURCES,
+    Number.isInteger(watchlists.minimumParsedSources) ? watchlists.minimumParsedSources : 0,
+  );
+  if (checkedSources < minimumParsedSources) {
     const error = new Error(
-      `Seulement ${checkedSources}/${watchlists.sources.length} sources Trends ont été parsées; minimum ${watchlists.minimumParsedSources}.`,
+      `Seulement ${checkedSources}/${watchlists.sources.length} sources Trends ont été parsées; minimum ${minimumParsedSources}.`,
     );
     error.refreshStatus = baseRefresh;
     throw error;
   }
 
-  const reuseVerification = await reverifyTrendReuseEvidence(actionable, {
-    now,
-    fetchImpl,
-  });
-  if (reuseVerification.reverified < MIN_PUBLISHABLE_ACTIONABLE_TRENDS) {
+  if (discoveryAudit.candidateCount < MIN_TREND_DISCOVERY_CANDIDATE_URLS) {
     const error = new Error(
-      `Seulement ${reuseVerification.reverified}/${actionable.length} trends ont conservé trois reprises natives vérifiables; minimum ${MIN_PUBLISHABLE_ACTIONABLE_TRENDS}.`,
+      `Seulement ${discoveryAudit.candidateCount} URLs candidates natives ont été extraites; minimum ${MIN_TREND_DISCOVERY_CANDIDATE_URLS}.`,
+    );
+    error.refreshStatus = baseRefresh;
+    throw error;
+  }
+
+  if (discoveryAudit.qualifiedInventoryCount < MIN_PUBLISHABLE_ACTIONABLE_TRENDS) {
+    const error = new Error(
+      `Seulement ${discoveryAudit.qualifiedInventoryCount}/${actionable.length} trends ont conservé trois reprises natives accessibles; minimum ${MIN_PUBLISHABLE_ACTIONABLE_TRENDS}.`,
     );
     error.refreshStatus = baseRefresh;
     throw error;
@@ -315,7 +473,10 @@ export async function buildDailyTrendRefresh({
     },
   };
   assertSocialTrendFeed(refreshedFeed);
-  assertPublishableSocialTrendFeed(refreshedFeed, { now });
+  assertPublishableSocialTrendFeed(refreshedFeed, {
+    now,
+    allowStaleSemanticEvidence: true,
+  });
   return { skipped: false, feed: refreshedFeed, status: refreshedFeed.refresh };
 }
 

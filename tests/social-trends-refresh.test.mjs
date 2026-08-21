@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  auditTrendReuseEvidenceReachability,
   buildDailyTrendRefresh,
   countMatchedSignals,
+  extractNativeTrendCandidateUrls,
   localDateKey,
   nativeTrendVerificationRequest,
   normalizeSourceText,
@@ -14,7 +16,6 @@ import {
   assertPublishableSocialTrendFeed,
   isActionableSocialTrend,
   MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS,
-  TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS,
 } from "../lib/social-trends.ts";
 
 const feed = JSON.parse(
@@ -23,6 +24,22 @@ const feed = JSON.parse(
 const watchlists = JSON.parse(
   await readFile(new URL("../data/trends/watchlists.json", import.meta.url), "utf8"),
 );
+
+const nativeCandidateUrls = [
+  ...Array.from({ length: 20 }, (_, index) =>
+    `https://www.tiktok.com/@radar${index}/video/${770000000000000000n + BigInt(index)}`),
+  ...Array.from({ length: 15 }, (_, index) =>
+    `https://www.instagram.com/reel/RadarCandidate${String(index).padStart(2, "0")}/`),
+  ...Array.from({ length: 15 }, (_, index) =>
+    `https://www.youtube.com/shorts/radar${String(index).padStart(6, "0")}`),
+  ...Array.from({ length: 10 }, (_, index) =>
+    `https://x.com/radar${index}/status/${2100000000000000000n + BigInt(index)}`),
+];
+
+const actionableTrendTerms = feed.trends
+  .filter(isActionableSocialTrend)
+  .flatMap((trend) => [trend.title, ...trend.keywords])
+  .join(" ");
 
 function successfulSourceFetch(url) {
   const source = watchlists.sources.find((candidate) => candidate.url === url);
@@ -38,18 +55,13 @@ function successfulSourceFetch(url) {
       { status: 200, headers: { "content-type": "text/html" } },
     ));
   }
-  const trendTerms = feed.trends
-    .filter(isActionableSocialTrend)
-    .slice(0, 8)
-    .flatMap((trend) => [trend.title, ...trend.keywords])
-    .join(" ");
   if (source.kind === "x-api") {
     return Promise.resolve(Response.json({
-      data: [{ trend_name: trendTerms }],
+      data: [{ trend_name: actionableTrendTerms }],
     }));
   }
   return Promise.resolve(new Response(
-    `<html><body>${source.requiredMarkers.join(" ")} ${trendTerms}</body></html>`,
+    `<html><body>${source.requiredMarkers.join(" ")} ${actionableTrendTerms} ${nativeCandidateUrls.join(" ")}</body></html>`,
     { status: 200, headers: { "content-type": "text/html" } },
   ));
 }
@@ -58,6 +70,24 @@ test("source text normalization and matching are deterministic", () => {
   assert.equal(normalizeSourceText("<h1>ÉTUDES&nbsp;&amp; Focus</h1>"), "etudes & focus");
   const actionable = feed.trends.filter(isActionableSocialTrend);
   assert.ok(countMatchedSignals(actionable[0].title, actionable) >= 1);
+});
+
+test("native candidate extraction deduplicates posts and excludes non-post URLs", () => {
+  const candidates = extractNativeTrendCandidateUrls(`
+    https://www.tiktok.com/@study/video/770000000000000001?is_from_webapp=1
+    https://www.tiktok.com/@study/video/770000000000000001
+    https://www.tiktok.com/@study https://www.tiktok.com/tag/study
+    https://www.instagram.com/reels/RadarCandidate00/?igsh=share
+    https://www.instagram.com/share/reel/abc
+    https://www.youtube.com/watch?v=radar000000 https://www.youtube.com/embed/radar000000
+    https://twitter.com/radar/status/2100000000000000001?s=20
+  `);
+  assert.deepEqual(candidates, [
+    "https://www.instagram.com/reel/RadarCandidate00/",
+    "https://www.tiktok.com/@study/video/770000000000000001",
+    "https://www.youtube.com/watch?v=radar000000",
+    "https://x.com/radar/status/2100000000000000001",
+  ]);
 });
 
 test("native post verification uses platform-owned endpoints and rejects identity drift", async () => {
@@ -84,8 +114,11 @@ test("native post verification uses platform-owned endpoints and rejects identit
 
 test("a real parsed-source run refreshes metadata without altering native metrics", async () => {
   const originalReferences = feed.trends.map((trend) => trend.referencePost);
-  const originalReuseEvidence = feed.trends.map((trend) => trend.reuseEvidence);
-  const now = new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString();
+  const originalSemanticProofs = structuredClone(feed.trends.map((trend) => ({
+    lastVerifiedAt: trend.lastVerifiedAt,
+    reuseEvidence: trend.reuseEvidence,
+  })));
+  const now = new Date(Date.parse(feed.capturedAt) + 4 * 24 * 60 * 60 * 1_000).toISOString();
   const result = await buildDailyTrendRefresh({
     feed,
     watchlists,
@@ -104,6 +137,36 @@ test("a real parsed-source run refreshes metadata without altering native metric
   assert.ok(result.feed.refresh.counts.matchedSignals > 0);
   assert.ok(result.feed.refresh.counts.actionable >= 50);
   assert.ok(result.feed.refresh.counts.lofiGirl >= 40);
+  assert.equal(result.feed.refresh.discoveryAudit.scannedAt, now);
+  assert.ok(result.feed.refresh.discoveryAudit.candidateCount >= 50);
+  assert.ok(result.feed.refresh.discoveryAudit.qualifiedInventoryCount >= 50);
+  assert.equal(
+    result.feed.refresh.discoveryAudit.currentMatchedCount,
+    result.feed.refresh.counts.actionable,
+  );
+  assert.equal(
+    result.feed.refresh.discoveryAudit.qualifiedInventoryCount,
+    result.feed.refresh.discoveryAudit.currentMatchedCount,
+  );
+  assert.equal(
+    result.feed.refresh.discoveryAudit.availablePosts,
+    feed.trends
+      .filter(isActionableSocialTrend)
+      .reduce((total, trend) => total + trend.reuseEvidence.posts.length, 0),
+  );
+  assert.equal(result.feed.refresh.discoveryAudit.unavailablePosts, 0);
+  assert.equal(
+    result.feed.refresh.discoveryAudit.candidateUrls.length,
+    nativeCandidateUrls.length,
+  );
+  assert.equal(
+    result.feed.refresh.discoveryAudit.added + result.feed.refresh.discoveryAudit.retained,
+    result.feed.refresh.discoveryAudit.candidateCount,
+  );
+  assert.equal(
+    result.feed.refresh.discoveryAudit.sourceBreakdown.length,
+    watchlists.sources.length,
+  );
   const actionableVideos = result.feed.trends.filter(
     (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
   );
@@ -125,20 +188,37 @@ test("a real parsed-source run refreshes metadata without altering native metric
     "an editorial source check must never rewrite native post metrics",
   );
   assert.deepEqual(
-    result.feed.trends.map((trend) =>
-      trend.reuseEvidence?.posts.map(({ platform, author, url }) => ({ platform, author, url })) ?? null,
-    ),
-    originalReuseEvidence.map((evidence) =>
-      evidence?.posts.map(({ platform, author, url }) => ({ platform, author, url })) ?? null,
-    ),
-    "reverification may update timestamps but must never rewrite creator identities or URLs",
+    result.feed.trends.map((trend) => ({
+      lastVerifiedAt: trend.lastVerifiedAt,
+      reuseEvidence: trend.reuseEvidence,
+    })),
+    originalSemanticProofs,
+    "reachability and discovery scans must not fabricate semantic proof freshness",
   );
-  const refreshedEvidence = result.feed.trends
-    .filter(isActionableSocialTrend)
-    .map((trend) => trend.reuseEvidence?.verifiedAt);
-  assert.ok(refreshedEvidence.length >= 50);
-  assert.ok(refreshedEvidence.every((verifiedAt) => verifiedAt === now));
-  assert.equal(assertPublishableSocialTrendFeed(result.feed, { now }), result.feed);
+  assert.throws(() => assertPublishableSocialTrendFeed(result.feed, { now }), /trop ancienne|72 h/i);
+  assert.equal(
+    assertPublishableSocialTrendFeed(result.feed, {
+      now,
+      allowStaleSemanticEvidence: true,
+    }),
+    result.feed,
+  );
+});
+
+test("reachability auditing is read-only", async () => {
+  const actionable = structuredClone(feed.trends.filter(isActionableSocialTrend));
+  const before = structuredClone(actionable);
+  const audit = await auditTrendReuseEvidenceReachability(actionable, {
+    now: new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString(),
+    fetchImpl: successfulSourceFetch,
+  });
+  assert.equal(audit.availablePosts, audit.checkedPosts);
+  assert.equal(audit.unavailablePosts, 0);
+  assert.deepEqual(
+    [...audit.availableTrendIds].sort(),
+    actionable.map((trend) => trend.id).sort(),
+  );
+  assert.deepEqual(actionable, before);
 });
 
 test("the daily publisher fails closed when too few sources parse", async () => {
@@ -154,40 +234,89 @@ test("the daily publisher fails closed when too few sources parse", async () => 
   );
 });
 
-test("the daily publisher fails closed when multi-creator proof is stale", async () => {
-  const staleFeed = structuredClone(feed);
+test("the daily publisher rejects a parsed scan without a native candidate pool", async () => {
   const now = new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString();
-  const staleVerifiedAt = new Date(
-    Date.parse(now) -
-      (TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS + 1) * 60 * 60 * 1_000,
-  ).toISOString();
-  const trend = staleFeed.trends.find(
-    (candidate) =>
-      candidate.lifecycle !== "steady" &&
-      isActionableSocialTrend(candidate) &&
-      Date.parse(candidate.firstSeenAt) <= Date.parse(staleVerifiedAt),
-  );
-  assert.ok(trend?.reuseEvidence);
-  trend.reuseEvidence.verifiedAt = staleVerifiedAt;
-  for (const post of trend.reuseEvidence.posts) {
-    post.capturedAt = staleVerifiedAt;
-  }
-  const staleMarkers = trend.reuseEvidence.posts.map(
-    (post) => nativeTrendVerificationRequest(post).marker,
-  );
+  const oneCandidate = nativeCandidateUrls[0];
 
   await assert.rejects(
     buildDailyTrendRefresh({
-      feed: staleFeed,
+      feed,
       watchlists,
       now,
       force: true,
-      fetchImpl: (url) => staleMarkers.some((marker) => decodeURIComponent(url).includes(marker))
+      fetchImpl: (url) => {
+        const source = watchlists.sources.find((candidate) => candidate.url === url);
+        if (!source) return successfulSourceFetch(url);
+        if (source.kind === "x-api") {
+          return Promise.resolve(Response.json({ data: [{ trend_name: actionableTrendTerms }] }));
+        }
+        return Promise.resolve(new Response(
+          `${source.requiredMarkers.join(" ")} ${actionableTrendTerms} ${oneCandidate}`,
+          { status: 200 },
+        ));
+      },
+      xBearerToken: "test-token",
+    }),
+    /1 URLs candidates natives.*minimum 50/i,
+  );
+});
+
+test("the daily publisher rejects a large candidate pool that matches fewer than 50 current trends", async () => {
+  const limitedDiscoveryText = feed.trends.find(isActionableSocialTrend).title;
+
+  await assert.rejects(
+    buildDailyTrendRefresh({
+      feed,
+      watchlists,
+      now: new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString(),
+      force: true,
+      fetchImpl: (url) => {
+        const source = watchlists.sources.find((candidate) => candidate.url === url);
+        if (!source) return successfulSourceFetch(url);
+        if (source.kind === "x-api") {
+          return Promise.resolve(Response.json({
+            data: [{ trend_name: limitedDiscoveryText }],
+          }));
+        }
+        return Promise.resolve(new Response(
+          `${source.requiredMarkers.join(" ")} ${limitedDiscoveryText} ${nativeCandidateUrls.join(" ")}`,
+          { status: 200 },
+        ));
+      },
+      xBearerToken: "test-token",
+    }),
+    (error) => {
+      assert.match(error.message, /trends.*reprises natives accessibles.*minimum 50/i);
+      assert.ok(error.refreshStatus.discoveryAudit.candidateCount >= 50);
+      assert.ok(error.refreshStatus.discoveryAudit.currentMatchedCount < 50);
+      assert.equal(
+        error.refreshStatus.discoveryAudit.qualifiedInventoryCount,
+        error.refreshStatus.discoveryAudit.currentMatchedCount,
+      );
+      return true;
+    },
+  );
+});
+
+test("the daily publisher fails closed when fewer than 50 evidence sets remain reachable", async () => {
+  const actionable = feed.trends.filter(isActionableSocialTrend);
+  const unavailableMarkers = actionable
+    .slice(0, 2)
+    .flatMap((trend) => trend.reuseEvidence.posts)
+    .map((post) => nativeTrendVerificationRequest(post).marker);
+
+  await assert.rejects(
+    buildDailyTrendRefresh({
+      feed,
+      watchlists,
+      now: new Date(Date.parse(feed.capturedAt) + 60 * 60 * 1_000).toISOString(),
+      force: true,
+      fetchImpl: (url) => unavailableMarkers.some((marker) => decodeURIComponent(url).includes(marker))
         ? Promise.resolve(new Response("missing", { status: 404 }))
         : successfulSourceFetch(url),
       xBearerToken: "test-token",
     }),
-    /trop ancienne|72 h/i,
+    /49\/51 trends.*reprises natives accessibles.*minimum 50/i,
   );
 });
 

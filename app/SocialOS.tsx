@@ -78,6 +78,7 @@ import {
   type AudioTrendFeed,
 } from "../lib/audio-trends";
 import { dailyRotationIndex } from "../lib/daily-rotation";
+import { isTrendEditorialScanLate } from "../lib/trend-health";
 import { AudioTrendFeedView } from "./AudioTrendFeedView";
 import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 import { SocialInlinePlayer } from "./SocialInlinePlayer";
@@ -523,17 +524,17 @@ function formatCardPublishedDate(value: string | null | undefined): string | nul
   }).format(date);
 }
 
-function formatTrendRefreshDate(value: string | null | undefined): string | null {
+function formatTrendEditorialScanDate(value: string | null | undefined): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return `Actualisé le ${new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat("fr-FR", {
     timeZone: "Europe/Paris",
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(date)}`;
+  }).format(date);
 }
 
 export function SocialOS({
@@ -1957,7 +1958,7 @@ function TrendFeedView({
   const [characterFilter, setCharacterFilter] = useState<TrendCharacterFilter>("all");
   const [activeTrend, setActiveTrend] = useState<SocialTrend | null>(null);
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
-  const [refreshIsLate, setRefreshIsLate] = useState(false);
+  const [freshnessCheckedAt, setFreshnessCheckedAt] = useState(Date.now);
   const actionableTrends = useMemo(
     () => (feed?.trends ?? []).filter(
       (trend) => isActionableSocialTrend(trend) && trend.referencePost?.mediaType === "video",
@@ -1987,45 +1988,38 @@ function TrendFeedView({
     },
     [characterFilter, platformFilter, selectedVideoTrends],
   );
-  const refreshDate = formatTrendRefreshDate(feed?.refresh.lastSuccessfulAt);
+  const editorialScanDate = formatTrendEditorialScanDate(feed?.capturedAt);
+  const refreshIsLate = isTrendEditorialScanLate(feed?.capturedAt, freshnessCheckedAt);
 
   useEffect(() => {
-    const updateFreshness = () => {
-      const refreshTimestamp = feed
-        ? Date.parse(feed.refresh.lastSuccessfulAt)
-        : Number.NaN;
-      setRefreshIsLate(Boolean(
-        feed &&
-          (!Number.isFinite(refreshTimestamp) ||
-            Date.now() - refreshTimestamp > 26 * 60 * 60 * 1_000),
-      ));
-    };
-    updateFreshness();
-    const interval = window.setInterval(updateFreshness, 60 * 60 * 1_000);
+    const interval = window.setInterval(
+      () => setFreshnessCheckedAt(Date.now()),
+      60 * 60 * 1_000,
+    );
     return () => window.clearInterval(interval);
-  }, [feed]);
+  }, []);
 
   return (
     <div className="trend-feed-view">
       <header className="trend-feed-heading">
         <div>
-          <span className="section-kicker">Mise à jour quotidienne · focus Lofi Girl</span>
+          <span className="section-kicker">Veille éditoriale quotidienne · focus Lofi Girl</span>
           <h2>Trends vidéos</h2>
           <p>
             Un exemple performant par trend, uniquement si la même mécanique a été reprise par plusieurs créateurs. Lofi Girl reste prioritaire.
           </p>
         </div>
-        {feed && refreshDate ? (
+        {feed && editorialScanDate ? (
           <span className={`trend-snapshot-pill ${refreshIsLate ? "is-late" : ""}`}>
-            {refreshIsLate ? "⚠️" : "✅"} {selectedVideoTrends.length} trends vidéo distinctes · {proposalCount} adaptations · {refreshDate}
+            {refreshIsLate ? "⚠️" : "✅"} {selectedVideoTrends.length} trends vidéo distinctes · {proposalCount} adaptations · Dernier feed qualifié : {editorialScanDate}
           </span>
         ) : null}
       </header>
 
-      {refreshIsLate && !error ? (
+      {feed && refreshIsLate && !error ? (
         <div className="trend-feed-notice" role="status">
           <span aria-hidden="true">⚠️</span>
-          <p>La mise à jour quotidienne est en retard. Le dernier feed validé reste affiché sans modifier ses chiffres.</p>
+          <p>Le dernier feed qualifié dépasse 26 h. Le dernier inventaire validé reste affiché sans présenter un scan candidat ou un rafraîchissement de médias comme une nouvelle tendance.</p>
         </div>
       ) : null}
 

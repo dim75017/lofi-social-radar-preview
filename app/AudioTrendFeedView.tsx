@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- platform logos and social thumbnails are public assets. */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   deriveAudioTrendGrowth,
@@ -14,6 +14,7 @@ import {
 } from "../lib/audio-trends";
 import { dailyRotationIndex } from "../lib/daily-rotation";
 import { resolveFreshInstagramPlaybackUrl } from "../lib/social-inline-player";
+import { isTrendEditorialScanLate } from "../lib/trend-health";
 import { SocialInlinePlayer } from "./SocialInlinePlayer";
 
 type PlatformFilter = AudioTrendPlatform | "all";
@@ -61,6 +62,7 @@ export function AudioTrendFeedView({
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
+  const [freshnessCheckedAt, setFreshnessCheckedAt] = useState(Date.now);
   const visibleTrends = useMemo(() => {
     const freshnessCutoff = Date.parse(feed?.capturedAt ?? "") -
       Math.max(feed?.cadenceHours ?? 24, 24) * 2 * 60 * 60 * 1_000;
@@ -69,25 +71,41 @@ export function AudioTrendFeedView({
       .filter((trend) => typeFilter === "all" || trend.type === typeFilter)
       .sort((left, right) => compareAudioTrends(left, right, freshnessCutoff));
   }, [feed?.cadenceHours, feed?.capturedAt, feed?.trends, platformFilter, typeFilter]);
-  const refreshedAt = feed ? formatRefreshDate(feed.capturedAt) : null;
+  const editorialScanDate = feed ? formatRefreshDate(feed.capturedAt) : null;
+  const editorialScanIsLate = isTrendEditorialScanLate(feed?.capturedAt, freshnessCheckedAt);
+
+  useEffect(() => {
+    const interval = window.setInterval(
+      () => setFreshnessCheckedAt(Date.now()),
+      60 * 60 * 1_000,
+    );
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
     <div className="trend-feed-view audio-trend-view">
       <header className="trend-feed-heading">
         <div>
-          <span className="section-kicker">Scan quotidien · focus Lofi Girl</span>
+          <span className="section-kicker">Veille éditoriale quotidienne · focus Lofi Girl</span>
           <h2>Trends audio</h2>
           <p>
             Les sons et musiques à reprendre maintenant, avec leur volume d’utilisation,
             leur vraie croissance et une vidéo de référence.
           </p>
         </div>
-        {feed && refreshedAt ? (
-          <span className="trend-snapshot-pill">
-            {feed.trends.length} audios distincts · Actualisé {refreshedAt}
+        {feed && editorialScanDate ? (
+          <span className={`trend-snapshot-pill ${editorialScanIsLate ? "is-late" : ""}`}>
+            {editorialScanIsLate ? "⚠️" : "✅"} {feed.trends.length} audios distincts · Dernier feed qualifié : {editorialScanDate}
           </span>
         ) : null}
       </header>
+
+      {feed && editorialScanIsLate && !error ? (
+        <div className="trend-feed-notice" role="status">
+          <span aria-hidden="true">⚠️</span>
+          <p>Le dernier feed qualifié dépasse 26 h. Un scan candidat ou des aperçus médias renouvelés séparément ne constituent pas une nouvelle détection de tendance.</p>
+        </div>
+      ) : null}
 
       <div className="audio-trend-controls" aria-label="Filtres des trends audio">
         <div className="trend-filter-group">

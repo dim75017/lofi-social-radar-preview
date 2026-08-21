@@ -22,6 +22,34 @@ export type TrendRefreshCounts = {
   lofiBoy: number;
 };
 
+export type TrendDiscoverySourceBreakdown = {
+  id: string;
+  label: string;
+  platform: TrendPlatform;
+  status: "success" | "failed";
+  candidateCount: number;
+  matchedTrendIds: string[];
+  candidateUrls: string[];
+};
+
+export type TrendDiscoveryAudit = {
+  scannedAt: string;
+  complete: boolean;
+  candidateCount: number;
+  qualifiedInventoryCount: number;
+  currentMatchedCount: number;
+  added: number;
+  removed: number;
+  retained: number;
+  candidateUrls: string[];
+  matchedTrendIds: string[];
+  sourceBreakdown: TrendDiscoverySourceBreakdown[];
+  reachabilityCheckedAt: string;
+  availablePosts: number;
+  unavailablePosts: number;
+  unavailablePostUrls: string[];
+};
+
 export type TrendRefreshMetadata = {
   cadenceHours: 24;
   lastAttemptAt: string;
@@ -32,6 +60,7 @@ export type TrendRefreshMetadata = {
   runUrl: string | null;
   sourceChecks: TrendSourceCheck[];
   counts: TrendRefreshCounts;
+  discoveryAudit?: TrendDiscoveryAudit;
 };
 
 export type TrendObservation = {
@@ -145,6 +174,8 @@ export const TREND_REFRESH_CADENCE_HOURS = 24;
 export const TREND_PUBLISH_MAX_AGE_HOURS = 26;
 export const TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS = 72;
 export const TREND_STEADY_MAX_VERIFICATION_AGE_HOURS = 14 * 24;
+export const MIN_TREND_DISCOVERY_PARSED_SOURCES = 3;
+export const MIN_TREND_DISCOVERY_CANDIDATE_URLS = 50;
 export const MIN_PUBLISHABLE_ACTIONABLE_TRENDS = 50;
 export const MIN_PUBLISHABLE_ACTIONABLE_VIDEO_TRENDS = 50;
 export const MIN_PUBLISHABLE_VIDEO_PROPOSALS = 100;
@@ -435,6 +466,7 @@ export function filterSocialTrends(
 
 type PublishableTrendFeedOptions = {
   now?: Date | string | number;
+  allowStaleSemanticEvidence?: boolean;
 };
 
 function canonicalReferenceIdentity(referencePost: TrendReferencePost) {
@@ -588,6 +620,80 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
     )
   ) {
     throw new Error("Compteurs de rafraÃ®chissement Trends incohÃ©rents.");
+  }
+  const discoveryAudit = refresh.discoveryAudit;
+  if (discoveryAudit !== undefined) {
+    const scannedTimestamp = typeof discoveryAudit?.scannedAt === "string"
+      ? Date.parse(discoveryAudit.scannedAt)
+      : Number.NaN;
+    const reachabilityTimestamp = typeof discoveryAudit?.reachabilityCheckedAt === "string"
+      ? Date.parse(discoveryAudit.reachabilityCheckedAt)
+      : Number.NaN;
+    const integerFields = [
+      discoveryAudit?.candidateCount,
+      discoveryAudit?.qualifiedInventoryCount,
+      discoveryAudit?.currentMatchedCount,
+      discoveryAudit?.added,
+      discoveryAudit?.removed,
+      discoveryAudit?.retained,
+      discoveryAudit?.availablePosts,
+      discoveryAudit?.unavailablePosts,
+    ];
+    if (
+      !discoveryAudit ||
+      !isText(discoveryAudit.scannedAt) ||
+      !Number.isFinite(scannedTimestamp) ||
+      typeof discoveryAudit.complete !== "boolean" ||
+      scannedTimestamp < lastAttemptTimestamp ||
+      scannedTimestamp > capturedTimestamp ||
+      !isText(discoveryAudit.reachabilityCheckedAt) ||
+      !Number.isFinite(reachabilityTimestamp) ||
+      reachabilityTimestamp < lastAttemptTimestamp ||
+      reachabilityTimestamp > capturedTimestamp ||
+      integerFields.some((count) => !Number.isInteger(count) || count < 0) ||
+      discoveryAudit.qualifiedInventoryCount > refresh.counts.actionable ||
+      discoveryAudit.currentMatchedCount > refresh.counts.actionable ||
+      discoveryAudit.added + discoveryAudit.retained !== discoveryAudit.candidateCount ||
+      !Array.isArray(discoveryAudit.candidateUrls) ||
+      discoveryAudit.candidateUrls.length > discoveryAudit.candidateCount ||
+      new Set(discoveryAudit.candidateUrls).size !== discoveryAudit.candidateUrls.length ||
+      discoveryAudit.candidateUrls.some((url) => !isWebUrl(url)) ||
+      !Array.isArray(discoveryAudit.matchedTrendIds) ||
+      discoveryAudit.matchedTrendIds.length !== discoveryAudit.currentMatchedCount ||
+      new Set(discoveryAudit.matchedTrendIds).size !== discoveryAudit.matchedTrendIds.length ||
+      discoveryAudit.matchedTrendIds.some((id) => !isText(id)) ||
+      !Array.isArray(discoveryAudit.unavailablePostUrls) ||
+      discoveryAudit.unavailablePostUrls.length > discoveryAudit.unavailablePosts ||
+      discoveryAudit.unavailablePostUrls.some((url) => !isWebUrl(url)) ||
+      !Array.isArray(discoveryAudit.sourceBreakdown) ||
+      discoveryAudit.sourceBreakdown.length !== refresh.sourceChecks.length
+    ) {
+      throw new Error("Audit de découverte Trends invalide.");
+    }
+    const breakdownIds = new Set<string>();
+    for (const source of discoveryAudit.sourceBreakdown) {
+      if (
+        !source ||
+        !isText(source.id) ||
+        breakdownIds.has(source.id) ||
+        !sourceCheckIds.has(source.id) ||
+        !isText(source.label) ||
+        !validPlatforms.has(source.platform) ||
+        !["success", "failed"].includes(source.status) ||
+        !Number.isInteger(source.candidateCount) ||
+        source.candidateCount < 0 ||
+        !Array.isArray(source.candidateUrls) ||
+        source.candidateUrls.length > source.candidateCount ||
+        new Set(source.candidateUrls).size !== source.candidateUrls.length ||
+        source.candidateUrls.some((url) => !isWebUrl(url)) ||
+        !Array.isArray(source.matchedTrendIds) ||
+        new Set(source.matchedTrendIds).size !== source.matchedTrendIds.length ||
+        source.matchedTrendIds.some((id) => !isText(id))
+      ) {
+        throw new Error(`Source d'audit Trends invalide : ${source?.id ?? "inconnue"}.`);
+      }
+      breakdownIds.add(source.id);
+    }
   }
   const ids = new Set<string>();
   const trendKeys = new Set<string>();
@@ -769,6 +875,16 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
       }
     }
   }
+  if (
+    discoveryAudit &&
+    (
+      discoveryAudit.matchedTrendIds.some((id) => !ids.has(id)) ||
+      discoveryAudit.sourceBreakdown.some((source) =>
+        source.matchedTrendIds.some((id) => !ids.has(id)))
+    )
+  ) {
+    throw new Error("Audit de découverte Trends lié à une trend inconnue.");
+  }
   const actionable = feed.trends.filter(isActionableSocialTrend);
   const lofiGirlCount = actionable.filter(
     (trend) => trend.character === "lofi-girl",
@@ -786,6 +902,30 @@ export function assertSocialTrendFeed(value: unknown): SocialTrendFeed {
   return feed;
 }
 
+export function hasCompleteTrendDiscoveryAudit(
+  feed: SocialTrendFeed,
+  now: Date | string | number = Date.now(),
+) {
+  const audit = feed.refresh.discoveryAudit;
+  if (!audit || feed.refresh.status !== "success") return false;
+  const nowTimestamp = resolveNowTimestamp(now);
+  const scannedTimestamp = Date.parse(audit.scannedAt);
+  const maximumAge = TREND_PUBLISH_MAX_AGE_HOURS * HOUR_IN_MILLISECONDS;
+  return (
+    audit.complete === true &&
+    audit.scannedAt === feed.capturedAt &&
+    audit.scannedAt === feed.refresh.lastAttemptAt &&
+    audit.reachabilityCheckedAt === audit.scannedAt &&
+    scannedTimestamp <= nowTimestamp &&
+    nowTimestamp - scannedTimestamp <= maximumAge &&
+    audit.candidateCount >= MIN_TREND_DISCOVERY_CANDIDATE_URLS &&
+    audit.candidateUrls.length >= MIN_TREND_DISCOVERY_CANDIDATE_URLS &&
+    audit.qualifiedInventoryCount >= MIN_PUBLISHABLE_ACTIONABLE_TRENDS &&
+    audit.sourceBreakdown.filter((source) => source.status === "success").length >=
+      MIN_TREND_DISCOVERY_PARSED_SOURCES
+  );
+}
+
 export function assertPublishableSocialTrendFeed(
   value: unknown,
   options: PublishableTrendFeedOptions = {},
@@ -796,6 +936,12 @@ export function assertPublishableSocialTrendFeed(
   const lastAttemptTimestamp = Date.parse(feed.refresh.lastAttemptAt);
   const lastSuccessfulTimestamp = Date.parse(feed.refresh.lastSuccessfulAt);
   const maximumAge = TREND_PUBLISH_MAX_AGE_HOURS * HOUR_IN_MILLISECONDS;
+  const completeDiscoveryAudit = hasCompleteTrendDiscoveryAudit(feed, nowTimestamp);
+  if (options.allowStaleSemanticEvidence && !completeDiscoveryAudit) {
+    throw new Error(
+      "Un scan éditorial complet est requis pour dissocier la fraîcheur du feed de ses preuves immuables.",
+    );
+  }
 
   if (
     capturedTimestamp > nowTimestamp ||
@@ -856,13 +1002,16 @@ export function assertPublishableSocialTrendFeed(
     const maximumVerificationAgeHours = trend.lifecycle === "steady"
       ? TREND_STEADY_MAX_VERIFICATION_AGE_HOURS
       : TREND_ACTIVE_MAX_VERIFICATION_AGE_HOURS;
-    if (
-      lastVerifiedTimestamp > nowTimestamp ||
-      reuseVerifiedTimestamp > nowTimestamp ||
+    const hasInvalidSemanticTimestamp =
+      lastVerifiedTimestamp > nowTimestamp || reuseVerifiedTimestamp > nowTimestamp;
+    const hasExpiredSemanticEvidence =
       nowTimestamp - lastVerifiedTimestamp >
         maximumVerificationAgeHours * HOUR_IN_MILLISECONDS ||
       nowTimestamp - reuseVerifiedTimestamp >
-        maximumVerificationAgeHours * HOUR_IN_MILLISECONDS
+        maximumVerificationAgeHours * HOUR_IN_MILLISECONDS;
+    if (
+      hasInvalidSemanticTimestamp ||
+      (!options.allowStaleSemanticEvidence && hasExpiredSemanticEvidence)
     ) {
       throw new Error(
         `Trend trop ancienne : ${trend.id} (vÃ©rification > ${maximumVerificationAgeHours} h).`,

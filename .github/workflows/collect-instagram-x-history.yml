@@ -32,11 +32,13 @@ jobs:
           # X now uses the paid official API workflow. Keeping the legacy
           # profile scroller away from X prevents it from weakening API rows.
           SOCIAL_HISTORY_PLATFORM: instagram
+      - name: Synchronize the lightweight public summary
+        run: node --experimental-strip-types scripts/sync-public-history-summary.mjs
       - name: Save public history
         run: |
           git config user.name "lofi-social-radar-bot"
           git config user.email "lofi-social-radar-bot@users.noreply.github.com"
-          git add data/public-history.json
+          git add data/public-history.json data/public-history-summary.json
           git diff --cached --quiet || git commit -m "Backfill Instagram history"
           git pull --rebase origin main
           git push
