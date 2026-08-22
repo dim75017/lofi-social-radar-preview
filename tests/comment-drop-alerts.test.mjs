@@ -71,9 +71,9 @@ function feedWith(cases) {
           },
         ],
         comments: [
-          { tone: "funny", label: "Drôle", text: "ok i will put my pen down for this one" },
-          { tone: "smart", label: "Smart", text: "eight years at this desk and this is the interruption" },
-          { tone: "complice", label: "Complice", text: "see you all back here at launch" },
+          { tone: "funny", label: "Drôle", text: `test trailer ${index} just closed the notebook` },
+          { tone: "smart", label: "Smart", text: `test trailer ${index} is a precise title for this interruption` },
+          { tone: "complice", label: "Complice", text: `the study table made room for test trailer ${index}` },
         ],
         commentsSource: "curated",
         alertedAt: null,

@@ -313,32 +313,330 @@ export function parseLofiVoiceResponse(raw: string): LofiVoiceResult {
   return { usable: true, comments };
 }
 
+const CURATED_COMMENT_OVERRIDES: Record<
+  string,
+  Record<CommentOpportunityTone, string>
+> = {
+  "yt-meoj92ztopa-ab0a1a": {
+    funny: "My study break just filed a flight plan on a Boeing 707.",
+    smart: "Functional authenticity makes a simulator impossible to treat casually.",
+    complice: "Famous Flyer 10 has officially cleared our homework for departure.",
+  },
+  "yt-aa4pyww2cyc-33e8bb": {
+    funny: "Beating every game is a very ambitious definition of one study break.",
+    smart: "‘Not ending’ turns a gaming challenge into an endurance syllabus.",
+    complice: "Kai Cenat joining is exactly when tomorrow’s schedule stopped mattering.",
+  },
+  "yt-mt4bk1lw8g-4ced59": {
+    funny: "Bloody Paradise just turned the study playlist into a full cinematic emergency.",
+    smart: "THE SIN : BLISS makes contradiction feel like an entire visual language.",
+    complice: "HATTRICK directed this; our untouched notes can direct complaints elsewhere.",
+  },
+  "yt-cn0drh49us-809077": {
+    funny: "The snow swallowed every footprint and apparently my entire revision schedule.",
+    smart: "Fog, frost, and a dreamscape make uncertainty feel strangely inviting.",
+    complice: "I would absolutely take that wandering journey instead of finishing one more page.",
+  },
+  "yt-5rkhlxnknhu-6a67e0": {
+    funny: "Sauron’s armies are advancing exactly when my assignment deadline starts advancing too.",
+    smart: "‘Fear No Darkness’ is excellent advice for both the North and late-night studying.",
+    complice: "Nintendo Switch 2 just made the North feel dangerously cozy tonight.",
+  },
+  "yt-49mtrzblgda-4b959a": {
+    funny: "A24 said prepare for the Onslaught; my quiet evening filed an appeal.",
+    smart: "That Adam Wingard cast list reads like controlled cinematic chaos.",
+    complice: "September 4 is now circled with an unnecessarily dramatic amount of ink.",
+  },
+  "yt-fow9bq3mbq8-e2a29a": {
+    funny: "Zero Hour has more coordination than my entire group project.",
+    smart: "Every precise breach begins with the part squads usually skip: an actual plan.",
+    complice: "Solo with AI squadmates sounds perfect for anyone whose group chat vanished.",
+  },
+  "yt-wrss65uindu-5ec3f7": {
+    funny: "The Pitt said ‘back to it’ before my coffee had even agreed.",
+    smart: "A January return gives ‘back to it’ a perfectly unforgiving meaning.",
+    complice: "Season three is exactly when ‘one more episode’ becomes structurally impossible.",
+  },
+  "yt-bhyr1bpbyy-300fc3": {
+    funny: "A World Cup final halftime sketch just benched my entire weekly schedule.",
+    smart: "BTS turning a global final into a sketch is scale meeting playfulness.",
+    complice: "2026 suddenly feels very real when this is already on the timeline.",
+  },
+  "yt-2x4ayn9a9ao-4efaa0": {
+    funny: "Those big eyes said MORE before the demon even finished asking.",
+    smart: "The demon wanting more is a surprisingly efficient lesson in escalation.",
+    complice: "Episode one already has moderation leaving through the emergency exit.",
+  },
+  "yt-qawbxet88o-89d8d9": {
+    funny: "That chip has more suspense than checking whether the assignment uploaded.",
+    smart: "Dude Perfect knows a single question mark can carry an entire setup.",
+    complice: "Bryson and that chip are exactly why the break keeps getting longer.",
+  },
+  "yt-syehkmfswhk-7d3ce1": {
+    funny: "Night City paired a washed-up edgerunner with a killer netrunner; very calm choice.",
+    smart: "A standalone ten-episode story makes chaos feel almost responsibly scheduled.",
+    complice: "October 20 just became the deadline my calendar will actually respect.",
+  },
+  "yt-wkra3yuozkm-fb4f11": {
+    funny: "Bloody Paradise needed only two words to cancel tonight’s productivity.",
+    smart: "The official MV framing turns Bloody Paradise from a phrase into a whole world.",
+    complice: "ENHYPEN is going straight between the focus tracks tonight.",
+  },
+  "yt-rvzvq0qazvq-b4677a": {
+    funny: "A thousand creators and players at COD Next; my focus left the lobby.",
+    smart: "Core 6v6, Warzone, and Zodiac make this showcase feel densely engineered.",
+    complice: "Modern Warfare 4 arriving mid-study session is extremely on brand for us.",
+  },
+  "yt-on7ifwoihew-b160c1": {
+    funny: "Counter-Strike turns one round into midnight with suspicious efficiency.",
+    smart: "‘Caught up in the moment’ is the most honest possible session timer.",
+    complice: "Ludwig just documented the point where our schedules quietly surrendered.",
+  },
+  "yt-9rmxngbvpa-acb791": {
+    funny: "A city on a Space Whale makes my desk setup feel underambitious.",
+    smart: "Managing supply chains on a Space Whale is peak cosmic urban planning.",
+    complice: "October 15, we are apparently moving the study room into space.",
+  },
+  "yt-vnz0dfvqj5m-168416": {
+    funny: "The Terminal List gained a second season; my to-do list gained nothing.",
+    smart: "Calling it an official teaser is brave when one title already resets the mood.",
+    complice: "Prime Video put another title on the list we were pretending not to keep.",
+  },
+  "yt-8b07gufyuji-5cc71d": {
+    funny: "Ruche said run away together; the group project officially lost another member.",
+    smart: "Knowing the game system turns the so-called weakest class into strategy.",
+    complice: "Those big-ticket items found Ruche and Elymas before our motivation found us.",
+  },
+  "yt-f0qgxeaike-ed7481": {
+    funny: "Bachiko meeting her natural enemy has more tension than my untouched deadline.",
+    smart: "A natural enemy is the fastest way to turn one lesson into a rivalry.",
+    complice: "Season four gave Bachiko a problem; our study group immediately took notes.",
+  },
+  "yt-mfmdxpt7nam-89978d": {
+    funny: "One month of saying yes to every email is inbox horror with a calendar.",
+    smart: "Repeating the experiment proves one month can turn availability into a full-time system.",
+    complice: "We saw ‘again’ and knew the inbox had already won once.",
+  },
+  "yt-avwffq3xlyc-8ace84": {
+    funny: "This week on Xbox has more chapters than the notebook I keep avoiding.",
+    smart: "Putting S.T.A.L.K.E.R. beside Mortal Shell II makes this lineup feel relentlessly atmospheric.",
+    complice: "Call of Duty, Mortal Shell II, then Forza; there goes the quiet study break.",
+  },
+  "yt-um3k9v4lkoa-0dedd8": {
+    funny: "Ito tried helping Syu; my group project could use that level of optimism.",
+    smart: "Moving Ito from only child to eldest sister makes every quiet moment newly complicated.",
+    complice: "Reclusive Syu meeting determined Ito is exactly the sibling energy we stayed for.",
+  },
+  "yt-nna95q3pzto-513663": {
+    funny: "An NBA star attempting the impossible shot while my pencil misses the cup.",
+    smart: "Calling it an impossible shot turns one attempt into a complete suspense engine.",
+    complice: "Dude Perfect found the one shot worth pausing the study timer for.",
+  },
+  "yt-sdhz4gzglkg-6b1850": {
+    funny: "Final-arc battles in 3v3; my study group barely survives one shared document.",
+    smart: "Turning the final arc into 3v3 combat makes teamwork part of the storytelling.",
+    complice: "September 4 just became the deadline our Nintendo Switch 2 will actually respect.",
+  },
+  "yt-na14zezutp8-553e91": {
+    funny: "Cap versus Red Skull is a slightly louder study-break debate than planned.",
+    smart: "Revisiting The First Avenger makes Cap’s original conflict feel newly foundational.",
+    complice: "One Cap versus Red Skull clip and the whole evening becomes a rewatch.",
+  },
+  "yt-qegdhu8ptc-076125": {
+    funny: "Marvel gathered every creator; my group chat still cannot pick one reaction.",
+    smart: "Collecting reactions in real time turns a special look into a shared premiere.",
+    complice: "December 18 feels closer once the entire creator timeline reacts together.",
+  },
+  "yt-yikfqaz3xq-56b83d": {
+    funny: "An underwater soulslike starring a crab; finally, procrastination with a shell.",
+    smart: "Making a crustacean the hero gives soulslike difficulty a wonderfully playful contrast.",
+    complice: "Free Switch 2 upgrade means our study break just grew another shell.",
+  },
+  "yt-rrfjvp6quw-b08616": {
+    funny: "Twenty hours of battery is enough to ignore an impressive number of deadlines.",
+    smart: "H2, stronger noise cancellation, and USB-C lossless make this a focused generational update.",
+    complice: "Personalized Spatial Audio and five colors; the study playlist just got ambitious.",
+  },
+  "yt-encmlxqbvra-5f2506": {
+    funny: "Tems brought What You Need; apparently what I needed was another study break.",
+    smart: "A COLORS MOMENT lets one song title carry the entire atmosphere.",
+    complice: "What You Need is going straight between the focus tracks tonight.",
+  },
+  "yt-zxu4v1qjssg-e24592": {
+    funny: "A new class of talent arrived before I finished the old class notes.",
+    smart: "Pairing Netflix icons with emerging talent makes legacy feel like a conversation.",
+    complice: "Netflix icons meeting a new class is the crossover our watchlist needed.",
+  },
+};
+
+export function curatedLofiComments(
+  opportunity: Pick<CommentOpportunity, "id">,
+): CommentSuggestion[] | null {
+  const override = CURATED_COMMENT_OVERRIDES[opportunity.id];
+  if (!override) return null;
+  return (["funny", "smart", "complice"] as CommentOpportunityTone[]).map((tone) => {
+    const text = override[tone];
+    const verdict = validateLofiComment(text);
+    if (!verdict.ok) {
+      throw new Error(`Commentaire éditorial ${tone} invalide pour ${opportunity.id}: ${verdict.reason}`);
+    }
+    return { tone, label: LOFI_TONE_BRIEFS[tone].label, text };
+  });
+}
+
 /**
- * Generic lines used only when the voice engine is unavailable. They are
- * deliberately about the act of watching rather than about the video, because
- * a placeholder that pretends to know the content is how a brand embarrasses
- * itself. The card is flagged `fallback` so nobody mistakes them for writing.
+ * Metadata-grounded lines used only when the voice engine is unavailable.
+ * Every sentence names a short anchor extracted from the post title (or, when
+ * needed, its caption/author). That keeps the degraded mode useful without
+ * pretending that metadata proves something visible inside the video.
  */
-const FALLBACK_LINES: Record<CommentOpportunityTone, readonly string[]> = {
+const FALLBACK_TEMPLATES: Record<
+  CommentOpportunityTone,
+  readonly ((anchor: string) => string)[]
+> = {
   funny: [
-    "well there goes the revision plan",
-    "i have an essay due and now i have plans",
-    "pocky and i have cleared the evening",
-    "closing the notebook, purely for research",
+    (anchor) => `apparently ${anchor} is what finally closed the notebook`,
+    (anchor) => `${anchor} just moved the revision plan to tomorrow`,
+    (anchor) => `the pen lasted eight years but ${anchor} got it`,
+    (anchor) => `pocky saw ${anchor} and approved one study break`,
+    (anchor) => `${anchor} was not on the syllabus, somehow it is now`,
+    (anchor) => `one tab for notes, one tab for ${anchor}, priorities`,
   ],
   smart: [
-    "the pacing here is doing most of the work",
-    "quiet start, and that is exactly why it lands",
-    "everyone will remember the last ten seconds",
-    "this is going to age into a reference",
+    (anchor) => `${anchor} is a very precise title for tonight's distraction`,
+    (anchor) => `the title ${anchor} already knows where the attention is going`,
+    (anchor) => `${anchor} turns the study break into the main event`,
+    (anchor) => `there is the assignment, and then there is ${anchor}`,
+    (anchor) => `${anchor} makes a quiet case for closing the notebook`,
+    (anchor) => `the timing of ${anchor} is doing real damage to the schedule`,
   ],
   complice: [
-    "whoever is watching this at 2am, same",
-    "the comment section is about to be unreadable, in a good way",
-    "showing up early for this one",
-    "eight years at this desk and still here for these",
+    (anchor) => `everyone who paused at ${anchor}, the study session understands`,
+    (anchor) => `we all read ${anchor} and silently moved the deadline`,
+    (anchor) => `${anchor} found the exact corner of the internet avoiding homework`,
+    (anchor) => `the late-night study table has made room for ${anchor}`,
+    (anchor) => `if ${anchor} interrupted your notes too, same desk`,
+    (anchor) => `the group project can wait; ${anchor} has the room`,
   ],
 };
+
+const FALLBACK_TITLE_STOPWORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "announcement",
+  "arrested",
+  "are",
+  "at",
+  "be",
+  "been",
+  "being",
+  "by",
+  "can",
+  "cancer",
+  "could",
+  "date",
+  "dead",
+  "death",
+  "died",
+  "did",
+  "do",
+  "does",
+  "every",
+  "for",
+  "from",
+  "ft",
+  "funeral",
+  "game",
+  "games",
+  "get",
+  "got",
+  "had",
+  "has",
+  "have",
+  "i",
+  "in",
+  "is",
+  "it",
+  "just",
+  "make",
+  "more",
+  "murder",
+  "mv",
+  "not",
+  "of",
+  "official",
+  "on",
+  "or",
+  "politics",
+  "shooting",
+  "should",
+  "suicide",
+  "this",
+  "tragedy",
+  "the",
+  "to",
+  "trailer",
+  "teaser",
+  "until",
+  "video",
+  "version",
+  "war",
+  "was",
+  "we",
+  "were",
+  "will",
+  "with",
+  "would",
+  "wants",
+  "you",
+]);
+
+function metadataWords(value: string) {
+  const cleaned = value.normalize("NFKC")
+    .replace(/https?:\/\/\S+|www\.\S+/giu, " ")
+    .replace(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, " ")
+    .replace(/\b(?:ft|feat)\.?\b/giu, "with")
+    .replace(/\b(?:official\s+)?(?:trailer|teaser|music\s+video|mv)\b.*$/giu, " ");
+  return (cleaned.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) ?? [])
+    .map((word) => word.replace(/’/gu, "'").toLocaleLowerCase("en"));
+}
+
+function boundedAnchor(words: string[]) {
+  const selected: string[] = [];
+  for (const word of words) {
+    if (selected.length >= 10) break;
+    const candidate = [...selected, word].join(" ");
+    if (candidate.length > 52) break;
+    selected.push(word);
+  }
+  return selected.join(" ");
+}
+
+function fallbackContextAnchor(
+  opportunity: Pick<CommentOpportunity, "title" | "caption" | "author">,
+) {
+  const titleSegments = opportunity.title.split(/\s+(?:\||[-–—])\s+/gu);
+  const captionSegments = opportunity.caption.split(/[\r\n]+|\s+(?:\||[-–—])\s+/gu);
+  const candidates = [
+    ...titleSegments,
+    ...captionSegments,
+    opportunity.author.replace(/^@/u, ""),
+  ];
+  for (let candidate of candidates) {
+    const colon = candidate.indexOf(":");
+    if (colon > 0 && SENSITIVE_COMMENT_PATTERN.test(candidate.slice(colon + 1))) {
+      candidate = candidate.slice(0, colon);
+    }
+    const words = metadataWords(candidate).filter(
+      (word) => !SENSITIVE_COMMENT_PATTERN.test(word),
+    );
+    const hasSpecificWord = words.some((word) => !FALLBACK_TITLE_STOPWORDS.has(word));
+    const anchor = hasSpecificWord ? boundedAnchor(words) : "";
+    if (anchor) return anchor;
+  }
+  throw new Error("Aucun détail textuel exploitable pour les commentaires de secours.");
+}
 
 function stableIndex(seed: string, length: number) {
   let hash = 0;
@@ -348,14 +646,34 @@ function stableIndex(seed: string, length: number) {
   return hash % length;
 }
 
-export function fallbackLofiComments(seed: string): CommentSuggestion[] {
-  return (Object.keys(FALLBACK_LINES) as CommentOpportunityTone[]).map((tone) => {
-    const lines = FALLBACK_LINES[tone];
-    return {
-      tone,
-      label: LOFI_TONE_BRIEFS[tone].label,
-      text: lines[stableIndex(`${seed}:${tone}`, lines.length)],
-    };
+export function fallbackLofiComments(
+  opportunity: Pick<CommentOpportunity, "id" | "title" | "caption" | "author">,
+  reservedTexts: Set<string> = new Set(),
+): CommentSuggestion[] {
+  const anchor = fallbackContextAnchor(opportunity);
+  return (Object.keys(FALLBACK_TEMPLATES) as CommentOpportunityTone[]).map((tone) => {
+    const templates = FALLBACK_TEMPLATES[tone];
+    const start = stableIndex(`${opportunity.id}:${tone}`, templates.length);
+    const candidates = Array.from({ length: templates.length }, (_, offset) =>
+      templates[(start + offset) % templates.length](anchor)
+    );
+    for (const preferredLength of [true, false]) {
+      for (const text of candidates) {
+        const normalized = text.normalize("NFKC").toLocaleLowerCase("en");
+        const wordCount = metadataWords(text).length;
+        if (preferredLength && (wordCount < 8 || wordCount > 18)) continue;
+        if (reservedTexts.has(normalized)) continue;
+        const verdict = validateLofiComment(text);
+        if (!verdict.ok) continue;
+        reservedTexts.add(normalized);
+        return {
+          tone,
+          label: LOFI_TONE_BRIEFS[tone].label,
+          text,
+        };
+      }
+    }
+    throw new Error(`Impossible de produire un commentaire ${tone} distinct pour ${opportunity.id}.`);
   });
 }
 

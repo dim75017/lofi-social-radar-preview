@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildLofiCommentPrompt,
+  curatedLofiComments,
   fallbackLofiComments,
   LOFI_COMMENT_ARCHETYPES,
   LOFI_VOICE_HALL_OF_FAME,
@@ -110,22 +111,84 @@ test("the model answer survives the prose models like to wrap JSON in", () => {
   assert.equal(parsed.usable, true);
 });
 
-test("fallback lines are stable per card, distinct per tone and never promotional", () => {
-  const first = fallbackLofiComments("yt-abc-123456");
-  const again = fallbackLofiComments("yt-abc-123456");
-  assert.deepEqual(first, again, "the same card must not shuffle its placeholder on every run");
+test("fallback lines are stable, metadata-specific and globally distinct", () => {
+  const opportunity = {
+    id: "yt-abc-123456",
+    title: "Grand Theft Auto VI Trailer 3",
+    caption: "Coming May 2027.",
+    author: "Rockstar Games",
+  };
+  const first = fallbackLofiComments(opportunity);
+  const again = fallbackLofiComments(opportunity);
+  assert.deepEqual(first, again, "the same card must not shuffle its fallback on every run");
   assert.equal(first.length, 3);
   assert.equal(new Set(first.map((comment) => comment.text)).size, 3);
   for (const comment of first) {
+    assert.match(comment.text, /grand theft auto vi/u);
     assert.equal(validateLofiComment(comment.text).ok, true, comment.text);
     assert.equal(isPromotionalComment(comment.text), false, comment.text);
+    const wordCount = comment.text.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)?.length ?? 0;
+    assert.ok(wordCount >= 8 && wordCount <= 18, `${wordCount} words: ${comment.text}`);
   }
-  const other = fallbackLofiComments("yt-zzz-999999");
-  assert.notDeepEqual(
-    first.map((comment) => comment.text),
-    other.map((comment) => comment.text),
-    "two different cards should not always get the same placeholder",
-  );
+
+  const reserved = new Set();
+  const sharedTitle = { title: "Official Trailer", caption: "A moonlit train arrives.", author: "Studio" };
+  const one = fallbackLofiComments({ ...sharedTitle, id: "yt-one-123456" }, reserved);
+  const two = fallbackLofiComments({ ...sharedTitle, id: "yt-two-123456" }, reserved);
+  assert.equal(new Set([...one, ...two].map((comment) => comment.text)).size, 6);
+  for (const comment of [...one, ...two]) {
+    assert.match(comment.text, /moonlit train arrives/u, "boilerplate title must yield to caption detail");
+  }
+});
+
+test("current editorial overrides are specific, concise and globally unique", () => {
+  const expectedAnchors = {
+    "yt-meoj92ztopa-ab0a1a": /707|functional authenticity|famous flyer/u,
+    "yt-aa4pyww2cyc-33e8bb": /every game|not ending|kai cenat/u,
+    "yt-mt4bk1lw8g-4ced59": /bloody paradise|sin\s*:\s*bliss|hattrick/u,
+    "yt-cn0drh49us-809077": /snow|fog|frost|dreamscape|wandering journey/u,
+    "yt-5rkhlxnknhu-6a67e0": /sauron|fear no darkness|nintendo switch 2|the north/u,
+    "yt-49mtrzblgda-4b959a": /onslaught|adam wingard|september 4/u,
+    "yt-fow9bq3mbq8-e2a29a": /zero hour|breach|ai squadmates/u,
+    "yt-wrss65uindu-5ec3f7": /pitt|season three|back to it|january return/u,
+    "yt-bhyr1bpbyy-300fc3": /world cup|halftime|bts|2026/u,
+    "yt-2x4ayn9a9ao-4efaa0": /demon want(?:ed|ing) more|big eyes|episode one/u,
+    "yt-qawbxet88o-89d8d9": /chip|dude perfect|bryson/u,
+    "yt-syehkmfswhk-7d3ce1": /night city|standalone ten-episode|october 20/u,
+    "yt-wkra3yuozkm-fb4f11": /bloody paradise|enhypen/u,
+    "yt-rvzvq0qazvq-b4677a": /cod next|6v6|warzone|zodiac|modern warfare 4/u,
+    "yt-on7ifwoihew-b160c1": /counter-strike|caught up in the moment|ludwig/u,
+    "yt-9rmxngbvpa-acb791": /space whale|stars|october 15/u,
+    "yt-vnz0dfvqj5m-168416": /terminal list|official teaser|prime video/u,
+    "yt-8b07gufyuji-5cc71d": /ruche|game system|weakest class|big-ticket/u,
+    "yt-f0qgxeaike-ed7481": /bachiko|natural enemy|season four/u,
+    "yt-mfmdxpt7nam-89978d": /every email|one month|again|inbox/u,
+    "yt-avwffq3xlyc-8ace84": /xbox|s\.t\.a\.l\.k\.e\.r\.|mortal shell ii|call of duty|forza/u,
+    "yt-um3k9v4lkoa-0dedd8": /ito|syu|only child|eldest sister/u,
+    "yt-nna95q3pzto-513663": /nba star|impossible shot|dude perfect/u,
+    "yt-sdhz4gzglkg-6b1850": /final arc|3v3|september 4|nintendo switch 2/u,
+    "yt-na14zezutp8-553e91": /cap|red skull|first avenger/u,
+    "yt-qegdhu8ptc-076125": /marvel|creator|reaction|december 18/u,
+    "yt-yikfqaz3xq-56b83d": /underwater soulslike|crab|crustacean|switch 2|shell/u,
+    "yt-rrfjvp6quw-b08616": /twenty hours|h2|noise cancellation|usb-c|spatial audio|five colors/u,
+    "yt-encmlxqbvra-5f2506": /tems|what you need|colors moment/u,
+    "yt-zxu4v1qjssg-e24592": /new class|netflix icons|emerging talent/u,
+  };
+  const allTexts = [];
+  for (const [id, anchor] of Object.entries(expectedAnchors)) {
+    const comments = curatedLofiComments({ id });
+    assert.equal(comments.length, 3, id);
+    assert.deepEqual(comments.map((comment) => comment.tone), ["funny", "smart", "complice"]);
+    for (const comment of comments) {
+      assert.match(comment.text.toLocaleLowerCase("en"), anchor, `${id}: ${comment.text}`);
+      assert.equal(validateLofiComment(comment.text).ok, true, comment.text);
+      const wordCount = comment.text.trim().split(/\s+/u).length;
+      assert.ok(wordCount >= 8 && wordCount <= 18, `${wordCount} words: ${comment.text}`);
+      allTexts.push(comment.text.normalize("NFKC").toLocaleLowerCase("en"));
+    }
+  }
+  assert.equal(new Set(allTexts).size, allTexts.length);
+  assert.equal(curatedLofiComments({ id: "yt-unknown-000000" }), null);
 });
 
 test("an unavailable voice engine degrades instead of throwing", async () => {

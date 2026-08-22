@@ -44,7 +44,12 @@ import {
   commentOpportunityLofiFitScore,
   commentOpportunityWhyNow,
 } from "../lib/comment-scoring.ts";
-import { fallbackLofiComments, requestLofiComments } from "../lib/lofi-voice.ts";
+import {
+  curatedLofiComments,
+  fallbackLofiComments,
+  requestLofiComments,
+  validateLofiComment,
+} from "../lib/lofi-voice.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dataDir = resolve(root, "data", "comment-opportunities");
@@ -304,6 +309,13 @@ export function qualifiesForBoard(opportunity) {
 // ------------------------------------------------------------- Voice engine
 
 async function fillComments(opportunities, { apiKey, limit, fetchImpl, log, now }) {
+  for (const opportunity of opportunities) {
+    const curated = curatedLofiComments(opportunity);
+    if (curated) {
+      opportunity.comments = curated;
+      opportunity.commentsSource = "curated";
+    }
+  }
   const needsVoice = rankCommentOpportunities(opportunities).filter((opportunity) => {
     const missing = opportunity.comments.length !== 3 ||
       opportunity.commentsSource === "fallback";
@@ -334,10 +346,34 @@ async function fillComments(opportunities, { apiKey, limit, fetchImpl, log, now 
     }
   }
 
-  // Every card leaves with three proposals, flagged for what they are.
-  for (const opportunity of opportunities) {
-    if (opportunity.comments.length !== 3) {
-      opportunity.comments = fallbackLofiComments(opportunity.id);
+  // Keep hand-written/model lines only while they are valid and unique across
+  // the entire board. Every fallback is rebuilt from this card's metadata, so
+  // an old generic placeholder can never survive a successful refresh.
+  const reservedTexts = new Set();
+  const fallbackRequired = new Set();
+  const stableOrder = [...opportunities].sort((left, right) =>
+    left.id < right.id ? -1 : left.id > right.id ? 1 : 0
+  );
+  for (const opportunity of stableOrder) {
+    const normalized = opportunity.comments.map((comment) =>
+      typeof comment?.text === "string"
+        ? comment.text.normalize("NFKC").trim().replace(/\s+/gu, " ").toLocaleLowerCase("en")
+        : ""
+    );
+    const canKeep = opportunity.commentsSource !== "fallback" &&
+      opportunity.comments.length === 3 &&
+      new Set(normalized).size === 3 &&
+      opportunity.comments.every((comment) => validateLofiComment(comment.text).ok) &&
+      normalized.every((text) => !reservedTexts.has(text));
+    if (canKeep) {
+      for (const text of normalized) reservedTexts.add(text);
+    } else {
+      fallbackRequired.add(opportunity.id);
+    }
+  }
+  for (const opportunity of stableOrder) {
+    if (fallbackRequired.has(opportunity.id)) {
+      opportunity.comments = fallbackLofiComments(opportunity, reservedTexts);
       opportunity.commentsSource = "fallback";
     }
   }
@@ -572,6 +608,14 @@ export async function refreshCommentOpportunities(options = {}) {
     log,
     now,
   });
+  const fallbackCount = opportunities.filter(
+    (opportunity) => opportunity.commentsSource === "fallback",
+  ).length;
+  if (fallbackCount > 0 && options.allowFallback !== true) {
+    throw new Error(
+      `${fallbackCount} cartes sans commentaires éditoriaux spécifiques : dernier snapshot conservé.`,
+    );
+  }
 
   const youtubeCount = opportunities.filter((item) => item.platform === "youtube").length;
   const youtubeCheck = {

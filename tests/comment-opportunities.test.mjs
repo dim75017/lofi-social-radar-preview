@@ -47,6 +47,15 @@ test("the comment opportunity feed is a valid v2 snapshot with every platform ch
     new Set(feed.opportunities.map((item) => nativeCommentOpportunityIdentity(item))).size,
     feed.opportunities.length,
   );
+  assert.equal(
+    new Set(
+      feed.opportunities.flatMap((item) =>
+        item.comments.map((comment) => comment.text.normalize("NFKC").toLocaleLowerCase("en"))
+      ),
+    ).size,
+    feed.opportunities.length * 3,
+    "no proposed line may be reused on another video",
+  );
 
   for (const opportunity of feed.opportunities) {
     assert.equal(opportunity.mediaType, "video", opportunity.id);
@@ -230,6 +239,15 @@ test("a sensitive subject cannot be published as low risk", () => {
   opportunity.risk = { level: "low", note: "rien à signaler" };
   assert.equal(commentOpportunityIsSensitive(opportunity), true);
   assert.throws(() => assertCommentOpportunityFeed(snapshot), /Sujet sensible/i);
+});
+
+test("an exact comment reused on another video is refused", () => {
+  const snapshot = structuredClone(feed);
+  snapshot.opportunities[1].comments[0].text = snapshot.opportunities[0].comments[0].text;
+  assert.throws(
+    () => assertCommentOpportunityFeed(snapshot),
+    /Commentaire proposé invalide/u,
+  );
 });
 
 test("a declared velocity that the observations do not support is refused", () => {

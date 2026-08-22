@@ -20,8 +20,8 @@ export type CommentOpportunityDiscoverySource = "watchlist" | "viral-scan";
 export type CommentOpportunityVelocityMetric = "views" | "likes" | "comments";
 /**
  * Where the three proposals come from. `fallback` means the voice engine was
- * unreachable and the lines are generic, which a community manager has to be
- * able to see at a glance instead of discovering it after pasting.
+ * unreachable and the lines were derived conservatively from public metadata,
+ * which a community manager still has to be able to identify at a glance.
  */
 export type CommentOpportunityCommentsSource = "voice-engine" | "curated" | "fallback";
 
@@ -656,6 +656,7 @@ export function assertCommentOpportunityFeed(
 
   const ids = new Set<string>();
   const nativePosts = new Set<string>();
+  const allCommentTexts = new Set<string>();
   for (const opportunity of feed.opportunities) {
     if (!opportunity || typeof opportunity !== "object") {
       throw new Error("Opportunité de commentaire invalide.");
@@ -800,12 +801,14 @@ export function assertCommentOpportunityFeed(
         !normalizedText ||
         normalizedText.length > COMMENT_OPPORTUNITY_MAX_COMMENT_LENGTH ||
         commentTexts.has(normalizedText) ||
+        allCommentTexts.has(normalizedText) ||
         isPromotionalComment(comment.text)
       ) {
         throw new Error(`Commentaire proposé invalide : ${opportunity.id}`);
       }
       tones.add(comment.tone);
       commentTexts.add(normalizedText);
+      allCommentTexts.add(normalizedText);
     }
     if (tones.size !== VALID_TONES.size) {
       throw new Error(`Tons de commentaire incomplets : ${opportunity.id}`);

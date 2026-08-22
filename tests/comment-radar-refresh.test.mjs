@@ -145,6 +145,7 @@ test("a drop is discovered, then promoted once the climb is measured", async () 
 
   const first = await refreshCommentOpportunities({
     lane: "fast",
+    allowFallback: true,
     now: "2026-08-13T10:10:00.000Z",
     apiKey: "",
     paths,
@@ -162,6 +163,7 @@ test("a drop is discovered, then promoted once the climb is measured", async () 
 
   const second = await refreshCommentOpportunities({
     lane: "fast",
+    allowFallback: true,
     now: "2026-08-13T10:40:00.000Z",
     apiKey: "",
     paths,
@@ -198,6 +200,7 @@ test("an unreachable channel degrades the source check instead of emptying the b
 
   const healthy = await refreshCommentOpportunities({
     lane: "fast",
+    allowFallback: true,
     now: "2026-08-13T10:10:00.000Z",
     apiKey: "",
     paths,
@@ -214,6 +217,7 @@ test("an unreachable channel degrades the source check instead of emptying the b
 
   const degraded = await refreshCommentOpportunities({
     lane: "fast",
+    allowFallback: true,
     now: "2026-08-13T10:40:00.000Z",
     apiKey: "",
     paths,
@@ -252,6 +256,7 @@ test("the same video seen twice in one run does not create two cards", async () 
   };
   const result = await refreshCommentOpportunities({
     lane: "fast",
+    allowFallback: true,
     now: "2026-08-13T10:10:00.000Z",
     apiKey: "",
     paths,
@@ -262,6 +267,39 @@ test("the same video seen twice in one run does not create two cards", async () 
   });
   assert.equal(result.feed.opportunities.length, 1);
   assert.equal(assertCommentOpportunityFeed(result.feed), result.feed);
+});
+
+test("an unmapped card cannot replace the last feed with generic fallbacks", async () => {
+  const paths = await workspace();
+  const previousFeed = await readFile(paths.feed, "utf8");
+  const entry = {
+    videoId: "QdBZY2fkU-0",
+    title: "Grand Theft Auto VI Trailer 3",
+    description: "Coming soon. A trailer for the next chapter.",
+    publishedAt: "2026-08-13T10:00:00+00:00",
+    views: 9_000_000,
+  };
+
+  await assert.rejects(
+    refreshCommentOpportunities({
+      lane: "fast",
+      now: "2026-08-13T10:10:00.000Z",
+      apiKey: "",
+      paths,
+      fetchImpl: async (url) =>
+        url.includes("UC6VcWc1rAoWdBCM0JxrRQ3A")
+          ? new Response(atomFeed("Rockstar Games", [entry]), { status: 200 })
+          : new Response(atomFeed("Quiet Channel", []), { status: 200 }),
+      log: () => {},
+    }),
+    /sans commentaires éditoriaux spécifiques/u,
+  );
+
+  assert.equal(
+    await readFile(paths.feed, "utf8"),
+    previousFeed,
+    "the last verified snapshot stays byte-for-byte intact",
+  );
 });
 
 test("a YouTube-only lane preserves the last verified cards from every other platform", async () => {
