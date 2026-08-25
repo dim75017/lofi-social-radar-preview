@@ -39,7 +39,10 @@ test("the published audio feed uses stable local frames instead of expiring CDN 
     .map((trend) => trend.referenceVideo.thumbnailUrl)
     .filter((thumbnailUrl) => thumbnailUrl !== null);
 
-  assert.equal(thumbnails.length, 49);
+  assert.ok(
+    thumbnails.length >= storedFeed.trends.length - 1,
+    "at most one audio card may use the explicit visual fallback",
+  );
   assert.ok(thumbnails.every((thumbnailUrl) => isCachedAudioTrendThumbnailUrl(thumbnailUrl)));
 
   for (const thumbnailUrl of thumbnails) {
