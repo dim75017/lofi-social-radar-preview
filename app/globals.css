@@ -1300,7 +1300,148 @@ a {
   color: #fde68a;
   font-size: 12px;
   font-weight: 780;
-  white-space: nowrap;
+  max-width: 520px;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.trend-scan-summary {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  border-radius: 14px;
+  background: rgba(74, 222, 128, 0.055);
+  padding: 13px 15px;
+}
+
+.trend-scan-summary.is-degraded {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: rgba(251, 191, 36, 0.055);
+}
+
+.trend-scan-summary > div {
+  display: grid;
+  gap: 3px;
+}
+
+.trend-scan-summary b {
+  color: #dcfce7;
+  font-size: 14px;
+}
+
+.trend-scan-summary.is-degraded b {
+  color: #fde68a;
+}
+
+.trend-scan-summary span,
+.trend-scan-summary p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.trend-candidate-panel {
+  display: grid;
+  gap: 11px;
+  border: 1px solid rgba(154, 168, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(154, 168, 255, 0.04);
+  padding: 13px 15px;
+}
+
+.trend-candidate-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.trend-candidate-panel-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.trend-candidate-panel-heading b {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.trend-candidate-panel-heading span {
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.trend-candidate-panel-heading > span {
+  flex: none;
+  border: 1px solid rgba(154, 168, 255, 0.24);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: #d9ddff;
+  font-weight: 760;
+}
+
+.trend-candidate-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.trend-candidate-links a,
+.trend-candidate-overflow {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(11, 13, 21, 0.58);
+  padding: 6px 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.trend-candidate-links a:hover,
+.trend-candidate-links a:focus-visible {
+  border-color: rgba(154, 168, 255, 0.48);
+  color: #fff;
+  outline: none;
+}
+
+.trend-candidate-links img {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  object-fit: contain;
+}
+
+.trend-candidate-overflow {
+  color: var(--dim);
+}
+
+.trend-scan-card-state {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  align-items: center;
+  border: 1px solid rgba(150, 163, 214, 0.18);
+  border-radius: 999px;
+  padding: 4px 7px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.trend-scan-card-state.is-current {
+  border-color: rgba(74, 222, 128, 0.28);
+  background: rgba(74, 222, 128, 0.07);
+  color: #bbf7d0;
 }
 
 .trend-feed-controls {
@@ -9104,6 +9245,15 @@ a {
 
   .trend-snapshot-pill {
     white-space: normal;
+  }
+
+  .trend-scan-summary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .trend-candidate-panel-heading {
+    flex-direction: column;
   }
 
   .trend-filter-tabs {

@@ -4,9 +4,11 @@ import { SocialOS, type WorkspacePayload } from "../app/SocialOS";
 import "../app/globals.css";
 import audienceHistoryJson from "../data/audience-history.json";
 import audioTrendFeedJson from "../data/audio-trends/feed.json";
+import audioTrendScanStatusJson from "../data/audio-trends/refresh-status.json";
 import commentOpportunityFeedJson from "../data/comment-opportunities/feed.json";
 import publicHistorySummaryJson from "../data/public-history-summary.json";
 import trendFeedJson from "../data/trends/feed.json";
+import videoTrendScanStatusJson from "../data/trends/refresh-status.json";
 import {
   assertAudienceHistory,
   type AudienceHistory,
@@ -29,6 +31,12 @@ import {
   assertSocialTrendFeed,
   type SocialTrendFeed,
 } from "../lib/social-trends";
+import {
+  assertAudioTrendScanStatus,
+  assertVideoTrendScanStatus,
+  type AudioTrendScanStatus,
+  type VideoTrendScanStatus,
+} from "../lib/trend-scan-status";
 
 const PLATFORM_ORDER: SocialPlatform[] = [
   "youtube",
@@ -46,12 +54,20 @@ const fallbackAudienceHistory = assertAudienceHistory(
 const fallbackAudioTrendFeed = assertAudioTrendFeed(
   audioTrendFeedJson as AudioTrendFeed,
 );
+const fallbackVideoTrendScanStatus = assertVideoTrendScanStatus(
+  videoTrendScanStatusJson as VideoTrendScanStatus,
+);
+const fallbackAudioTrendScanStatus = assertAudioTrendScanStatus(
+  audioTrendScanStatusJson as AudioTrendScanStatus,
+);
 const fallbackCommentOpportunityFeed = assertCommentOpportunityFeed(
   commentOpportunityFeedJson as CommentOpportunityFeed,
 );
 const dataBaseUrl = `${import.meta.env.BASE_URL}data`;
 const RAW_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar-preview/main/data/trends/feed.json";
 const RAW_AUDIO_TREND_FEED_URL = "https://raw.githubusercontent.com/dim75017/lofi-social-radar-preview/main/data/audio-trends/feed.json";
+const RAW_VIDEO_TREND_STATUS_URL = `${dataBaseUrl}/trends/refresh-status.json`;
+const RAW_AUDIO_TREND_STATUS_URL = `${dataBaseUrl}/audio-trends/refresh-status.json`;
 const RAW_AUDIENCE_HISTORY_URL = `${dataBaseUrl}/audience-history.json`;
 const RAW_COMMENT_OPPORTUNITIES_URL = `${dataBaseUrl}/comment-opportunities/feed.json`;
 const emptySnapshot: PublicHistorySnapshot = {
@@ -76,6 +92,8 @@ function PublicPreview() {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [trendFeed, setTrendFeed] = useState(fallbackTrendFeed);
   const [audioTrendFeed, setAudioTrendFeed] = useState(fallbackAudioTrendFeed);
+  const [videoTrendScanStatus, setVideoTrendScanStatus] = useState(fallbackVideoTrendScanStatus);
+  const [audioTrendScanStatus, setAudioTrendScanStatus] = useState(fallbackAudioTrendScanStatus);
   const [audienceHistory, setAudienceHistory] = useState(fallbackAudienceHistory);
   const [commentOpportunityFeed, setCommentOpportunityFeed] = useState(fallbackCommentOpportunityFeed);
   const [pendingPlatforms, setPendingPlatforms] = useState<SocialPlatform[]>([
@@ -122,6 +140,63 @@ function PublicPreview() {
 
     refreshTrendFeed();
     const hourlyRefresh = window.setInterval(refreshTrendFeed, 60 * 60 * 1_000);
+    document.addEventListener("visibilitychange", refreshOnReturn);
+
+    return () => {
+      active = false;
+      window.clearInterval(hourlyRefresh);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    const refreshTrendScanStatuses = () => {
+      const version = Date.now();
+      void Promise.allSettled([
+        fetch(`${RAW_VIDEO_TREND_STATUS_URL}?v=${version}`, {
+          cache: "no-store",
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        }).then(async (response) => {
+          if (!response.ok) throw new Error(`Statut vidéo indisponible (${response.status}).`);
+          return assertVideoTrendScanStatus(await response.json());
+        }),
+        fetch(`${RAW_AUDIO_TREND_STATUS_URL}?v=${version}`, {
+          cache: "no-store",
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        }).then(async (response) => {
+          if (!response.ok) throw new Error(`Statut audio indisponible (${response.status}).`);
+          return assertAudioTrendScanStatus(await response.json());
+        }),
+      ]).then(([videoResult, audioResult]) => {
+        if (!active) return;
+        if (videoResult.status === "fulfilled") {
+          setVideoTrendScanStatus((current) =>
+            Date.parse(videoResult.value.lastAttemptAt) >= Date.parse(current.lastAttemptAt)
+              ? videoResult.value
+              : current,
+          );
+        }
+        if (audioResult.status === "fulfilled") {
+          setAudioTrendScanStatus((current) =>
+            Date.parse(audioResult.value.attemptedAt) >= Date.parse(current.attemptedAt)
+              ? audioResult.value
+              : current,
+          );
+        }
+      });
+    };
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") refreshTrendScanStatuses();
+    };
+
+    refreshTrendScanStatuses();
+    const hourlyRefresh = window.setInterval(refreshTrendScanStatuses, 60 * 60 * 1_000);
     document.addEventListener("visibilitychange", refreshOnReturn);
 
     return () => {
@@ -352,6 +427,8 @@ function PublicPreview() {
       initialWorkspace={workspace as WorkspacePayload}
       initialTrendFeed={trendFeed}
       initialAudioTrendFeed={audioTrendFeed}
+      initialVideoTrendScanStatus={videoTrendScanStatus}
+      initialAudioTrendScanStatus={audioTrendScanStatus}
       initialCommentOpportunityFeed={commentOpportunityFeed}
       initialAudienceHistory={audienceHistory}
       previewMode

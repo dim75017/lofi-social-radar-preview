@@ -76,6 +76,12 @@ jobs:
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
+      - name: Publish the failed-attempt status on the dashboard
+        if: steps.scan.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish-public-preview.yml --ref main
+
       - name: Mark an invalid or failed scan
         if: steps.scan.outcome == 'failure' || steps.validation.outcome == 'failure'
         run: exit 1

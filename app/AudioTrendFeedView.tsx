@@ -15,6 +15,11 @@ import {
 import { dailyRotationIndex } from "../lib/daily-rotation";
 import { resolveFreshInstagramPlaybackUrl } from "../lib/social-inline-player";
 import { isTrendEditorialScanLate } from "../lib/trend-health";
+import {
+  isScanLate,
+  type AudioTrendCandidateReference,
+  type AudioTrendScanStatus,
+} from "../lib/trend-scan-status";
 import { SocialInlinePlayer } from "./SocialInlinePlayer";
 
 type PlatformFilter = AudioTrendPlatform | "all";
@@ -52,10 +57,12 @@ const PROPOSAL_TONE_LABELS: Record<AudioTrendProposalTone, string> = {
 
 export function AudioTrendFeedView({
   feed,
+  scanStatus,
   loading,
   error,
 }: {
   feed: AudioTrendFeed | null;
+  scanStatus: AudioTrendScanStatus | null;
   loading: boolean;
   error: string;
 }) {
@@ -63,16 +70,32 @@ export function AudioTrendFeedView({
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
   const [freshnessCheckedAt, setFreshnessCheckedAt] = useState(Date.now);
+  const matchedAudioUrls = useMemo(
+    () => new Set((scanStatus?.discoveryAudit.candidateAudioUrls ?? []).map(canonicalUrl)),
+    [scanStatus?.discoveryAudit.candidateAudioUrls],
+  );
   const visibleTrends = useMemo(() => {
     const freshnessCutoff = Date.parse(feed?.capturedAt ?? "") -
       Math.max(feed?.cadenceHours ?? 24, 24) * 2 * 60 * 60 * 1_000;
     return [...(feed?.trends ?? [])]
       .filter((trend) => platformFilter === "all" || trend.platform === platformFilter)
       .filter((trend) => typeFilter === "all" || trend.type === typeFilter)
-      .sort((left, right) => compareAudioTrends(left, right, freshnessCutoff));
-  }, [feed?.cadenceHours, feed?.capturedAt, feed?.trends, platformFilter, typeFilter]);
+      .sort((left, right) => {
+        const leftMatched = matchedAudioUrls.has(canonicalUrl(left.audioUrl));
+        const rightMatched = matchedAudioUrls.has(canonicalUrl(right.audioUrl));
+        if (leftMatched !== rightMatched) return leftMatched ? -1 : 1;
+        return compareAudioTrends(left, right, freshnessCutoff);
+      });
+  }, [feed?.cadenceHours, feed?.capturedAt, feed?.trends, matchedAudioUrls, platformFilter, typeFilter]);
   const editorialScanDate = feed ? formatRefreshDate(feed.capturedAt) : null;
   const editorialScanIsLate = isTrendEditorialScanLate(feed?.capturedAt, freshnessCheckedAt);
+  const dailyScanDate = formatRefreshDate(
+    scanStatus?.discoveryAudit.scannedAt ?? scanStatus?.attemptedAt ?? "",
+  );
+  const dailyScanIsLate = isScanLate(
+    scanStatus?.discoveryAudit.scannedAt ?? scanStatus?.attemptedAt,
+    freshnessCheckedAt,
+  );
 
   useEffect(() => {
     const interval = window.setInterval(
@@ -93,18 +116,32 @@ export function AudioTrendFeedView({
             leur vraie croissance et une vidéo de référence.
           </p>
         </div>
-        {feed && editorialScanDate ? (
-          <span className={`trend-snapshot-pill ${editorialScanIsLate ? "is-late" : ""}`}>
-            {editorialScanIsLate ? "⚠️" : "✅"} {feed.trends.length} audios distincts · Dernier feed qualifié : {editorialScanDate}
+        {scanStatus && dailyScanDate ? (
+          <span className={`trend-snapshot-pill ${dailyScanIsLate ? "is-late" : ""}`}>
+            Scan 24 h : {scanStatus.discoveryAudit.candidateCount} sons · {scanStatus.discoveryAudit.qualifiedInventoryCount} carte retrouvée · {dailyScanDate}
           </span>
         ) : null}
       </header>
 
-      {feed && editorialScanIsLate && !error ? (
-        <div className="trend-feed-notice" role="status">
-          <span aria-hidden="true">⚠️</span>
-          <p>Le dernier feed qualifié dépasse 26 h. Un scan candidat ou des aperçus médias renouvelés séparément ne constituent pas une nouvelle détection de tendance.</p>
+      {feed && editorialScanDate ? (
+        <div className={`trend-scan-summary ${editorialScanIsLate ? "is-degraded" : ""}`} role="status">
+          <div>
+            <b>{dailyScanIsLate ? "Scan quotidien en retard" : "Scan quotidien effectué"}</b>
+            <span>Dernier lot complet : {editorialScanDate} · {feed.trends.length} cartes</span>
+          </div>
+          <p>
+            {editorialScanIsLate
+              ? `${scanStatus?.discoveryAudit.qualifiedInventoryCount ?? 0}/50 cartes ont été reliées au scan du jour. Les ${scanStatus?.discoveryAudit.newCandidateCount ?? 0} nouveaux sons restent candidats tant que leurs reprises, likes et durée ne sont pas prouvés.`
+              : "Le lot affiché a passé les contrôles multi-créateurs, métriques et durée."}
+          </p>
         </div>
+      ) : null}
+
+      {scanStatus?.discoveryAudit.candidateReferences.length ? (
+        <AudioCandidateLinks
+          references={scanStatus.discoveryAudit.candidateReferences}
+          total={scanStatus.discoveryAudit.candidateCount}
+        />
       ) : null}
 
       <div className="audio-trend-controls" aria-label="Filtres des trends audio">
@@ -175,6 +212,7 @@ export function AudioTrendFeedView({
               active={activePlayerId === trend.id}
               onActivate={() => setActivePlayerId(trend.id)}
               onClose={() => setActivePlayerId(null)}
+              scanMatched={matchedAudioUrls.has(canonicalUrl(trend.audioUrl))}
               feedCapturedAt={feed.capturedAt}
               key={`${trend.id}:${feed.capturedAt.slice(0, 10)}`}
             />
@@ -202,12 +240,50 @@ export function AudioTrendFeedView({
   );
 }
 
+function AudioCandidateLinks({
+  references,
+  total,
+}: {
+  references: readonly AudioTrendCandidateReference[];
+  total: number;
+}) {
+  const visibleReferences = references.slice(0, 12);
+  return (
+    <section className="trend-candidate-panel" aria-label="Nouveaux sons détectés au dernier scan">
+      <div className="trend-candidate-panel-heading">
+        <div>
+          <b>Nouveaux sons détectés au dernier scan</b>
+          <span>À qualifier : trois créateurs, métriques publiques et durée doivent encore être vérifiés.</span>
+        </div>
+        <span>{total} détectés</span>
+      </div>
+      <div className="trend-candidate-links">
+        {visibleReferences.map((candidate, index) => {
+          const platform = audioCandidatePlatform(candidate.referenceUrl);
+          return (
+            <a href={candidate.referenceUrl} target="_blank" rel="noreferrer" key={`${candidate.audioUrl}:${candidate.referenceUrl}`}>
+              {platform ? (
+                <img src={`platforms/${platform}.svg`} alt="" width="17" height="17" />
+              ) : null}
+              Son candidat {index + 1}
+            </a>
+          );
+        })}
+        {total > visibleReferences.length ? (
+          <span className="trend-candidate-overflow">+{total - visibleReferences.length} autres</span>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 function AudioTrendCard({
   trend,
   rank,
   active,
   onActivate,
   onClose,
+  scanMatched,
   feedCapturedAt,
 }: {
   trend: AudioTrend;
@@ -215,6 +291,7 @@ function AudioTrendCard({
   active: boolean;
   onActivate: () => void;
   onClose: () => void;
+  scanMatched: boolean;
   feedCapturedAt: string;
 }) {
   const derivedGrowth = deriveAudioTrendGrowth(trend.usageObservations);
@@ -307,6 +384,10 @@ function AudioTrendCard({
           )}
         </div>
 
+        <span className={`trend-scan-card-state ${scanMatched ? "is-current" : "is-retained"}`}>
+          {scanMatched ? "Retrouvé dans le scan du jour" : "Conservé du dernier lot complet"}
+        </span>
+
         <div className="post-card-title audio-card-title">
           <div className="post-media-caption">
             <span className="trend-card-source-title">{trend.title} · {trend.author}</span>
@@ -348,6 +429,30 @@ function AudioTrendCard({
 function latestUses(trend: AudioTrend) {
   const observation = latestUsageObservation(trend);
   return observation?.uses ?? -1;
+}
+
+function canonicalUrl(candidate: string) {
+  try {
+    const url = new URL(candidate);
+    url.search = "";
+    url.hash = "";
+    url.pathname = url.pathname.replace(/\/+$/u, "");
+    return url.toString();
+  } catch {
+    return candidate;
+  }
+}
+
+function audioCandidatePlatform(candidate: string): AudioTrendPlatform | null {
+  try {
+    const host = new URL(candidate).hostname.toLowerCase();
+    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+    if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function latestRank(trend: AudioTrend) {

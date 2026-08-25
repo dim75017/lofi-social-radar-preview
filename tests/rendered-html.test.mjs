@@ -237,6 +237,11 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(previewEntry, /initialTrendFeed=\{trendFeed\}/);
   assert.match(previewEntry, /initialAudioTrendFeed=\{audioTrendFeed\}/);
   assert.match(previewEntry, /RAW_AUDIO_TREND_FEED_URL/);
+  assert.match(previewEntry, /RAW_VIDEO_TREND_STATUS_URL/);
+  assert.match(previewEntry, /RAW_AUDIO_TREND_STATUS_URL/);
+  assert.match(previewEntry, /initialVideoTrendScanStatus=\{videoTrendScanStatus\}/);
+  assert.match(previewEntry, /initialAudioTrendScanStatus=\{audioTrendScanStatus\}/);
+  assert.match(previewEntry, /refreshTrendScanStatuses/);
   assert.match(previewEntry, /window\.setInterval\(refreshAudioTrendFeed, 60 \* 60 \* 1_000\)/);
   assert.match(previewEntry, /RAW_AUDIENCE_HISTORY_URL/);
   assert.match(previewEntry, /initialAudienceHistory=\{audienceHistory\}/);
@@ -308,8 +313,8 @@ test("keeps real social collection, post formats and persistence explicit", asyn
     /selectGirlFirstSocialTrends\([\s\S]*actionableTrends\.filter\(\(trend\) => trend\.referencePost\?\.mediaType === "video"\)[\s\S]*50/,
   );
   assert.match(component, /platformFilter === "all" && characterFilter === "all"/);
-  assert.match(component, /return selectedVideoTrends/);
-  assert.match(component, /\{selectedVideoTrends\.length\} trends vid.o distinctes/);
+  assert.match(component, /return orderedVideoTrends/);
+  assert.match(component, /\{selectedVideoTrends\.length\} cartes/);
   assert.match(component, /\{proposalCount\} adaptations/);
   assert.match(component, /trend\.proposals\.map/);
   assert.match(component, /trend-proposal-tabs/);
@@ -328,7 +333,7 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(component, /post-grid top-ranking-grid trend-shorts-grid/);
   assert.match(audioTrendView, /<h2>Trends audio<\/h2>/);
   assert.match(audioTrendView, /deriveAudioTrendGrowth/);
-  assert.match(audioTrendView, /\{feed\.trends\.length\} audios distincts/);
+  assert.match(audioTrendView, /\{feed\.trends\.length\} cartes/);
   assert.doesNotMatch(audioTrendView, /proposalCount/);
   assert.match(audioTrendView, /compareAudioTrends\(left, right, freshnessCutoff\)/);
   assert.match(audioTrendView, /recentGrowth/);
@@ -578,9 +583,9 @@ test("makes editorial trend freshness visible and checks it without reading medi
   for (const view of [videoTrendView, audioTrendView]) {
     assert.match(view, /isTrendEditorialScanLate/);
     assert.match(view, /feed\?\.capturedAt|feed\.capturedAt/);
-    assert.match(view, /Dernier feed qualifié/);
-    assert.match(view, /feed qualifié dépasse 26 h/);
-    assert.match(view, /scan candidat/);
+    assert.match(view, /Dernier lot complet/);
+    assert.match(view, /Scan quotidien/);
+    assert.match(view, /scan du jour|candidats/);
     assert.doesNotMatch(view, /Actualisé/);
   }
   assert.match(trendHealthModel, /TREND_EDITORIAL_SCAN_MAX_AGE_HOURS = 26/);

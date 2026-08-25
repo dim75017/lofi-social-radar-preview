@@ -520,6 +520,7 @@ async function main() {
       status: "degraded",
       runId: process.env.GITHUB_RUN_ID ?? `local-${localDateKey(attemptedAt)}`,
       runUrl: process.env.GITHUB_RUN_URL ?? null,
+      discoveryAudit: feed?.refresh?.discoveryAudit,
       sourceChecks: [],
       counts: {
         checkedSources: 0,

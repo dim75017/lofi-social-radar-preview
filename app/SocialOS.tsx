@@ -79,6 +79,11 @@ import {
 } from "../lib/audio-trends";
 import { dailyRotationIndex } from "../lib/daily-rotation";
 import { isTrendEditorialScanLate } from "../lib/trend-health";
+import {
+  isScanLate,
+  type AudioTrendScanStatus,
+  type VideoTrendScanStatus,
+} from "../lib/trend-scan-status";
 import { AudioTrendFeedView } from "./AudioTrendFeedView";
 import { CommentOpportunitiesView } from "./CommentOpportunitiesView";
 import { SocialInlinePlayer } from "./SocialInlinePlayer";
@@ -224,6 +229,7 @@ const RECOMMENDATION_NAV: Array<{
 
 const EDITORIAL_WORKFLOW_STORAGE_KEY = "lofi-social-radar:editorial-workflow:v2";
 const POSTS_PAGE_SIZE = 48;
+const TREND_CANDIDATE_PREVIEW_LIMIT = 12;
 const PLATFORM_ORDER: Platform[] = ["youtube", "instagram", "tiktok", "x"];
 const DEFAULT_FORMAT_FILTER: Record<Platform, SocialFormatFilter> = {
   youtube: "short",
@@ -541,6 +547,8 @@ export function SocialOS({
   initialWorkspace = null,
   initialTrendFeed = null,
   initialAudioTrendFeed = null,
+  initialVideoTrendScanStatus = null,
+  initialAudioTrendScanStatus = null,
   initialCommentOpportunityFeed = null,
   initialAudienceHistory = null,
   previewMode = false,
@@ -552,6 +560,8 @@ export function SocialOS({
   initialWorkspace?: WorkspacePayload | null;
   initialTrendFeed?: SocialTrendFeed | null;
   initialAudioTrendFeed?: AudioTrendFeed | null;
+  initialVideoTrendScanStatus?: VideoTrendScanStatus | null;
+  initialAudioTrendScanStatus?: AudioTrendScanStatus | null;
   initialCommentOpportunityFeed?: CommentOpportunityFeed | null;
   initialAudienceHistory?: AudienceHistory | null;
   previewMode?: boolean;
@@ -1320,6 +1330,7 @@ export function SocialOS({
         {view === "trends" ? (
           <TrendFeedView
             feed={trendFeed}
+            scanStatus={initialVideoTrendScanStatus}
             loading={trendsLoading}
             error={trendsError}
           />
@@ -1328,6 +1339,7 @@ export function SocialOS({
         {view === "audio-trends" ? (
           <AudioTrendFeedView
             feed={audioTrendFeed}
+            scanStatus={initialAudioTrendScanStatus}
             loading={audioTrendsLoading}
             error={audioTrendsError}
           />
@@ -1947,10 +1959,12 @@ function formatAudienceDate(value: string) {
 
 function TrendFeedView({
   feed,
+  scanStatus,
   loading,
   error,
 }: {
   feed: SocialTrendFeed | null;
+  scanStatus: VideoTrendScanStatus | null;
   loading: boolean;
   error: string;
 }) {
@@ -1972,6 +1986,17 @@ function TrendFeedView({
     ),
     [actionableTrends],
   );
+  const matchedTrendIds = useMemo(
+    () => new Set(scanStatus?.discoveryAudit.matchedTrendIds ?? []),
+    [scanStatus?.discoveryAudit.matchedTrendIds],
+  );
+  const orderedVideoTrends = useMemo(
+    () => [
+      ...selectedVideoTrends.filter((trend) => matchedTrendIds.has(trend.id)),
+      ...selectedVideoTrends.filter((trend) => !matchedTrendIds.has(trend.id)),
+    ],
+    [matchedTrendIds, selectedVideoTrends],
+  );
   const proposalCount = useMemo(
     () => selectedVideoTrends.reduce((total, trend) => total + trend.proposals.length, 0),
     [selectedVideoTrends],
@@ -1979,17 +2004,23 @@ function TrendFeedView({
   const visibleTrends = useMemo(
     () => {
       if (platformFilter === "all" && characterFilter === "all") {
-        return selectedVideoTrends;
+        return orderedVideoTrends;
       }
-      return filterSocialTrends(selectedVideoTrends, {
+      const filtered = filterSocialTrends(selectedVideoTrends, {
         platform: platformFilter,
         character: characterFilter,
       });
+      return [
+        ...filtered.filter((trend) => matchedTrendIds.has(trend.id)),
+        ...filtered.filter((trend) => !matchedTrendIds.has(trend.id)),
+      ];
     },
-    [characterFilter, platformFilter, selectedVideoTrends],
+    [characterFilter, matchedTrendIds, orderedVideoTrends, platformFilter, selectedVideoTrends],
   );
   const editorialScanDate = formatTrendEditorialScanDate(feed?.capturedAt);
   const refreshIsLate = isTrendEditorialScanLate(feed?.capturedAt, freshnessCheckedAt);
+  const dailyScanDate = formatTrendEditorialScanDate(scanStatus?.discoveryAudit.scannedAt);
+  const dailyScanIsLate = isScanLate(scanStatus?.discoveryAudit.scannedAt, freshnessCheckedAt);
 
   useEffect(() => {
     const interval = window.setInterval(
@@ -2009,18 +2040,32 @@ function TrendFeedView({
             Un exemple performant par trend, uniquement si la même mécanique a été reprise par plusieurs créateurs. Lofi Girl reste prioritaire.
           </p>
         </div>
-        {feed && editorialScanDate ? (
-          <span className={`trend-snapshot-pill ${refreshIsLate ? "is-late" : ""}`}>
-            {refreshIsLate ? "⚠️" : "✅"} {selectedVideoTrends.length} trends vidéo distinctes · {proposalCount} adaptations · Dernier feed qualifié : {editorialScanDate}
+        {scanStatus && dailyScanDate ? (
+          <span className={`trend-snapshot-pill ${dailyScanIsLate ? "is-late" : ""}`}>
+            Scan 24 h : {scanStatus.discoveryAudit.candidateCount} signaux · {scanStatus.discoveryAudit.qualifiedInventoryCount} cartes retrouvées · {dailyScanDate}
           </span>
         ) : null}
       </header>
 
-      {feed && refreshIsLate && !error ? (
-        <div className="trend-feed-notice" role="status">
-          <span aria-hidden="true">⚠️</span>
-          <p>Le dernier feed qualifié dépasse 26 h. Le dernier inventaire validé reste affiché sans présenter un scan candidat ou un rafraîchissement de médias comme une nouvelle tendance.</p>
+      {feed && editorialScanDate ? (
+        <div className={`trend-scan-summary ${refreshIsLate ? "is-degraded" : ""}`} role="status">
+          <div>
+            <b>{dailyScanIsLate ? "Scan quotidien en retard" : "Scan quotidien effectué"}</b>
+            <span>Dernier lot complet : {editorialScanDate} · {selectedVideoTrends.length} cartes · {proposalCount} adaptations</span>
+          </div>
+          <p>
+            {refreshIsLate
+              ? `${scanStatus?.discoveryAudit.qualifiedInventoryCount ?? 0}/50 cartes de l’inventaire ont été retrouvées dans les sources du jour. Le lot complet précédent reste affiché pour ne pas présenter des candidats non qualifiés comme des trends.`
+              : "Le lot affiché a passé les contrôles multi-créateurs, métriques et durée."}
+          </p>
         </div>
+      ) : null}
+
+      {scanStatus?.discoveryAudit.candidateUrls.length ? (
+        <DailyCandidateLinks
+          title="Nouveaux signaux vidéo détectés au dernier scan"
+          urls={scanStatus.discoveryAudit.candidateUrls}
+        />
       ) : null}
 
       <div className="trend-feed-controls" aria-label="Filtres des tendances">
@@ -2096,6 +2141,7 @@ function TrendFeedView({
               playerActive={activePlayerId === trend.id}
               onActivatePlayer={() => setActivePlayerId(trend.id)}
               onClosePlayer={() => setActivePlayerId(null)}
+              scanMatched={matchedTrendIds.has(trend.id)}
               feedCapturedAt={feed.capturedAt}
               key={`${trend.id}:${feed.capturedAt.slice(0, 10)}`}
             />
@@ -2129,6 +2175,50 @@ function TrendFeedView({
   );
 }
 
+function DailyCandidateLinks({ title, urls }: { title: string; urls: readonly string[] }) {
+  const visibleUrls = urls.slice(0, TREND_CANDIDATE_PREVIEW_LIMIT);
+  return (
+    <section className="trend-candidate-panel" aria-label={title}>
+      <div className="trend-candidate-panel-heading">
+        <div>
+          <b>{title}</b>
+          <span>Ces liens sont des candidats récents, pas encore des trends qualifiées.</span>
+        </div>
+        <span>{urls.length} détectés</span>
+      </div>
+      <div className="trend-candidate-links">
+        {visibleUrls.map((url, index) => {
+          const platform = trendPlatformFromUrl(url);
+          return (
+            <a href={url} target="_blank" rel="noreferrer" key={url}>
+              {platform ? (
+                <img src={`platforms/${platform}.svg`} alt="" width="17" height="17" />
+              ) : null}
+              Signal {index + 1}
+            </a>
+          );
+        })}
+        {urls.length > visibleUrls.length ? (
+          <span className="trend-candidate-overflow">+{urls.length - visibleUrls.length} autres</span>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function trendPlatformFromUrl(candidate: string): TrendPlatform | null {
+  try {
+    const host = new URL(candidate).hostname.toLowerCase();
+    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+    if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
+    if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com") return "x";
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function TrendFeedCard({
   trend,
   rank,
@@ -2136,6 +2226,7 @@ function TrendFeedCard({
   playerActive,
   onActivatePlayer,
   onClosePlayer,
+  scanMatched,
   feedCapturedAt,
 }: {
   trend: SocialTrend;
@@ -2144,6 +2235,7 @@ function TrendFeedCard({
   playerActive: boolean;
   onActivatePlayer: () => void;
   onClosePlayer: () => void;
+  scanMatched: boolean;
   feedCapturedAt: string;
 }) {
   const lifecycle = TREND_LIFECYCLE_META[trend.lifecycle];
@@ -2178,6 +2270,9 @@ function TrendFeedCard({
         </div>
         <span className="trend-reuse-pill">
           🔥 Repris par {reuseCount}+ créateurs
+        </span>
+        <span className={`trend-scan-card-state ${scanMatched ? "is-current" : "is-retained"}`}>
+          {scanMatched ? "Retrouvée dans le scan du jour" : "Conservée du dernier lot complet"}
         </span>
         <div className="post-card-title">
           <div className="post-media-caption">
