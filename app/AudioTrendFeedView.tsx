@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   deriveAudioTrendGrowth,
+  isAudioTrendThumbnailExpired,
   type AudioTrend,
   type AudioTrendFeed,
   type AudioTrendPlatform,
@@ -13,7 +14,6 @@ import {
   type AudioTrendType,
 } from "../lib/audio-trends";
 import { dailyRotationIndex } from "../lib/daily-rotation";
-import { resolveFreshInstagramPlaybackUrl } from "../lib/social-inline-player";
 import { isTrendEditorialScanLate } from "../lib/trend-health";
 import {
   isScanLate,
@@ -301,11 +301,9 @@ function AudioTrendCard({
     : null;
   const uses = latestUses(trend);
   const rankSignal = latestRank(trend);
-  const instagramPreviewUrl = trend.platform === "instagram"
-    ? resolveFreshInstagramPlaybackUrl(
-        trend.referenceVideo.playbackUrl,
-        trend.referenceVideo.playbackExpiresAt,
-      )
+  const thumbnailUrl = trend.referenceVideo.thumbnailUrl &&
+    !isAudioTrendThumbnailExpired(trend.referenceVideo.thumbnailUrl)
+    ? trend.referenceVideo.thumbnailUrl
     : null;
   const [activeProposalIndex, setActiveProposalIndex] = useState(() =>
     dailyRotationIndex(trend.id, feedCapturedAt, trend.proposals.length),
@@ -332,27 +330,11 @@ function AudioTrendCard({
             aria-label={`Lire la vidéo de référence de ${trend.title}`}
             onClick={onActivate}
           >
-            {trend.referenceVideo.thumbnailUrl ? (
-              <img src={trend.referenceVideo.thumbnailUrl} alt="" loading="lazy" />
-            ) : instagramPreviewUrl ? (
-              <video
-                src={instagramPreviewUrl}
-                muted
-                playsInline
-                preload="metadata"
-                aria-hidden="true"
-                onLoadedMetadata={(event) => {
-                  const video = event.currentTarget;
-                  if (Number.isFinite(video.duration) && video.duration > 0.05) {
-                    video.currentTime = 0.05;
-                  }
-                }}
-              />
-            ) : (
-              <span className="audio-reference-fallback">
-                <b>Vidéo de référence</b>
-              </span>
-            )}
+            <AudioReferencePreview
+              key={thumbnailUrl ?? "fallback"}
+              thumbnailUrl={thumbnailUrl}
+              title={trend.title}
+            />
             <span className="audio-reference-play-overlay" aria-hidden="true">▶</span>
           </button>
         )}
@@ -423,6 +405,43 @@ function AudioTrendCard({
         </footer>
       </div>
     </article>
+  );
+}
+
+function AudioReferencePreview({
+  thumbnailUrl,
+  title,
+}: {
+  thumbnailUrl: string | null;
+  title: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const showImage = Boolean(thumbnailUrl) && !failed;
+  return (
+    <>
+      <span className="audio-reference-fallback" aria-hidden={loaded && showImage}>
+        <span className="audio-reference-waveform" aria-hidden="true">
+          <i /><i /><i /><i /><i /><i /><i />
+        </span>
+        <b>{title}</b>
+        <small>{showImage ? "Chargement de la frame" : "Frame momentanément indisponible"}</small>
+      </span>
+      {showImage ? (
+        <img
+          className={loaded ? "is-loaded" : ""}
+          src={thumbnailUrl ?? undefined}
+          alt=""
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(false);
+            setFailed(true);
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 

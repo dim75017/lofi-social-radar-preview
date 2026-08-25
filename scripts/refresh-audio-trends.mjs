@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   assertAudioTrendFeed,
+  isCachedAudioTrendThumbnailUrl,
   isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
   isPublishableAudioTrendReferenceVideo,
@@ -559,7 +560,12 @@ async function inspectAudioTrend(trend, { capturedAt, fetchImpl, timeoutMs }) {
     }
     if (thumbnailResult.status === "fulfilled" && thumbnailResult.value) {
       thumbnailMatched = true;
-      trend.referenceVideo.thumbnailUrl = thumbnailResult.value.url;
+      // The public feed uses repository-owned frames so its cards do not turn
+      // black as soon as TikTok's signed CDN URLs expire. Still verify the
+      // native thumbnail on every scan, but never replace a stable cache hit.
+      if (!isCachedAudioTrendThumbnailUrl(trend.referenceVideo.thumbnailUrl ?? "")) {
+        trend.referenceVideo.thumbnailUrl = thumbnailResult.value.url;
+      }
     }
     if (playbackResult.status === "rejected") {
       assetErrors.push(playbackResult.reason instanceof Error

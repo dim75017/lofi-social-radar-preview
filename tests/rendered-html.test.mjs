@@ -350,25 +350,25 @@ test("keeps real social collection, post formats and persistence explicit", asyn
   assert.match(audioTrendView, /platforms\/\$\{trend\.platform\}\.svg/);
   assert.match(audioTrendView, /activePlayerId/);
   assert.match(audioTrendView, /<SocialInlinePlayer/);
-  assert.match(audioTrendView, /resolveFreshInstagramPlaybackUrl/);
-  assert.match(audioTrendView, /instagramPreviewUrl/);
-  assert.match(audioTrendView, /<video/);
-  assert.match(audioTrendView, /muted/);
-  assert.match(audioTrendView, /playsInline/);
-  assert.match(audioTrendView, /preload="metadata"/);
-  assert.match(audioTrendView, /video\.currentTime = 0\.05/);
+  assert.match(audioTrendView, /isAudioTrendThumbnailExpired/);
+  assert.match(audioTrendView, /AudioReferencePreview/);
+  assert.match(audioTrendView, /onError=\{\(\) =>/);
+  assert.match(audioTrendView, /setFailed\(true\)/);
+  assert.match(audioTrendView, /onLoad=\{\(\) => setLoaded\(true\)\}/);
+  assert.doesNotMatch(audioTrendView, /<video|preload="metadata"|currentTime = 0\.05/);
   assert.match(audioTrendView, /audio-reference-play-overlay/);
   assert.match(audioTrendView, /audio-reference-fallback/);
-  assert.match(
-    audioTrendView,
-    /trend\.referenceVideo\.thumbnailUrl \? \([\s\S]*?<img[\s\S]*?\) : instagramPreviewUrl \? \(/,
-  );
+  assert.match(audioTrendView, /audio-reference-waveform/);
+  assert.match(audioTrendView, /Frame momentanément indisponible/);
   const inactiveAudioPreview = audioTrendView.slice(
     audioTrendView.indexOf('className="audio-reference-trigger"'),
     audioTrendView.indexOf('</button>', audioTrendView.indexOf('className="audio-reference-trigger"')),
   );
   assert.doesNotMatch(inactiveAudioPreview, /platforms\/\$\{trend\.platform\}\.svg/);
-  assert.match(styles, /\.audio-reference-trigger > :is\(img, video\)/);
+  assert.match(styles, /\.audio-reference-trigger > img\s*\{[\s\S]*?opacity:\s*0/);
+  assert.match(styles, /\.audio-reference-trigger > img\.is-loaded\s*\{[\s\S]*?opacity:\s*1/);
+  assert.match(styles, /\.audio-reference-fallback\s*\{[\s\S]*?linear-gradient/);
+  assert.match(styles, /\.audio-reference-waveform\s*\{/);
   assert.match(styles, /\.audio-reference-play-overlay\s*\{/);
   assert.match(component, /activePlayerId/);
   assert.match(component, /<SocialInlinePlayer/);

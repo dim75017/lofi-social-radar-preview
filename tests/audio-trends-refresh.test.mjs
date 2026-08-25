@@ -637,7 +637,12 @@ test("a complete linked scan updates all counters without mutating the input", a
   assert.ok(
     result.feed.trends
       .filter((trend) => trend.platform === "tiktok")
-      .every((trend) => trend.referenceVideo.thumbnailUrl === tiktokThumbnailUrl(trend)),
+      .every((trend) => {
+        const previous = feed.trends.find((candidate) => candidate.id === trend.id);
+        return previous.referenceVideo.thumbnailUrl?.startsWith("media/audio-trends/")
+          ? trend.referenceVideo.thumbnailUrl === previous.referenceVideo.thumbnailUrl
+          : trend.referenceVideo.thumbnailUrl === tiktokThumbnailUrl(trend);
+      }),
   );
   assert.deepEqual(feed, original, "the last validated feed remains untouched until publication");
 });

@@ -235,15 +235,46 @@ const TIKTOK_THUMBNAIL_DOMAINS = [
   "muscdn.com",
 ] as const;
 
+const AUDIO_TREND_THUMBNAIL_CACHE_PATTERN =
+  /^media\/audio-trends\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:avif|jpe?g|png|webp)$/u;
+const AUDIO_TREND_THUMBNAIL_EXPIRY_SAFETY_MS = 60_000;
+
+export function isCachedAudioTrendThumbnailUrl(candidate: string) {
+  return AUDIO_TREND_THUMBNAIL_CACHE_PATTERN.test(candidate);
+}
+
+export function isAudioTrendThumbnailExpired(
+  candidate: string,
+  now = Date.now(),
+) {
+  if (isCachedAudioTrendThumbnailUrl(candidate)) return false;
+  try {
+    const url = new URL(candidate);
+    const hostname = url.hostname.toLowerCase();
+    if (!TIKTOK_THUMBNAIL_DOMAINS.some((domain) => hasDomain(hostname, domain))) {
+      return false;
+    }
+    const rawExpiry = url.searchParams.get("x-expires");
+    const hasSignature = url.searchParams.has("x-signature");
+    if (rawExpiry === null) return hasSignature;
+    const expirySeconds = Number(rawExpiry);
+    return !Number.isSafeInteger(expirySeconds) ||
+      expirySeconds * 1_000 <= now + AUDIO_TREND_THUMBNAIL_EXPIRY_SAFETY_MS;
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Thumbnail URLs are accepted only from the platform that owns the reference
- * video. This deliberately excludes arbitrary HTTPS hosts so a refresh cannot
- * smuggle an unrelated image into the public feed.
+ * video or from the repository's exact same-origin cache path. This deliberately
+ * excludes arbitrary hosts and arbitrary local paths.
  */
 export function isOfficialAudioTrendThumbnailUrl(
   candidate: string,
   platform: AudioTrendPlatform,
 ) {
+  if (isCachedAudioTrendThumbnailUrl(candidate)) return true;
   try {
     const url = new URL(candidate);
     const hostname = url.hostname.toLowerCase();

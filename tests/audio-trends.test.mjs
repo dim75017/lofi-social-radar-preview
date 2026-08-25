@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -8,6 +8,8 @@ import {
   MIN_PUBLISHABLE_AUDIO_TRENDS,
   assertAudioTrendFeed,
   deriveAudioTrendGrowth,
+  isAudioTrendThumbnailExpired,
+  isCachedAudioTrendThumbnailUrl,
   isPublishableAudioTrendReferenceVideo,
   isOfficialAudioTrendThumbnailUrl,
   isInstagramSignedPlaybackUrl,
@@ -31,6 +33,21 @@ function thresholdCompliantFixture(feed) {
 }
 
 const bootstrapFeed = thresholdCompliantFixture(storedFeed);
+
+test("the published audio feed uses stable local frames instead of expiring CDN previews", async () => {
+  const thumbnails = storedFeed.trends
+    .map((trend) => trend.referenceVideo.thumbnailUrl)
+    .filter((thumbnailUrl) => thumbnailUrl !== null);
+
+  assert.equal(thumbnails.length, 49);
+  assert.ok(thumbnails.every((thumbnailUrl) => isCachedAudioTrendThumbnailUrl(thumbnailUrl)));
+
+  for (const thumbnailUrl of thumbnails) {
+    const frame = await stat(new URL(`../public/${thumbnailUrl}`, import.meta.url));
+    assert.ok(frame.isFile());
+    assert.ok(frame.size > 0);
+  }
+});
 
 function validProposals() {
   return [
@@ -408,6 +425,13 @@ test("publishable reference metrics must be present, sourced and non-fabricated"
 
 test("reference thumbnails are restricted to official platform CDNs", () => {
   assert.equal(
+    isOfficialAudioTrendThumbnailUrl("media/audio-trends/quiet-library.webp", "instagram"),
+    true,
+  );
+  assert.equal(isCachedAudioTrendThumbnailUrl("media/audio-trends/quiet-library.webp"), true);
+  assert.equal(isCachedAudioTrendThumbnailUrl("media/audio-trends/../secret.webp"), false);
+  assert.equal(isCachedAudioTrendThumbnailUrl("/media/audio-trends/quiet-library.webp"), false);
+  assert.equal(
     isOfficialAudioTrendThumbnailUrl(
       "https://scontent-cdg4-1.cdninstagram.com/v/t51.29350-15/reference.webp",
       "instagram",
@@ -453,6 +477,46 @@ test("reference thumbnails are restricted to official platform CDNs", () => {
   assert.throws(
     () => assertAudioTrendFeed(feedWith(crossPlatformThumbnail)),
     /r.f.rence audio invalide/i,
+  );
+});
+
+test("expired signed TikTok thumbnails fail before rendering while cached frames stay valid", () => {
+  const now = Date.parse("2026-08-25T08:00:00.000Z");
+  assert.equal(
+    isAudioTrendThumbnailExpired(
+      "https://p16-sign-va.tiktokcdn.com/frame.jpeg?x-expires=1787288400&x-signature=old",
+      now,
+    ),
+    true,
+  );
+  assert.equal(
+    isAudioTrendThumbnailExpired(
+      `https://p16-sign-va.tiktokcdn.com/frame.jpeg?x-expires=${Math.floor((now + 30_000) / 1_000)}&x-signature=soon`,
+      now,
+    ),
+    true,
+  );
+  assert.equal(
+    isAudioTrendThumbnailExpired(
+      `https://p16-sign-va.tiktokcdn.com/frame.jpeg?x-expires=${Math.floor((now + 3_600_000) / 1_000)}&x-signature=fresh`,
+      now,
+    ),
+    false,
+  );
+  assert.equal(
+    isAudioTrendThumbnailExpired(
+      "https://p16-sign-va.tiktokcdn.com/frame.jpeg?x-signature=missing-expiry",
+      now,
+    ),
+    true,
+  );
+  assert.equal(
+    isAudioTrendThumbnailExpired("media/audio-trends/quiet-library.webp", now),
+    false,
+  );
+  assert.equal(
+    isAudioTrendThumbnailExpired("https://i.ytimg.com/vi/AbCdEfGhI_j/hqdefault.jpg", now),
+    false,
   );
 });
 
