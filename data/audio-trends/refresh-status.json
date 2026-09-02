@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "attemptedAt": "2026-09-01T20:00:26.944Z",
+  "attemptedAt": "2026-09-02T09:44:07.499Z",
   "status": "failed",
   "published": false,
   "inventory": {
@@ -14,13 +14,13 @@
     "publishable": true
   },
   "discoveryAudit": {
-    "scannedAt": "2026-09-01T20:00:26.944Z",
+    "scannedAt": "2026-09-02T09:44:07.499Z",
     "status": "incomplete",
     "complete": false,
-    "candidateCount": 163,
-    "qualifiedInventoryCount": 1,
-    "currentMatchedCount": 1,
-    "newCandidateCount": 162,
+    "candidateCount": 168,
+    "qualifiedInventoryCount": 2,
+    "currentMatchedCount": 2,
+    "newCandidateCount": 166,
     "added": [
       "https://www.instagram.com/reels/audio/1006119841436928",
       "https://www.instagram.com/reels/audio/1040129337188935",
@@ -183,11 +183,14 @@
       "https://www.instagram.com/reels/audio/954122087366261",
       "https://www.instagram.com/reels/audio/9573873819403156",
       "https://www.instagram.com/reels/audio/980370881663525",
-      "https://www.instagram.com/reels/audio/993398866388191"
+      "https://www.instagram.com/reels/audio/993398866388191",
+      "https://www.tiktok.com/music/Golden-7515251957310539792",
+      "https://www.tiktok.com/music/Quiet-on-the-Creek-7662457740929157137",
+      "https://www.tiktok.com/music/Saxophones-getting-louder-Sped-Up-7639417177691473937",
+      "https://www.tiktok.com/music/She-Bugging-Whatchu-Gonna-Do-7645058632418461697"
     ],
     "removed": [
       "https://www.tiktok.com/music/Pocketful-of-Sunshine-6696420561934878722",
-      "https://www.tiktok.com/music/petal-7668507565575964673",
       "https://www.tiktok.com/music/original-sound-7653201595181665038",
       "https://www.tiktok.com/music/original-sound-7643191632304671518",
       "https://www.tiktok.com/music/original-sound-7627517043541068566",
@@ -237,6 +240,7 @@
       "https://www.tiktok.com/music/son-original-7649860736952388384"
     ],
     "retainedIds": [
+      "petal-soft-chaos",
       "stupid-song-montage"
     ],
     "candidateAudioUrls": [
@@ -402,7 +406,12 @@
       "https://www.instagram.com/reels/audio/954122087366261",
       "https://www.instagram.com/reels/audio/9573873819403156",
       "https://www.instagram.com/reels/audio/980370881663525",
-      "https://www.instagram.com/reels/audio/993398866388191"
+      "https://www.instagram.com/reels/audio/993398866388191",
+      "https://www.tiktok.com/music/Golden-7515251957310539792",
+      "https://www.tiktok.com/music/petal-7668507565575964673",
+      "https://www.tiktok.com/music/Quiet-on-the-Creek-7662457740929157137",
+      "https://www.tiktok.com/music/Saxophones-getting-louder-Sped-Up-7639417177691473937",
+      "https://www.tiktok.com/music/She-Bugging-Whatchu-Gonna-Do-7645058632418461697"
     ],
     "candidateReferences": [
       {
@@ -600,6 +609,26 @@
       {
         "audioUrl": "https://www.instagram.com/reels/audio/980370881663525",
         "referenceUrl": "https://www.instagram.com/reel/Db-lM_nTh_s"
+      },
+      {
+        "audioUrl": "https://www.tiktok.com/music/Golden-7515251957310539792",
+        "referenceUrl": "https://www.tiktok.com/@twenty4tim/video/7669488320358927648"
+      },
+      {
+        "audioUrl": "https://www.tiktok.com/music/petal-7668507565575964673",
+        "referenceUrl": "https://www.tiktok.com/@vierbessen/video/7677914834154933537"
+      },
+      {
+        "audioUrl": "https://www.tiktok.com/music/Quiet-on-the-Creek-7662457740929157137",
+        "referenceUrl": "https://www.tiktok.com/@martha_xoft/video/7680465414131862792"
+      },
+      {
+        "audioUrl": "https://www.tiktok.com/music/Saxophones-getting-louder-Sped-Up-7639417177691473937",
+        "referenceUrl": "https://www.tiktok.com/@wilmahtheband/video/7652550018200653086"
+      },
+      {
+        "audioUrl": "https://www.tiktok.com/music/She-Bugging-Whatchu-Gonna-Do-7645058632418461697",
+        "referenceUrl": "https://www.tiktok.com/@kuzcopluscleo/video/7667585163404004639"
       }
     ],
     "sourceBreakdown": [
@@ -626,8 +655,8 @@
         "label": "SocialPilot · tendances TikTok",
         "url": "https://www.socialpilot.co/blog/tiktok-trends",
         "status": "success",
-        "candidateCount": 0,
-        "referenceCandidateCount": 0,
+        "candidateCount": 5,
+        "referenceCandidateCount": 5,
         "error": null
       },
       {
